@@ -1,0 +1,30 @@
+{
+  "name": "docula",
+  "version": "0.0.1",
+  "description": "Open Source Static Site Generator",
+  "main": "docula.ts",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaredwray/docula.git"
+  },
+  "keywords": [
+    "open",
+    "source",
+    "static",
+    "site",
+    "github",
+    "zendesk",
+    "intercom",
+    "swagger",
+    "stripe"
+  ],
+  "author": "Jared Wray (me@jaredwray.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaredwray/docula/issues"
+  },
+  "homepage": "https://github.com/jaredwray/docula#readme"
+}
