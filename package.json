@@ -2,7 +2,8 @@
   "name": "docula",
   "version": "0.0.1",
   "description": "Open Source Static Site Generator",
-  "main": "docula.ts",
+  "main": "./dist/docula.js",
+  "types": "./dist/docula.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist && rm -rf node_modules",
