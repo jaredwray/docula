@@ -19,12 +19,16 @@ Beautiful documentation for your projects
 - Will generate a release based on Github Releases.
 - Generatses an RSS feed.xml file to use and share 
 - Will pull your latest tweets and display them on the site
+- Easily add in a blog to your site if needed
+
+## Research
+- Is there a swagger version for api libraries?
 
 
 ## Supported Search Plugins
 - Algolia
 - Google Programmable Search - https://programmablesearchengine.google.com/
-- FlexSearch - https://www.npmjs.com/package/flexsearch
+- FlexSearch (Default) - https://www.npmjs.com/package/flexsearch
 
 This is a plugin framework so others can be added to the docula system. If you want to add one, please submit a PR.
 
