@@ -65,6 +65,7 @@ No need to say any more. Just look at apiary and swagger side by side.
 ### Templates
 - Multiple Templates (Need at Least 4 at launch)
 - Pull them down directly from the command line `docula install-template <template-name>`
+- notify if there is an update via build process
 
 ### Export Capabilities
 - Export from Zendesk
