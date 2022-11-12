@@ -1,0 +1,38 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['14', '16', '18']
+
+    steps:
+    - name: Use Node.js ${{ matrix.node-version }}
+    - uses: actions/checkout@v3
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build    
+      run: npm run build
+
+    - name: Testing    
+      run: npm run test
+      
+    - name: Code Coverage
+      uses: codecov/codecov-action@v1.0.15
+      with:
+        token: ${{ secrets.CODECOV_KEY }}
+

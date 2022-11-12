@@ -63,3 +63,4 @@ package-lock.json
 
 # build
 dist
+.DS_Store
