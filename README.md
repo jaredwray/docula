@@ -1,6 +1,8 @@
 # Docula
 Beautiful documentation for your projects
 
+## :warning: - this is currently under development. Please do not use.
+
 ## Features
 
 - Zero Config - Just drop it in and it works
