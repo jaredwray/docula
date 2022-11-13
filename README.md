@@ -1,6 +1,8 @@
 # Docula
 Beautiful documentation for your projects
 
+[![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
+
 ## :warning: - this is currently under development. Please do not use.
 
 ## Features
