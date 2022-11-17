@@ -43,12 +43,12 @@ This is a plugin framework so others can be added to the docula system. If you w
 
 ## Site Structure
 
-- `docs` - contains the documentation files
-- `api` - contains the API documentation files (Swagger)
-- `data` - contains the data files
-- `templates` - contains the templates files
-- `public` - contains the static files
-- `blog` - contains the blog files and images
+- `site/docs` - contains the documentation files
+- `site/api` - contains the API documentation files (Swagger)
+- `site/data` - contains the data files
+- `site/templates` - contains the templates files
+- `site/public` - contains the static files
+- `site/blog` - contains the blog files and images
 - `.env` - contains all the environment variables
 
 This will all be generated in the `dist` folder by default. To change that you can use the `--output=<folder_name>` flag.
