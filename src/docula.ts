@@ -1,13 +1,31 @@
 import { DoculaOptions } from "./doculaOptions";
+import * as fs from "fs-extra";
 
 export class Docula {
-    private _options: DoculaOptions = { sitePath: "site", outputPath: "dist" };
+    private _sitePath: string = "site";
+    private _outputPath: string = "dist";
 
     constructor(options?: DoculaOptions) {
-        this._options = {...this._options, ...options};
+        if(options) {
+            this.loadOptions(options);
+        }
     }
 
-    get options(): DoculaOptions {
-        return this._options;
+    get sitePath() {
+        return this._sitePath;
+    }
+
+    get outputPath() {
+        return this._outputPath;
+    }
+
+    private loadOptions(options: DoculaOptions) {
+        if(options.sitePath) {
+            this._sitePath = options.sitePath;
+        }
+
+        if(options.outputPath) {
+            this._outputPath = options.outputPath;
+        }
     }
 }
