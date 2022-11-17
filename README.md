@@ -20,10 +20,8 @@ Beautiful documentation for your projects
 - Step by Step Guides Built in - Just setup the files in a single folder and state which step they are and it will work.
 - Will generate a sitemap.xml
 - Will generate a robots.txt
-- Will generate a redirects.json file for Netlify, Vercel, and Cloudflare
-- Will generate a release based on Github Releases.
+- Will generate a release based on Github Releases
 - Generatses an RSS feed.xml file to use and share 
-- Will pull your latest tweets and display them on the site
 - Easily add in a blog to your site if needed
 
 ## Research
