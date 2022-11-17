@@ -1,12 +1,10 @@
 import { DoculaOptions } from "./doculaOptions";
 
 export class Docula {
-    private _options: DoculaOptions = new DoculaOptions();
+    private _options: DoculaOptions = { sitePath: "site", outputPath: "dist" };
 
     constructor(options?: DoculaOptions) {
-        if(options) {
-            this._options = options;
-        }
+        this._options = {...this._options, ...options};
     }
 
     get options(): DoculaOptions {

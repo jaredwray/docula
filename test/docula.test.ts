@@ -18,9 +18,14 @@ describe('Docula', () => {
     });
 
     it('Docula - init with options', () => {
-        const doculaOptions = new DoculaOptions();
-        doculaOptions.sitePath = "test";
-        const docula = new Docula(doculaOptions);
-        expect(docula.options.sitePath).toBe("test");
+        const options: DoculaOptions = { sitePath: "site" };
+        const docula = new Docula(options);
+        expect(docula.options.sitePath).toBe("site");
+    });
+
+    it('Docula - init with options', () => {
+        const options: DoculaOptions = { outputPath: "test" };
+        const docula = new Docula(options);
+        expect(docula.options.outputPath).toBe("test");
     });
 });
