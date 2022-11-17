@@ -2,6 +2,7 @@
 Beautiful documentation for your projects
 
 [![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
+[![codecov](https://codecov.io/github/jaredwray/docula/branch/main/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/github/jaredwray/docula)
 
 ## :warning: - this is currently under development. Please do not use.
 
@@ -87,17 +88,7 @@ This will actually do all the scaffolding for the site setting up the package.js
 
 To download a new template just do:
 ```bash
-docula template add <template-name>
-```
-
-To remove a template:
-```bash
-docula template remove <template-name>
-```
-
-To update a template:
-```bash
-docula template update <template-name>
+docula get-template <template-name>
 ```
 
 To build the site just do:
@@ -110,9 +101,7 @@ To build the site and watch for changes:
 docula <path optional> --serve --watch --port=8081
 ```
 
-### Exporting from Providers
-To export from a provider just do:
+To export from a documentation service:
 ```bash
-docula export <provider_name> --<options>
+docula export <service> <path optional> <parameters>
 ```
-
