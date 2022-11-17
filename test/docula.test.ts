@@ -1,31 +1,43 @@
-import { Docula } from '../src/docula';
-import { DoculaOptions } from '../src/doculaOptions';
+import * as fs from 'fs-extra';
+import {Docula} from '../src/docula.js';
+import {type DoculaOptions} from '../src/docula-options.js';
 
 describe('Docula', () => {
-    it('Docula - init', () => {
-        const docula = new Docula();
-        expect(docula).toBeDefined();
-    });
+	it('Docula - init', () => {
+		const docula = new Docula();
+		expect(docula).toBeDefined();
+	});
 
-    it('Docula - default outputPath to dist', () => {
-        const docula = new Docula();
-        expect(docula.outputPath).toBe("dist");
-    });
+	it('Docula - default outputPath to dist', () => {
+		const docula = new Docula();
+		expect(docula.outputPath).toBe('dist');
+	});
 
-    it('Docula - default sitePath to site', () => {
-        const docula = new Docula();
-        expect(docula.sitePath).toBe("site");
-    });
+	it('Docula - default sitePath to site', () => {
+		const docula = new Docula();
+		expect(docula.sitePath).toBe('site');
+	});
 
-    it('Docula - init with options', () => {
-        const options: DoculaOptions = { sitePath: "site" };
-        const docula = new Docula(options);
-        expect(docula.sitePath).toBe("site");
-    });
+	it('Docula - init with options <sitePath>', () => {
+		const options: DoculaOptions = {sitePath: 'site'};
+		const docula = new Docula(options);
+		expect(docula.sitePath).toBe('site');
+	});
 
-    it('Docula - init with options', () => {
-        const options: DoculaOptions = { outputPath: "test" };
-        const docula = new Docula(options);
-        expect(docula.outputPath).toBe("test");
-    });
+	it('Docula - init with options <outputPath>', () => {
+		const options: DoculaOptions = {outputPath: 'test'};
+		const docula = new Docula(options);
+		expect(docula.outputPath).toBe('test');
+	});
+
+	it('Docula - testing init function with folders', () => {
+		const options: DoculaOptions = {sitePath: 'test/site1'};
+		const docula = new Docula(options);
+		expect(docula.sitePath).toBe('test/site1');
+		docula.init();
+		expect(fs.existsSync('test/site1')).toBe(true);
+
+		// Clean up
+		fs.removeSync('test/site1');
+	});
 });
