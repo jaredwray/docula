@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
+</head>
+<body>
+  {% include "header.njk" %}
+
+  <div class="container">
+      {% include "sidebar.njk" %}
+      {% include "main.njk" %}
+
+  </div>
+
+<script>
+    const sidebar = document.querySelector('#sidebar');
+    const closeBtn = document.querySelector('#close-sidebar');
+    const openBtn = document.querySelector('#open-sidebar');
+
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.add('hidden');
+    });
+
+    openBtn.addEventListener('click', () => {
+        sidebar.classList.remove('hidden');
+    });
+</script>
+</body>
+</html>
