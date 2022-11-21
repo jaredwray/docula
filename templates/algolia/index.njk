@@ -7,24 +7,26 @@
     <title>Document</title>
 </head>
 <body>
-  {% include "header.njk" %}
 
-  <div class="container">
+    <div class="layout">
+      {% include "header.njk" %}
       {% include "sidebar.njk" %}
       {% include "main.njk" %}
-
-  </div>
+    </div>
 
 <script>
     const sidebar = document.querySelector('#sidebar');
     const closeBtn = document.querySelector('#close-sidebar');
     const openBtn = document.querySelector('#open-sidebar');
+    const header = document.querySelector('#header');
 
     closeBtn.addEventListener('click', () => {
         sidebar.classList.add('hidden');
+        header.classList.remove('bottom');
     });
 
     openBtn.addEventListener('click', () => {
+        header.classList.add('bottom');
         sidebar.classList.remove('hidden');
     });
 </script>
