@@ -71,10 +71,6 @@ nav {
   background-color: var(--background);
 }
 
-.header-logo {
-  display: none;
-}
-
 .menu-btn {
   margin-right: 22px;
 }
@@ -320,6 +316,21 @@ nav {
   transform: rotate(-45deg);
 }
 
+.header-menu {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  flex-shrink: 0;
+  margin-right: 24px;
+  display: block;
+}
+
+.header-logo svg {
+  width: 24px;
+  height: 24px;
+}
 
 @media screen and (min-width: 576px) {
   .date {
@@ -364,19 +375,11 @@ nav {
   .content h1 {
     font-size: 30px;
   }
-
 }
 
 @media screen and (min-width: 992px) {
   .header-menu {
     display: none;
-  }
-
-  .header-logo {
-    width: 376px;
-    flex-shrink: 0;
-    padding: 24px 40px;
-    display: block;
   }
 
   nav {
