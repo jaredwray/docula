@@ -320,6 +320,7 @@ nav {
   transform: rotate(-45deg);
 }
 
+
 @media screen and (min-width: 576px) {
   .date {
     display: flex;
@@ -496,6 +497,22 @@ nav {
 
   .sidebar-footer {
     justify-content: space-between;
+  }
+
+  .on-page--desktop {
+    width: 280px;
+    margin-left: 64px;
+    position: relative;
+    transition: all .3s ease-in;
+  }
+
+  .on-page--desktop ~ .on-page-list {
+    margin-left: 0;
+  }
+
+  .on-page-fixed {
+    position: fixed;
+    width: 280px;
   }
 }
 

@@ -22,6 +22,7 @@
     const closeBtn = document.querySelector('#close-sidebar');
     const openBtn = document.querySelector('#open-sidebar');
     const header = document.querySelector('#header');
+    const onPage = document.querySelector('#on-page');
 
     closeBtn.addEventListener('click', () => {
         sidebar.classList.add('hidden');
@@ -31,6 +32,15 @@
     openBtn.addEventListener('click', () => {
         header.classList.add('bottom');
         sidebar.classList.remove('hidden');
+    });
+
+    //scroll listener
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 0 && window.innerWidth > 992) {
+            onPage.classList.remove('hidden');
+        } else {
+            onPage.classList.add('hidden');
+        }
     });
 </script>
 </body>
