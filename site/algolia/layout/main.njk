@@ -1,0 +1,47 @@
+<div class="main-container">
+        <div class="main-content">
+                <article class="content">
+                        <div class="items-start">
+                                <div class="breadcrumb">
+                                     Guides/Getting Started
+                                </div>
+                                <div class="date hidden">
+                                    <span>{% formatDate date, "MMM DD, YYYY" %}</span>
+                                </div>
+
+                        </div>
+                        <h1>{{title}}</h1>
+
+                        <!--   on this page start  -->
+                        <div class="on-page-container">
+                             <h5>On this page</h5>
+                                <ul>
+                                    <li><a class="on-page-link" href="#"><div>1.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
+                                    <li><a class="on-page-link" href="#"><div>2.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
+                                    <li><a class="on-page-link" href="#"><div>3.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
+                                    <li><a class="on-page-link" href="#"><div>4.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
+
+                                </ul>
+
+                        </div>
+
+                        <!--   on this page end  -->
+
+
+                        {{ content | safe }}
+
+                </article>
+
+                <div class="on-page-container on-page--desktop hidden" id="on-page">
+                        <div class="on-page-fixed">
+                                <h5>On this page</h5>
+                                <ul>
+                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
+                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
+                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
+                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
+                                </ul>
+                        </div>
+                </div>
+        </div>
+</div>

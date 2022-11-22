@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../../styles.css">
     <title>Document</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,9 @@
 <body>
 
     <div class="layout">
-      {% include "header.njk" %}
-      {% include "sidebar.njk" %}
-      {% include "main.njk" %}
+      {% include "layout/header.njk" %}
+      {% include "layout/sidebar.njk" %}
+      {% include "layout/main.njk" %}
     </div>
 
 <script>
@@ -33,7 +33,6 @@
         header.classList.add('bottom');
         sidebar.classList.remove('hidden');
     });
-
     //scroll listener
     window.addEventListener('scroll', () => {
         if (window.scrollY > 0 && window.innerWidth > 1428) {

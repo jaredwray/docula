@@ -332,6 +332,10 @@ nav {
   height: 24px;
 }
 
+.child-list {
+  padding-left: 18px;
+}
+
 @media screen and (min-width: 576px) {
   .date {
     display: flex;
