@@ -4,15 +4,21 @@
                         <div class="items-start">
                             {% set navPages = collections.all | eleventyNavigationBreadcrumb(eleventyNavigation.key, { includeSelf: true }) %}
                                 <div class="breadcrumb">
-                                    <a href="{{navPages[0].url}}">{{ navPages[0].title }}</a>
+                                    {% if navPages[0].url %}
+                                        <a href="{{navPages[0].url}}">{{ navPages[0].title }}</a>
+                                    {% else %}
+                                        <span>{{ navPages[0].title }}</span>
+                                    {% endif %}
                                     {% if navPages[1] %}
                                         <span>/ {{ navPages[1].title }}</span>
                                     {% endif %}
 
                                 </div>
+                            {% if date %}
                                 <div class="date hidden">
                                     <span>{% formatDate date, "MMM DD, YYYY" %}</span>
                                 </div>
+                            {% endif %}
 
                         </div>
                         <h1>{{title}}</h1>

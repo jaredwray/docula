@@ -215,6 +215,29 @@ nav {
   line-height: 48px;
 }
 
+.content table {
+  margin-top: 16px;
+  border-collapse: collapse
+}
+
+.content tr {
+  border-bottom: 1px;
+  border-color: rgba(90,94,154,.1);
+  border-style: solid;
+}
+
+.content tr th:first-child {
+  padding-left: 0;
+}
+
+.content table tbody tr td:first-child {
+  width: 98px;
+}
+
+.content table tbody tr td:nth-child(2) {
+  width: 250px;
+}
+
 .items-start {
   display: flex;
   justify-content: space-between;
@@ -372,6 +395,14 @@ nav {
 .breadcrumb a:hover {
   text-decoration: underline;
 }
+
+details > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+
+
 
 @media screen and (min-width: 576px) {
   .date {

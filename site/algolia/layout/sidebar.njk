@@ -13,20 +13,35 @@
    </button>
    <div class="sidebar-content">
        {% set navPages = collections.all | eleventyNavigation %}
+
        {% macro renderNavListItem(entry) -%}
-       <li{% if entry.url == page.url %} class="active"{% endif %}>
-       <a href="{{ entry.url }}">{{ entry.title }}</a>
-       {%- if entry.children.length -%}
-       <ul class="child-list" id="sidebar-child-list">
-           {%- for child in entry.children %}{{ renderNavListItem(child) }}{% endfor -%}
-       </ul>
-       {%- endif -%}
+       {% if entry.children.length %}
+       <li>
+           <details
+                   {%- for child in entry.children %}
+                   {% if child.parent == entry.title and child.url == page.url %}
+                   class="active"
+                   open
+                   {% endif %}
+                   {% endfor %}
+           >
+               <summary>{{ entry.title }}</summary>
+               <ul class="child-list" role="list">
+                   {%- for child in entry.children %}{{ renderNavListItem(child) }}{% endfor -%}
+               </ul>
+           </details>
        </li>
+       {% else %}
+       <li>
+           <a href="{{ entry.url }}"{% if entry.url == page.url %} class="active" {% endif %}>{{ entry.title }}</a>
+       </li>
+       {%- endif -%}
        {%- endmacro %}
 
-       <ul class="nav-list">
+       <ul class="nav-list" role="list">
            {%- for entry in navPages %}{{ renderNavListItem(entry) }}{%- endfor -%}
        </ul>
+
    </div>
    <div class="sidebar-footer">
      <a class="block mx-16 py-8 text-sm text-grey-700 hover:text-grey-800 transition-fast-out" href="https://www.algolia.com/" target="_blank">
