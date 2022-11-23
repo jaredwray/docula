@@ -2,8 +2,14 @@
         <div class="main-content">
                 <article class="content">
                         <div class="items-start">
+                            {% set navPages = collections.all | eleventyNavigationBreadcrumb(eleventyNavigation.key, { includeSelf: true }) %}
+                            {{ navPages | log }}
                                 <div class="breadcrumb">
-                                     Guides/Getting Started
+                                    <a href="{{navPages[0].url}}">{{ navPages[0].title }}</a>
+                                    {% if navPages[1] %}
+                                        <span>/ {{ navPages[1].title }}</span>
+                                    {% endif %}
+
                                 </div>
                                 <div class="date hidden">
                                     <span>{% formatDate date, "MMM DD, YYYY" %}</span>

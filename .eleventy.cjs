@@ -19,17 +19,6 @@ module.exports = function(eleventyConfig) {
     return dayjs.utc().format(format);
   }
 
-  //collections
-  eleventyConfig.addCollection('docsList', function(collection) {
-    return collection.getFilteredByGlob("docs/*.md").reverse();
-  });
-
-  eleventyConfig.addCollection("sidebarNav", function(collection) {
-    // filter out excludeFromSidebar options
-    return collection.getAll()
-      .filter(item => (item.data || {}));
-  });
-
   //shortcodes
   eleventyConfig.addShortcode("formatDate", function(date, format) {
     return formatDate(date, format);

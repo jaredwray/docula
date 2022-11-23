@@ -336,6 +336,10 @@ nav {
   padding-left: 18px;
 }
 
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
 @media screen and (min-width: 576px) {
   .date {
     display: flex;

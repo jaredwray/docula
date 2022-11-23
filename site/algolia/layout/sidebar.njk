@@ -17,8 +17,6 @@
        <li{% if entry.url == page.url %} class="active"{% endif %}>
        <a href="{{ entry.url }}">{{ entry.title }}</a>
        {%- if entry.children.length -%}
-       {{ entry.url | log }}
-       {{ page.url | log }}
        <ul class="child-list" id="sidebar-child-list">
            {%- for child in entry.children %}{{ renderNavListItem(child) }}{% endfor -%}
        </ul>
