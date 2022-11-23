@@ -3,7 +3,6 @@
                 <article class="content">
                         <div class="items-start">
                             {% set navPages = collections.all | eleventyNavigationBreadcrumb(eleventyNavigation.key, { includeSelf: true }) %}
-                            {{ navPages | log }}
                                 <div class="breadcrumb">
                                     <a href="{{navPages[0].url}}">{{ navPages[0].title }}</a>
                                     {% if navPages[1] %}
