@@ -48,9 +48,12 @@
   },
   "dependencies": {
     "@11ty/eleventy": "^1.0.2",
+    "algoliasearch": "^4.14.2",
     "dayjs": "^1.11.6",
     "dotenv": "^16.0.3",
-    "fs-extra": "^10.1.0"
+    "fs-extra": "^10.1.0",
+    "instantsearch.js": "^4.49.1",
+    "node-fetch": "2.6.7"
   },
   "jest": {
     "extensionsToTreatAsEsm": [

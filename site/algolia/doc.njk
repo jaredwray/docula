@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/highlight/styles/base16/dracula.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.4.5/themes/satellite-min.css" integrity="sha256-TehzF/2QvNKhGQrrNpoOb2Ck4iGZ1J/DI4pkd2oUsBc=" crossorigin="anonymous">
 </head>
 <body>
 
@@ -16,14 +17,17 @@
       {% include "layout/header.njk" %}
       {% include "layout/sidebar.njk" %}
       {% include "layout/main.njk" %}
+      {% include "layout/search.njk" %}
     </div>
 
 <script>
-    const sidebar = document.querySelector('#sidebar');
+  const sidebar = document.querySelector('#sidebar');
     const closeBtn = document.querySelector('#close-sidebar');
     const openBtn = document.querySelector('#open-sidebar');
     const header = document.querySelector('#header');
     const onPage = document.querySelector('#on-page');
+    const searchBtn = document.querySelector('#search-btn');
+    const searchModal = document.querySelector('#search-modal');
 
     closeBtn.addEventListener('click', () => {
         sidebar.classList.add('hidden');
@@ -42,6 +46,12 @@
             onPage.classList.add('hidden');
         }
     });
+
+    //search
+    searchBtn.addEventListener('click', () => {
+      searchModal.classList.add('show-modal');
+    });
+
 </script>
 
 <script src="/highlight/highlight.min.js"></script>
@@ -49,6 +59,55 @@
   document.addEventListener('DOMContentLoaded', () => {
     hljs.highlightAll()
   });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.14.2/dist/algoliasearch-lite.umd.js" integrity="sha256-dImjLPUsG/6p3+i7gVKBiDM8EemJAhQ0VvkRK2pVsQY=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.49.1/dist/instantsearch.production.min.js" integrity="sha256-3s8yn/IU/hV+UjoqczP+9xDS1VXIpMf3QYRUi9XoG0Y=" crossorigin="anonymous"></script>
+
+<script>
+  const searchClient = algoliasearch('H1FAIV3INQ', 'API-KEY');
+
+  const search = instantsearch({
+    indexName: 'demo',
+    searchClient,
+    searchFunction(helper) {
+      const container = document.querySelector('#hits');
+      container.style.display = helper.state.query === '' ? 'none' : '';
+
+      helper.search();
+    }
+  });
+
+  search.addWidgets([
+    instantsearch.widgets.searchBox({
+      container: '#searchbox',
+      placeholder: 'Search for concepts',
+      autofocus: true,
+      showSubmit: false,
+    }),
+
+    instantsearch.widgets.hits({
+      container: '#hits',
+      templates: {
+        // empty: `<div>No results have been found for {{query}}</div>.`,
+        item(hit) {
+          return `
+          <article class="search-result">
+              <a href="${hit.url}">
+                <h2>${instantsearch.highlight({ attribute: 'title', highlightedTagName: 'span', hit })}</h2>
+                <p>${hit.description}</p>
+              </a>
+          </article>
+        `;
+        }
+      }
+    }),
+  ]);
+
+
+
+  search.start();
 </script>
 
 </body>
