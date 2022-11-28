@@ -54,7 +54,7 @@ button {
   font-family: var(--font-family);
 }
 
-nav {
+.nav {
   padding-left: 16px;
   padding-right: 16px;
   height: 72px;
@@ -560,7 +560,7 @@ details > summary {
     padding-top: 120px;
   }
 
-  nav {
+  .nav {
     padding-left: 56px;
     padding-right: 56px;
   }
@@ -575,7 +575,7 @@ details > summary {
     display: none;
   }
 
-  nav {
+  .nav {
     height: auto;
     box-shadow: none;
     padding-right: 16px;
@@ -677,7 +677,7 @@ details > summary {
     height: 100%;
   }
 
-  nav {
+  .nav {
     justify-content: flex-start;
     padding-left: 56px;
     z-index: 30;
