@@ -24,15 +24,9 @@
                         <h1>{{title}}</h1>
 
                         <!--   on this page start  -->
-                        <div class="on-page-container">
+                        <div class="on-page-container on-page-main">
                              <h5>On this page</h5>
-                                <ul>
-                                    <li><a class="on-page-link" href="#"><div>1.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
-                                    <li><a class="on-page-link" href="#"><div>2.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
-                                    <li><a class="on-page-link" href="#"><div>3.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
-                                    <li><a class="on-page-link" href="#"><div>4.<span class="on-page-list">What does Algolia do?</span></div><span class="right-chevron"></span></a> </li>
-
-                                </ul>
+                             {{ content | toc | safe }}
 
                         </div>
 
@@ -46,12 +40,7 @@
                 <div class="on-page-container on-page--desktop hidden" id="on-page">
                         <div class="on-page-fixed">
                                 <h5>On this page</h5>
-                                <ul>
-                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
-                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
-                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
-                                        <li><a class="on-page-link" href="#"><span class="on-page-list">What does Algolia do?</span></a></li>
-                                </ul>
+                                {{ content | toc | safe }}
                         </div>
                 </div>
         </div>

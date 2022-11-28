@@ -2,6 +2,9 @@ const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 const utc = require('dayjs/plugin/utc');
 const eleventyNavigationPlugin = require("@11ty/eleventy-navigation");
+const pluginTOC = require('eleventy-plugin-toc')
+const markdownIt = require('markdown-it')
+const markdownItAnchor = require('markdown-it-anchor')
 
 
 dayjs.extend(relativeTime)
@@ -9,7 +12,16 @@ dayjs.extend(utc)
 
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({'public': '.'});
+
+  eleventyConfig.setLibrary(
+    'md',
+    markdownIt().use(markdownItAnchor)
+  )
+
   eleventyConfig.addPlugin(eleventyNavigationPlugin);
+  eleventyConfig.addPlugin(pluginTOC , {
+    tags: ['h2'],
+  });
 
 
   function formatDate(date, format) {

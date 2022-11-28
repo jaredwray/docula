@@ -355,39 +355,57 @@ nav {
   color: var(--color-tertiary);
 }
 
-.on-page-container ul {
+.on-page-container .toc {
   list-style: none;
   line-height: 24px;
   padding-left: 0;
+  width: 100%;
 }
 
-.on-page-container ul > li {
+.on-page-container ol {
+  padding-left: 16px;
+  list-style: none;
+  counter-reset: li;
+  width: 100%;
+}
+
+.on-page-container ol > li::before {
+  content: counter(li);
+  color: var(--color-tertiary);
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  margin-right: 8px;
+}
+
+.on-page-container ol > li {
   border-bottom: 1px solid rgba(90,94,154,.1);
+  counter-increment: li;
+  display: flex;
+  align-items: baseline;
+  position: relative;
 }
 
-.on-page-container ul > li > a {
+.on-page-container ol > li > a {
   transition: all .2s ease-out;
   color: var(--color-tertiary);
   padding: 8px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: initial;
 }
 
-.on-page-container ul > li > a > div {
-  font-size: 12px;
-}
-
-.on-page-container ul > li:hover + li > a {
+.on-page-container ol > li:hover + li > a {
   transform: translateX(4px);
 }
 
-.on-page-list {
-  margin-left: 8px;
-  font-size: 12px;
-}
-
-.right-chevron::after {
+.on-page-main ol > li > a::after {
+  position: absolute;
+  right: 0;
   content: '';
   display: inline-block;
   width: 4px;
@@ -395,6 +413,11 @@ nav {
   border-right: 1px solid var(--color-tertiary);
   border-bottom: 1px solid var(--color-tertiary);
   transform: rotate(-45deg);
+}
+
+.on-page-list {
+  margin-left: 8px;
+  font-size: 12px;
 }
 
 .header-menu {
