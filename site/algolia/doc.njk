@@ -28,6 +28,7 @@
     const onPage = document.querySelector('#on-page');
     const searchBtn = document.querySelector('#search-btn');
     const searchModal = document.querySelector('#search-modal');
+    const searchContent = document.querySelector('#search-content');
 
     closeBtn.addEventListener('click', () => {
         sidebar.classList.add('hidden');
@@ -52,6 +53,21 @@
       searchModal.classList.add('show-modal');
     });
 
+    document.addEventListener('click', (e) => {
+      if(window.innerWidth > 991) {
+        if (!e.target.closest('#search-container')) {
+        console.log('click outside')
+        }
+      }
+    });
+
+  searchContent.addEventListener('click', (e) => {
+    if(window.innerWidth < 992) {
+      searchModal.classList.remove('show-modal');
+      e.stopImmediatePropagation()
+    }
+  });
+
 </script>
 
 <script src="/highlight/highlight.min.js"></script>
@@ -72,8 +88,15 @@
     indexName: 'demo',
     searchClient,
     searchFunction(helper) {
-      const container = document.querySelector('#hits');
-      container.style.display = helper.state.query === '' ? 'none' : '';
+      const modalContent = document.querySelector('#search-content');
+      const isMobile = window.innerWidth < 992;
+      if(isMobile) {
+        modalContent.style.opacity = helper.state.query === '' ? '0' : '1';
+        modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : '#fff';
+      } else {
+        modalContent.style.display = helper.state.query === '' ? 'none' : '';
+        // container.style.height = helper.state.query === '' ? '72px' : '580px';
+      }
 
       helper.search();
     }
@@ -85,6 +108,7 @@
       placeholder: 'Search for concepts',
       autofocus: true,
       showSubmit: false,
+      showReset: true,
     }),
 
     instantsearch.widgets.hits({
@@ -96,7 +120,7 @@
           <article class="search-result">
               <a href="${hit.url}">
                 <h2>${instantsearch.highlight({ attribute: 'title', highlightedTagName: 'span', hit })}</h2>
-                <p>${hit.description}</p>
+                <p>${instantsearch.highlight({ attribute: 'description', highlightedTagName: 'span', hit })}</p>
               </a>
           </article>
         `;

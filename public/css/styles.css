@@ -426,6 +426,7 @@ details > summary {
   list-style: none;
 }
 
+/*search-modal*/
 .search-modal {
   position: fixed;
   top: 0;
@@ -439,8 +440,15 @@ details > summary {
 }
 
 .show-modal {
-  display: block;
+  display: flex;
   z-index: 100;
+}
+
+.search-container {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+
 }
 
 .search-box {
@@ -453,6 +461,7 @@ details > summary {
 
 .search-box .ais-SearchBox-form {
   height: 100%;
+  background-color: transparent;
 }
 
 .search-box input {
@@ -695,15 +704,20 @@ details > summary {
     border-top-left-radius: 8px;
   }
 
-  .search-content {
+  .search-container {
     height: 580px;
     width: 780px;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--background);
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-content {
+    /*background-color: var(--background);*/
+    /*border-radius: 8px;*/
   }
 
   .search-matches {
@@ -713,9 +727,13 @@ details > summary {
 }
 
 @media screen and (min-width: 1200px) {
-  .search-content {
+  /*.search-content {*/
+  /*  max-width: 1040px;*/
+  /*  max-height: 832px;*/
+  /*}*/
+
+  .search-container {
     max-width: 1040px;
-    max-height: 832px;
   }
 
 }
