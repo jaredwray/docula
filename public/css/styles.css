@@ -487,7 +487,6 @@ details > summary {
 .search-content {
   height: 100%;
   width: 100%;
-  /*background-color: var(--background);*/
 }
 
 .search-result {
@@ -716,22 +715,17 @@ details > summary {
   }
 
   .search-content {
-    /*background-color: var(--background);*/
-    /*border-radius: 8px;*/
+    border-radius: 8px;
   }
 
   .search-matches {
     max-height: 580px;
     overflow-y: auto;
+    border-radius: 8px;
   }
 }
 
 @media screen and (min-width: 1200px) {
-  /*.search-content {*/
-  /*  max-width: 1040px;*/
-  /*  max-height: 832px;*/
-  /*}*/
-
   .search-container {
     max-width: 1040px;
   }

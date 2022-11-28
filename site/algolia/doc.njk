@@ -28,6 +28,7 @@
     const onPage = document.querySelector('#on-page');
     const searchBtn = document.querySelector('#search-btn');
     const searchModal = document.querySelector('#search-modal');
+    const searchModalContainer = document.querySelector('#search-container');
     const searchContent = document.querySelector('#search-content');
 
     closeBtn.addEventListener('click', () => {
@@ -53,11 +54,10 @@
       searchModal.classList.add('show-modal');
     });
 
-    document.addEventListener('click', (e) => {
+   searchModal.addEventListener('click', (e) => {
       if(window.innerWidth > 991) {
-        if (!e.target.closest('#search-container')) {
-        console.log('click outside')
-        }
+        if (searchModalContainer === e.target || searchModalContainer.contains(e.target)) return;
+          searchModal.classList.remove('show-modal');
       }
     });
 
@@ -95,7 +95,7 @@
         modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : '#fff';
       } else {
         modalContent.style.display = helper.state.query === '' ? 'none' : '';
-        // container.style.height = helper.state.query === '' ? '72px' : '580px';
+        modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : '#fff';
       }
 
       helper.search();
