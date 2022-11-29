@@ -12,6 +12,7 @@ dayjs.extend(utc)
 
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({'public': '.'});
+  eleventyConfig.addPassthroughCopy({'site/algolia/images': '/images/'});
 
   eleventyConfig.setLibrary(
     'md',

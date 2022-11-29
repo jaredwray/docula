@@ -6,7 +6,8 @@
     "eleventyNavigation": {
       "key": "{{ title }}",
       "title": "{{ title }}",
-      "parent": "{{parent}}"
+      "parent": "{{parent}}",
+      "order": "{{order}}"
     }
   }
 }
