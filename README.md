@@ -10,7 +10,6 @@ Beautiful documentation for your projects
 
 - Zero Config - Just drop it in and it works
 - Can run from `npx` or installed globally
-- Uses `dotenv` to load environment variables or via parameters
 - Knowledge Base that is easy to setup and manage
 - Beautiful and Responsive Design (Like Stripe or 11ty)
 - Search Engine Optimized
