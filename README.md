@@ -21,7 +21,7 @@ Beautiful documentation for your projects
 - Will generate a robots.txt
 - Will generate a release based on Github Releases
 - Generatses an RSS feed.xml file to use and share 
-- Easily add in a blog to your site if needed
+- Easily add in a blog to your site
 
 ## Research
 - Is there a swagger version for api libraries?
