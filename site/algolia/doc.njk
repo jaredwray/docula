@@ -30,6 +30,7 @@
     const searchModal = document.querySelector('#search-modal');
     const searchModalContainer = document.querySelector('#search-container');
     const searchContent = document.querySelector('#search-content');
+    const closeModalBtn = document.querySelector('#close-modal-btn');
 
     closeBtn.addEventListener('click', () => {
         sidebar.classList.add('hidden');
@@ -61,7 +62,11 @@
       }
     });
 
-  searchContent.addEventListener('click', (e) => {
+  closeModalBtn.addEventListener('click', () => {
+    searchModal.classList.remove('show-modal');
+  });
+
+  searchContent.addEventListener('click', () => {
     if(window.innerWidth < 992) {
       searchModal.classList.remove('show-modal');
     }

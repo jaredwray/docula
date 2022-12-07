@@ -1,7 +1,7 @@
 <div class="sidebar hidden" id="sidebar">
   <div class="sidebar-logo">
       <span class="header-link">
-          <img src="/../../images/docula-logo-horizontal.png" alt="logo" />
+          <img src="/../../images/logo.svg" alt="logo" />
       </span>
   </div>
 
@@ -44,12 +44,7 @@
 
    </div>
    <div class="sidebar-footer">
-     <a class="block mx-16 py-8 text-sm text-grey-700 hover:text-grey-800 transition-fast-out" href="https://www.algolia.com/" target="_blank">
-      Algolia.com
-     </a>
-     <a class="block mx-16 py-8 text-sm text-grey-700 hover:text-grey-800 transition-fast-out" href="https://www.algolia.com/developers/" target="_blank">
-      Developer Hub
-     </a>
+       {{ site.footer }} {{ site.authorName }} {% year %}
     </div>
   </div>
  </aside>

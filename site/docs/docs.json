@@ -5,9 +5,9 @@
   "eleventyComputed": {
     "eleventyNavigation": {
       "key": "{{ title }}",
-      "title": "{{ title }}",
-      "parent": "{{parent}}",
-      "order": "{{order}}"
+      "title": "{{ menuTitle or title }}",
+      "parent": "{{ parent }}",
+      "order": "{{ order }}"
     }
   }
 }

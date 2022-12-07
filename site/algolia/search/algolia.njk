@@ -5,17 +5,16 @@
   const searchClient = algoliasearch('H1FAIV3INQ', 'b67cfed507b83773bee21c9baa05c9df');
 
   const search = instantsearch({
-    indexName: 'demo',
+    indexName: 'demo-2',
     searchClient,
     searchFunction(helper) {
       const modalContent = document.querySelector('#search-content');
       const isMobile = window.innerWidth < 992;
       if(isMobile) {
         modalContent.style.opacity = helper.state.query === '' ? '0' : '1';
-        modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : '#fff';
+        modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : 'inherit';
       } else {
         modalContent.style.display = helper.state.query === '' ? 'none' : '';
-        modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : '#fff';
       }
 
       helper.search();
