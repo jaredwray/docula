@@ -59,4 +59,8 @@ export class Docula {
 			this._outputPath = options.outputPath;
 		}
 	}
+
+	public build(): void {
+
+	}
 }
