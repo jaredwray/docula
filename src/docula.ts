@@ -1,14 +1,17 @@
 import * as fs from 'fs-extra';
 import {type DoculaOptions} from './docula-options.js';
+import {Eleventy} from "./eleventy.js";
 
 export class Docula {
 	private _sitePath = 'site';
 	private _outputPath = 'dist';
+	private eleventy;
 
 	constructor(options?: DoculaOptions) {
 		if (options) {
 			this.loadOptions(options);
 		}
+		this.eleventy = new Eleventy({});
 	}
 
 	get sitePath() {
@@ -60,7 +63,12 @@ export class Docula {
 		}
 	}
 
-	public build(): void {
-
+	public async build(): Promise<void> {
+		try{
+			await this.eleventy.build();
+		} catch (error: any) {
+			console.log('Error: ', error.message);
+		}
 	}
+
 }

@@ -1,5 +1,1 @@
-export class Config {
-
-
-
-}
+export class Config {}

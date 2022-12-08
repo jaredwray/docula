@@ -11,11 +11,16 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist && rm -rf node_modules",
-    "test": "xo && jest --coverage"
+    "test": "xo && jest --coverage",
+    "test:code": "yarn build && node ./bin/docula.js",
+    "lint": "xo --fix"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jaredwray/docula.git"
+  },
+  "bin": {
+    "docula": "./bin/docula.js"
   },
   "keywords": [
     "open",
@@ -46,6 +51,7 @@
   },
   "dependencies": {
     "@11ty/eleventy": "^1.0.2",
+    "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "fs-extra": "^10.1.0"
   },
