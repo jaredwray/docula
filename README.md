@@ -13,7 +13,7 @@ Beautiful documentation for your projects
 - Knowledge Base that is easy to setup and manage
 - Beautiful and Responsive Design (Like Stripe or 11ty)
 - Search Engine Optimized
-- Search Engine Plugin (Algolia & Google Search) that pushes the content to the search service.
+- Search Engine Plugin (Algolia) that pushes the content to the search service.
 - Swagger Enabled for API documentation
 - Convention over Configuration - just add your files, use a template (or build your own) and you're done.
 - Step by Step Guides Built in - Just setup the files in a single folder and state which step they are and it will work.
