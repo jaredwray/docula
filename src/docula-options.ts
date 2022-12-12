@@ -6,5 +6,6 @@ export type DoculaOptions = {
 		api?: string;
 		outputFile?: string;
 		repo?: string;
+		author?: string;
 	};
 };

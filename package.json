@@ -59,6 +59,12 @@
     "markdown-it-anchor": "^8.6.5",
     "node-fetch": "2.6.7"
   },
+  "xo": {
+		"rules": {
+      "@typescript-eslint/no-unsafe-assignment": 0,
+      "@typescript-eslint/no-unsafe-return": 0
+		}
+	},
   "jest": {
     "extensionsToTreatAsEsm": [
       ".ts"
@@ -79,7 +85,7 @@
     },
     "testMatch": [
       "**/test/*.test.(ts)",
-      "**/test/providers/*.test.(ts)"
+      "**/test/plugins/*.test.(ts)"
     ],
     "testEnvironment": "node"
   }
