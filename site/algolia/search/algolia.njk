@@ -1,0 +1,54 @@
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.14.2/dist/algoliasearch-lite.umd.js" integrity="sha256-dImjLPUsG/6p3+i7gVKBiDM8EemJAhQ0VvkRK2pVsQY=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.49.1/dist/instantsearch.production.min.js" integrity="sha256-3s8yn/IU/hV+UjoqczP+9xDS1VXIpMf3QYRUi9XoG0Y=" crossorigin="anonymous"></script>
+
+<script>
+  const searchClient = algoliasearch('H1FAIV3INQ', 'b67cfed507b83773bee21c9baa05c9df');
+
+  const search = instantsearch({
+    indexName: 'demo-2',
+    searchClient,
+    searchFunction(helper) {
+      const modalContent = document.querySelector('#search-content');
+      const isMobile = window.innerWidth < 992;
+      if(isMobile) {
+        modalContent.style.opacity = helper.state.query === '' ? '0' : '1';
+        modalContent.style.backgroundColor = helper.state.query === '' ? 'transparent' : 'inherit';
+      } else {
+        modalContent.style.display = helper.state.query === '' ? 'none' : '';
+      }
+
+      helper.search();
+    }
+  });
+
+  search.addWidgets([
+    instantsearch.widgets.searchBox({
+      container: '#searchbox',
+      placeholder: 'Search for concepts',
+      autofocus: true,
+      showSubmit: false,
+      showReset: true,
+    }),
+
+    instantsearch.widgets.hits({
+      container: '#hits',
+      templates: {
+        // empty: `<div>No results have been found for {{query}}</div>.`,
+        item(hit) {
+          return `
+          <article class="search-result">
+              <a href="${hit.url}">
+                <h2>${instantsearch.highlight({ attribute: 'title', highlightedTagName: 'span', hit })}</h2>
+                <p>${instantsearch.highlight({ attribute: 'description', highlightedTagName: 'span', hit })}</p>
+              </a>
+          </article>
+        `;
+        }
+      }
+    }),
+  ]);
+
+
+
+  search.start();
+</script>
