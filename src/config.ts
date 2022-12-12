@@ -30,7 +30,6 @@ export class Config {
 	loadConfig(path: string) {
 		const data = readFileSync(path, {encoding: 'utf8'});
 		const config = JSON.parse(data) as Record<string, string>;
-		// Replace originPath with config.originPath if exist
 		this.originPath = config.originPath ?? this.originPath;
 		this.outputPath = config.outputPath ?? this.outputPath;
 		this.dataPath = config.dataPath ?? this.dataPath;

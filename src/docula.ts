@@ -1,6 +1,4 @@
 import * as fs from 'fs-extra';
-import {type OptionValues} from 'commander';
-import {type DoculaOptions} from './docula-options.js';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {getErrorMessage, reportError} from './tools.js';
@@ -14,9 +12,7 @@ export class Docula {
 
 	constructor(options: CommanderOptions) {
 		const parameters = options.opts();
-
 		this.config = new Config(parameters.config);
-
 		this.eleventy = new Eleventy(this.config);
 	}
 
@@ -64,16 +60,6 @@ export class Docula {
 			await this.eleventy.build();
 		} catch (error: unknown) {
 			reportError({message: getErrorMessage(error)});
-		}
-	}
-
-	private loadOptions(options: DoculaOptions) {
-		if (options.sitePath) {
-			this._sitePath = options.sitePath;
-		}
-
-		if (options.outputPath) {
-			this._outputPath = options.outputPath;
 		}
 	}
 }
