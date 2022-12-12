@@ -387,8 +387,8 @@ button {
 }
 
 .on-page-container {
-  margin-top: 48px;
-  margin-bottom: 56px;
+  padding-top: 48px;
+  padding-bottom: 28px;
 }
 
 .on-page-container h5 {

@@ -12,7 +12,7 @@ dayjs.extend(utc)
 
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({'public': '.'});
-  eleventyConfig.addPassthroughCopy({'site/algolia/images': '/images/'});
+  eleventyConfig.addPassthroughCopy({'site/template/simple_clean/images': '/images/'});
 
   eleventyConfig.setLibrary(
     'md',
@@ -67,8 +67,8 @@ module.exports = function(eleventyConfig) {
     dir: {
       input: "site",
       output: "dist",
-      includes: "algolia",
-      data: "algolia/data"
+      includes: "template/simple_clean",
+      data: "template/simple_clean/data"
     },
     templateExtensionAliases: {
       "11ty.cjs": "11ty.js",
