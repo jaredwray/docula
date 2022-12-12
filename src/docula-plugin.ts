@@ -1,5 +1,5 @@
 import {type DoculaOptions} from './docula-options.js';
 
-export type DoculaPlugin = {
+export interface DoculaPlugin {
 	execute(options: DoculaOptions): Promise<void>;
 };

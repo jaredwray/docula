@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
+import { DoculaPlugin } from '../docula-plugin';
 
-export class GithubPlugin {
+export class GithubPlugin implements DoculaPlugin {
 
     options = {
         github_url: 'https://api.github.com',
