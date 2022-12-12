@@ -9,23 +9,25 @@ export class Executable {
         program.storeOptionsAsProperties(true);
 
         program.command('build', {isDefault: true})
-            .action(async (options: any) => {
-                try{
-                    const docula = new Docula();
-                    await docula.build();
-                } catch (error: any) {
-                    console.error('Error: '+ error.message);
-                }
-            })
+          .description('Build the site')
+          .option("-c, --config <config>", "Path of where the config file is located")
+          .action(async (options: any) => {
+              try{
+                  const docula = new Docula(options);
+                  await docula.build();
+              } catch (error: any) {
+                  console.error('Error: '+ error.message);
+              }
+          })
 
         program.command('template')
-            .action(async (options: any) => {
-                try {
+          .action(async (options: any) => {
+            try {
 
-                } catch (error: any){
-                    console.error('Error: '+ error.message);
-                }
-            })
+            } catch (error: any){
+                console.error('Error: '+ error.message);
+            }
+        })
 
         program.parse(process.argv);
     };

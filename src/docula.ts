@@ -1,17 +1,20 @@
 import * as fs from 'fs-extra';
 import {type DoculaOptions} from './docula-options.js';
 import {Eleventy} from "./eleventy.js";
+import {Config} from "./config.js";
 
 export class Docula {
 	private _sitePath = 'site';
 	private _outputPath = 'dist';
-	private eleventy;
+	private eleventy: Eleventy;
+	private readonly config: Config;
 
-	constructor(options?: DoculaOptions) {
-		if (options) {
-			this.loadOptions(options);
-		}
-		this.eleventy = new Eleventy({});
+	constructor(options: any) {
+		const params = options.opts();
+
+		this.config = new Config(params.config);
+
+		this.eleventy = new Eleventy(this.config);
 	}
 
 	get sitePath() {
