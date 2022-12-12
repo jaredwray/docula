@@ -8,11 +8,11 @@ export class Docula {
 	private _sitePath = 'site';
 	private _outputPath = 'dist';
 	private readonly eleventy: Eleventy;
-	private readonly config: Config;
+	readonly config: Config;
 
-	constructor(options: CommanderOptions) {
-		const parameters = options.opts();
-		this.config = new Config(parameters.config);
+	constructor(options?: CommanderOptions) {
+		const parameters = options?.opts();
+		this.config = new Config(parameters?.config);
 		this.eleventy = new Eleventy(this.config);
 	}
 
