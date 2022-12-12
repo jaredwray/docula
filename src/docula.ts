@@ -5,10 +5,8 @@ import {getErrorMessage, reportError} from './tools.js';
 import {type CommanderOptions} from './index.js';
 
 export class Docula {
-	private _sitePath = 'site';
-	private _outputPath = 'dist';
-	private readonly eleventy: Eleventy;
 	readonly config: Config;
+	private readonly eleventy: Eleventy;
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
@@ -16,16 +14,8 @@ export class Docula {
 		this.eleventy = new Eleventy(this.config);
 	}
 
-	get sitePath() {
-		return this._sitePath;
-	}
-
-	get outputPath() {
-		return this._outputPath;
-	}
-
 	public init(sitePath?: string): void {
-		const rootSitePath = sitePath ?? this._sitePath;
+		const rootSitePath = sitePath ?? this.config.originPath;
 
 		// Create the <site> folder
 		if (!fs.existsSync(rootSitePath)) {

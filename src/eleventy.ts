@@ -6,7 +6,7 @@ import eleventyNavigationPlugin from '@11ty/eleventy-navigation';
 // @ts-expect-error - 11ty doesn't have types
 import pluginTOC from 'eleventy-plugin-toc';
 import markdownIt from 'markdown-it';
-// @ts-ignore
+// @ts-expect-error - This module doesn't have types
 import markdownItAnchor from 'markdown-it-anchor';
 import {type Config} from './config.js';
 
