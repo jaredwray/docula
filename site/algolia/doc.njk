@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/highlight/styles/base16/dracula.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.4.5/themes/satellite-min.css" integrity="sha256-TehzF/2QvNKhGQrrNpoOb2Ck4iGZ1J/DI4pkd2oUsBc=" crossorigin="anonymous">
+</head>
+<body>
+
+    <div class="layout">
+      {% include "layout/header.njk" %}
+      {% include "layout/sidebar.njk" %}
+      {% include "layout/main.njk" %}
+      {% include "layout/search.njk" %}
+    </div>
+
+<script>
+  const sidebar = document.querySelector('#sidebar');
+    const closeBtn = document.querySelector('#close-sidebar');
+    const openBtn = document.querySelector('#open-sidebar');
+    const header = document.querySelector('#header');
+    const onPage = document.querySelector('#on-page');
+    const searchBtn = document.querySelector('#search-btn');
+    const searchModal = document.querySelector('#search-modal');
+    const searchModalContainer = document.querySelector('#search-container');
+    const searchContent = document.querySelector('#search-content');
+    const closeModalBtn = document.querySelector('#close-modal-btn');
+
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.add('hidden');
+        header.classList.remove('bottom');
+    });
+
+    openBtn.addEventListener('click', () => {
+        header.classList.add('bottom');
+        sidebar.classList.remove('hidden');
+    });
+    //scroll listener
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 0 && window.innerWidth > 1428) {
+            onPage.classList.remove('hidden');
+        } else {
+            onPage.classList.add('hidden');
+        }
+    });
+
+    //search
+    searchBtn.addEventListener('click', () => {
+      searchModal.classList.add('show-modal');
+    });
+
+   searchModal.addEventListener('click', (e) => {
+      if(window.innerWidth > 991) {
+        if (searchModalContainer === e.target || searchModalContainer.contains(e.target)) return;
+          searchModal.classList.remove('show-modal');
+      }
+    });
+
+  closeModalBtn.addEventListener('click', () => {
+    searchModal.classList.remove('show-modal');
+  });
+
+  searchContent.addEventListener('click', () => {
+    if(window.innerWidth < 992) {
+      searchModal.classList.remove('show-modal');
+    }
+  });
+
+</script>
+
+<script src="/highlight/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    hljs.highlightAll()
+  });
+</script>
+
+ {% include "search/algolia.njk" %}
+
+</body>
+</html>
