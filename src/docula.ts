@@ -1,18 +1,21 @@
 import * as fs from 'fs-extra';
+import {type OptionValues} from 'commander';
 import {type DoculaOptions} from './docula-options.js';
-import {Eleventy} from "./eleventy.js";
-import {Config} from "./config.js";
+import {Eleventy} from './eleventy.js';
+import {Config} from './config.js';
+import {getErrorMessage, reportError} from './tools.js';
+import {type CommanderOptions} from './index.js';
 
 export class Docula {
 	private _sitePath = 'site';
 	private _outputPath = 'dist';
-	private eleventy: Eleventy;
+	private readonly eleventy: Eleventy;
 	private readonly config: Config;
 
-	constructor(options: any) {
-		const params = options.opts();
+	constructor(options: CommanderOptions) {
+		const parameters = options.opts();
 
-		this.config = new Config(params.config);
+		this.config = new Config(parameters.config);
 
 		this.eleventy = new Eleventy(this.config);
 	}
@@ -56,6 +59,14 @@ export class Docula {
 		// Create the <site>/template folder with initial template
 	}
 
+	public async build(): Promise<void> {
+		try {
+			await this.eleventy.build();
+		} catch (error: unknown) {
+			reportError({message: getErrorMessage(error)});
+		}
+	}
+
 	private loadOptions(options: DoculaOptions) {
 		if (options.sitePath) {
 			this._sitePath = options.sitePath;
@@ -65,13 +76,4 @@ export class Docula {
 			this._outputPath = options.outputPath;
 		}
 	}
-
-	public async build(): Promise<void> {
-		try{
-			await this.eleventy.build();
-		} catch (error: any) {
-			console.log('Error: ', error.message);
-		}
-	}
-
 }
