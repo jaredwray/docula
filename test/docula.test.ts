@@ -19,15 +19,15 @@ describe('Docula', () => {
 	});
 
 	it('Docula - init with options <sitePath>', () => {
-		const options: DoculaOptions = {sitePath: 'site'};
+		const options: DoculaOptions = {outputPath: 'site'};
 		const docula = new Docula(options);
-		expect(docula.sitePath).toBe('site');
+		expect(docula.outputPath).toBe('site');
 	});
 
 	it('Docula - init with options <outputPath>', () => {
-		const options: DoculaOptions = {outputPath: 'test'};
+		const options: DoculaOptions = {sitePath: 'test'};
 		const docula = new Docula(options);
-		expect(docula.outputPath).toBe('test');
+		expect(docula.sitePath).toBe('test');
 	});
 
 	it('Docula - testing init function with folders', () => {
