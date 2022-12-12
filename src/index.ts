@@ -1,47 +1,52 @@
-import {createCommand} from "commander";
-import {Docula} from "./docula.js";
+import {createCommand, type OptionValues} from 'commander';
+import {Docula} from './docula.js';
+import {getErrorMessage, reportError} from './tools.js';
+
+export type CommanderOptions = {
+	opts: () => OptionValues;
+};
 
 export class Executable {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	async parseCLI(process: NodeJS.Process) {
+		const program = createCommand();
 
-    async parseCLI(process: NodeJS.Process) {
-        const program = createCommand();
+		program.storeOptionsAsProperties(true);
 
-        program.storeOptionsAsProperties(true);
-
-        program.command('build', {isDefault: true})
-          .description('Build the site')
-          .option("-c, --config <config>", "Path of where the config file is located")
-          .action(async (options: any) => {
-              try{
-                  const docula = new Docula(options);
-                  await docula.build();
-              } catch (error: any) {
-                  console.error('Error: '+ error.message);
-              }
-          })
+		program.command('build', {isDefault: true})
+			.description('Build the site')
+			.option('-c, --config <config>', 'Path of where the config file is located')
+			.action(async (options: CommanderOptions) => {
+				try {
+					const docula = new Docula(options);
+					await docula.build();
+				} catch (error: unknown) {
+					reportError({message: getErrorMessage(error)});
+				}
+			});
 
         program.command('template')
           .description('The template to work with')
           .argument("<name>", "The template name to work with'")
-          .action(async (options: any) => {
+          .action(async (options: CommanderOptions) => {
             try {
               console.log(options);
-            } catch (error: any){
-                console.error('Error: '+ error.message);
+            } catch (error: unknown) {
+              reportError({message: getErrorMessage(error)});
             }
         })
 
       program.command('init')
           .description('Initialize the site')
-          .action(async (options: any) => {
+          .action(async (options: CommanderOptions) => {
             try{
               const docula = new Docula(options);
               await docula.init();
-            } catch (error: any) {
-              console.error('Error: '+ error.message);
+            } catch (error: unknown) {
+              reportError({message: getErrorMessage(error)});
             }
         })
 
-        program.parse(process.argv);
-    };
+		program.parse(process.argv);
+	}
 }

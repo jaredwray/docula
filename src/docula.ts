@@ -1,13 +1,12 @@
 import { existsSync, mkdirSync } from 'fs';
-import {type DoculaOptions} from './docula-options.js';
-import {Eleventy} from "./eleventy.js";
-import {Config} from "./config.js";
+import {Eleventy} from './eleventy.js';
+import {Config} from './config.js';
+import {getErrorMessage, reportError} from './tools.js';
+import {type CommanderOptions} from './index.js';
 
 export class Docula {
-	private _sitePath = 'site';
-	private _outputPath = 'dist';
-	private eleventy: Eleventy;
-	private readonly config: Config;
+	readonly config: Config;
+	private readonly eleventy: Eleventy;
 	private readonly directories: string[] = ['data',
 		'api',
 		'docs',
@@ -15,24 +14,14 @@ export class Docula {
 		'blog'
 	];
 
-	constructor(options: any) {
-		const params = options.opts();
-
-		this.config = new Config(params.config);
-
+	constructor(options?: CommanderOptions) {
+		const parameters = options?.opts();
+		this.config = new Config(parameters?.config);
 		this.eleventy = new Eleventy(this.config);
 	}
 
-	get sitePath() {
-		return this._sitePath;
-	}
-
-	get outputPath() {
-		return this._outputPath;
-	}
-
 	public init(sitePath?: string): void {
-		const rootSitePath = sitePath ?? this._sitePath;
+		const rootSitePath = sitePath ?? this.config.originPath;
 
 		// Create the <site> folder
 		if (!existsSync(rootSitePath)) {
@@ -47,22 +36,11 @@ export class Docula {
 
 	}
 
-	private loadOptions(options: DoculaOptions) {
-		if (options.sitePath) {
-			this._sitePath = options.sitePath;
-		}
-
-		if (options.outputPath) {
-			this._outputPath = options.outputPath;
-		}
-	}
-
 	public async build(): Promise<void> {
-		try{
+		try {
 			await this.eleventy.build();
-		} catch (error: any) {
-			console.log('Error: ', error.message);
+		} catch (error: unknown) {
+			reportError({message: getErrorMessage(error)});
 		}
 	}
-
 }
