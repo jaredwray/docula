@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import { existsSync, mkdirSync } from 'fs';
 import {type DoculaOptions} from './docula-options.js';
 import {Eleventy} from "./eleventy.js";
 import {Config} from "./config.js";
@@ -8,6 +8,12 @@ export class Docula {
 	private _outputPath = 'dist';
 	private eleventy: Eleventy;
 	private readonly config: Config;
+	private readonly directories: string[] = ['data',
+		'api',
+		'docs',
+		'template',
+		'blog'
+	];
 
 	constructor(options: any) {
 		const params = options.opts();
@@ -29,31 +35,16 @@ export class Docula {
 		const rootSitePath = sitePath ?? this._sitePath;
 
 		// Create the <site> folder
-		if (!fs.existsSync(rootSitePath)) {
-			fs.mkdirSync(rootSitePath);
+		if (!existsSync(rootSitePath)) {
+			mkdirSync(rootSitePath);
 		}
 
-		// Create the <site>/api folder
-		if (!fs.existsSync(rootSitePath + '/api')) {
-			fs.mkdirSync(rootSitePath + '/api');
-		}
+		this.directories.forEach((directory) => {
+			if(!existsSync(rootSitePath + '/' + directory)) {
+				mkdirSync(rootSitePath + '/' + directory);
+			}
+		})
 
-		// Create the <site>/docs folder
-		if (!fs.existsSync(rootSitePath + '/docs')) {
-			fs.mkdirSync(rootSitePath + '/docs');
-		}
-
-		// Create the <site>/blog folder
-		if (!fs.existsSync(rootSitePath + '/blog')) {
-			fs.mkdirSync(rootSitePath + '/blog');
-		}
-
-		// Create the <site>/data folder
-		if (!fs.existsSync(rootSitePath + '/data')) {
-			fs.mkdirSync(rootSitePath + '/data');
-		}
-
-		// Create the <site>/template folder with initial template
 	}
 
 	private loadOptions(options: DoculaOptions) {

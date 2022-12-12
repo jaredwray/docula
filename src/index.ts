@@ -21,11 +21,24 @@ export class Executable {
           })
 
         program.command('template')
+          .description('The template to work with')
+          .argument("<name>", "The template name to work with'")
           .action(async (options: any) => {
             try {
-
+              console.log(options);
             } catch (error: any){
                 console.error('Error: '+ error.message);
+            }
+        })
+
+      program.command('init')
+          .description('Initialize the site')
+          .action(async (options: any) => {
+            try{
+              const docula = new Docula(options);
+              await docula.init();
+            } catch (error: any) {
+              console.error('Error: '+ error.message);
             }
         })
 
