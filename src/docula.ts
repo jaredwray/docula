@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {getErrorMessage, reportError} from './tools.js';
+import {reportError} from './tools.js';
 import {type CommanderOptions} from './index.js';
 
 export class Docula {
@@ -49,7 +49,7 @@ export class Docula {
 		try {
 			await this.eleventy.build();
 		} catch (error: unknown) {
-			reportError({message: getErrorMessage(error)});
+			reportError(error);
 		}
 	}
 }
