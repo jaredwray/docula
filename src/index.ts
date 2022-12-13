@@ -25,27 +25,28 @@ export class Executable {
 				}
 			});
 
-        program.command('template')
-          .description('The template to work with')
-          .argument("<name>", "The template name to work with'")
-          .action(async (options: CommanderOptions) => {
-            try {
-              console.log(options);
-            } catch (error: unknown) {
-              reportError({message: getErrorMessage(error)});
-            }
-        })
+		program.command('template')
+			.description('The template to work with')
+			.argument('<name>', 'The template name to work with\'')
+			.action(async (argument: string) => {
+				try {
+					const docula = new Docula();
+					docula.copyTemplate(`templates/${argument}`);
+				} catch (error: unknown) {
+					reportError({message: getErrorMessage(error)});
+				}
+			});
 
-      program.command('init')
-          .description('Initialize the site')
-          .action(async (options: CommanderOptions) => {
-            try{
-              const docula = new Docula(options);
-              await docula.init();
-            } catch (error: unknown) {
-              reportError({message: getErrorMessage(error)});
-            }
-        })
+		program.command('init')
+			.description('Initialize the site')
+			.action(async (options: CommanderOptions) => {
+				try {
+					const docula = new Docula(options);
+					docula.init();
+				} catch (error: unknown) {
+					reportError({message: getErrorMessage(error)});
+				}
+			});
 
 		program.parse(process.argv);
 	}
