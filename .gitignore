@@ -61,9 +61,6 @@ typings/
 .next
 package-lock.json
 
-# test output
-test/data
-
 # build
 dist
 .DS_Store

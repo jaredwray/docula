@@ -4,7 +4,7 @@ import * as elev from '@11ty/eleventy';
 import {Eleventy} from '../src/eleventy.js';
 import {Config} from '../src/config.js';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = elev.default;
 
 describe('Eleventy', () => {

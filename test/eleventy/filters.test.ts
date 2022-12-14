@@ -1,4 +1,4 @@
-import {squashCallback} from '../src/eleventy/filters.js';
+import {squashCallback} from '../../src/eleventy/filters.js';
 
 describe('Eleventy Filters', () => {
 	it('Eleventy Filters - squash', () => {

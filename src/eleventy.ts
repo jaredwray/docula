@@ -11,7 +11,7 @@ import markdownItAnchor from 'markdown-it-anchor';
 import {type Config} from './config.js';
 import {squashCallback} from './eleventy/filters.js';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
 
 type ElevConfig = {
@@ -43,7 +43,7 @@ export class Eleventy {
 	public async build() {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias, unicorn/no-this-assignment
 		const $this = this;
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
 			quietMode: false,
 

@@ -94,7 +94,8 @@
     },
     "testMatch": [
       "**/test/*.test.(ts)",
-      "**/test/plugins/*.test.(ts)"
+      "**/test/plugins/*.test.(ts)",
+      "**/test/eleventy/*.test.(ts)"
     ],
     "testEnvironment": "node"
   }
