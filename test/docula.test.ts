@@ -15,6 +15,9 @@ describe('Docula', () => {
 
 	beforeEach(() => {
 		jest.spyOn(Eleventy.prototype, 'build').mockImplementation();
+	});
+
+	afterEach(() => {
 		fs.rmSync('./test/data/config.json', {force: true});
 	});
 
@@ -46,14 +49,13 @@ describe('Docula', () => {
 		expect(docula.config.originPath).toBe('test/data/site');
 		docula.init();
 		expect(fs.existsSync('test/data/site')).toBe(true);
-		fs.removeSync('test/data/site');
+		fs.rmSync('test/data/site', {force: true, recursive: true});
 	});
 
 	it('Docula - build using Eleventy', async () => {
 		await fs.writeFile('./test/data/config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/config.json'})};
 		const docula = new Docula(options);
-		docula.init();
 		await docula.build();
 		expect(Eleventy.prototype.build).toHaveBeenCalled();
 	});
