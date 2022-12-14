@@ -1,11 +1,8 @@
-export const getErrorMessage = (error: unknown) => {
+export const reportError = (error: unknown): void => {
+	let message = String(error);
 	if (error instanceof Error) {
-		return error.message;
+		message = error.message;
 	}
 
-	return String(error);
-};
-
-export const reportError = ({message}: {message: string}) => {
-	console.log('Error:', message);
+	console.error(message);
 };

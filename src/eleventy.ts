@@ -9,14 +9,15 @@ import markdownIt from 'markdown-it';
 // @ts-expect-error - This module doesn't have types
 import markdownItAnchor from 'markdown-it-anchor';
 import {type Config} from './config.js';
+import {squashCallback} from './eleventy/filters.js';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
 
 type ElevConfig = {
-	addPassthroughCopy: (options: Record<string, any>) => void;
-	setLibrary: (name: string, library: Record<string, any>) => void;
-	addPlugin: (plugin: any, options?: Record<string, any>) => void;
+	addPassthroughCopy: (options: Record<string, unknown>) => void;
+	setLibrary: (name: string, library: unknown) => void;
+	addPlugin: (plugin: any, options?: Record<string, unknown>) => void;
 	addShortcode: (name: string, callback: () => void) => void;
 	addFilter: (name: string, callback: (text: string) => string) => void;
 };
@@ -24,19 +25,15 @@ type ElevConfig = {
 type ElevInterface = {
 	constructor: (originPath: string, outputPath: string, config: {
 		quietMode?: boolean;
-		config: (config: ElevConfig) => Record<string, any>;
+		config: (config: ElevConfig) => Record<string, unknown>;
 	}) => void;
 	write: () => Promise<void>;
 };
 
 export class Eleventy {
-	private _config: Config;
+	private readonly _config: Config;
 	get config(): Config {
 		return this._config;
-	}
-
-	set config(value: Config) {
-		this._config = value;
 	}
 
 	constructor(config: Config) {
@@ -44,40 +41,18 @@ export class Eleventy {
 	}
 
 	public async build() {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+		// eslint-disable-next-line @typescript-eslint/no-this-alias, unicorn/no-this-assignment
+		const $this = this;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
 			quietMode: false,
 
 			config(eleventyConfig: ElevConfig) {
-				eleventyConfig.addPassthroughCopy({[this.config.assetsPath]: '.'});
-
-				const siteImages = `${this.config.originPath as string}/${this.config.templatePath as string}/${this.config.imagesPath as string}`;
-				eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
-
-				eleventyConfig.setLibrary(
-					'md',
-					markdownIt().use(markdownItAnchor),
-				);
-
-				eleventyConfig.addPlugin(eleventyNavigationPlugin);
-				eleventyConfig.addPlugin(pluginTOC, {
-					tags: ['h2'],
-				});
-
-				eleventyConfig.addShortcode('year', () => DateTime.now().toFormat('YYYY'));
-
-				// Filters
-				eleventyConfig.addFilter('squash', text => {
-					const content = text.toString().toLowerCase();
-
-					// Remove duplicated words
-					const words = content.split(' ');
-					const deduped = [...(new Set(words))];
-					const dedupedString = deduped.join(' ');
-
-					// Remove repeated spaces
-					return dedupedString.replace(/ {2,}/g, ' ');
-				});
+				$this.addPassthroughCopy(eleventyConfig);
+				$this.setLibrary(eleventyConfig);
+				$this.addPlugin(eleventyConfig);
+				$this.addShortcode(eleventyConfig);
+				$this.addFilter(eleventyConfig);
 
 				return {
 					templateFormats: [
@@ -100,5 +75,34 @@ export class Eleventy {
 		});
 
 		await eleventy.write();
+	}
+
+	private addPassthroughCopy(eleventyConfig: ElevConfig) {
+		eleventyConfig.addPassthroughCopy({[this.config.assetsPath]: '.'});
+
+		const siteImages = `${this.config.originPath}/${this.config.templatePath}/${this.config.imagesPath}`;
+		eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
+	}
+
+	private setLibrary(eleventyConfig: ElevConfig) {
+		eleventyConfig.setLibrary(
+			'md',
+			markdownIt().use(markdownItAnchor),
+		);
+	}
+
+	private addPlugin(eleventyConfig: ElevConfig) {
+		eleventyConfig.addPlugin(eleventyNavigationPlugin);
+		eleventyConfig.addPlugin(pluginTOC, {
+			tags: ['h2'],
+		});
+	}
+
+	private addShortcode(eleventyConfig: ElevConfig) {
+		eleventyConfig.addShortcode('year', () => DateTime.now().toFormat('YYYY'));
+	}
+
+	private addFilter(eleventyConfig: ElevConfig) {
+		eleventyConfig.addFilter('squash', squashCallback);
 	}
 }

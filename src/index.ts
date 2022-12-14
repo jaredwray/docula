@@ -1,6 +1,6 @@
 import {createCommand, type OptionValues} from 'commander';
 import {Docula} from './docula.js';
-import {getErrorMessage, reportError} from './tools.js';
+import {reportError} from './tools.js';
 
 export type CommanderOptions = {
 	opts: () => OptionValues;
@@ -21,7 +21,7 @@ export class Executable {
 					const docula = new Docula(options);
 					await docula.build();
 				} catch (error: unknown) {
-					reportError({message: getErrorMessage(error)});
+					reportError(error);
 				}
 			});
 
@@ -44,7 +44,7 @@ export class Executable {
 					const docula = new Docula(options);
 					docula.init();
 				} catch (error: unknown) {
-					reportError({message: getErrorMessage(error)});
+					reportError(error);
 				}
 			});
 
