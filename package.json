@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist && rm -rf node_modules",
-    "test": "xo && jest --coverage",
+    "test": "xo --fix && jest --coverage",
     "test:code": "yarn build && node ./bin/docula.js",
     "lint": "xo --fix",
     "docs:gen": "eleventy --config=.eleventy.cjs",
