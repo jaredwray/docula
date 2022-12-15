@@ -1,26 +1,21 @@
 import * as fs from 'fs-extra';
-import {type DoculaOptions} from './docula-options.js';
+import {Eleventy} from './eleventy.js';
+import {Config} from './config.js';
+import {reportError} from './tools.js';
+import {type CommanderOptions} from './index.js';
 
 export class Docula {
-	private _sitePath = 'site';
-	private _outputPath = 'dist';
+	readonly config: Config;
+	private readonly eleventy: Eleventy;
 
-	constructor(options?: DoculaOptions) {
-		if (options) {
-			this.loadOptions(options);
-		}
-	}
-
-	get sitePath() {
-		return this._sitePath;
-	}
-
-	get outputPath() {
-		return this._outputPath;
+	constructor(options?: CommanderOptions) {
+		const parameters = options?.opts();
+		this.config = new Config(parameters?.config);
+		this.eleventy = new Eleventy(this.config);
 	}
 
 	public init(sitePath?: string): void {
-		const rootSitePath = sitePath ?? this._sitePath;
+		const rootSitePath = sitePath ?? this.config.originPath;
 
 		// Create the <site> folder
 		if (!fs.existsSync(rootSitePath)) {
@@ -50,13 +45,11 @@ export class Docula {
 		// Create the <site>/template folder with initial template
 	}
 
-	private loadOptions(options: DoculaOptions) {
-		if (options.sitePath) {
-			this._sitePath = options.sitePath;
-		}
-
-		if (options.outputPath) {
-			this._outputPath = options.outputPath;
+	public async build(): Promise<void> {
+		try {
+			await this.eleventy.build();
+		} catch (error: unknown) {
+			reportError(error);
 		}
 	}
 }

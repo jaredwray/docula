@@ -55,7 +55,7 @@ describe('Github Plugin', () => {
 		await github.execute();
 		const filePath = 'test/data/github.json';
 		expect(fs.existsSync(filePath)).toBe(true);
-		await fs.remove('test/data');
+		fs.rmSync('test/data/github.json');
 	});
 
 	it('author option does not exist', () => {
