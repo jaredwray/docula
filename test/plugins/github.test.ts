@@ -42,7 +42,7 @@ describe('Github Plugin', () => {
 
 	it('execute and write out the github file', async () => {
 		const options: DoculaOptions = {
-			sitePath: 'test',
+			sitePath: 'test/site',
 			dataPath: 'data',
 			github: {
 				repo: 'docula',
@@ -53,9 +53,9 @@ describe('Github Plugin', () => {
 		};
 		const github = new GithubPlugin(options);
 		await github.execute();
-		const filePath = 'test/data/github.json';
+		const filePath = 'test/site/data/github.json';
 		expect(fs.existsSync(filePath)).toBe(true);
-		fs.rmSync('test/data/github.json');
+		fs.rmSync('test/site/data/github.json');
 	});
 
 	it('author option does not exist', () => {
