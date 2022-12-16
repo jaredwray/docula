@@ -433,7 +433,7 @@ button {
   white-space: initial;
 }
 
-.on-page-container ol > li:hover + li > a {
+.on-page-container ol > li:hover > a {
   transform: translateX(4px);
 }
 
