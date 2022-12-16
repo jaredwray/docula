@@ -29,11 +29,7 @@ export class Docula {
 			mkdirSync(rootSitePath);
 		}
 
-		for (const directory of this.directories) {
-			if (!existsSync(rootSitePath + '/' + directory)) {
-				mkdirSync(rootSitePath + '/' + directory);
-			}
-		}
+		this.copyFolder('init', rootSitePath);
 	}
 
 	public async build(): Promise<void> {
@@ -44,7 +40,7 @@ export class Docula {
 		}
 	}
 
-	public copyTemplate(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
+	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
 		const sourceExists = existsSync(source);
 		const targetExists = existsSync(target);
 		const sourceStats = statSync(source);
@@ -56,7 +52,7 @@ export class Docula {
 			}
 
 			for (const file of readdirSync(source)) {
-				this.copyTemplate(path.join(source, file), path.join(target, file));
+				this.copyFolder(path.join(source, file), path.join(target, file));
 			}
 		} else {
 			copyFileSync(source, target);

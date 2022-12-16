@@ -31,7 +31,7 @@ export class Executable {
 			.action(async (argument: string) => {
 				try {
 					const docula = new Docula();
-					docula.copyTemplate(`templates/${argument}`);
+					docula.copyFolder(`templates/${argument}`);
 				} catch (error: unknown) {
 					reportError(error);
 				}
