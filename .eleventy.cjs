@@ -7,7 +7,7 @@ const markdownItAnchor = require('markdown-it-anchor')
 const DateTime = luxon.DateTime;
 
 module.exports = function(eleventyConfig) {
-  eleventyConfig.addPassthroughCopy({'public': '.'});
+  eleventyConfig.addPassthroughCopy({'site/template/css': '/css/'});
   eleventyConfig.addPassthroughCopy({'site/template/images': '/images/'});
 
   eleventyConfig.setLibrary(
