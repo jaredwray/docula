@@ -1,18 +1,14 @@
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const utc = require('dayjs/plugin/utc');
+const luxon = require('luxon');
 const eleventyNavigationPlugin = require("@11ty/eleventy-navigation");
 const pluginTOC = require('eleventy-plugin-toc')
 const markdownIt = require('markdown-it')
 const markdownItAnchor = require('markdown-it-anchor')
 
-
-dayjs.extend(relativeTime)
-dayjs.extend(utc)
+const DateTime = luxon.DateTime;
 
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({'public': '.'});
-  eleventyConfig.addPassthroughCopy({'site/template/simple_clean/images': '/images/'});
+  eleventyConfig.addPassthroughCopy({'site/template/images': '/images/'});
 
   eleventyConfig.setLibrary(
     'md',
@@ -27,9 +23,9 @@ module.exports = function(eleventyConfig) {
 
   function formatDate(date, format) {
     if(date) {
-      return dayjs.utc(date).format(format);
+      return DateTime.fromJSDate(date).toUTC().toFormat(format);
     }
-    return dayjs.utc().format(format);
+    return DateTime.now().toUTC().toFormat(format);
   }
 
   //shortcodes
@@ -38,7 +34,7 @@ module.exports = function(eleventyConfig) {
   });
 
   eleventyConfig.addShortcode("year", function () {
-    return dayjs.utc().format('YYYY');
+    return DateTime.local().toUTC().toFormat('yyyy');
   });
 
   //filters
@@ -67,8 +63,8 @@ module.exports = function(eleventyConfig) {
     dir: {
       input: "site",
       output: "dist",
-      includes: "template/simple_clean",
-      data: "template/simple_clean/data"
+      includes: "template",
+      data: "template/data"
     },
     templateExtensionAliases: {
       "11ty.cjs": "11ty.js",
