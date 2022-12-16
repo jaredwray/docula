@@ -10,11 +10,10 @@ Beautiful documentation for your projects
 
 - Zero Config - Just drop it in and it works
 - Can run from `npx` or installed globally
-- Uses `dotenv` to load environment variables or via parameters
 - Knowledge Base that is easy to setup and manage
 - Beautiful and Responsive Design (Like Stripe or 11ty)
 - Search Engine Optimized
-- Search Engine Plugin (Algolia & Google Search) that pushes the content to the search service.
+- Search Engine Plugin (Algolia) that pushes the content to the search service.
 - Swagger Enabled for API documentation
 - Convention over Configuration - just add your files, use a template (or build your own) and you're done.
 - Step by Step Guides Built in - Just setup the files in a single folder and state which step they are and it will work.
@@ -22,7 +21,7 @@ Beautiful documentation for your projects
 - Will generate a robots.txt
 - Will generate a release based on Github Releases
 - Generatses an RSS feed.xml file to use and share 
-- Easily add in a blog to your site if needed
+- Easily add in a blog to your site
 
 ## Research
 - Is there a swagger version for api libraries?
