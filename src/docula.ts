@@ -1,5 +1,5 @@
-import {existsSync, mkdirSync, statSync, readdirSync, copyFileSync} from 'node:fs';
 import * as path from 'node:path';
+import * as fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
@@ -25,8 +25,8 @@ export class Docula {
 		const rootSitePath = sitePath ?? this.config.originPath;
 
 		// Create the <site> folder
-		if (!existsSync(rootSitePath)) {
-			mkdirSync(rootSitePath);
+		if (!fs.existsSync(rootSitePath)) {
+			fs.mkdirSync(rootSitePath);
 		}
 
 		this.copyFolder('init', rootSitePath);
@@ -41,21 +41,21 @@ export class Docula {
 	}
 
 	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
-		const sourceExists = existsSync(source);
-		const targetExists = existsSync(target);
-		const sourceStats = statSync(source);
+		const sourceExists = fs.existsSync(source);
+		const targetExists = fs.existsSync(target);
+		const sourceStats = fs.statSync(source);
 		const isDirectory = sourceExists && sourceStats.isDirectory();
 
 		if (isDirectory) {
 			if (!targetExists) {
-				mkdirSync(target);
+				fs.mkdirSync(target);
 			}
 
-			for (const file of readdirSync(source)) {
+			for (const file of fs.readdirSync(source)) {
 				this.copyFolder(path.join(source, file), path.join(target, file));
 			}
 		} else {
-			copyFileSync(source, target);
+			fs.copyFileSync(source, target);
 		}
 	}
 }
