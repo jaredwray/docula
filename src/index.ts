@@ -27,13 +27,13 @@ export class Executable {
 
 		program.command('template')
 			.description('The template to work with')
-			.argument('<name>', 'The template name to work with\'')
+			.argument('<name>', 'The template name to work with')
 			.action(async (argument: string) => {
 				try {
 					const docula = new Docula();
 					docula.copyTemplate(`templates/${argument}`);
 				} catch (error: unknown) {
-					reportError({message: getErrorMessage(error)});
+					reportError(error);
 				}
 			});
 
