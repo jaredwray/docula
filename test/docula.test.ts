@@ -52,7 +52,7 @@ describe('Docula', () => {
 		fs.rmSync('test/data/site', {force: true, recursive: true});
 	});
 
-	it('Docula - build using Eleventy', async () => {
+	it('Docula - should build using Eleventy', async () => {
 		await fs.writeFile('./test/data/config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/config.json'})};
 		const docula = new Docula(options);
@@ -60,7 +60,7 @@ describe('Docula', () => {
 		expect(Eleventy.prototype.build).toHaveBeenCalled();
 	});
 
-	it('Docula - build using Eleventy fails', async () => {
+	it('Docula - should build using Eleventy fails', async () => {
 		const errorLog = jest.spyOn(console, 'error').mockImplementation((message: string) => message);
 		jest.spyOn(Eleventy.prototype, 'build').mockImplementation(() => {
 			throw new Error('Error');
@@ -73,4 +73,19 @@ describe('Docula', () => {
 		await docula.build();
 		expect(errorLog).toHaveBeenCalled();
 	});
+
+	it('Docula - should copy a folder to a target location', () => {
+		const docula = new Docula();
+		docula.copyFolder('test/data/site', 'test/data/site-copy');
+		expect(fs.existsSync('test/data/site-copy')).toBe(true);
+		fs.rmSync('test/data/site-copy', {force: true, recursive: true});
+	});
+
+	it('Docula - should copy a folder to a default target location', () => {
+		const docula = new Docula();
+		docula.copyFolder('test/data/site');
+		expect(fs.existsSync('site/template')).toBe(true);
+		fs.rmSync('site/template', {force: true, recursive: true});
+	});
 });
+

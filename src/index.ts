@@ -26,9 +26,23 @@ export class Executable {
 			});
 
 		program.command('template')
+			.description('The template to work with')
+			.argument('<name>', 'The template name to work with')
+			.action(async (argument: string) => {
+				try {
+					const docula = new Docula();
+					docula.copyFolder(`templates/${argument}`);
+				} catch (error: unknown) {
+					reportError(error);
+				}
+			});
+
+		program.command('init')
+			.description('Initialize the site')
 			.action(async (options: CommanderOptions) => {
 				try {
-					console.log('Demo');
+					const docula = new Docula(options);
+					docula.init();
 				} catch (error: unknown) {
 					reportError(error);
 				}

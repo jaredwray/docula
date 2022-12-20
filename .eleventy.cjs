@@ -67,8 +67,8 @@ module.exports = function(eleventyConfig) {
     dir: {
       input: "site",
       output: "dist",
-      includes: "algolia",
-      data: "algolia/data"
+      includes: "template/simple_clean",
+      data: "template/simple_clean"
     },
     templateExtensionAliases: {
       "11ty.cjs": "11ty.js",
