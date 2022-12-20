@@ -14,13 +14,19 @@
   --header-background: #ffffff;
 
   --color-search-highlight: #ffffff;
-  --background-search-highlight: #af34d0;
+  --background-search-highlight: #7bdaf7;
 
   --search-button-background: #f0eff2;
   --search-color: #322d3c;
   --search-input-background: #ffffff;
 
   --code: rgba(238,238,245,1);
+
+  --pagefind-ui-text: var(--color-text) !important;
+  --pagefind-ui-font: var(--font-family) !important;
+  --pagefind-ui-background: var(--background) !important;
+  --pagefind-ui-border: var(--border) !important;
+  --pagefind-ui-scale: .9 !important;
 }
 
 * {
@@ -237,7 +243,7 @@ button {
 }
 
 .content h1 {
- letter-spacing: -.5px;
+  letter-spacing: -.5px;
   font-weight: 700;
   font-size: 24px;
   line-height: 48px;
@@ -528,7 +534,7 @@ details > summary {
 }
 
 .search-box input {
-  height: 72px;
+  height: 72px !important;
   width: 100%;
   padding-left: 48px;
   padding-right: 16px;
@@ -538,6 +544,8 @@ details > summary {
   align-items: center;
   color: var(--search-color);
   background-color: var(--search-input-background);
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .search-content {
@@ -564,6 +572,7 @@ details > summary {
 
 .search-result h2 {
   padding-bottom: 32px;
+  color: var(--color-secondary);
 }
 
 .ais-Hits--empty {
@@ -584,6 +593,51 @@ details > summary {
   word-wrap: break-word;
   word-break: break-word;
 }
+
+.pagefind-ui__search-input {
+  border-radius: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pagefind-ui__result, .pagefind-ui__message {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.pagefind-ui__results-area {
+  overflow-y: auto !important;
+  margin-top: 0 !important;
+  height: calc(100vh - 72px) !important;
+}
+
+.pagefind-ui__result-link {
+  color: var(--color-secondary) !important;
+}
+
+.pagefind-ui__button {
+  margin-top: 0 !important;
+  border-top: none !important;
+  border-top-right-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border: 1px solid var(--border) !important;
+}
+
+.pagefind-ui__button:hover {
+  background-color: var(--search-button-background) !important;
+}
+
+.pagefind-ui__result-excerpt {
+  line-height: 1.5 !important;
+}
+
+.pagefind-ui__result-excerpt > mark {
+  background-color: var(--background-search-highlight) !important;
+}
+
+.pagefind-ui__form::before {
+  top: 28px !important;
+}
+
 
 
 @media screen and (min-width: 576px) {
@@ -823,7 +877,7 @@ details > summary {
     border: 1px solid var(--sidebar-text);
     position: absolute;
     right: -18px;
-    top: -28px;
+    top: -18px;
     z-index: 8;
     width: 40px;
     height: 40px;
@@ -840,6 +894,10 @@ details > summary {
 
   .content table td {
     max-width: 380px;
+  }
+
+  .pagefind-ui__results-area {
+    max-height: 504px !important;
   }
 }
 
