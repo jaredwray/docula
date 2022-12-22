@@ -21,6 +21,7 @@ type ElevConfig = {
 	addPlugin: (plugin: any, options?: Record<string, unknown>) => void;
 	addShortcode: (name: string, callback: (...args: any[]) => unknown) => void;
 	addFilter: (name: string, callback: (text: string) => string) => void;
+	setTemplateFormats(strings: string[]): void;
 };
 
 type ElevInterface = {
@@ -48,9 +49,10 @@ export class Eleventy {
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
 			quietMode: false,
 
+			configPath: './src/elev.js',
+
 			config: (eleventyConfig: ElevConfig) => {
 				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
-
 
 				$this.addPassthroughCopy(eleventyConfig);
 				$this.setLibrary(eleventyConfig);
@@ -58,13 +60,9 @@ export class Eleventy {
 				$this.addShortcode(eleventyConfig);
 				$this.addFilter(eleventyConfig);
 
+				eleventyConfig.setTemplateFormats([ "njk", "md", "html" ]);
+
 				return {
-					templateFormats: [
-						'md',
-						'njk',
-						'html',
-						'liquid',
-					],
 					markdownTemplateEngine: 'njk',
 					htmlTemplateEngine: 'njk',
 					passthroughFileCopy: true,
