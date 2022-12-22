@@ -8,12 +8,6 @@ import {type CommanderOptions} from './index.js';
 export class Docula {
 	readonly config: Config;
 	private readonly eleventy: Eleventy;
-	private readonly directories: string[] = [
-		'api',
-		'docs',
-		'template',
-		'blog',
-	];
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();

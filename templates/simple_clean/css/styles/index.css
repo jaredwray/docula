@@ -237,7 +237,7 @@ button {
 }
 
 .content h1 {
- letter-spacing: -.5px;
+  letter-spacing: -.5px;
   font-weight: 700;
   font-size: 24px;
   line-height: 48px;
@@ -387,8 +387,8 @@ button {
 }
 
 .on-page-container {
-  margin-top: 48px;
-  margin-bottom: 56px;
+  padding-top: 28px;
+  padding-bottom: 28px;
 }
 
 .on-page-container h5 {
@@ -433,7 +433,7 @@ button {
   white-space: initial;
 }
 
-.on-page-container ol > li:hover + li > a {
+.on-page-container ol > li:hover > a {
   transform: translateX(4px);
 }
 
@@ -528,7 +528,7 @@ details > summary {
 }
 
 .search-box input {
-  height: 72px;
+  height: 72px !important;
   width: 100%;
   padding-left: 48px;
   padding-right: 16px;
@@ -538,6 +538,8 @@ details > summary {
   align-items: center;
   color: var(--search-color);
   background-color: var(--search-input-background);
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .search-content {
@@ -564,6 +566,7 @@ details > summary {
 
 .search-result h2 {
   padding-bottom: 32px;
+  color: var(--color-secondary);
 }
 
 .ais-Hits--empty {

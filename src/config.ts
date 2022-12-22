@@ -14,7 +14,7 @@ export class Config {
 	searchEngine = 'algolia';
 	algolia?: AlgoliaConfig;
 	imagesPath = 'images';
-	assetsPath = 'public';
+	assetsPath = 'css';
 
 	constructor(path?: string) {
 		const configFile = this.checkConfigFile(path);

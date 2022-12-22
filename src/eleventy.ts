@@ -1,6 +1,5 @@
 // @ts-expect-error - 11ty doesn't have types
 import * as pkg from '@11ty/eleventy';
-import {DateTime} from 'luxon';
 // @ts-expect-error - 11ty doesn't have types
 import eleventyNavigationPlugin from '@11ty/eleventy-navigation';
 // @ts-expect-error - 11ty doesn't have types
@@ -10,15 +9,17 @@ import markdownIt from 'markdown-it';
 import markdownItAnchor from 'markdown-it-anchor';
 import {type Config} from './config.js';
 import {squashCallback} from './eleventy/filters.js';
+import {getYear, formatDate} from './eleventy/shortcodes.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
 
 type ElevConfig = {
+	ignores: any;
 	addPassthroughCopy: (options: Record<string, unknown>) => void;
 	setLibrary: (name: string, library: unknown) => void;
 	addPlugin: (plugin: any, options?: Record<string, unknown>) => void;
-	addShortcode: (name: string, callback: () => void) => void;
+	addShortcode: (name: string, callback: (...args: any[]) => unknown) => void;
 	addFilter: (name: string, callback: (text: string) => string) => void;
 };
 
@@ -47,7 +48,10 @@ export class Eleventy {
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
 			quietMode: false,
 
-			config(eleventyConfig: ElevConfig) {
+			config: (eleventyConfig: ElevConfig) => {
+				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
+
+
 				$this.addPassthroughCopy(eleventyConfig);
 				$this.setLibrary(eleventyConfig);
 				$this.addPlugin(eleventyConfig);
@@ -63,12 +67,6 @@ export class Eleventy {
 					],
 					markdownTemplateEngine: 'njk',
 					htmlTemplateEngine: 'njk',
-					dir: {
-						input: this.config.originPath as string,
-						output: this.config.outputPath as string,
-						includes: this.config.templatePath as string,
-						data: `${this.config.templatePath as string}/${this.config.dataPath as string}`,
-					},
 					passthroughFileCopy: true,
 				};
 			},
@@ -77,8 +75,10 @@ export class Eleventy {
 		await eleventy.write();
 	}
 
+
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
-		eleventyConfig.addPassthroughCopy({[this.config.assetsPath]: '.'});
+		const cssPath = `${this.config.originPath}/${this.config.templatePath}/${this.config.assetsPath}`;
+		eleventyConfig.addPassthroughCopy({[cssPath]: '/css/'});
 
 		const siteImages = `${this.config.originPath}/${this.config.templatePath}/${this.config.imagesPath}`;
 		eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
@@ -99,7 +99,8 @@ export class Eleventy {
 	}
 
 	private addShortcode(eleventyConfig: ElevConfig) {
-		eleventyConfig.addShortcode('year', () => DateTime.now().toFormat('YYYY'));
+		eleventyConfig.addShortcode('year', getYear)
+		eleventyConfig.addShortcode('formatDate', formatDate);
 	}
 
 	private addFilter(eleventyConfig: ElevConfig) {
