@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean": "rm -rf dist && rm -rf test/data/site && rm -rf node_modules",
     "test": "xo --fix && jest --coverage",
     "test:code": "yarn build && node ./bin/docula.js",
     "lint": "xo --fix",
@@ -56,10 +56,11 @@
   "dependencies": {
     "@11ty/eleventy": "^1.0.2",
     "algoliasearch": "^4.14.2",
-    "commander": "^9.4.1",
     "axios": "^1.2.1",
+    "commander": "^9.4.1",
     "dayjs": "^1.11.6",
     "dotenv": "^16.0.3",
+    "download-stats": "^0.3.4",
     "eleventy-plugin-toc": "^1.1.5",
     "fs-extra": "^10.1.0",
     "instantsearch.js": "^4.49.1",
@@ -69,11 +70,11 @@
     "node-fetch": "2.6.7"
   },
   "xo": {
-		"rules": {
+    "rules": {
       "@typescript-eslint/no-unsafe-assignment": 0,
       "@typescript-eslint/no-unsafe-return": 0
-		}
-	},
+    }
+  },
   "jest": {
     "extensionsToTreatAsEsm": [
       ".ts"

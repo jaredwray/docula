@@ -8,4 +8,8 @@ export type DoculaOptions = {
 		repo?: string;
 		author?: string;
 	};
+	npm?: {
+		moduleName?: string;
+		outputFile?: string;
+	};
 };
