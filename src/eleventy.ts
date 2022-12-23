@@ -60,7 +60,7 @@ export class Eleventy {
 				$this.addShortcode(eleventyConfig);
 				$this.addFilter(eleventyConfig);
 
-				eleventyConfig.setTemplateFormats([ "njk", "md", "html" ]);
+				eleventyConfig.setTemplateFormats(['njk', 'md', 'html']);
 
 				return {
 					markdownTemplateEngine: 'njk',
@@ -72,7 +72,6 @@ export class Eleventy {
 
 		await eleventy.write();
 	}
-
 
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
 		const cssPath = `${this.config.originPath}/${this.config.templatePath}/${this.config.assetsPath}`;
@@ -97,7 +96,7 @@ export class Eleventy {
 	}
 
 	private addShortcode(eleventyConfig: ElevConfig) {
-		eleventyConfig.addShortcode('year', getYear)
+		eleventyConfig.addShortcode('year', getYear);
 		eleventyConfig.addShortcode('formatDate', formatDate);
 	}
 
