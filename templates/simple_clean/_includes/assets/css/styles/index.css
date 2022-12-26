@@ -170,7 +170,7 @@ button {
 }
 
 .sidebar-container {
-  height: 100vh;
+  overflow-y: auto;
   width: inherit;
   flex-grow: 1;
   position: relative;
@@ -178,7 +178,6 @@ button {
 
 .sidebar-content {
   padding: 48px 40px 24px;
-  height: calc(100% - 52px);
   overflow-y: auto;
   font-size: 14px;
 }
@@ -290,10 +289,6 @@ button {
 .content table tbody tr td:first-child {
   width: 98px;
 }
-
-/*.content table tbody tr td:nth-child(2) {*/
-/*  width: 180px;*/
-/*}*/
 
 .items-start {
   display: flex;
@@ -666,7 +661,6 @@ details > summary {
 
   .sidebar-content {
     padding-top: 24px;
-    height: calc(100% - 256.5px);
   }
 
   .nav-list {
@@ -719,7 +713,7 @@ details > summary {
   }
 
   .sidebar-logo {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     z-index: 80;
@@ -760,6 +754,9 @@ details > summary {
 
   .sidebar-footer {
     justify-content: space-between;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--sidebar-background);
   }
 
   .on-page--desktop {

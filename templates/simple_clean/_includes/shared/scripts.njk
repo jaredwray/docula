@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "layout/head.njk" %}
-<body>
-<div class="layout">
-    {% include "layout/header.njk" %}
-    {% include "layout/sidebar.njk" %}
-    {% include "layout/main.njk" %}
-    {% include "layout/search.njk" %}
-</div>
-
 <script>
   const sidebar = document.querySelector('#sidebar');
   const closeBtn = document.querySelector('#close-sidebar');
@@ -26,10 +15,16 @@
     header.classList.remove('bottom');
   });
 
-  openBtn.addEventListener('click', () => {
-    header.classList.add('bottom');
-    sidebar.classList.remove('hidden');
-  });
+  const openNavigation = () => {
+    openBtn.addEventListener('click', () => {
+      console.log('click')
+      header.classList.add('bottom');
+      sidebar.classList.remove('hidden');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', openNavigation, false)
+
   //scroll listener
   window.addEventListener('scroll', () => {
     if (window.scrollY > 0 && window.innerWidth > 1428) {
@@ -63,14 +58,10 @@
 
 </script>
 
+
 <script src="/css/highlight/highlight.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     hljs.highlightAll()
   });
 </script>
-
-{% include "search/algolia.njk" %}
-
-</body>
-</html>

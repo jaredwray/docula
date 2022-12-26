@@ -49,8 +49,6 @@ export class Eleventy {
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
 			quietMode: false,
 
-			configPath: './src/elev.js',
-
 			config: (eleventyConfig: ElevConfig) => {
 				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
 
@@ -74,10 +72,11 @@ export class Eleventy {
 	}
 
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
-		const cssPath = `${this.config.originPath}/${this.config.templatePath}/${this.config.assetsPath}`;
+		const assetsPath = `${this.config.originPath}/_includes/assets`;
+		const cssPath = `${assetsPath}/${this.config.assetsPath}`;
 		eleventyConfig.addPassthroughCopy({[cssPath]: '/css/'});
 
-		const siteImages = `${this.config.originPath}/${this.config.templatePath}/${this.config.imagesPath}`;
+		const siteImages = `${assetsPath}/${this.config.imagesPath}`;
 		eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
 	}
 
