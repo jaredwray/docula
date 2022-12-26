@@ -73,11 +73,7 @@ export class Eleventy {
 
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
 		const assetsPath = `${this.config.originPath}/_includes/assets`;
-		const cssPath = `${assetsPath}/${this.config.assetsPath}`;
-		eleventyConfig.addPassthroughCopy({[cssPath]: '/css/'});
-
-		const siteImages = `${assetsPath}/${this.config.imagesPath}`;
-		eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
+		eleventyConfig.addPassthroughCopy({[assetsPath]: '/assets/'});
 	}
 
 	private setLibrary(eleventyConfig: ElevConfig) {
