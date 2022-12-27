@@ -49,8 +49,6 @@ export class Eleventy {
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
 			quietMode: false,
 
-			configPath: './src/elev.js',
-
 			config: (eleventyConfig: ElevConfig) => {
 				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
 
@@ -60,7 +58,7 @@ export class Eleventy {
 				$this.addShortcode(eleventyConfig);
 				$this.addFilter(eleventyConfig);
 
-				eleventyConfig.setTemplateFormats([ "njk", "md", "html" ]);
+				eleventyConfig.setTemplateFormats(['njk', 'md', 'html']);
 
 				return {
 					markdownTemplateEngine: 'njk',
@@ -73,13 +71,9 @@ export class Eleventy {
 		await eleventy.write();
 	}
 
-
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
-		const cssPath = `${this.config.originPath}/${this.config.templatePath}/${this.config.assetsPath}`;
-		eleventyConfig.addPassthroughCopy({[cssPath]: '/css/'});
-
-		const siteImages = `${this.config.originPath}/${this.config.templatePath}/${this.config.imagesPath}`;
-		eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
+		const assetsPath = `${this.config.originPath}/_includes/assets`;
+		eleventyConfig.addPassthroughCopy({[assetsPath]: '/assets/'});
 	}
 
 	private setLibrary(eleventyConfig: ElevConfig) {
@@ -97,7 +91,7 @@ export class Eleventy {
 	}
 
 	private addShortcode(eleventyConfig: ElevConfig) {
-		eleventyConfig.addShortcode('year', getYear)
+		eleventyConfig.addShortcode('year', getYear);
 		eleventyConfig.addShortcode('formatDate', formatDate);
 	}
 
