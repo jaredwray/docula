@@ -16,9 +16,9 @@
   --color-search-highlight: #ffffff;
   --background-search-highlight: #af34d0;
 
-  --search-button-background: #f0eff2;
+  --home-background: #f0eff2;
   --search-color: #322d3c;
-  --search-input-background: #ffffff;
+  --search-input-background: #fbfbfb;
 
   --code: rgba(238,238,245,1);
 }
@@ -121,28 +121,22 @@ button {
 }
 
 .search-btn {
-  transition-duration: .2s;
+  transition-duration: .3s;
   transition-timing-function: cubic-bezier(.4,0,.2,1);
   transition-property: all;
   width: 100%;
-  padding-left: 16px;
-  padding-right: 16px;
   outline: none;
   height: 48px;
-  border-radius: 9999px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   color: var(--search-color);
-  background-color: var(--search-button-background);
 }
 
-.search-btn:hover {
-  border: 0.5px solid var(--color-secondary);
-}
 
-.search-btn span {
-  margin: 4px 16px 0;
+.search-text {
+  margin-top: 4px;
+  margin-left: 16px;
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -370,6 +364,11 @@ button {
   flex-wrap: wrap;
   font-size: 14px;
   border-top: 1px solid var(--border);
+  justify-content: space-between;
+  position: absolute;
+  bottom: 0;
+  background-color: var(--sidebar-background);
+  width: 100%;
 }
 
 .sidebar-footer a {
@@ -456,7 +455,7 @@ button {
 
 .header-logo {
   flex-shrink: 0;
-  margin-right: 12px;
+  margin-right: 24px;
   display: block;
 }
 
@@ -607,6 +606,11 @@ details > summary {
   .content h2 {
     font-size: 24px;
   }
+
+  .nav {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
 }
 
 
@@ -627,10 +631,14 @@ details > summary {
   .content h1 {
     font-size: 30px;
   }
+
+  .search-text {
+    display: inline;
+  }
 }
 
 @media screen and (min-width: 992px) {
-  .header-menu {
+  .hide-d {
     display: none;
   }
 
@@ -642,17 +650,10 @@ details > summary {
   }
 
   .sidebar {
-    width: 376px;
+    width: 324px;
     display: flex;
     height: 100%;
     z-index: 20;
-  }
-
-  .header-search {
-    max-width: 448px;
-    display: flex;
-    width: 100%;
-    flex: auto;
   }
 
   .close-btn {
@@ -672,11 +673,6 @@ details > summary {
     padding-top: 0;
   }
 
-  .content {
-    max-width: 648px;
-    width: 100%;
-  }
-
   .header-link {
     margin-top: 20px;
   }
@@ -687,7 +683,7 @@ details > summary {
 
   .layout {
     display: grid;
-    grid-template-columns: 376px 1fr;
+    grid-template-columns: 324px 1fr;
     grid-template-rows: 72px 1fr;
     grid-gap: 0;
   }
@@ -695,7 +691,8 @@ details > summary {
   .header {
     grid-area: 1 / 2 / 2 / 3;
     z-index: 40;
-    left: 376px;
+    left: 324px;
+    background-color: var(--search-input-background)
   }
 
   aside {
@@ -705,7 +702,7 @@ details > summary {
     left: 0;
     z-index: 40;
     height: 100%;
-    width: 376px;
+    width: 324px;
   }
 
   .main-container {
@@ -717,16 +714,14 @@ details > summary {
     top: 0;
     left: 0;
     z-index: 80;
-    width: 376px;
+    width: 324px;
     background-color: var(--sidebar-background);
     display: flex;
     align-items: center;
+    justify-content: center;
     border-right: 1px solid var(--border);
   }
 
-  .sidebar-logo, .sidebar-content {
-    padding-left: 40px;
-  }
 
   .sidebar-logo svg {
     width: 32px;
@@ -752,27 +747,8 @@ details > summary {
     font-size: 30px;
   }
 
-  .sidebar-footer {
-    justify-content: space-between;
-    position: sticky;
-    bottom: 0;
-    background-color: var(--sidebar-background);
-  }
-
-  .on-page--desktop {
-    width: 280px;
-    margin-left: 64px;
-    position: relative;
-    transition: all .3s ease-in;
-  }
-
   .on-page--desktop ~ .on-page-list {
     margin-left: 0;
-  }
-
-  .on-page-fixed {
-    position: fixed;
-    width: 280px;
   }
 
   .search-box, .search-box input {
@@ -827,7 +803,7 @@ details > summary {
     z-index: 8;
     width: 40px;
     height: 40px;
-    background-color: var(--search-button-background);
+    background-color: var(--home-background);
     cursor: pointer;
   }
 
@@ -841,6 +817,10 @@ details > summary {
   .content table td {
     max-width: 380px;
   }
+
+  .sidebar-footer {
+    position: sticky;
+  }
 }
 
 @media screen and (min-width: 1200px) {
@@ -849,17 +829,49 @@ details > summary {
   }
 }
 
+@media screen and (min-width: 1458px) {
+  .on-page--desktop ol {
+    font-size: 12px;
+  }
+
+  .on-page--desktop ol li a {
+    padding: 4px 0;
+  }
+
+  .on-page--desktop {
+    width: 100%;
+    position: relative;
+    transition: all .3s ease-in;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .on-page-fixed {
+    position: fixed;
+    max-width: 200px
+  }
+
+  .content {
+    max-width: 750px;
+  }
+
+  .main-content {
+    padding: 0 56px 24px;
+
+  }
+}
+
 @media screen and (min-width: 1600px) {
   .layout {
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 380px 1fr;
   }
 
   .header {
-    left: 400px;
+    left: 380px;
   }
 
   .sidebar, aside, .sidebar-logo  {
-    width: 400px;
+    width: 380px;
   }
 
   .sidebar-logo, .sidebar-content, .sidebar-footer {
@@ -867,9 +879,15 @@ details > summary {
     padding-right: 54px;
   }
 
-  .on-page--desktop {
-    margin-left: 8%;
+  .main-content {
+    padding-left: 72px;
+    padding-right: 72px;
   }
+
+  .on-page--desktop {
+    justify-content: center;
+  }
+
 }
 
 @media screen and (min-width: 1800px) {
@@ -888,10 +906,6 @@ details > summary {
   .sidebar-logo, .sidebar-content, .sidebar-footer {
     padding-left: 88px;
     padding-right: 88px;
-  }
-
-  .on-page--desktop {
-    margin-left: 180px;
   }
 
 }
@@ -913,10 +927,6 @@ details > summary {
   .sidebar-logo, .sidebar-content, .sidebar-footer {
     padding-left: 120px;
     padding-right: 120px;
-  }
-
-  .on-page--desktop {
-    margin-left: 120px;
   }
 
   .content {

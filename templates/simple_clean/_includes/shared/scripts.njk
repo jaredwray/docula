@@ -1,43 +1,65 @@
-<script>
+<script defer>
   const sidebar = document.querySelector('#sidebar');
-  const closeBtn = document.querySelector('#close-sidebar');
-  const openBtn = document.querySelector('#open-sidebar');
   const header = document.querySelector('#header');
   const onPage = document.querySelector('#on-page');
-  const searchBtn = document.querySelector('#search-btn');
   const searchModal = document.querySelector('#search-modal');
   const searchModalContainer = document.querySelector('#search-container');
   const searchContent = document.querySelector('#search-content');
   const closeModalBtn = document.querySelector('#close-modal-btn');
 
-  closeBtn.addEventListener('click', () => {
-    sidebar.classList.add('hidden');
-    header.classList.remove('bottom');
-  });
 
-  const openNavigation = () => {
-    openBtn.addEventListener('click', () => {
-      console.log('click')
-      header.classList.add('bottom');
-      sidebar.classList.remove('hidden');
+  const searchFunc = () => {
+    const searchBtn = document.querySelector('#search-btn');
+
+    searchBtn.addEventListener('click', () => {
+      searchModal.classList.add('show-modal');
     });
+
   }
 
-  document.addEventListener('DOMContentLoaded', openNavigation, false)
 
-  //scroll listener
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 0 && window.innerWidth > 1428) {
-      onPage.classList.remove('hidden');
-    } else {
-      onPage.classList.add('hidden');
+  document.addEventListener('DOMContentLoaded', searchFunc, false)
+
+
+  const path = window.location.pathname;
+  if(path !== '/') {
+    if(window.innerWidth < 992) {
+      const closeBtn = document.querySelector('#close-sidebar');
+      closeBtn.addEventListener('click', () => {
+        sidebar.classList.add('hidden');
+        header.classList.remove('bottom');
+      });
     }
-  });
 
-  //search
-  searchBtn.addEventListener('click', () => {
-    searchModal.classList.add('show-modal');
-  });
+    //scroll listener
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 0 && window.innerWidth >= 1458) {
+        onPage.classList.remove('hidden');
+      } else {
+        onPage.classList.add('hidden');
+      }
+    });
+
+
+  }
+
+
+
+  const openNavigation = () => {
+    if(path !== '/') {
+      const openBtn = document.querySelector('#open-sidebar');
+
+      if(window.innerWidth < 992) {
+        openBtn.addEventListener('click', () => {
+          header.classList.add('bottom');
+          sidebar.classList.remove('hidden');
+        });
+      }
+    }
+  }
+
+
+  document.addEventListener('DOMContentLoaded', openNavigation, false)
 
   searchModal.addEventListener('click', (e) => {
     if(window.innerWidth > 991) {
