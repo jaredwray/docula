@@ -1,5 +1,7 @@
 import {existsSync, readFileSync} from 'node:fs';
 import {reportError} from './tools.js';
+import Ajv from 'ajv';
+import {jsonConfigSchema} from "./schemas";
 
 type AlgoliaConfig = {
 	algoliaAppId: string;
@@ -17,6 +19,7 @@ export class Config {
 	plugins?: any;
 	imagesPath = 'images';
 	assetsPath = 'css';
+	ajv = new Ajv();
 
 	constructor(path?: string) {
 		const configFile = this.checkConfigFile(path);
@@ -34,6 +37,15 @@ export class Config {
 			const data = readFileSync(path, {encoding: 'utf8'});
 			const jsonConfig = JSON.parse(data) as Record<string, any>;
 
+			const validate = this.ajv.compile(jsonConfigSchema);
+
+			validate(jsonConfig);
+
+			if(validate.errors) {
+				const [error] = validate.errors
+				throw new Error(`${error.dataPath} ${error.message}`);
+			}
+
 			this.originPath = jsonConfig.originPath ?? this.originPath;
 			this.outputPath = jsonConfig.outputPath ?? this.outputPath;
 			this.dataPath = jsonConfig.dataPath ?? this.dataPath;
@@ -50,19 +62,10 @@ export class Config {
 			this.imagesPath = jsonConfig.imagesPath ?? this.imagesPath;
 			this.assetsPath = jsonConfig.assetsPath ?? this.assetsPath;
 
-			if (jsonConfig.plugins && Array.isArray(jsonConfig.plugins)) {
-				if (jsonConfig.plugins.length > 0) {
-					const validPlugins = jsonConfig.plugins.every(plugin => typeof plugin === 'string');
-					if (validPlugins) {
-						for (const name of jsonConfig.plugins) {
-							this.loadPlugins(name, jsonConfig[name]);
-						}
-					} else {
-						throw 'Invalid plugins';
-					}
+			if (jsonConfig.plugins) {
+				for (const name of jsonConfig.plugins) {
+					this.loadPlugins(name, jsonConfig[name]);
 				}
-			} else {
-				throw 'Plugins must be an array of strings';
 			}
 		} catch (error: unknown) {
 			reportError(error);
@@ -79,7 +82,6 @@ export class Config {
 		if (!path) {
 			return false;
 		}
-
 		return existsSync(path);
 	}
 }
