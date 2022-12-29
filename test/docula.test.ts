@@ -68,6 +68,7 @@ describe('Docula', () => {
 		jest.spyOn(Eleventy.prototype, 'build').mockImplementation(() => {
 			throw new Error('Error');
 		});
+		jest.spyOn(logger, 'error');
 
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/config.json'})};
