@@ -1,5 +1,6 @@
 export const jsonConfigSchema = {
 	type: 'object',
+	additionalProperties: false,
 	properties: {
 		originPath: {type: 'string'},
 		outputPath: {type: 'string'},

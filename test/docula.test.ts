@@ -5,12 +5,14 @@ import {Eleventy} from '../src/eleventy.js';
 jest.mock('../src/eleventy.js');
 
 describe('Docula', () => {
-	const configJson: Record<string, string> = {
+	const configJson: Record<string, any> = {
 		originPath: 'test/data/site',
 		outputPath: '_dist',
-		algoliaAppId: 'test',
-		algoliaKey: 'test',
-		algoliaIndexName: 'test',
+		algolia: {
+			appId: 'test',
+			apiKey:	'test',
+			indexName: 'test',
+		},
 	};
 
 	beforeEach(() => {
@@ -42,8 +44,8 @@ describe('Docula', () => {
 		expect(docula.config.originPath).toBe('site');
 	});
 
-	it('Docula - testing init function with folders', async () => {
-		await fs.writeFile('./test/data/config.json', JSON.stringify(configJson));
+	it('Docula - testing init function with folders', () => {
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/config.json'})};
 		const docula = new Docula(options);
 		expect(docula.config.originPath).toBe('test/data/site');
@@ -53,7 +55,7 @@ describe('Docula', () => {
 	});
 
 	it('Docula - should build using Eleventy', async () => {
-		await fs.writeFile('./test/data/config.json', JSON.stringify(configJson));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/config.json'})};
 		const docula = new Docula(options);
 		await docula.build();
@@ -66,7 +68,7 @@ describe('Docula', () => {
 			throw new Error('Error');
 		});
 
-		await fs.writeFile('./test/data/config.json', JSON.stringify(configJson));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/config.json'})};
 		const docula = new Docula(options);
 		docula.init();
