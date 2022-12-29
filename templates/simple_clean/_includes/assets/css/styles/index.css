@@ -170,7 +170,7 @@ button {
 }
 
 .sidebar-container {
-  height: 100vh;
+  overflow-y: auto;
   width: inherit;
   flex-grow: 1;
   position: relative;
@@ -178,7 +178,6 @@ button {
 
 .sidebar-content {
   padding: 48px 40px 24px;
-  height: calc(100% - 52px);
   overflow-y: auto;
   font-size: 14px;
 }
@@ -237,7 +236,7 @@ button {
 }
 
 .content h1 {
- letter-spacing: -.5px;
+  letter-spacing: -.5px;
   font-weight: 700;
   font-size: 24px;
   line-height: 48px;
@@ -290,10 +289,6 @@ button {
 .content table tbody tr td:first-child {
   width: 98px;
 }
-
-/*.content table tbody tr td:nth-child(2) {*/
-/*  width: 180px;*/
-/*}*/
 
 .items-start {
   display: flex;
@@ -387,8 +382,8 @@ button {
 }
 
 .on-page-container {
-  margin-top: 48px;
-  margin-bottom: 56px;
+  padding-top: 28px;
+  padding-bottom: 28px;
 }
 
 .on-page-container h5 {
@@ -433,7 +428,7 @@ button {
   white-space: initial;
 }
 
-.on-page-container ol > li:hover + li > a {
+.on-page-container ol > li:hover > a {
   transform: translateX(4px);
 }
 
@@ -528,7 +523,7 @@ details > summary {
 }
 
 .search-box input {
-  height: 72px;
+  height: 72px !important;
   width: 100%;
   padding-left: 48px;
   padding-right: 16px;
@@ -538,6 +533,8 @@ details > summary {
   align-items: center;
   color: var(--search-color);
   background-color: var(--search-input-background);
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .search-content {
@@ -564,6 +561,7 @@ details > summary {
 
 .search-result h2 {
   padding-bottom: 32px;
+  color: var(--color-secondary);
 }
 
 .ais-Hits--empty {
@@ -663,7 +661,6 @@ details > summary {
 
   .sidebar-content {
     padding-top: 24px;
-    height: calc(100% - 256.5px);
   }
 
   .nav-list {
@@ -716,7 +713,7 @@ details > summary {
   }
 
   .sidebar-logo {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     z-index: 80;
@@ -757,6 +754,9 @@ details > summary {
 
   .sidebar-footer {
     justify-content: space-between;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--sidebar-background);
   }
 
   .on-page--desktop {

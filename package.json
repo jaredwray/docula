@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@11ty/eleventy": "^1.0.2",
+    "ajv": "^6.12.6",
     "algoliasearch": "^4.14.2",
     "axios": "^1.2.1",
     "commander": "^9.4.1",
@@ -67,7 +68,8 @@
     "luxon": "^3.1.1",
     "markdown-it": "^13.0.1",
     "markdown-it-anchor": "^8.6.5",
-    "node-fetch": "2.6.7"
+    "node-fetch": "2.6.7",
+    "winston": "^3.8.2"
   },
   "xo": {
     "rules": {
