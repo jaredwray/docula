@@ -49,7 +49,7 @@ export class Eleventy {
 		const $this = this;
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
-			quietMode: false,
+			quietMode: true,
 
 			config: (eleventyConfig: ElevConfig) => {
 				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);

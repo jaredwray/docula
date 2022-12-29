@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import {Docula} from '../src/docula.js';
 import {Eleventy} from '../src/eleventy.js';
+import logger from '../src/logger.js';
 
 jest.mock('../src/eleventy.js');
 
@@ -21,6 +22,7 @@ describe('Docula', () => {
 
 	afterEach(() => {
 		fs.rmSync('./test/data/config.json', {force: true});
+		jest.clearAllMocks();
 	});
 
 	it('Docula - init', () => {
@@ -63,7 +65,6 @@ describe('Docula', () => {
 	});
 
 	it('Docula - should build using Eleventy fails', async () => {
-		const errorLog = jest.spyOn(console, 'error').mockImplementation((message: string) => message);
 		jest.spyOn(Eleventy.prototype, 'build').mockImplementation(() => {
 			throw new Error('Error');
 		});
@@ -73,7 +74,7 @@ describe('Docula', () => {
 		const docula = new Docula(options);
 		docula.init();
 		await docula.build();
-		expect(errorLog).toHaveBeenCalled();
+		expect(logger.error).toHaveBeenCalledWith('Error');
 	});
 
 	it('Docula - should copy a folder to a target location', () => {
