@@ -1,83 +1,70 @@
 <script defer>
   const sidebar = document.querySelector('#sidebar');
   const header = document.querySelector('#header');
-  const onPage = document.querySelector('#on-page');
   const searchModal = document.querySelector('#search-modal');
   const searchModalContainer = document.querySelector('#search-container');
   const searchContent = document.querySelector('#search-content');
   const closeModalBtn = document.querySelector('#close-modal-btn');
+  const path = window.location.pathname;
+  const isHome = path === '/' || path === '/index.html';
+  const isDesktop  = window.innerWidth >= 992
 
-
-  const searchFunc = () => {
+  const handleSearchModal = () => {
     const searchBtn = document.querySelector('#search-btn');
-
     searchBtn.addEventListener('click', () => {
       searchModal.classList.add('show-modal');
     });
+  };
 
-  }
-
-
-  document.addEventListener('DOMContentLoaded', searchFunc, false)
-
-
-  const path = window.location.pathname;
-  if(path !== '/') {
-    if(window.innerWidth < 992) {
-      const closeBtn = document.querySelector('#close-sidebar');
-      closeBtn.addEventListener('click', () => {
-        sidebar.classList.add('hidden');
-        header.classList.remove('bottom');
-      });
-    }
-
-    //scroll listener
-    window.addEventListener('scroll', () => {
+  const handleScroll = () => {
+    const onPage = document.querySelector('#on-page');
+    if(!isHome) {
       if (window.scrollY > 0 && window.innerWidth >= 1458) {
         onPage.classList.remove('hidden');
       } else {
         onPage.classList.add('hidden');
       }
+    }
+  };
+
+  const  closeSidebar = () => {
+    const closeBtn = document.querySelector('#close-sidebar');
+    closeBtn.addEventListener('click', () => {
+      sidebar.classList.add('hidden');
+      header.classList.remove('bottom');
     });
-
-
   }
 
+  const openSidebar = () => {
+    const openBtn = document.querySelector('#open-sidebar');
+    openBtn.addEventListener('click', () => {
+      sidebar.classList.remove('hidden');
+      header.classList.add('bottom');
+    });
+  }
 
-
-  const openNavigation = () => {
-    if(path !== '/') {
-      const openBtn = document.querySelector('#open-sidebar');
-
-      if(window.innerWidth < 992) {
-        openBtn.addEventListener('click', () => {
-          header.classList.add('bottom');
-          sidebar.classList.remove('hidden');
-        });
-      }
+  const handleMobileSidebar = () => {
+    if (!isHome && !isDesktop) {
+      openSidebar()
+      closeSidebar();
     }
   }
 
-
-  document.addEventListener('DOMContentLoaded', openNavigation, false)
-
+  document.addEventListener('DOMContentLoaded', handleSearchModal, false)
+  document.addEventListener('DOMContentLoaded', handleMobileSidebar, false)
+  window.addEventListener('scroll', handleScroll);
   searchModal.addEventListener('click', (e) => {
-    if(window.innerWidth > 991) {
+    if(isDesktop) {
       if (searchModalContainer === e.target || searchModalContainer.contains(e.target)) return;
       searchModal.classList.remove('show-modal');
     }
   });
-
   closeModalBtn.addEventListener('click', () => {
     searchModal.classList.remove('show-modal');
   });
-
   searchContent.addEventListener('click', () => {
-    if(window.innerWidth < 992) {
-      searchModal.classList.remove('show-modal');
-    }
+    if(!isDesktop) searchModal.classList.remove('show-modal');
   });
-
 </script>
 
 

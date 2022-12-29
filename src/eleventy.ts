@@ -15,7 +15,9 @@ import {getYear, formatDate} from './eleventy/shortcodes.js';
 const Elev = pkg.default;
 
 type ElevConfig = {
-	ignores: any;
+	ignores: {
+		add: (pattern: string) => void;
+	};
 	addPassthroughCopy: (options: Record<string, unknown>) => void;
 	setLibrary: (name: string, library: unknown) => void;
 	addPlugin: (plugin: any, options?: Record<string, unknown>) => void;
@@ -47,7 +49,7 @@ export class Eleventy {
 		const $this = this;
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
-			quietMode: false,
+			quietMode: true,
 
 			config: (eleventyConfig: ElevConfig) => {
 				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
