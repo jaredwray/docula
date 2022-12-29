@@ -1,7 +1,7 @@
 import {existsSync, readFileSync} from 'node:fs';
-import {reportError} from './tools.js';
 import Ajv from 'ajv';
-import {jsonConfigSchema} from "./schemas";
+import {reportError} from './tools.js';
+import {jsonConfigSchema} from './schemas.js';
 
 type AlgoliaConfig = {
 	algoliaAppId: string;
@@ -39,11 +39,13 @@ export class Config {
 
 			const validate = this.ajv.compile(jsonConfigSchema);
 
+			// eslint-disable-next-line @typescript-eslint/no-floating-promises
 			validate(jsonConfig);
 
-			if(validate.errors) {
-				const [error] = validate.errors
-				throw new Error(`${error.dataPath} ${error.message}`);
+			if (validate.errors) {
+				const [error] = validate.errors;
+				const {dataPath, message} = error;
+				throw new Error(`${dataPath} ${message!}`);
 			}
 
 			this.originPath = jsonConfig.originPath ?? this.originPath;
@@ -82,6 +84,7 @@ export class Config {
 		if (!path) {
 			return false;
 		}
+
 		return existsSync(path);
 	}
 }

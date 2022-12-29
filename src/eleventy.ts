@@ -15,7 +15,9 @@ import {getYear, formatDate} from './eleventy/shortcodes.js';
 const Elev = pkg.default;
 
 type ElevConfig = {
-	ignores: any;
+	ignores: {
+		add: (pattern: string) => void;
+	};
 	addPassthroughCopy: (options: Record<string, unknown>) => void;
 	setLibrary: (name: string, library: unknown) => void;
 	addPlugin: (plugin: any, options?: Record<string, unknown>) => void;
