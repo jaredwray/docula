@@ -4,8 +4,8 @@ import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
-import {type PluginInstances} from './types/config.js';
-import {type CommanderOptions} from './index.js';
+import type {PluginInstances} from './types/config.js';
+import type {CommanderOptions} from './index.js';
 
 export class Docula {
 	readonly config: Config;
