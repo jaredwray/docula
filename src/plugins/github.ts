@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
 import axios from 'axios';
-import {type DoculaPlugin} from '../docula-plugin.js';
-import {type DoculaOptions} from '../docula-options.js';
+import type {DoculaPlugin} from '../docula-plugin.js';
+import type {Config} from '../config.js';
+import type {GithubConfig} from '../types/config.js';
 
 export class GithubPlugin implements DoculaPlugin {
 	private readonly options = {
@@ -13,32 +14,11 @@ export class GithubPlugin implements DoculaPlugin {
 		outputFile: 'github.json',
 	};
 
-	constructor(options: DoculaOptions) {
-		if (options.sitePath) {
-			this.options.sitePath = options.sitePath;
-		}
-
-		if (options.dataPath) {
-			this.options.path = options.dataPath;
-		}
-
-		if (options.github) {
-			if (options.github.api) {
-				this.options.api = options.github.api;
-			}
-
-			if (options.github.repo) {
-				this.options.repo = options.github.repo;
-			} else {
-				throw new Error('Github repo must be defined in options.github.repo');
-			}
-
-			if (options.github.author) {
-				this.options.author = options.github.author;
-			} else {
-				throw new Error('Github author must be defined in options.github.author');
-			}
-		}
+	constructor(config: Config) {
+		this.options.sitePath = config.originPath;
+		const {author, repo} = config.pluginConfig.github as GithubConfig;
+		this.options.author = author;
+		this.options.repo = repo;
 	}
 
 	async execute(): Promise<void> {

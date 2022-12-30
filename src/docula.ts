@@ -3,16 +3,20 @@ import * as fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
+import DoculaPlugins from './plugins/index.js';
+import {type PluginInstances} from './types/config.js';
 import {type CommanderOptions} from './index.js';
 
 export class Docula {
 	readonly config: Config;
 	private readonly eleventy: Eleventy;
+	private pluginInstances: PluginInstances = {};
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
 		this.config = new Config(parameters?.config);
 		this.eleventy = new Eleventy(this.config);
+		this.loadPlugins();
 	}
 
 	public init(sitePath?: string): void {
@@ -50,6 +54,17 @@ export class Docula {
 			}
 		} else {
 			fs.copyFileSync(source, target);
+		}
+	}
+
+	private loadPlugins(): void {
+		const {plugins, pluginConfig} = this.config;
+
+		for (const plugin of plugins) {
+			// @ts-expect-error - Object with index signature
+			const pluginInstance = DoculaPlugins[plugin];
+			// eslint-disable-next-line new-cap, @typescript-eslint/no-unsafe-call
+			this.pluginInstances[plugin] = new pluginInstance(this.config);
 		}
 	}
 }

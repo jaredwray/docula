@@ -1,5 +1,5 @@
-import {type GithubPlugin} from '../plugins/github.js';
-import {type NpmPlugin} from '../plugins/npm.js';
+import type {GithubPlugin} from '../plugins/github.js';
+import type {NpmPlugin} from '../plugins/npm.js';
 
 export type PluginName = 'algolia' | 'github' | 'npm';
 
@@ -20,7 +20,7 @@ export type NpmConfig = {
 
 export type PluginConfig = AlgoliaConfig | GithubConfig | NpmConfig;
 
-export type PluginInstances = Record<string, GithubPlugin | NpmPlugin >;
+export type PluginInstances = Record<string, GithubPlugin | NpmPlugin>;
 
 export type Plugins = PluginName[];
 

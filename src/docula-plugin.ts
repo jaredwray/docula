@@ -1,5 +1,6 @@
-import {type DoculaOptions} from './docula-options.js';
+import type {DoculaOptions} from './docula-options.js';
+import type {Config} from './config.js';
 
 export type DoculaPlugin = {
-	execute(options: DoculaOptions): Promise<void>;
+	execute(config: DoculaOptions): Promise<void>;
 };
