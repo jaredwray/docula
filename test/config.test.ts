@@ -44,7 +44,6 @@ describe('Config', () => {
 		const config = new Config('./test/data/config.json');
 		expect(config.originPath).toBe('site');
 		expect(config.outputPath).toBe('_dist');
-		expect(config.plugins.algolia?.apiKey).toBe('test');
 	});
 
 	it('Config - default values with config path', () => {

@@ -1,12 +1,7 @@
 import {existsSync, readFileSync} from 'node:fs';
 import Ajv from 'ajv';
 import {jsonConfigSchema} from './schemas.js';
-
-type AlgoliaConfig = {
-	appId: string;
-	apiKey: string;
-	indexName: string;
-};
+import type {PluginConfig, PluginConfigs, PluginName, Plugins} from './types/config.js';
 
 export class Config {
 	originPath = 'site';
@@ -14,8 +9,9 @@ export class Config {
 	dataPath = 'data';
 	templatePath = 'template';
 	searchEngine = 'algolia';
-	algolia?: AlgoliaConfig;
-	plugins: Record<string, any> = {};
+	// eslint-disable-next-line  @typescript-eslint/consistent-type-assertions
+	pluginConfig: PluginConfigs = {} as PluginConfigs;
+	plugins: Plugins = [];
 	imagesPath = 'images';
 	assetsPath = 'css';
 	ajv = new Ajv();
@@ -68,9 +64,9 @@ export class Config {
 		}
 	}
 
-	loadPlugins(name: string, config: Record<string, string>) {
+	loadPlugins(name: PluginName, config: PluginConfig) {
 		if (config) {
-			this.plugins[name] = config;
+			this.pluginConfig[name] = config;
 		}
 	}
 
