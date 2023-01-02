@@ -10,7 +10,6 @@ export class GithubPlugin implements DoculaPlugin {
 		path: '_data',
 		author: '',
 		repo: '',
-		sitePath: 'site',
 		outputFile: 'github.json',
 	};
 
@@ -31,7 +30,7 @@ export class GithubPlugin implements DoculaPlugin {
 		data.releases = await this.getReleases();
 		data.contributors = await this.getContributors();
 		const path = `${this.options.sitePath}/${this.options.path}`;
-		const filePath = `${this.options.sitePath}/${this.options.path}/${this.options.outputFile}`;
+		const filePath = `${path}/${this.options.outputFile}`;
 		await fs.ensureDir(path);
 		await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 	}

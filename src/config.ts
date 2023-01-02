@@ -56,6 +56,7 @@ export class Config {
 
 		this.imagesPath = jsonConfig.imagesPath ?? this.imagesPath;
 		this.assetsPath = jsonConfig.assetsPath ?? this.assetsPath;
+		this.plugins = jsonConfig.plugins ?? this.plugins;
 
 		if (jsonConfig.plugins) {
 			for (const name of jsonConfig.plugins) {

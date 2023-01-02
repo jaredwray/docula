@@ -6,7 +6,6 @@ import type {NpmConfig} from '../types/config.js';
 
 export class NpmPlugin implements DoculaPlugin {
 	 readonly options: Record<string, string> = {
-		sitePath: 'site',
 		dataPath: '_data',
 		moduleName: '',
 		outputFile: 'npm.json',
