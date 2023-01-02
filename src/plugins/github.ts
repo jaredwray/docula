@@ -5,14 +5,16 @@ import type {Config} from '../config.js';
 import type {GithubConfig} from '../types/config.js';
 
 export class GithubPlugin implements DoculaPlugin {
-	private readonly options = {
+	readonly options: Record<string, string> = {
 		api: 'https://api.github.com',
-		path: 'data',
+		path: '_data',
 		author: '',
 		repo: '',
 		sitePath: 'site',
 		outputFile: 'github.json',
 	};
+
+	runtime: 'before' | 'after' = 'before';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;

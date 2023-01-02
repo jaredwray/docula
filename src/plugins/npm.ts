@@ -5,12 +5,14 @@ import type {Config} from '../config.js';
 import type {NpmConfig} from '../types/config.js';
 
 export class NpmPlugin implements DoculaPlugin {
-	private readonly options = {
+	 readonly options: Record<string, string> = {
 		sitePath: 'site',
-		dataPath: 'data',
+		dataPath: '_data',
 		moduleName: '',
 		outputFile: 'npm.json',
 	};
+
+	runtime: 'before' | 'after' = 'before';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;

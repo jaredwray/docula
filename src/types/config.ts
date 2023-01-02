@@ -20,7 +20,9 @@ export type NpmConfig = {
 
 export type PluginConfig = AlgoliaConfig | GithubConfig | NpmConfig;
 
-export type PluginInstances = Record<string, GithubPlugin | NpmPlugin>;
+export type PluginInstance = GithubPlugin | NpmPlugin;
+
+export type PluginInstances = Record<string, PluginInstance>;
 
 export type Plugins = PluginName[];
 
