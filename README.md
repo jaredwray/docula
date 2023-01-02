@@ -1,7 +1,6 @@
 <img src="site/branding-guidelines/Docula Logos/PNG/Color/docula.png" />
 
 # Docula
-Beautiful documentation for your projects
 
 [![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
 [![codecov](https://codecov.io/github/jaredwray/docula/branch/main/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/github/jaredwray/docula)
