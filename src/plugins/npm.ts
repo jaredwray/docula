@@ -1,17 +1,17 @@
 import axios from 'axios';
 import fs from 'fs-extra';
-import type {DoculaPlugin} from '../docula-plugin.js';
+import type {DoculaPlugin, Runtime} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 import type {NpmConfig} from '../types/config.js';
 
 export class NpmPlugin implements DoculaPlugin {
-	 readonly options: Record<string, string> = {
+	readonly options: Record<string, string> = {
 		dataPath: '_data',
 		moduleName: '',
 		outputFile: 'npm.json',
 	};
 
-	runtime: 'before' | 'after' = 'before';
+	runtime: Runtime = 'before';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;

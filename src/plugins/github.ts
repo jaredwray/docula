@@ -3,6 +3,7 @@ import axios from 'axios';
 import type {DoculaPlugin} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 import type {GithubConfig} from '../types/config.js';
+import {type Runtime} from '../docula-plugin.js';
 
 export class GithubPlugin implements DoculaPlugin {
 	readonly options: Record<string, string> = {
@@ -13,7 +14,7 @@ export class GithubPlugin implements DoculaPlugin {
 		outputFile: 'github.json',
 	};
 
-	runtime: 'before' | 'after' = 'before';
+	runtime: Runtime = 'after';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;
