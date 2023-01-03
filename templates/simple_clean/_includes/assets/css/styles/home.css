@@ -241,6 +241,9 @@
     margin: 160px 0;
   }
 
+  .versions-container {
+    margin: 120px 0;
+  }
 
   .facepile > a {
     margin-left: -30px;
