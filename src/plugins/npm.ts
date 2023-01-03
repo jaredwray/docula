@@ -5,22 +5,22 @@ import type {Config} from '../config.js';
 
 export type NpmConfig = {
 	moduleName: string;
-}
+};
 
-export class NpmPlugin implements DoculaPlugin  {
-	readonly options: Options = {
-		dataPath: '_data',
-		moduleName: '',
-		outputFile: 'npm.json',
-	};
-
+export class NpmPlugin implements DoculaPlugin {
 	static rules: Rules = {
 		type: 'object',
 		required: ['moduleName'],
 		properties: {
 			moduleName: {type: 'string'},
 		},
-	}
+	};
+
+	readonly options: Options = {
+		dataPath: '_data',
+		moduleName: '',
+		outputFile: 'npm.json',
+	};
 
 	runtime: Runtime = 'before';
 

@@ -10,6 +10,15 @@ export type GithubConfig = {
 };
 
 export class GithubPlugin implements DoculaPlugin {
+	static rules: Rules = {
+		type: 'object',
+		required: ['repo', 'author'],
+		properties: {
+			repo: {type: 'string'},
+			author: {type: 'string'},
+		},
+	};
+
 	readonly options: Options = {
 		api: 'https://api.github.com',
 		path: '_data',
@@ -18,14 +27,6 @@ export class GithubPlugin implements DoculaPlugin {
 		outputFile: 'github.json',
 	};
 
-	static rules: Rules = {
-		type: 'object',
-		required: ['repo', 'author'],
-		properties: {
-			repo: {type: 'string'},
-			author: {type: 'string'},
-		},
-	}
 	runtime: Runtime = 'after';
 
 	constructor(config: Config) {
