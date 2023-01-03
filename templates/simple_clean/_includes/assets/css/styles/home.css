@@ -99,10 +99,34 @@
 .release-title {
   font-size: 22px;
   color: var(--color-primary);
+  font-weight: 700;
+  transition: color .3s;
+  display: block;
+}
+
+.release-title:hover {
+  color: var(--color-secondary-dark);
 }
 
 .release-date {
   font-size: 12px;
+}
+
+.release-btn {
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid var(--color-secondary);
+  color: var(--color-text);
+}
+
+.release-btn span {
+  margin-left: 8px;
+  font-size: 12px;
+  transition: margin-left .3s;
+}
+
+.release-btn:hover span {
+  margin-left: 16px;
 }
 
 .release-body p {
@@ -163,6 +187,10 @@
 
   .content-container {
     margin: 96px 0;
+  }
+
+  .versions-container {
+    margin: 72px 0;
   }
 
   .release {
