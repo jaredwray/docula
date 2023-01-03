@@ -2,8 +2,10 @@ import {existsSync, readFileSync} from 'node:fs';
 import Ajv from 'ajv';
 import {jsonConfigSchema} from './schemas.js';
 import type {PluginConfig, PluginConfigs, PluginName, Plugins} from './types/config.js';
+import DoculaPlugins from "./plugins/index.js";
 
 export class Config {
+	private schema: Record<string, any> = jsonConfigSchema;
 	originPath = 'site';
 	outputPath = 'dist';
 	dataPath = 'data';
@@ -32,7 +34,13 @@ export class Config {
 		const data = readFileSync(path, {encoding: 'utf8'});
 		const jsonConfig = JSON.parse(data) as Record<string, any>;
 
-		const validate = this.ajv.compile(jsonConfigSchema);
+		if (jsonConfig.plugins) {
+			for (const name of jsonConfig.plugins) {
+				this.loadPlugins(name, jsonConfig[name]);
+			}
+		}
+
+		const validate = this.ajv.compile(this.schema);
 
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		validate(jsonConfig);
@@ -57,17 +65,13 @@ export class Config {
 		this.imagesPath = jsonConfig.imagesPath ?? this.imagesPath;
 		this.assetsPath = jsonConfig.assetsPath ?? this.assetsPath;
 		this.plugins = jsonConfig.plugins ?? this.plugins;
-
-		if (jsonConfig.plugins) {
-			for (const name of jsonConfig.plugins) {
-				this.loadPlugins(name, jsonConfig[name]);
-			}
-		}
 	}
 
 	loadPlugins(name: PluginName, config: PluginConfig) {
 		if (config) {
 			this.pluginConfig[name] = config;
+			this.schema.properties[name] = DoculaPlugins[name].rules;
+			this.schema.properties.plugins.enum.push(name);
 		}
 	}
 

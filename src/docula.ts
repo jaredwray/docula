@@ -4,8 +4,7 @@ import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
-import type {PluginInstances} from './types/config.js';
-import {type PluginInstance} from './types/config.js';
+import type {PluginInstances, PluginInstance} from './types/config.js';
 import type {CommanderOptions} from './index.js';
 
 export class Docula {
@@ -67,7 +66,6 @@ export class Docula {
 		const {plugins} = this.config;
 
 		for (const plugin of plugins) {
-			// @ts-expect-error - Object with index signature
 			const pluginClass = DoculaPlugins[plugin];
 			// eslint-disable-next-line new-cap, @typescript-eslint/no-unsafe-call
 			const pluginInstance = new pluginClass(this.config);

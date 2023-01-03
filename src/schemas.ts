@@ -11,7 +11,7 @@ export const jsonConfigSchema = {
 			type: 'array',
 			items: {
 				type: 'string',
-				enum: ['github', 'npm', 'algolia'],
+				enum: [],
 			},
 		},
 		algolia: {
@@ -23,22 +23,8 @@ export const jsonConfigSchema = {
 				indexName: {type: 'string'},
 			},
 		},
-		github: {
-			type: 'object',
-			required: ['repo', 'author'],
-			properties: {
-				repo: {type: 'string'},
-				author: {type: 'string'},
-			},
-		},
-		npm: {
-			type: 'object',
-			required: ['moduleName'],
-			properties: {
-				moduleName: {type: 'string'},
-			},
-		},
 		imagesPath: {type: 'string'},
 		assetsPath: {type: 'string'},
+		required: [],
 	},
 };
