@@ -8,9 +8,9 @@
     <div class="header-content">
       <nav class="nav">
         <div class="header-menu">
-          <span class="header-logo">
+          <a class="header-logo" href="/">
             <img src="/../assets/images/logo.svg" alt="logo" />
-          </span>
+          </a>
           <a href="/docs" class="docs-link">Docs</a>
         </div>
 
@@ -29,55 +29,45 @@
     <div class="home-hero">
       <img src="/../assets/images/logo.svg" alt="logo" />
       <div class="home-container">
-        <h3>Simple key-value storage with support for multiple backends</h3>
+        <h1>Simple key-value storage with support for multiple backends</h1>
       </div>
     </div>
     <section class="home-container">
       {% if github %}
+      {% if github.contributors %}
+      <div class="content-container">
         <h2 class="home-title">Contributors</h2>
         <div class="facepile-container">
           <div class="facepile">
-            {% for contributor in github %}
-            <a href="{{ contributor.html_url }}" target="_blank">
+            {% for contributor in github.contributors %}
+            <a href="{{ contributor.html_url }}" target="_blank" title="{{ contributor.login }}">
               <img src="{{ contributor.avatar_url }}" alt="{{ contributor.login }}" />
             </a>
             {% endfor %}
           </div>
         </div>
+      </div>
       {% endif %}
 
-      <h2 class="home-title">Sponsors</h2>
-      <div class="facepile-container">
-        <div class="facepile">
-          {% for contributor in github %}
-          <a href="{{ contributor.html_url }}" target="_blank">
-            <img src="{{ contributor.avatar_url }}" alt="{{ contributor.login }}" />
-          </a>
-          {% endfor %}
+      {% if github.releases %}
+      <div class="content-container">
+        <h2 class="home-title">Releases</h2>
+        {% for release in github.releases %}
+        <div class="release">
+          <div class="release-header">
+            <h3 class="release-title">{{ release.name }}</h3>
+            <span class="release-date">{% formatDate "MMM dd, yyyy", release.published_at %}</span>
+          </div>
+          <div class="release-body">
+            <p>{% parseRelease release.body %}</p>
+          </div>
         </div>
+        {% endfor %}
       </div>
+      {% endif %}
 
-      <h2 class="home-title">Sponsors</h2>
-      <div class="facepile-container">
-        <div class="facepile">
-          {% for contributor in github %}
-          <a href="{{ contributor.html_url }}" target="_blank">
-            <img src="{{ contributor.avatar_url }}" alt="{{ contributor.login }}" />
-          </a>
-          {% endfor %}
-        </div>
-      </div>
+      {% endif %}
 
-      <h2 class="home-title">Sponsors</h2>
-      <div class="facepile-container">
-        <div class="facepile">
-          {% for contributor in github %}
-          <a href="{{ contributor.html_url }}" target="_blank">
-            <img src="{{ contributor.avatar_url }}" alt="{{ contributor.login }}" />
-          </a>
-          {% endfor %}
-        </div>
-      </div>
     </section>
 
   </main>
