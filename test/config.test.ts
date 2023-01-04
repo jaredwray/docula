@@ -90,11 +90,11 @@ describe('Config', () => {
 		const pluginConfig = {
 			author: 'jaredwray',
 			repo: 'docula',
-		}
+		};
 		const configData = {
 			plugins: ['github'],
 			github: pluginConfig,
-		}
+		};
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData));
 		const config = new Config('./test/data/config.json');
 		expect(config.pluginConfig.github).toEqual(pluginConfig);
