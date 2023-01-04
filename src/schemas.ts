@@ -1,4 +1,26 @@
-export const jsonConfigSchema = {
+import DoculaPlugins from './plugins/index.js';
+import {type Plugins} from './types/config.js';
+
+type Property = Record<string, string | Array<string | undefined>>;
+type PluginsType = {
+	type: string;
+	items: {
+		type: string;
+		enum: Plugins;
+	};
+};
+
+export type ConfigSchema = {
+	type: 'object';
+	additionalProperties: boolean;
+	properties: {
+		[key: string]: Property | PluginsType;
+		plugins: PluginsType;
+	};
+	required: string[];
+};
+
+export const jsonConfigSchema: ConfigSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
@@ -11,7 +33,7 @@ export const jsonConfigSchema = {
 			type: 'array',
 			items: {
 				type: 'string',
-				enum: [],
+				enum: Object.keys(DoculaPlugins) as Plugins,
 			},
 		},
 		imagesPath: {type: 'string'},
