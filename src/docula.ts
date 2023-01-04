@@ -67,7 +67,7 @@ export class Docula {
 
 		for (const plugin of plugins) {
 			const pluginClass = DoculaPlugins[plugin];
-			// eslint-disable-next-line new-cap, @typescript-eslint/no-unsafe-call
+			// eslint-disable-next-line new-cap
 			const pluginInstance = new pluginClass(this.config);
 			this.pluginInstances[plugin] = pluginInstance;
 

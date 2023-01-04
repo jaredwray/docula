@@ -14,17 +14,8 @@ export const jsonConfigSchema = {
 				enum: [],
 			},
 		},
-		algolia: {
-			type: 'object',
-			required: ['appId', 'apiKey', 'indexName'],
-			properties: {
-				appId: {type: 'string'},
-				apiKey: {type: 'string'},
-				indexName: {type: 'string'},
-			},
-		},
 		imagesPath: {type: 'string'},
 		assetsPath: {type: 'string'},
-		required: [],
 	},
+	required: [],
 };
