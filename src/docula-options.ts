@@ -12,4 +12,8 @@ export type DoculaOptions = {
 		moduleName?: string;
 		outputFile?: string;
 	};
+	robots?: {
+		allowedUrl?: string;
+		disallowedUrl?: string;
+	};
 };
