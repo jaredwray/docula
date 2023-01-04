@@ -1,7 +1,8 @@
 import DoculaPlugins from './plugins/index.js';
 import {type Plugins} from './types/config.js';
 
-type Property = Record<string, string | Array<string | undefined>>;
+type Property = Record<string, string | string[]>;
+
 type PluginsType = {
 	type: string;
 	items: {
@@ -28,7 +29,7 @@ export const jsonConfigSchema: ConfigSchema = {
 		outputPath: {type: 'string'},
 		dataPath: {type: 'string'},
 		templatePath: {type: 'string'},
-		searchEngine: {type: 'string', enum: ['algolia', null]},
+		searchEngine: {type: 'string', enum: ['algolia']},
 		plugins: {
 			type: 'array',
 			items: {
