@@ -11,6 +11,7 @@ describe('Github Plugin', () => {
 
 	afterEach(() => {
 		config = null;
+		fs.rmSync('test/config.json');
 	});
 
 	it('init', () => {
@@ -27,7 +28,7 @@ describe('Github Plugin', () => {
 		expect(github).toBeDefined();
 	});
 
-	it('passing in all options', () => {
+	it('passing in all config', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			github: {

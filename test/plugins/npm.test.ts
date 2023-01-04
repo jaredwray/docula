@@ -11,9 +11,10 @@ describe('NPM Plugin', () => {
 
 	afterEach(() => {
 		config = null;
+		fs.rmSync('test/config.json');
 	});
 
-	it('setting the module name in options', () => {
+	it('setting the module name in config', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
@@ -27,7 +28,7 @@ describe('NPM Plugin', () => {
 		expect(npm.options.moduleName).toEqual('writr');
 	});
 
-	it('setting the site path in options', () => {
+	it('getting the sitePath from the originPath prop in config', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
@@ -41,7 +42,7 @@ describe('NPM Plugin', () => {
 		expect(npm.options.sitePath).toEqual('test/site');
 	});
 
-	it('setting the data path in options', () => {
+	it('getting the default data path', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
@@ -54,7 +55,7 @@ describe('NPM Plugin', () => {
 		expect(npm.options.dataPath).toEqual('_data');
 	});
 
-	it('setting the output file in options', () => {
+	it('setting the output file in config', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
@@ -68,7 +69,7 @@ describe('NPM Plugin', () => {
 		expect(npm.options.outputFile).toEqual('npm.json');
 	});
 
-	it('throw an error if no npm in options', () => {
+	it('throw an error if no npm in config', () => {
 		const jsonConfig = {};
 		expect(() => {
 			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
