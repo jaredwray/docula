@@ -1,17 +1,17 @@
 import fs from 'fs-extra';
 import {GithubPlugin} from '../../src/plugins/github.js';
-import {Config} from "../../src/config";
+import {Config} from '../../src/config.js';
 
 describe('Github Plugin', () => {
 	let config;
-	let defaultConfig = {
+	const defaultConfig = {
 		originPath: 'test/site',
 		plugins: ['github'],
-	}
+	};
 
 	afterEach(() => {
 		config = null;
-	})
+	});
 
 	it('init', () => {
 		const jsonConfig = {

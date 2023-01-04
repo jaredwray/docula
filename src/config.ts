@@ -20,7 +20,8 @@ export class Config {
 	private readonly schema: ConfigSchema;
 
 	constructor(path?: string) {
-		this.schema = jsonConfigSchema;
+		this.schema = {...jsonConfigSchema};
+		this.schema.required = [];
 		const configPath = path ?? `./${this.originPath}/config.json`;
 		const configFile = this.checkConfigFile(configPath);
 		if (configFile) {

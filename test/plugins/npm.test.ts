@@ -1,17 +1,17 @@
 import fs from 'fs-extra';
 import {NpmPlugin} from '../../src/plugins/npm.js';
-import {Config} from "../../src/config";
+import {Config} from '../../src/config.js';
 
 describe('NPM Plugin', () => {
 	let config;
-	let defaultConfig = {
+	const defaultConfig = {
 		originPath: 'test/site',
 		plugins: ['npm'],
-	}
+	};
 
 	afterEach(() => {
 		config = null;
-	})
+	});
 
 	it('setting the module name in options', () => {
 		const jsonConfig = {
@@ -21,7 +21,7 @@ describe('NPM Plugin', () => {
 			},
 		};
 
-	  fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
 		const config = new Config('./test/config.json');
 		const npm = new NpmPlugin(config);
 		expect(npm.options.moduleName).toEqual('writr');
