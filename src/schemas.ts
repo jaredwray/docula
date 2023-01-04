@@ -1,4 +1,27 @@
-export const jsonConfigSchema = {
+import DoculaPlugins from './plugins/index.js';
+import {type Plugins} from './types/config.js';
+
+type Property = Record<string, string | string[]>;
+
+type PluginsType = {
+	type: string;
+	items: {
+		type: string;
+		enum: Plugins;
+	};
+};
+
+export type ConfigSchema = {
+	type: 'object';
+	additionalProperties: boolean;
+	properties: {
+		[key: string]: Property | PluginsType;
+		plugins: PluginsType;
+	};
+	required: string[];
+};
+
+export const jsonConfigSchema: ConfigSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
@@ -6,39 +29,16 @@ export const jsonConfigSchema = {
 		outputPath: {type: 'string'},
 		dataPath: {type: 'string'},
 		templatePath: {type: 'string'},
-		searchEngine: {type: 'string', enum: ['algolia', null]},
+		searchEngine: {type: 'string', enum: ['algolia']},
 		plugins: {
 			type: 'array',
 			items: {
 				type: 'string',
-				enum: ['github', 'npm', 'algolia'],
-			},
-		},
-		algolia: {
-			type: 'object',
-			required: ['appId', 'apiKey', 'indexName'],
-			properties: {
-				appId: {type: 'string'},
-				apiKey: {type: 'string'},
-				indexName: {type: 'string'},
-			},
-		},
-		github: {
-			type: 'object',
-			required: ['repo', 'author'],
-			properties: {
-				repo: {type: 'string'},
-				author: {type: 'string'},
-			},
-		},
-		npm: {
-			type: 'object',
-			required: ['moduleName'],
-			properties: {
-				moduleName: {type: 'string'},
+				enum: Object.keys(DoculaPlugins) as Plugins,
 			},
 		},
 		imagesPath: {type: 'string'},
 		assetsPath: {type: 'string'},
 	},
+	required: [],
 };
