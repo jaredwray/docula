@@ -1,6 +1,6 @@
 import {existsSync, readFileSync} from 'node:fs';
 import Ajv from 'ajv';
-import {jsonConfigSchema} from './schemas.js';
+import {type ConfigSchema, jsonConfigSchema} from './schemas.js';
 import type {PluginConfig, PluginConfigs, PluginName, Plugins} from './types/config.js';
 import DoculaPlugins from './plugins/index.js';
 
@@ -17,9 +17,10 @@ export class Config {
 	assetsPath = 'css';
 	ajv = new Ajv();
 
-	private readonly schema: Record<string, any> = jsonConfigSchema;
+	private readonly schema: ConfigSchema;
 
 	constructor(path?: string) {
+		this.schema = jsonConfigSchema;
 		const configPath = path ?? `./${this.originPath}/config.json`;
 		const configFile = this.checkConfigFile(configPath);
 		if (configFile) {
@@ -40,6 +41,8 @@ export class Config {
 				this.loadPlugins(name, jsonConfig[name]);
 			}
 		}
+
+		this.schema.required = [...new Set(this.schema.required)];
 
 		const validate = this.ajv.compile(this.schema);
 
@@ -72,8 +75,6 @@ export class Config {
 		if (config) {
 			this.pluginConfig[name] = config;
 			this.schema.properties[name] = DoculaPlugins[name].rules;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-			this.schema.properties.plugins.items.enum.push(name);
 			this.schema.required.push(name);
 		}
 	}

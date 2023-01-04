@@ -2,14 +2,9 @@ import * as fs from 'fs-extra';
 import {Config} from '../src/config.js';
 
 describe('Config', () => {
-	const configJson: Record<string, any> = {
+	const configJson: Record<string, string> = {
 		originPath: '_site',
 		outputPath: '_dist',
-		algolia: {
-			apiKey: 'test',
-			appId: 'test',
-			indexName: 'test',
-		},
 	};
 
 	afterEach(() => {
@@ -38,7 +33,6 @@ describe('Config', () => {
 
 	it('Config - config path found', () => {
 		const configData = {...configJson};
-		configData.plugins = ['algolia'];
 		delete configData.originPath;
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData));
 		const config = new Config('./test/data/config.json');
@@ -54,7 +48,7 @@ describe('Config', () => {
 		expect(config.outputPath).toBe('dist');
 	});
 
-	test('Config - throws an error if the config file is invalid', () => {
+	it('Config - throws an error if the config file is invalid', () => {
 		const config = new Config();
 		const invalidConfig = {invalid: 'config'};
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig));
@@ -63,7 +57,7 @@ describe('Config', () => {
 		}).toThrow();
 	});
 
-	test('Config - does not throw an error if the config file is valid', () => {
+	it('Config - does not throw an error if the config file is valid', () => {
 		const config = new Config();
 		const validConfig = {originPath: 'site'};
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(validConfig));
@@ -72,12 +66,37 @@ describe('Config', () => {
 		}).not.toThrow();
 	});
 
-	test('Config - loadConfig throws an error if the property value is not allowed', () => {
+	it('Config - loadConfig throws an error if the property value is not allowed', () => {
 		const config = new Config();
 		const invalidConfig = {searchEngine: 'google'};
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig));
 		expect(() => {
 			config.loadConfig('./test/data/config.json');
 		}).toThrow();
+	});
+
+	it('Config - adds a plugin configuration to the pluginConfig property', () => {
+		const config = new Config();
+		const pluginName = 'github';
+		const pluginConfig = {
+			author: 'jaredwray',
+			repo: 'docula',
+		};
+		config.loadPlugins(pluginName, pluginConfig);
+		expect(config.pluginConfig.github).toEqual(pluginConfig);
+	});
+
+	it('Config - load all of the plugins specified in the config file', () => {
+		const pluginConfig = {
+			author: 'jaredwray',
+			repo: 'docula',
+		};
+		const configData = {
+			plugins: ['github'],
+			github: pluginConfig,
+		};
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData));
+		const config = new Config('./test/data/config.json');
+		expect(config.pluginConfig.github).toEqual(pluginConfig);
 	});
 });
