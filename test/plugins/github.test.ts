@@ -3,14 +3,13 @@ import {GithubPlugin} from '../../src/plugins/github.js';
 import {Config} from '../../src/config.js';
 
 describe('Github Plugin', () => {
-	let config;
 	const defaultConfig = {
 		originPath: 'test/site',
 		plugins: ['github'],
 	};
 
-	afterEach(() => {
-		config = null;
+	afterAll(() => {
+		fs.rmSync('./test/data/github-config.json', {force: true});
 	});
 
 	it('init', () => {
@@ -21,24 +20,22 @@ describe('Github Plugin', () => {
 				author: 'jaredwray',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
 		const github = new GithubPlugin(config);
 		expect(github).toBeDefined();
 	});
 
-	it('passing in all options', () => {
+	it('passing in all config', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			github: {
 				repo: 'docula',
 				author: 'jaredwray',
-				api: 'https://api.github.com',
-				outputFile: 'github.json',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
 		const github = new GithubPlugin(config);
 		expect(github).toBeDefined();
 	});
@@ -48,13 +45,11 @@ describe('Github Plugin', () => {
 			...defaultConfig,
 			github: {
 				author: 'jaredwray',
-				api: 'https://api.github.com',
-				outputFile: 'github.json',
 			},
 		};
 		expect(() => {
-			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-			const config = new Config('./test/config.json');
+			fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/data/github-config.json');
 			const github = new GithubPlugin(config);
 		}).toThrow();
 	});
@@ -65,12 +60,10 @@ describe('Github Plugin', () => {
 			github: {
 				repo: 'docula',
 				author: 'jaredwray',
-				api: 'https://api.github.com',
-				outputFile: 'github.json',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
 		const github = new GithubPlugin(config);
 		await github.execute();
 		const filePath = 'test/site/_data/github.json';
@@ -83,13 +76,11 @@ describe('Github Plugin', () => {
 			...defaultConfig,
 			github: {
 				repo: 'docula',
-				api: 'https://api.github.com',
-				outputFile: 'github.json',
 			},
 		};
 		expect(() => {
-			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-			const config = new Config('./test/config.json');
+			fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/data/github-config.json');
 			const github = new GithubPlugin(config);
 		}).toThrow();
 	});
@@ -102,8 +93,8 @@ describe('Github Plugin', () => {
 				author: 'jaredwray',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
 		const github = new GithubPlugin(config);
 		const result = await github.getContributors();
 
@@ -118,8 +109,8 @@ describe('Github Plugin', () => {
 				author: 'jaredwray',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
 		const github = new GithubPlugin(config);
 		const result = await github.getReleases();
 
