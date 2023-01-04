@@ -1,94 +1,120 @@
 import fs from 'fs-extra';
-import {type DoculaOptions} from '../../src/docula-options.js';
 import {NpmPlugin} from '../../src/plugins/npm.js';
+import {Config} from '../../src/config.js';
 
 describe('NPM Plugin', () => {
+	let config;
+	const defaultConfig = {
+		originPath: 'test/site',
+		plugins: ['npm'],
+	};
+
+	afterEach(() => {
+		config = null;
+	});
+
 	it('setting the module name in options', () => {
-		const options: DoculaOptions = {
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {
 				moduleName: 'writr',
 			},
 		};
-		const npm = new NpmPlugin(options);
-		expect(npm.moduleName).toEqual('writr');
+
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/config.json');
+		const npm = new NpmPlugin(config);
+		expect(npm.options.moduleName).toEqual('writr');
 	});
 
 	it('setting the site path in options', () => {
-		const options: DoculaOptions = {
-			sitePath: 'test/data/site',
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {
 				moduleName: 'docula',
 			},
 		};
-		const npm = new NpmPlugin(options);
-		expect(npm.sitePath).toEqual('test/data/site');
+
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/config.json');
+		const npm = new NpmPlugin(config);
+		expect(npm.options.sitePath).toEqual('test/site');
 	});
 
 	it('setting the data path in options', () => {
-		const options: DoculaOptions = {
-			sitePath: 'test/data/site',
-			dataPath: '_data',
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {
 				moduleName: 'docula',
 			},
 		};
-		const npm = new NpmPlugin(options);
-		expect(npm.dataPath).toEqual('_data');
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/config.json');
+		const npm = new NpmPlugin(config);
+		expect(npm.options.dataPath).toEqual('_data');
 	});
 
 	it('setting the output file in options', () => {
-		const options: DoculaOptions = {
-			sitePath: 'test/data/site',
-			dataPath: '_data',
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {
 				moduleName: 'docula',
-				outputFile: 'file1.json',
+				outputFile: 'npm.json',
 			},
 		};
-		const npm = new NpmPlugin(options);
-		expect(npm.outputFile).toEqual('file1.json');
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/config.json');
+		const npm = new NpmPlugin(config);
+		expect(npm.options.outputFile).toEqual('npm.json');
 	});
 
 	it('throw an error if no npm in options', () => {
-		const options: DoculaOptions = {};
+		const jsonConfig = {};
 		expect(() => {
-			const npm = new NpmPlugin(options);
+			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/config.json');
+			const npm = new NpmPlugin(config);
 		}).toThrow();
 	});
 
 	it('throw an error if no module name', () => {
-		const options: DoculaOptions = {
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {},
 		};
 		expect(() => {
-			const npm = new NpmPlugin(options);
+			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/config.json');
+			const npm = new NpmPlugin(config);
 		}).toThrow();
 	});
 
 	it('get monthly downloads should return downloads', async () => {
-		const options: DoculaOptions = {
-			sitePath: 'test/data/site',
-			dataPath: '_data',
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {
 				moduleName: 'writr',
 			},
 		};
-		const npm = new NpmPlugin(options);
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/config.json');
+		const npm = new NpmPlugin(config);
 		const data = await npm.getMonthlyDownloads();
 		expect(data.downloads).toBeDefined();
 	});
 
 	it('execute and write out file', async () => {
-		const options: DoculaOptions = {
-			sitePath: 'test/data/site',
-			dataPath: 'data',
+		const jsonConfig = {
+			...defaultConfig,
 			npm: {
 				moduleName: 'writr',
 			},
 		};
-		const npm = new NpmPlugin(options);
+		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/config.json');
+		const npm = new NpmPlugin(config);
 		await npm.execute();
-		expect(fs.existsSync('test/data/site/data/npm.json')).toBe(true);
-		fs.rmSync('test/data/site/data/npm.json');
+		expect(fs.existsSync('test/site/_data/npm.json')).toBe(true);
+		fs.rmSync('test/site/_data/npm.json');
 	});
 });

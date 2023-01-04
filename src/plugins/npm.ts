@@ -20,6 +20,7 @@ export class NpmPlugin implements DoculaPlugin {
 		dataPath: '_data',
 		moduleName: '',
 		outputFile: 'npm.json',
+		sitePath: '',
 	};
 
 	runtime: Runtime = 'before';

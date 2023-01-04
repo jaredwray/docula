@@ -21,10 +21,11 @@ export class GithubPlugin implements DoculaPlugin {
 
 	readonly options: Options = {
 		api: 'https://api.github.com',
-		path: '_data',
+		dataPath: '_data',
 		author: '',
 		repo: '',
 		outputFile: 'github.json',
+		sitePath: '',
 	};
 
 	runtime: Runtime = 'after';
@@ -43,7 +44,7 @@ export class GithubPlugin implements DoculaPlugin {
 		};
 		data.releases = await this.getReleases();
 		data.contributors = await this.getContributors();
-		const path = `${this.options.sitePath}/${this.options.path}`;
+		const path = `${this.options.sitePath}/${this.options.dataPath}`;
 		const filePath = `${path}/${this.options.outputFile}`;
 		await fs.ensureDir(path);
 		await fs.writeFile(filePath, JSON.stringify(data, null, 2));
