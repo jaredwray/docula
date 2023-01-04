@@ -9,9 +9,12 @@ describe('Docula', () => {
 	const configJson: Record<string, any> = {
 		originPath: 'test/data/site',
 		outputPath: '_dist',
-		plugins: ['npm'],
+		plugins: ['npm', 'robots'],
 		npm: {
 			moduleName: 'docula',
+		},
+		robots: {
+			allow: ['/'],
 		},
 	};
 
