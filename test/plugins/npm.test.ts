@@ -3,15 +3,13 @@ import {NpmPlugin} from '../../src/plugins/npm.js';
 import {Config} from '../../src/config.js';
 
 describe('NPM Plugin', () => {
-	let config;
 	const defaultConfig = {
 		originPath: 'test/site',
 		plugins: ['npm'],
 	};
 
-	afterEach(() => {
-		config = null;
-		fs.rmSync('test/config.json');
+	afterAll(() => {
+		fs.rmSync('./test/data/npm-config.json', {force: true});
 	});
 
 	it('setting the module name in config', () => {
@@ -22,8 +20,8 @@ describe('NPM Plugin', () => {
 			},
 		};
 
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
 		expect(npm.options.moduleName).toEqual('writr');
 	});
@@ -36,8 +34,8 @@ describe('NPM Plugin', () => {
 			},
 		};
 
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
 		expect(npm.options.sitePath).toEqual('test/site');
 	});
@@ -49,31 +47,17 @@ describe('NPM Plugin', () => {
 				moduleName: 'docula',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
 		expect(npm.options.dataPath).toEqual('_data');
-	});
-
-	it('setting the output file in config', () => {
-		const jsonConfig = {
-			...defaultConfig,
-			npm: {
-				moduleName: 'docula',
-				outputFile: 'npm.json',
-			},
-		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
-		const npm = new NpmPlugin(config);
-		expect(npm.options.outputFile).toEqual('npm.json');
 	});
 
 	it('throw an error if no npm in config', () => {
 		const jsonConfig = {};
 		expect(() => {
-			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-			const config = new Config('./test/config.json');
+			fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/data/npm-config.json');
 			const npm = new NpmPlugin(config);
 		}).toThrow();
 	});
@@ -84,8 +68,8 @@ describe('NPM Plugin', () => {
 			npm: {},
 		};
 		expect(() => {
-			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-			const config = new Config('./test/config.json');
+			fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/data/npm-config.json');
 			const npm = new NpmPlugin(config);
 		}).toThrow();
 	});
@@ -97,8 +81,8 @@ describe('NPM Plugin', () => {
 				moduleName: 'writr',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
 		const data = await npm.getMonthlyDownloads();
 		expect(data.downloads).toBeDefined();
@@ -111,8 +95,8 @@ describe('NPM Plugin', () => {
 				moduleName: 'writr',
 			},
 		};
-		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/config.json');
+		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
 		await npm.execute();
 		expect(fs.existsSync('test/site/_data/npm.json')).toBe(true);

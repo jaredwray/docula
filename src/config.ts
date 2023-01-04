@@ -23,12 +23,12 @@ export class Config {
 		this.schema = {...jsonConfigSchema};
 		this.schema.required = [];
 		const configPath = path ?? `./${this.originPath}/config.json`;
-		const configFile = this.checkConfigFile(configPath);
-		if (configFile) {
+		const configFileExists = this.checkConfigFile(configPath);
+		if (configFileExists) {
 			this.loadConfig(configPath);
 		}
 
-		if (path && !configFile) {
+		if (path && !configFileExists) {
 			throw new Error('Config file not found');
 		}
 	}

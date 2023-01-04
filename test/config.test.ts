@@ -27,14 +27,15 @@ describe('Config', () => {
 	});
 
 	it('Config - config path not found', async () => {
-		const config = () => new Config('test/config.json');
+		const invalidPath = 'invalid/path';
+		const config = () => new Config(invalidPath);
 		expect(config).toThrow(new Error('Config file not found'));
 	});
 
 	it('Config - config path found', () => {
 		const configData = {...configJson};
 		delete configData.originPath;
-		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData, null, 2));
 		const config = new Config('./test/data/config.json');
 		expect(config.originPath).toBe('site');
 		expect(config.outputPath).toBe('_dist');
@@ -43,7 +44,7 @@ describe('Config', () => {
 	it('Config - default values with config path', () => {
 		const configData = {...configJson};
 		delete configData.outputPath;
-		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData, null, 2));
 		const config = new Config('./test/data/config.json');
 		expect(config.outputPath).toBe('dist');
 	});
@@ -51,7 +52,7 @@ describe('Config', () => {
 	it('Config - throws an error if the config file is invalid', () => {
 		const config = new Config();
 		const invalidConfig = {invalid: 'config'};
-		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig, null, 2));
 		expect(() => {
 			config.loadConfig('./test/data/config.json');
 		}).toThrow();
@@ -60,7 +61,7 @@ describe('Config', () => {
 	it('Config - does not throw an error if the config file is valid', () => {
 		const config = new Config();
 		const validConfig = {originPath: 'site'};
-		fs.writeFileSync('./test/data/config.json', JSON.stringify(validConfig));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(validConfig, null, 2));
 		expect(() => {
 			config.loadConfig('./test/data/config.json');
 		}).not.toThrow();
@@ -69,7 +70,7 @@ describe('Config', () => {
 	it('Config - loadConfig throws an error if the property value is not allowed', () => {
 		const config = new Config();
 		const invalidConfig = {searchEngine: 'google'};
-		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig, null, 2));
 		expect(() => {
 			config.loadConfig('./test/data/config.json');
 		}).toThrow();
@@ -95,7 +96,7 @@ describe('Config', () => {
 			plugins: ['github'],
 			github: pluginConfig,
 		};
-		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData));
+		fs.writeFileSync('./test/data/config.json', JSON.stringify(configData, null, 2));
 		const config = new Config('./test/data/config.json');
 		expect(config.pluginConfig.github).toEqual(pluginConfig);
 	});
