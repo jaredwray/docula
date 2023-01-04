@@ -1,18 +1,18 @@
 import fs from 'fs-extra';
 import {RobotsPlugin} from '../../src/plugins/robots.js';
-import {Config} from "../../src/config";
+import {Config} from '../../src/config.js';
 
 describe('Robots Plugin', () => {
 	let config;
-	let defaultConfig = {
+	const defaultConfig = {
 		outputPath: 'test/site',
 		plugins: ['robots'],
-	}
+	};
 
-	afterEach(() =>{
+	afterEach(() => {
 		config = null;
 		fs.rmSync('test/config.json');
-	})
+	});
 
 	it('init', () => {
 		const jsonConfig = {
@@ -20,14 +20,13 @@ describe('Robots Plugin', () => {
 			robots: {
 				allowedUrl: '/demo',
 				disallowedUrl: '/admin',
-			}
-		}
+			},
+		};
 		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
 		config = new Config('./test/config.json');
 		const robots = new RobotsPlugin(config);
 		expect(robots).toBeDefined();
 	});
-
 
 	it('execute and write out the robots file', async () => {
 		const jsonConfig = {
@@ -35,9 +34,8 @@ describe('Robots Plugin', () => {
 			robots: {
 				allowedUrl: '/demo',
 				disallowedUrl: '/admin',
-			}
-
-		}
+			},
+		};
 		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
 		config = new Config('./test/config.json');
 		const robots = new RobotsPlugin(config);
@@ -53,9 +51,8 @@ describe('Robots Plugin', () => {
 			plugins: ['robots'],
 			robots: {
 				allowedUrl: '/demo',
-			}
-
-		}
+			},
+		};
 		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
 		config = new Config('./test/config.json');
 		const robots = new RobotsPlugin(config);
@@ -70,9 +67,8 @@ describe('Robots Plugin', () => {
 			...defaultConfig,
 			robots: {
 				disallowedUrl: '/admin',
-			}
-
-		}
+			},
+		};
 		fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
 		config = new Config('./test/config.json');
 		const robots = new RobotsPlugin(config);
@@ -80,5 +76,14 @@ describe('Robots Plugin', () => {
 		const filePath = 'test/site/robots.txt';
 		expect(fs.existsSync(filePath)).toBe(true);
 		fs.rmSync('test/site/robots.txt');
+	});
+
+	it('throw an error if no config was provided', () => {
+		const jsonConfig = {};
+		expect(() => {
+			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
+			const config = new Config('./test/config.json');
+			const robots = new RobotsPlugin(config);
+		}).toThrow();
 	});
 });
