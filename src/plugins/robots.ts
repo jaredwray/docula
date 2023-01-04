@@ -34,14 +34,9 @@ export class RobotsPlugin implements DoculaPlugin {
 		const isAllowed = this.options.allowedUrl ? `Allow: ${this.options.allowedUrl}` : '';
 		const isDisallowed = this.options.disallowedUrl ? `Disallow: ${this.options.disallowedUrl}` : '';
 
-		const data = `User-agent: *
-      ${isAllowed}
-      ${isDisallowed}
-      Sitemap: ${this.options.sitemapPath}
-     `;
-
+		const data = `User-agent: * \n${isAllowed} \n${isDisallowed} \nSitemap: ${this.options.sitemapPath}`;
 		const filePath = `${this.options.outputPath}/${this.options.outputFile}`;
 		await fs.ensureDir(this.options.outputPath);
-		await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+		await fs.writeFile(filePath, data);
 	}
 }
