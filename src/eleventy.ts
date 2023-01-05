@@ -35,12 +35,13 @@ type ElevInterface = {
 	toJSON: () => Promise<ElevJSONOutput[]>;
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 type ElevJSONOutput = {
-  url: string;
+	url: string;
 	inputPath: string;
 	outputPath: string;
-	content: string
-}
+	content: string;
+};
 
 export class Eleventy {
 	private readonly _config: Config;
@@ -73,6 +74,7 @@ export class Eleventy {
 			},
 		};
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		this.eleventy = new Elev(this.config.originPath, this.config.outputPath, this.eleventyConfig);
 	}
 
@@ -80,6 +82,7 @@ export class Eleventy {
 		await this.eleventy.write();
 	}
 
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	public async toJSON() {
 		const json: ElevJSONOutput[] = await this.eleventy.toJSON();
 		return json.filter((element: ElevJSONOutput) => element.url);
