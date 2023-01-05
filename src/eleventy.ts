@@ -32,33 +32,36 @@ type ElevInterface = {
 		config: (config: ElevConfig) => Record<string, unknown>;
 	}) => void;
 	write: () => Promise<void>;
+	toJSON: () => Promise<ElevJSONOutput[]>;
 };
+
+type ElevJSONOutput = {
+  url: string;
+	inputPath: string;
+	outputPath: string;
+	content: string
+}
 
 export class Eleventy {
 	private readonly _config: Config;
+	private readonly eleventyConfig: {quietMode: boolean; config: (eleventyConfig: ElevConfig) => {htmlTemplateEngine: string; passthroughFileCopy: boolean; markdownTemplateEngine: string}};
+	private readonly eleventy: ElevInterface;
 	get config(): Config {
 		return this._config;
 	}
 
 	constructor(config: Config) {
 		this._config = config;
-	}
-
-	public async build() {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias, unicorn/no-this-assignment
-		const $this = this;
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
+		this.eleventyConfig = {
 			quietMode: true,
-
 			config: (eleventyConfig: ElevConfig) => {
 				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
 
-				$this.addPassthroughCopy(eleventyConfig);
-				$this.setLibrary(eleventyConfig);
-				$this.addPlugin(eleventyConfig);
-				$this.addShortcode(eleventyConfig);
-				$this.addFilter(eleventyConfig);
+				this.addPassthroughCopy(eleventyConfig);
+				this.setLibrary(eleventyConfig);
+				this.addPlugin(eleventyConfig);
+				this.addShortcode(eleventyConfig);
+				this.addFilter(eleventyConfig);
 
 				eleventyConfig.setTemplateFormats(['njk', 'md', 'html']);
 
@@ -68,9 +71,18 @@ export class Eleventy {
 					passthroughFileCopy: true,
 				};
 			},
-		});
+		};
 
-		await eleventy.write();
+		this.eleventy = new Elev(this.config.originPath, this.config.outputPath, this.eleventyConfig);
+	}
+
+	public async build() {
+		await this.eleventy.write();
+	}
+
+	public async toJSON() {
+		const json: ElevJSONOutput[] = await this.eleventy.toJSON();
+		return json.filter((element: ElevJSONOutput) => element.url);
 	}
 
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
