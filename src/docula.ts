@@ -4,17 +4,16 @@ import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
-import type {PluginInstances} from './types/config.js';
+import type {PluginInstances, PluginInstance} from './types/config.js';
 import type {CommanderOptions} from './index.js';
-import {PluginInstance} from "./types/config.js";
 
 export class Docula {
 	readonly config: Config;
 	private readonly eleventy: Eleventy;
 	private pluginInstances: PluginInstances = {};
 
-	private beforePlugins: PluginInstance[] = [];
-	private afterPlugins: PluginInstance[] = [];
+	private readonly beforePlugins: PluginInstance[] = [];
+	private readonly afterPlugins: PluginInstance[] = [];
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
@@ -67,23 +66,22 @@ export class Docula {
 		const {plugins} = this.config;
 
 		for (const plugin of plugins) {
-			// @ts-expect-error - Object with index signature
 			const pluginClass = DoculaPlugins[plugin];
-			// eslint-disable-next-line new-cap, @typescript-eslint/no-unsafe-call
+			// eslint-disable-next-line new-cap
 			const pluginInstance = new pluginClass(this.config);
 			this.pluginInstances[plugin] = pluginInstance;
 
 			const {runtime} = pluginInstance;
 			if (runtime === 'before') {
 				this.beforePlugins.push(pluginInstance);
-			} else if(runtime === 'after') {
+			} else if (runtime === 'after') {
 				this.afterPlugins.push(pluginInstance);
 			}
 		}
 	}
 
-	private executePlugins = async (plugins: PluginInstance[]): Promise<void> => {
-		 await Promise.all(plugins.map((plugin) => plugin.execute()))
-	}
+	private readonly executePlugins = async (plugins: PluginInstance[]): Promise<void> => {
+		await Promise.all(plugins.map(async plugin => plugin.execute()));
+	};
 }
 

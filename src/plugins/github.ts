@@ -1,19 +1,34 @@
 import fs from 'fs-extra';
 import axios from 'axios';
-import type {DoculaPlugin} from '../docula-plugin.js';
+import type {DoculaPlugin, Options, Rules} from '../docula-plugin.js';
 import type {Config} from '../config.js';
-import type {GithubConfig} from '../types/config.js';
+import {type Runtime} from '../docula-plugin.js';
+
+export type GithubConfig = {
+	repo: string;
+	author: string;
+};
 
 export class GithubPlugin implements DoculaPlugin {
-	readonly options: Record<string, string> = {
+	static rules: Rules = {
+		type: 'object',
+		required: ['repo', 'author'],
+		properties: {
+			repo: {type: 'string'},
+			author: {type: 'string'},
+		},
+	};
+
+	readonly options: Options = {
 		api: 'https://api.github.com',
-		path: '_data',
+		dataPath: '_data',
 		author: '',
 		repo: '',
 		outputFile: 'github.json',
+		sitePath: '',
 	};
 
-	runtime: 'before' | 'after' = 'before';
+	runtime: Runtime = 'after';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;
@@ -29,7 +44,7 @@ export class GithubPlugin implements DoculaPlugin {
 		};
 		data.releases = await this.getReleases();
 		data.contributors = await this.getContributors();
-		const path = `${this.options.sitePath}/${this.options.path}`;
+		const path = `${this.options.sitePath}/${this.options.dataPath}`;
 		const filePath = `${path}/${this.options.outputFile}`;
 		await fs.ensureDir(path);
 		await fs.writeFile(filePath, JSON.stringify(data, null, 2));
