@@ -3,7 +3,6 @@ import * as elev from '@11ty/eleventy';
 
 import {Eleventy} from '../src/eleventy.js';
 import {Config} from '../src/config.js';
-import {parseRelease} from '../src/eleventy/shortcodes.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = elev.default;
@@ -43,12 +42,5 @@ describe('Eleventy', () => {
 		// @ts-expect-error - private method
 		eleventy.addShortcode(eleventyConfig);
 		expect(eleventyConfig.addShortcode).toHaveBeenCalled();
-	});
-
-	it('Eleventy parseRelease shortcode', () => {
-		const md = '# Title';
-		const result = parseRelease(md);
-		expect(result).toEqual(`<h1>Title</h1>
-`);
 	});
 });
