@@ -11,7 +11,7 @@ describe('Docula', () => {
 		outputPath: '_dist',
 		plugins: ['npm', 'robots'],
 		npm: {
-			moduleName: 'docula',
+			moduleName: 'keyv',
 		},
 		robots: {
 			allow: ['/'],
@@ -57,6 +57,21 @@ describe('Docula', () => {
 		docula.init();
 		expect(fs.existsSync('test/data/site')).toBe(true);
 		fs.rmSync('test/data/site', {force: true, recursive: true});
+	});
+
+	it('Docula - init should create root folder if does not exist', () => {
+		const initConfigJson = {
+			...configJson,
+			originPath: 'test/data/root',
+		};
+
+		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(initConfigJson));
+		const options = {opts: () => ({config: './test/data/docula-config.json'})};
+		const docula = new Docula(options);
+		expect(docula.config.originPath).toBe('test/data/root');
+		docula.init();
+		expect(fs.existsSync('test/data/root')).toBe(true);
+		fs.rmSync('test/data/root', {force: true, recursive: true});
 	});
 
 	it('Docula - should build using Eleventy', async () => {
