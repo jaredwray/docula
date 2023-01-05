@@ -9,7 +9,7 @@ import markdownIt from 'markdown-it';
 import markdownItAnchor from 'markdown-it-anchor';
 import type {Config} from './config.js';
 import {squashCallback} from './eleventy/filters.js';
-import {getYear, formatDate} from './eleventy/shortcodes.js';
+import {getYear, formatDate, parseRelease} from './eleventy/shortcodes.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
@@ -95,6 +95,7 @@ export class Eleventy {
 	private addShortcode(eleventyConfig: ElevConfig) {
 		eleventyConfig.addShortcode('year', getYear);
 		eleventyConfig.addShortcode('formatDate', formatDate);
+		eleventyConfig.addShortcode('parseRelease', parseRelease);
 	}
 
 	private addFilter(eleventyConfig: ElevConfig) {

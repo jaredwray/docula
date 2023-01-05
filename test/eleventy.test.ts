@@ -32,4 +32,15 @@ describe('Eleventy', () => {
 		eleventy.addFilter(eleventyConfig);
 		expect(eleventyConfig.addFilter).toHaveBeenCalled();
 	});
+
+	it('Eleventy - add shortcode', async () => {
+		const eleventyConfig = {
+			addShortcode: jest.fn(),
+		};
+		const config = new Config();
+		const eleventy = new Eleventy(config);
+		// @ts-expect-error - private method
+		eleventy.addShortcode(eleventyConfig);
+		expect(eleventyConfig.addShortcode).toHaveBeenCalled();
+	});
 });
