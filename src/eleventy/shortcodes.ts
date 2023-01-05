@@ -1,5 +1,5 @@
 import {DateTime} from 'luxon';
-import MarkdownIt from "markdown-it";
+import MarkdownIt from 'markdown-it';
 
 export const getYear = (): string => DateTime.local().toUTC().toFormat('yyyy');
 
@@ -15,7 +15,7 @@ export const parseRelease = (content: string) => {
 	const md = new MarkdownIt({
 		html: true,
 		linkify: true,
-		typographer: true
+		typographer: true,
 	});
 	return md.render(content);
 };
