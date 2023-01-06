@@ -1,4 +1,4 @@
-import {getYear, formatDate} from '../../src/eleventy/shortcodes.js';
+import {getYear, formatDate, parseRelease} from '../../src/eleventy/shortcodes.js';
 
 describe('shortcodes', () => {
 	test('getYear returns the current year', () => {
@@ -20,5 +20,12 @@ describe('shortcodes', () => {
 		const expectedDateString = new Date().toISOString().slice(0, 10);
 		const formattedDate = formatDate(format);
 		expect(formattedDate).toBe(expectedDateString);
+	});
+
+	test('parseRelease returns html based on md file', () => {
+		const md = '# Title';
+		const result = parseRelease(md);
+		expect(result).toEqual(`<h1>Title</h1>
+`);
 	});
 });

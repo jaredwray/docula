@@ -43,4 +43,19 @@ describe('Eleventy', () => {
 		eleventy.addShortcode(eleventyConfig);
 		expect(eleventyConfig.addShortcode).toHaveBeenCalled();
 	});
+
+	it('Eleventy - toJSON method', async () => {
+		jest.spyOn(Elev.prototype, 'toJSON').mockImplementation(async () => [
+			{
+				url: '/demo',
+				inputPath: 'test/site/demo/index.html',
+				outputPath: 'test/site',
+				content: 'test',
+			},
+		]);
+		const config = new Config();
+		const eleventy = new Eleventy(config);
+		await eleventy.toJSON();
+		expect(Elev.prototype.toJSON).toHaveBeenCalled();
+	});
 });
