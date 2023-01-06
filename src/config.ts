@@ -1,10 +1,8 @@
 import {existsSync, readFileSync} from 'node:fs';
-
-type AlgoliaConfig = {
-	algoliaAppId: string;
-	algoliaKey: string;
-	algoliaIndexName: string;
-};
+import Ajv from 'ajv';
+import {type ConfigSchema, jsonConfigSchema} from './schemas.js';
+import type {PluginConfig, PluginConfigs, PluginName, Plugins} from './types/config.js';
+import DoculaPlugins from './plugins/index.js';
 
 export class Config {
 	originPath = 'site';
@@ -12,46 +10,77 @@ export class Config {
 	dataPath = 'data';
 	templatePath = 'template';
 	searchEngine = 'algolia';
-	algolia?: AlgoliaConfig;
+	// eslint-disable-next-line  @typescript-eslint/consistent-type-assertions
+	pluginConfig: PluginConfigs = {} as PluginConfigs;
+	plugins: Plugins = [];
 	imagesPath = 'images';
-	assetsPath = 'public';
+	assetsPath = 'css';
+	ajv = new Ajv();
+
+	private readonly schema: ConfigSchema;
 
 	constructor(path?: string) {
-		const configFile = this.checkConfigFile(path);
-		if (path) {
-			if (configFile) {
-				this.loadConfig(path);
-			} else {
-				throw new Error('Config file not found');
-			}
+		this.schema = {...jsonConfigSchema};
+		this.schema.required = [];
+		const configPath = path ?? `./${this.originPath}/config.json`;
+		const configFileExists = this.checkConfigFile(configPath);
+		if (configFileExists) {
+			this.loadConfig(configPath);
+		}
+
+		if (path && !configFileExists) {
+			throw new Error('Config file not found');
 		}
 	}
 
 	loadConfig(path: string) {
 		const data = readFileSync(path, {encoding: 'utf8'});
-		const config = JSON.parse(data) as Record<string, string>;
-		this.originPath = config.originPath ?? this.originPath;
-		this.outputPath = config.outputPath ?? this.outputPath;
-		this.dataPath = config.dataPath ?? this.dataPath;
-		this.templatePath = config.templatePath ?? this.templatePath;
-		this.searchEngine = config.searchEngine ?? this.searchEngine;
-		if (config.algoliaAppId && config.algoliaKey && config.algoliaIndexName) {
-			this.algolia = {
-				algoliaAppId: config.algoliaAppId,
-				algoliaKey: config.algoliaKey,
-				algoliaIndexName: config.algoliaIndexName,
-			};
+		const jsonConfig = JSON.parse(data) as Record<string, any>;
+
+		if (jsonConfig.plugins) {
+			for (const name of jsonConfig.plugins) {
+				this.loadPlugins(name, jsonConfig[name]);
+			}
 		}
 
-		this.imagesPath = config.imagesPath ?? this.imagesPath;
-		this.assetsPath = config.assetsPath ?? this.assetsPath;
+		this.schema.required = [...new Set(this.schema.required)];
+
+		const validate = this.ajv.compile(this.schema);
+
+		// eslint-disable-next-line @typescript-eslint/no-floating-promises
+		validate(jsonConfig);
+
+		if (validate.errors) {
+			const [error] = validate.errors;
+			const {dataPath, message, keyword, params} = error;
+			if (keyword === 'additionalProperties') {
+				const {additionalProperty} = params as Record<string, string>;
+				throw new Error(`The config file has an invalid property: ${additionalProperty}`);
+			}
+
+			throw new Error(`${dataPath} ${message!}`);
+		}
+
+		this.originPath = jsonConfig.originPath ?? this.originPath;
+		this.outputPath = jsonConfig.outputPath ?? this.outputPath;
+		this.dataPath = jsonConfig.dataPath ?? this.dataPath;
+		this.templatePath = jsonConfig.templatePath ?? this.templatePath;
+		this.searchEngine = jsonConfig.searchEngine ?? this.searchEngine;
+
+		this.imagesPath = jsonConfig.imagesPath ?? this.imagesPath;
+		this.assetsPath = jsonConfig.assetsPath ?? this.assetsPath;
+		this.plugins = jsonConfig.plugins ?? this.plugins;
 	}
 
-	checkConfigFile(path?: string): boolean {
-		if (!path) {
-			return false;
+	loadPlugins(name: PluginName, config: PluginConfig) {
+		if (config) {
+			this.pluginConfig[name] = config;
+			this.schema.properties[name] = DoculaPlugins[name].rules;
+			this.schema.required.push(name);
 		}
+	}
 
+	checkConfigFile(path: string): boolean {
 		return existsSync(path);
 	}
 }

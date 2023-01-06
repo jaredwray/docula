@@ -32,4 +32,30 @@ describe('Eleventy', () => {
 		eleventy.addFilter(eleventyConfig);
 		expect(eleventyConfig.addFilter).toHaveBeenCalled();
 	});
+
+	it('Eleventy - add shortcode', async () => {
+		const eleventyConfig = {
+			addShortcode: jest.fn(),
+		};
+		const config = new Config();
+		const eleventy = new Eleventy(config);
+		// @ts-expect-error - private method
+		eleventy.addShortcode(eleventyConfig);
+		expect(eleventyConfig.addShortcode).toHaveBeenCalled();
+	});
+
+	it('Eleventy - toJSON method', async () => {
+		jest.spyOn(Elev.prototype, 'toJSON').mockImplementation(async () => [
+			{
+				url: '/demo',
+				inputPath: 'test/site/demo/index.html',
+				outputPath: 'test/site',
+				content: 'test',
+			},
+		]);
+		const config = new Config();
+		const eleventy = new Eleventy(config);
+		await eleventy.toJSON();
+		expect(Elev.prototype.toJSON).toHaveBeenCalled();
+	});
 });

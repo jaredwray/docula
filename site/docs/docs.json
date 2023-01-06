@@ -5,7 +5,7 @@
   "eleventyComputed": {
     "eleventyNavigation": {
       "key": "{{ title }}",
-      "title": "{{ menuTitle or title }}",
+      "title": "{{ menuTitle }}",
       "parent": "{{ parent }}",
       "order": "{{ order }}"
     }

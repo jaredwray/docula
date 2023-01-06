@@ -1,6 +1,5 @@
 // @ts-expect-error - 11ty doesn't have types
 import * as pkg from '@11ty/eleventy';
-import {DateTime} from 'luxon';
 // @ts-expect-error - 11ty doesn't have types
 import eleventyNavigationPlugin from '@11ty/eleventy-navigation';
 // @ts-expect-error - 11ty doesn't have types
@@ -8,18 +7,23 @@ import pluginTOC from 'eleventy-plugin-toc';
 import markdownIt from 'markdown-it';
 // @ts-expect-error - This module doesn't have types
 import markdownItAnchor from 'markdown-it-anchor';
-import {type Config} from './config.js';
+import type {Config} from './config.js';
 import {squashCallback} from './eleventy/filters.js';
+import {getYear, formatDate, parseRelease} from './eleventy/shortcodes.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
 
 type ElevConfig = {
+	ignores: {
+		add: (pattern: string) => void;
+	};
 	addPassthroughCopy: (options: Record<string, unknown>) => void;
 	setLibrary: (name: string, library: unknown) => void;
 	addPlugin: (plugin: any, options?: Record<string, unknown>) => void;
-	addShortcode: (name: string, callback: () => void) => void;
+	addShortcode: (name: string, callback: (...args: any[]) => unknown) => void;
 	addFilter: (name: string, callback: (text: string) => string) => void;
+	setTemplateFormats(strings: string[]): void;
 };
 
 type ElevInterface = {
@@ -28,60 +32,65 @@ type ElevInterface = {
 		config: (config: ElevConfig) => Record<string, unknown>;
 	}) => void;
 	write: () => Promise<void>;
+	toJSON: () => Promise<ElevJSONOutput[]>;
+};
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type ElevJSONOutput = {
+	url: string;
+	inputPath: string;
+	outputPath: string;
+	content: string;
 };
 
 export class Eleventy {
 	private readonly _config: Config;
+	private readonly eleventyConfig: {quietMode: boolean; config: (eleventyConfig: ElevConfig) => {htmlTemplateEngine: string; passthroughFileCopy: boolean; markdownTemplateEngine: string}};
+	private readonly eleventy: ElevInterface;
 	get config(): Config {
 		return this._config;
 	}
 
 	constructor(config: Config) {
 		this._config = config;
-	}
+		this.eleventyConfig = {
+			quietMode: true,
+			config: (eleventyConfig: ElevConfig) => {
+				eleventyConfig.ignores.add(`./${this.config.originPath}/README.md`);
 
-	public async build() {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias, unicorn/no-this-assignment
-		const $this = this;
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		const eleventy: ElevInterface = new Elev(this.config.originPath, this.config.outputPath, {
-			quietMode: false,
+				this.addPassthroughCopy(eleventyConfig);
+				this.setLibrary(eleventyConfig);
+				this.addPlugin(eleventyConfig);
+				this.addShortcode(eleventyConfig);
+				this.addFilter(eleventyConfig);
 
-			config(eleventyConfig: ElevConfig) {
-				$this.addPassthroughCopy(eleventyConfig);
-				$this.setLibrary(eleventyConfig);
-				$this.addPlugin(eleventyConfig);
-				$this.addShortcode(eleventyConfig);
-				$this.addFilter(eleventyConfig);
+				eleventyConfig.setTemplateFormats(['njk', 'md', 'html']);
 
 				return {
-					templateFormats: [
-						'md',
-						'njk',
-						'html',
-						'liquid',
-					],
 					markdownTemplateEngine: 'njk',
 					htmlTemplateEngine: 'njk',
-					dir: {
-						input: this.config.originPath as string,
-						output: this.config.outputPath as string,
-						includes: this.config.templatePath as string,
-						data: `${this.config.templatePath as string}/${this.config.dataPath as string}`,
-					},
 					passthroughFileCopy: true,
 				};
 			},
-		});
+		};
 
-		await eleventy.write();
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		this.eleventy = new Elev(this.config.originPath, this.config.outputPath, this.eleventyConfig);
+	}
+
+	public async build() {
+		await this.eleventy.write();
+	}
+
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	public async toJSON() {
+		const json: ElevJSONOutput[] = await this.eleventy.toJSON();
+		return json.filter((element: ElevJSONOutput) => element.url);
 	}
 
 	private addPassthroughCopy(eleventyConfig: ElevConfig) {
-		eleventyConfig.addPassthroughCopy({[this.config.assetsPath]: '.'});
-
-		const siteImages = `${this.config.originPath}/${this.config.templatePath}/${this.config.imagesPath}`;
-		eleventyConfig.addPassthroughCopy({[siteImages]: '/images/'});
+		const assetsPath = `${this.config.originPath}/_includes/assets`;
+		eleventyConfig.addPassthroughCopy({[assetsPath]: '/assets/'});
 	}
 
 	private setLibrary(eleventyConfig: ElevConfig) {
@@ -99,7 +108,9 @@ export class Eleventy {
 	}
 
 	private addShortcode(eleventyConfig: ElevConfig) {
-		eleventyConfig.addShortcode('year', () => DateTime.now().toFormat('YYYY'));
+		eleventyConfig.addShortcode('year', getYear);
+		eleventyConfig.addShortcode('formatDate', formatDate);
+		eleventyConfig.addShortcode('parseRelease', parseRelease);
 	}
 
 	private addFilter(eleventyConfig: ElevConfig) {
