@@ -606,6 +606,10 @@ details > summary {
 }
 
 .pagefind-ui__result-link {
+  color: var(--color-primary) !important;
+}
+
+.pagefind-ui__result-link:hover {
   color: var(--color-secondary) !important;
 }
 
@@ -617,7 +621,7 @@ details > summary {
   border: 1px solid var(--border) !important;
 }
 
-.pagefind-ui__button:hover {
+.pagefind-ui__button {
   background-color: var(--search-input-background) !important;
 }
 
@@ -627,6 +631,7 @@ details > summary {
 
 .pagefind-ui__result-excerpt > mark {
   background-color: var(--background-search-highlight) !important;
+  color: var(--color-search-highlight) !important;
 }
 
 .pagefind-ui__form::before {
