@@ -14,8 +14,7 @@
     "test:code": "yarn build && node ./bin/docula.js",
     "lint": "xo --fix",
     "docs:gen": "eleventy --config=.eleventy.cjs",
-    "docs:gen:watch": "eleventy --config=.eleventy.cjs --serve",
-    "build:pagefind": "npx pagefind --source 'dist'"
+    "docs:gen:watch": "eleventy --config=.eleventy.cjs --serve"
   },
   "repository": {
     "type": "git",
