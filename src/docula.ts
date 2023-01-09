@@ -39,7 +39,7 @@ export class Docula {
 			await this.eleventy.build();
 			await this.executePlugins(this.afterPlugins);
 		} catch (error: unknown) {
-			throw error;
+			reportError(error);
 		}
 	}
 

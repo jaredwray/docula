@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import type {DoculaPlugin, Options, Runtime, Rules} from '../docula-plugin.js';
+import type {DoculaPlugin, Options, Runtime, Schema} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 
 export type RobotsConfig = {
@@ -8,7 +8,7 @@ export type RobotsConfig = {
 };
 
 export class RobotsPlugin implements DoculaPlugin {
-	static rules: Rules = {
+	static schema: Schema = {
 		type: 'object',
 		properties: {
 			allowedUrl: {type: 'string'},

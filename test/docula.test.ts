@@ -8,13 +8,10 @@ jest.mock('../src/eleventy.js');
 describe('Docula', () => {
 	const configJson: Record<string, any> = {
 		originPath: 'test/data/site',
-		outputPath: '_dist',
-		plugins: ['npm', 'robots'],
+		outputPath: 'test/data/dist',
+		plugins: ['npm'],
 		npm: {
 			moduleName: 'keyv',
-		},
-		robots: {
-			allow: ['/'],
 		},
 	};
 

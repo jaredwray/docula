@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import type {DoculaPlugin, Options, Rules} from '../docula-plugin.js';
+import type {DoculaPlugin, Options, Schema} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 import {type Runtime} from '../docula-plugin.js';
 import {Eleventy} from '../eleventy.js';
@@ -9,7 +9,7 @@ export type SitemapConfig = {
 };
 
 export class SitemapPlugin implements DoculaPlugin {
-	static rules: Rules = {
+	static schema: Schema = {
 		type: 'object',
 		required: ['baseUrl'],
 		properties: {
