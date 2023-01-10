@@ -24,6 +24,4 @@ describe('Pagefind Plugin', () => {
 		const pagefind = new PagefindPlugin(config);
 		expect(pagefind).toBeDefined();
 	});
-
-
 });

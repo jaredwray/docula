@@ -2,7 +2,7 @@ import {type GithubConfig, GithubPlugin} from './github.js';
 import {type NpmConfig, NpmPlugin} from './npm.js';
 import {type RobotsConfig, RobotsPlugin} from './robots.js';
 import {type SitemapConfig, SitemapPlugin} from './sitemap.js';
-import {type PagefindConfig, PagefindPlugin} from './pagefind.js';
+import {PagefindPlugin} from './pagefind.js';
 
 const plugins = {
 	github: GithubPlugin,
@@ -12,7 +12,7 @@ const plugins = {
 	pagefind: PagefindPlugin,
 };
 
-export type PluginConfig = GithubConfig | NpmConfig | RobotsConfig | SitemapConfig | PagefindConfig;
+export type PluginConfig = GithubConfig | NpmConfig | RobotsConfig | SitemapConfig;
 
 export type PluginInstance = GithubPlugin | NpmPlugin | RobotsPlugin | SitemapPlugin | PagefindPlugin;
 

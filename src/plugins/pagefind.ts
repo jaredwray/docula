@@ -3,17 +3,8 @@ import type {DoculaPlugin, Options, Schema} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 import {type Runtime} from '../docula-plugin.js';
 
-export type PagefindConfig = {
-	output: string;
-};
-
 export class PagefindPlugin implements DoculaPlugin {
-	static schema: Schema = {
-		type: 'object',
-		properties: {
-			output: {type: 'string'},
-		},
-	};
+	static schema: Schema = {};
 
 	readonly options: Options = {
 		outputPath: '',
@@ -31,6 +22,7 @@ export class PagefindPlugin implements DoculaPlugin {
 				if (error) {
 					reject(error);
 				}
+
 				resolve(stdout);
 			});
 		});

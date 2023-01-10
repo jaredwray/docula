@@ -75,8 +75,11 @@ export class Config {
 	loadPlugins(name: PluginName, config: PluginConfig) {
 		if (config) {
 			this.pluginConfig[name] = config;
-			this.schema.properties[name] = DoculaPlugins[name].schema;
-			this.schema.required.push(name);
+			const pluginSchema = DoculaPlugins[name].schema;
+			this.schema.properties[name] = pluginSchema;
+			if (pluginSchema.required?.length) {
+				this.schema.required.push(name);
+			}
 		}
 	}
 

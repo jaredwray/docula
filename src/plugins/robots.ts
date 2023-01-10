@@ -25,9 +25,14 @@ export class RobotsPlugin implements DoculaPlugin {
 
 	constructor(config: Config) {
 		this.options.outputPath = config.outputPath;
-		const {allowedUrl, disallowedUrl} = config.pluginConfig.robots as RobotsConfig;
-		this.options.allowedUrl = allowedUrl;
-		this.options.disallowedUrl = disallowedUrl;
+		const {allowedUrl, disallowedUrl} = config.pluginConfig.robots as unknown as RobotsConfig;
+		if (allowedUrl) {
+			this.options.allowedUrl = allowedUrl;
+		}
+
+		if (disallowedUrl)	{
+			this.options.disallowedUrl = disallowedUrl;
+		}
 	}
 
 	async execute(): Promise<void> {
