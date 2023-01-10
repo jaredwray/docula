@@ -33,10 +33,6 @@ This will all be generated in the `dist` folder by default. To change that you c
 - Pull all of your Contributors and Display Them
 - Pulls your release notes and puts it into a good looking data format for your templates
 - Pulls your project stats based on Github Forks, Stars, and Watchers
-
-## NPM Integration
-- pulls your package manager stats based on NPM, crate, pip, and nuget
-
 ## How the CLI should work
 To create a new project it should be as simple as:
 ```bash
