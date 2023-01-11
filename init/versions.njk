@@ -15,7 +15,9 @@
         <span class="release-date">{% formatDate "MMM dd, yyyy", release.published_at %}</span>
       </div>
       <div class="release-body">
-        <p>{% parseRelease release.body %}</p>
+        {% if release.body %}
+          <p>{% parseRelease release.body %}</p>
+        {% endif %}
       </div>
     </div>
     {% endfor %}
