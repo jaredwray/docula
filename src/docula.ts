@@ -6,6 +6,7 @@ import {reportError} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstances, PluginInstance} from './types/config.js';
 import type {CommanderOptions} from './index.js';
+import {fileURLToPath} from 'url';
 
 export class Docula {
 	readonly config: Config;
@@ -23,8 +24,8 @@ export class Docula {
 	}
 
 	public init(sitePath?: string): void {
-		const rootSitePath = sitePath ?? this.config.originPath;
-
+		const {originPath} = this.config;
+		const rootSitePath = path.join(process.cwd(), sitePath || originPath);
 		// Create the <site> folder
 		if (!fs.existsSync(rootSitePath)) {
 			fs.mkdirSync(rootSitePath);
@@ -36,9 +37,10 @@ export class Docula {
 	public async build(): Promise<void> {
 		const {originPath} = this.config;
 		// eslint-disable-next-line unicorn/prefer-module
-		// const site = path.join(__dirname, originPath);
-		//
-		// console.log(site, 'site');
+		const userOriginPath = `${process.cwd()}/${originPath}`;
+		if(!fs.existsSync(userOriginPath)) {
+			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
+		}
 		try {
 			await this.executePlugins(this.beforePlugins);
 			await this.eleventy.build();
@@ -49,9 +51,12 @@ export class Docula {
 	}
 
 	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
-		const sourceExists = fs.existsSync(source);
+		const __filename = fileURLToPath(import.meta.url);
+		const doculaPath = path.dirname(path.dirname(__filename));
+		const sourcePath = path.join(doculaPath, source);
+		const sourceExists = fs.existsSync(sourcePath);
 		const targetExists = fs.existsSync(target);
-		const sourceStats = fs.statSync(source);
+		const sourceStats = fs.statSync(sourcePath);
 		const isDirectory = sourceExists && sourceStats.isDirectory();
 
 		if (isDirectory) {
@@ -59,11 +64,11 @@ export class Docula {
 				fs.mkdirSync(target);
 			}
 
-			for (const file of fs.readdirSync(source)) {
+			for (const file of fs.readdirSync(sourcePath)) {
 				this.copyFolder(path.join(source, file), path.join(target, file));
 			}
 		} else {
-			fs.copyFileSync(source, target);
+			fs.copyFileSync(sourcePath, target);
 		}
 	}
 

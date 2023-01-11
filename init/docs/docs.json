@@ -1,0 +1,13 @@
+{
+  "layout": "doc.njk",
+  "tags": "docs",
+  "permalink": "/docs/{{ page.fileSlug | slugify }}/",
+  "eleventyComputed": {
+    "eleventyNavigation": {
+      "key": "{{ title }}",
+      "title": "{{ menuTitle }}",
+      "parent": "{{ parent }}",
+      "order": "{{ order }}"
+    }
+  }
+}
