@@ -4,17 +4,16 @@
   "description": "Open Source Static Site Generator",
   "exports": "./dist/docula.js",
   "types": "./dist/docula.d.ts",
+  "type": "module",
   "engines": {
     "node": ">=14.16"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p .",
     "clean": "rm -rf dist && rm -rf test/data/site && rm -rf node_modules",
     "test": "xo --fix && jest --coverage",
     "test:code": "yarn build && node ./bin/docula.js",
-    "lint": "xo --fix",
-    "docs:gen": "eleventy --config=.eleventy.cjs",
-    "docs:gen:watch": "eleventy --config=.eleventy.cjs --serve"
+    "lint": "xo --fix"
   },
   "repository": {
     "type": "git",
@@ -71,6 +70,11 @@
     "node-fetch": "2.6.7",
     "winston": "^3.8.2"
   },
+  "files": [
+    "dist",
+    "bin",
+    "init"
+  ],
   "xo": {
     "rules": {
       "@typescript-eslint/no-unsafe-assignment": 0,

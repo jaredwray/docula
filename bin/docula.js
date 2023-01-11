@@ -1,6 +1,5 @@
-#!/usr/bin/env ts-node --esm --inspect --experimental-specifier-resolution=node --es-module-specifier-resolution=node
-// eslint-disable-next-line unicorn/prefer-module
-const {Executable} = require('../dist/index.js');
+#!/usr/bin/env node
+import {Executable} from '../dist/index.js';
 
 const docula = new Executable();
 
