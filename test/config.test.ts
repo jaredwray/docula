@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import {Config} from '../src/config.js';
 
 describe('Config', () => {

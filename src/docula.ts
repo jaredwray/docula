@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
@@ -34,6 +34,11 @@ export class Docula {
 	}
 
 	public async build(): Promise<void> {
+		const {originPath} = this.config;
+		// eslint-disable-next-line unicorn/prefer-module
+		// const site = path.join(__dirname, originPath);
+		//
+		// console.log(site, 'site');
 		try {
 			await this.executePlugins(this.beforePlugins);
 			await this.eleventy.build();

@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import type {DoculaPlugin, Options, Rules} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 import {type Runtime} from '../docula-plugin.js';

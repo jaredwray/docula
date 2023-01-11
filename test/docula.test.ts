@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import {Docula} from '../src/docula.js';
 import {Eleventy} from '../src/eleventy.js';
 import logger from '../src/logger.js';
