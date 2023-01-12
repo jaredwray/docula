@@ -9,7 +9,7 @@ export class Config {
 	outputPath = 'dist';
 	dataPath = 'data';
 	templatePath = 'template';
-	searchEngine = 'algolia';
+	searchEngine = 'pagefind';
 	// eslint-disable-next-line  @typescript-eslint/consistent-type-assertions
 	pluginConfig: PluginConfigs = {} as PluginConfigs;
 	plugins: Plugins = [];
