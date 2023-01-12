@@ -9,7 +9,7 @@ describe('Docula', () => {
 	const configJson: Record<string, any> = {
 		originPath: 'test/data/site',
 		outputPath: 'test/data/dist',
-		plugins: ['npm'],
+		plugins: ['npm', 'robots'],
 		npm: {
 			moduleName: 'keyv',
 		},

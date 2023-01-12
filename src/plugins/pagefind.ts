@@ -18,7 +18,7 @@ export class PagefindPlugin implements DoculaPlugin {
 
 	async execute(): Promise<void> {
 		await new Promise((resolve, reject) => {
-			exec(`npx pagefind --source ${this.options.outputPath}`, (error, stdout) => {
+			exec(`npx pagefind --source ${this.options.outputPath}`, (error: any, stdout: any) => {
 				if (error) {
 					reject(error);
 				}

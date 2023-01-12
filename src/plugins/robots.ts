@@ -25,7 +25,7 @@ export class RobotsPlugin implements DoculaPlugin {
 
 	constructor(config: Config) {
 		this.options.outputPath = config.outputPath;
-		const {allowedUrl, disallowedUrl} = config.pluginConfig.robots as unknown as RobotsConfig;
+		const {allowedUrl, disallowedUrl} = config.pluginConfig.robots as unknown as RobotsConfig || {};
 		if (allowedUrl) {
 			this.options.allowedUrl = allowedUrl;
 		}

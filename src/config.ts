@@ -15,6 +15,7 @@ export class Config {
 	plugins: Plugins = [];
 	imagesPath = 'images';
 	assetsPath = 'css';
+	siteUrl = '';
 	ajv = new Ajv();
 
 	private readonly schema: ConfigSchema;
@@ -70,6 +71,7 @@ export class Config {
 		this.imagesPath = jsonConfig.imagesPath ?? this.imagesPath;
 		this.assetsPath = jsonConfig.assetsPath ?? this.assetsPath;
 		this.plugins = jsonConfig.plugins ?? this.plugins;
+		this.siteUrl = jsonConfig.siteUrl ?? this.siteUrl;
 	}
 
 	loadPlugins(name: PluginName, config: PluginConfig) {

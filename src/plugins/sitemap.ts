@@ -29,8 +29,10 @@ export class SitemapPlugin implements DoculaPlugin {
 	constructor(config: Config) {
 		this.eleventy = new Eleventy(config);
 		this.options.outputPath = config.outputPath;
-		const {baseUrl} = config.pluginConfig.sitemap as SitemapConfig;
-		this.options.baseUrl = baseUrl;
+		const {baseUrl} = config.pluginConfig.sitemap as SitemapConfig || {};
+		const {siteUrl} = config;
+
+		this.options.baseUrl = baseUrl ?? siteUrl;
 	}
 
 	async execute(): Promise<void> {
