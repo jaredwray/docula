@@ -78,12 +78,12 @@ describe('Robots Plugin', () => {
 		fs.rmSync('test/site/robots.txt');
 	});
 
-	it('throw an error if no config was provided', () => {
+	it('not throw an error if no config was provided', () => {
 		const jsonConfig = {};
 		expect(() => {
 			fs.writeFileSync('test/config.json', JSON.stringify(jsonConfig, null, 2));
 			const config = new Config('./test/config.json');
 			const robots = new RobotsPlugin(config);
-		}).toThrow();
+		}).not.toThrow();
 	});
 });

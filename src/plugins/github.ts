@@ -1,8 +1,7 @@
 import fs from 'fs-extra';
 import axios from 'axios';
-import type {DoculaPlugin, Options, Rules} from '../docula-plugin.js';
+import type {DoculaPlugin, Options, Schema, Runtime} from '../docula-plugin.js';
 import type {Config} from '../config.js';
-import {type Runtime} from '../docula-plugin.js';
 
 export type GithubConfig = {
 	repo: string;
@@ -10,7 +9,7 @@ export type GithubConfig = {
 };
 
 export class GithubPlugin implements DoculaPlugin {
-	static rules: Rules = {
+	static schema: Schema = {
 		type: 'object',
 		required: ['repo', 'author'],
 		properties: {

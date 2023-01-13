@@ -33,17 +33,20 @@
           <div class="content-container">
             <h2 class="home-title">Latest's Releases</h2>
             {% set releasesLength = github.releases | length %}
-            {% set latestReleases = github.releases | slice(3) %}
-            {% for release in latestReleases %}
-              <div class="release">
-                <div class="release-header">
-                  <a class="release-title" href="{{ release.html_url }}" target="_blank" rel="noopener noreferrer">{{ release.name }}</a>
-                  <span class="release-date">{% formatDate "MMM dd, yyyy", release.published_at %}</span>
+            {% for release in github.releases %}
+             {% if loop.index <= 3 %}
+                <div class="release">
+                  <div class="release-header">
+                    <a class="release-title" href="{{ release.html_url }}" target="_blank" rel="noopener noreferrer">{{ release.name }}</a>
+                    <span class="release-date">{% formatDate "MMM dd, yyyy", release.published_at %}</span>
+                  </div>
+                  <div class="release-body">
+                    {% if release.body %}
+                      <p>{% parseRelease release.body %}</p>
+                    {% endif %}
+                  </div>
                 </div>
-                <div class="release-body">
-                  <p>{% parseRelease release.body %}</p>
-                </div>
-              </div>
+              {% endif %}
             {% endfor %}
 
             {% if releasesLength > 5 %}
@@ -61,9 +64,9 @@
 
   </main>
 
-  {% include "shared/search.njk" %}
+  {% include "shared/searchModal.njk" %}
   {% include "shared/scripts.njk" %}
-  {% include "search/algolia.njk" %}
+  {% include "search/pagefind.njk" %}
 
 </body>
 </html>

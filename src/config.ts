@@ -9,12 +9,13 @@ export class Config {
 	outputPath = 'dist';
 	dataPath = 'data';
 	templatePath = 'template';
-	searchEngine = 'algolia';
+	searchEngine = 'pagefind';
 	// eslint-disable-next-line  @typescript-eslint/consistent-type-assertions
 	pluginConfig: PluginConfigs = {} as PluginConfigs;
 	plugins: Plugins = [];
 	imagesPath = 'images';
 	assetsPath = 'css';
+	siteUrl = '';
 	ajv = new Ajv();
 
 	private readonly schema: ConfigSchema;
@@ -70,13 +71,17 @@ export class Config {
 		this.imagesPath = jsonConfig.imagesPath ?? this.imagesPath;
 		this.assetsPath = jsonConfig.assetsPath ?? this.assetsPath;
 		this.plugins = jsonConfig.plugins ?? this.plugins;
+		this.siteUrl = jsonConfig.siteUrl ?? this.siteUrl;
 	}
 
 	loadPlugins(name: PluginName, config: PluginConfig) {
 		if (config) {
 			this.pluginConfig[name] = config;
-			this.schema.properties[name] = DoculaPlugins[name].rules;
-			this.schema.required.push(name);
+			const pluginSchema = DoculaPlugins[name].schema;
+			this.schema.properties[name] = pluginSchema;
+			if (pluginSchema.required?.length) {
+				this.schema.required.push(name);
+			}
 		}
 	}
 
