@@ -39,6 +39,7 @@ export const jsonConfigSchema: ConfigSchema = {
 		},
 		imagesPath: {type: 'string'},
 		assetsPath: {type: 'string'},
+		siteUrl: {type: 'string'},
 	},
 	required: [],
 };

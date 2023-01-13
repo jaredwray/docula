@@ -1,6 +1,6 @@
 import axios from 'axios';
 import fs from 'fs-extra';
-import type {DoculaPlugin, Options, Rules, Runtime} from '../docula-plugin.js';
+import type {DoculaPlugin, Options, Schema, Runtime} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 
 export type NpmConfig = {
@@ -8,7 +8,7 @@ export type NpmConfig = {
 };
 
 export class NpmPlugin implements DoculaPlugin {
-	static rules: Rules = {
+	static schema: Schema = {
 		type: 'object',
 		required: ['moduleName'],
 		properties: {
