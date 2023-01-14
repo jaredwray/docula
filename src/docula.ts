@@ -1,4 +1,6 @@
 import * as path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import process from 'node:process';
 import fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
@@ -6,7 +8,6 @@ import {reportError} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstances, PluginInstance} from './types/config.js';
 import type {CommanderOptions} from './index.js';
-import {fileURLToPath} from 'url';
 
 export class Docula {
 	readonly config: Config;
@@ -25,7 +26,7 @@ export class Docula {
 
 	public init(sitePath?: string): void {
 		const {originPath} = this.config;
-		const rootSitePath = path.join(process.cwd(), sitePath || originPath);
+		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
 		// Create the <site> folder
 		if (!fs.existsSync(rootSitePath)) {
 			fs.mkdirSync(rootSitePath);
@@ -36,9 +37,8 @@ export class Docula {
 
 	public async build(): Promise<void> {
 		const {originPath} = this.config;
-		// eslint-disable-next-line unicorn/prefer-module
 		const userOriginPath = `${process.cwd()}/${originPath}`;
-		if(!fs.existsSync(userOriginPath)) {
+		if (!fs.existsSync(userOriginPath)) {
 			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
 		}
 		try {
