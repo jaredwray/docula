@@ -1,0 +1,13 @@
+{
+  "contributors": [
+    {
+      "login": "jaredwray",
+      "id": 1,
+      "node_id": "test",
+      "avatar_url": "url",
+      "url": "https://api.github.com/users/jaredwray",
+      "type": "User",
+      "contributions": 1
+    }
+  ]
+}

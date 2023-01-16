@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/jaredwray/writr/releases",
+      "assets_url": "https://api.github.com/repos/jaredwray/writr",
+      "upload_url": "https://uploads.github.com/repos/jaredwray/writr",
+      "html_url": "https://github.com/jaredwray/writr/releases/tag/v1.0.0",
+      "id": 222,
+      "node_id": "demo",
+      "tag_name": "v1.0.0",
+      "body": "test"
+    }
+  ]
+}

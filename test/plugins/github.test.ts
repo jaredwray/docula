@@ -1,6 +1,9 @@
 import fs from 'fs-extra';
+import axios from 'axios';
 import {GithubPlugin} from '../../src/plugins/github.js';
 import {Config} from '../../src/config.js';
+
+jest.mock('axios');
 
 describe('Github Plugin', () => {
 	const defaultConfig = {
@@ -54,23 +57,6 @@ describe('Github Plugin', () => {
 		}).toThrow();
 	});
 
-	it('execute and write out the github file', async () => {
-		const jsonConfig = {
-			...defaultConfig,
-			github: {
-				repo: 'docula',
-				author: 'jaredwray',
-			},
-		};
-		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
-		const config = new Config('./test/data/github-config.json');
-		const github = new GithubPlugin(config);
-		await github.execute();
-		const filePath = 'test/site/_data/github.json';
-		expect(fs.existsSync(filePath)).toBe(true);
-		fs.rmSync('test/site/_data/github.json');
-	});
-
 	it('author option does not exist', () => {
 		const jsonConfig = {
 			...defaultConfig,
@@ -86,6 +72,9 @@ describe('Github Plugin', () => {
 	});
 
 	it('get contributors', async () => {
+		const githubData = fs.readFileSync('test/mock/github-contributors.json', 'utf8');
+		const parseGithubData = JSON.parse(githubData);
+		(axios.get as jest.Mock).mockResolvedValue({data: JSON.parse(githubData)});
 		const jsonConfig = {
 			...defaultConfig,
 			github: {
@@ -98,10 +87,14 @@ describe('Github Plugin', () => {
 		const github = new GithubPlugin(config);
 		const result = await github.getContributors();
 
-		expect(result).toBeDefined();
+		expect(axios.get).toHaveBeenCalledWith('https://api.github.com/repos/jaredwray/docula/contributors');
+		expect(result).toEqual(parseGithubData);
 	});
 
 	it('get releases', async () => {
+		const githubData = fs.readFileSync('test/mock/github-releases.json', 'utf8');
+		const parseGithubData = JSON.parse(githubData);
+		(axios.get as jest.Mock).mockResolvedValue({data: parseGithubData});
 		const jsonConfig = {
 			...defaultConfig,
 			github: {
@@ -114,6 +107,27 @@ describe('Github Plugin', () => {
 		const github = new GithubPlugin(config);
 		const result = await github.getReleases();
 
-		expect(result.length).toBeGreaterThan(2);
+		expect(axios.get).toHaveBeenCalledWith('https://api.github.com/repos/jaredwray/writr/releases');
+		expect(result).toEqual(parseGithubData);
+	});
+
+	it('execute and write out the github file', async () => {
+		(axios.get as jest.Mock).mockResolvedValue({data: {}});
+
+		const jsonConfig = {
+			...defaultConfig,
+			github: {
+				repo: 'docula',
+				author: 'jaredwray',
+			},
+		};
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
+		const github = new GithubPlugin(config);
+		await github.execute();
+
+		const filePath = 'test/site/_data/github.json';
+		expect(fs.existsSync(filePath)).toBe(true);
+		fs.rmSync('test/site/_data/github.json');
 	});
 });
