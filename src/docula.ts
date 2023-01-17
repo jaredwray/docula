@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import fs from 'fs-extra';
+import inquirer from 'inquirer';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {reportError} from './tools.js';
@@ -25,6 +26,62 @@ export class Docula {
 	}
 
 	public init(sitePath?: string): void {
+		const userConfig: any = {};
+		inquirer.prompt([
+			{
+				type: 'input',
+				name: 'siteUrl',
+				message: 'What is the URL of your site?',
+				// validate(value: string) {
+				// 	const regex = /^(http(s)?:\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g;
+				// 	if(value.length && value.match(regex)) {
+				// 		return true;
+				// 	} else {
+				// 		return 'Please enter a complete URL.';
+				// 	}
+				// }
+			},
+			{
+				type: 'checkbox',
+				name: 'plugins',
+				message: 'Select the plugins you want to use',
+				choices: [{name: 'github'}, {name: 'robots.txt'}, {name: 'sitemap.xml'}],
+			}
+		]).then(answers => {
+			if(answers.plugins.length) {
+				const plugins = answers.plugins.map((plugin: any) => {
+					if(plugin === 'robots.txt') {
+						return 'robots';
+					} else if(plugin === 'sitemap.xml') {
+						return 'sitemap';
+					} else {
+						return plugin;
+					}
+				});
+				answers.plugins = plugins;
+				userConfig.plugins = plugins;
+
+				if(plugins.includes('github')) {
+					inquirer.prompt([
+					{
+						type: 'input',
+						name: 'author',
+						message: "What is your GitHub username?",
+					}, {
+						type: 'input',
+						name: 'repo',
+						message: "What is your GitHub repository's name?",
+					}
+					]).then(githubData => {
+						userConfig.github = githubData
+					})
+				}
+				userConfig.plugins = plugins;
+			}
+			userConfig.siteUrl = answers.siteUrl;
+		}).catch(error => { console.log(error, 'errpr') })
+
+
 		const {originPath} = this.config;
 		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
 		// Create the <site> folder
@@ -51,6 +108,7 @@ export class Docula {
 	}
 
 	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
+		//TODO: refactor and add a check to see if the folder exists
 		const __filename = fileURLToPath(import.meta.url);
 		const doculaPath = path.dirname(path.dirname(__filename));
 		const sourcePath = path.join(doculaPath, source);
