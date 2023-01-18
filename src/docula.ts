@@ -2,12 +2,11 @@ import * as path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import fs from 'fs-extra';
-import inquirer from 'inquirer';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {reportError} from './tools.js';
+import {getSiteURL, getUserPlugins} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
-import type {PluginInstances, PluginInstance} from './types/config.js';
+import type {PluginInstance, PluginInstances} from './types/config.js';
 import type {CommanderOptions} from './index.js';
 
 export class Docula {
@@ -20,68 +19,15 @@ export class Docula {
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
-		this.config = new Config(parameters?.config);
+		const configPath = `${process.cwd()}/site/config.json`;
+		const config: string = parameters ? parameters?.config : configPath;
+		this.config = new Config(config);
 		this.eleventy = new Eleventy(this.config);
 		this.loadPlugins();
 	}
 
-	public init(sitePath?: string): void {
-		const userConfig: any = {};
-		inquirer.prompt([
-			{
-				type: 'input',
-				name: 'siteUrl',
-				message: 'What is the URL of your site?',
-				// validate(value: string) {
-				// 	const regex = /^(http(s)?:\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g;
-				// 	if(value.length && value.match(regex)) {
-				// 		return true;
-				// 	} else {
-				// 		return 'Please enter a complete URL.';
-				// 	}
-				// }
-			},
-			{
-				type: 'checkbox',
-				name: 'plugins',
-				message: 'Select the plugins you want to use',
-				choices: [{name: 'github'}, {name: 'robots.txt'}, {name: 'sitemap.xml'}],
-			}
-		]).then(answers => {
-			if(answers.plugins.length) {
-				const plugins = answers.plugins.map((plugin: any) => {
-					if(plugin === 'robots.txt') {
-						return 'robots';
-					} else if(plugin === 'sitemap.xml') {
-						return 'sitemap';
-					} else {
-						return plugin;
-					}
-				});
-				answers.plugins = plugins;
-				userConfig.plugins = plugins;
-
-				if(plugins.includes('github')) {
-					inquirer.prompt([
-					{
-						type: 'input',
-						name: 'author',
-						message: "What is your GitHub username?",
-					}, {
-						type: 'input',
-						name: 'repo',
-						message: "What is your GitHub repository's name?",
-					}
-					]).then(githubData => {
-						userConfig.github = githubData
-					})
-				}
-				userConfig.plugins = plugins;
-			}
-			userConfig.siteUrl = answers.siteUrl;
-		}).catch(error => { console.log(error, 'errpr') })
-
-
+	public async init(sitePath?: string): Promise<void> {
+		await this.buildConfigFile();
 		const {originPath} = this.config;
 		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
 		// Create the <site> folder
@@ -98,13 +44,9 @@ export class Docula {
 		if (!fs.existsSync(userOriginPath)) {
 			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
 		}
-		try {
-			await this.executePlugins(this.beforePlugins);
-			await this.eleventy.build();
-			await this.executePlugins(this.afterPlugins);
-		} catch (error: unknown) {
-			reportError(error);
-		}
+		await this.executePlugins(this.beforePlugins);
+		await this.eleventy.build();
+		await this.executePlugins(this.afterPlugins);
 	}
 
 	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
@@ -128,6 +70,20 @@ export class Docula {
 		} else {
 			fs.copyFileSync(sourcePath, target);
 		}
+	}
+
+	private async buildConfigFile(): Promise<void> {
+		const userConfig: any = {};
+		const siteUrl = await getSiteURL();
+		const plugins = await getUserPlugins();
+		userConfig.siteUrl = siteUrl;
+
+		for (const plugin in plugins) {
+			userConfig[plugin] = plugins[plugin];
+		}
+
+		const configPath = `${process.cwd()}/${this.config.originPath}/config.json`;
+		fs.writeFileSync(configPath, JSON.stringify(userConfig, null, 2));
 	}
 
 	private loadPlugins(): void {

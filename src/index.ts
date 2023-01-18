@@ -34,7 +34,7 @@ export class Executable {
 				try {
 					logger.info('Initializing Docula...');
 					const docula = new Docula(options);
-					docula.init();
+					await docula.init();
 				} catch (error: unknown) {
 					reportError(error);
 				}

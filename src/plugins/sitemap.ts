@@ -1,23 +1,13 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import type {DoculaPlugin, Options, Schema, Runtime} from '../docula-plugin.js';
 import type {Config} from '../config.js';
 import {Eleventy} from '../eleventy.js';
 
-export type SitemapConfig = {
-	baseUrl: string;
-};
-
 export class SitemapPlugin implements DoculaPlugin {
-	static schema: Schema = {
-		type: 'object',
-		required: ['baseUrl'],
-		properties: {
-			baseUrl: {type: 'string'},
-		},
-	};
+	static schema: Schema = {};
 
 	readonly options: Options = {
-		baseUrl: '',
+		siteUrl: '',
 		outputFile: 'sitemap.xml',
 		outputPath: '',
 	};
@@ -28,17 +18,16 @@ export class SitemapPlugin implements DoculaPlugin {
 	constructor(config: Config) {
 		this.eleventy = new Eleventy(config);
 		this.options.outputPath = config.outputPath;
-		const {baseUrl} = config.pluginConfig.sitemap as SitemapConfig || {};
 		const {siteUrl} = config;
 
-		this.options.baseUrl = baseUrl ?? siteUrl;
+		this.options.siteUrl = siteUrl;
 	}
 
 	async execute(): Promise<void> {
 		const jsonContent = await this.eleventy.toJSON();
 		const content = `<?xml version="1.0" encoding="utf-8"?>
 				<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-				  ${jsonContent.map(item => (`<url><loc>${this.options.baseUrl}${item.url}</loc></url>`)).join('')}
+				  ${jsonContent.map(item => (`<url><loc>${this.options.siteUrl}${item.url}</loc></url>`)).join('')}
 				</urlset>`;
 
 		fs.writeFileSync(`${this.options.outputPath}/${this.options.outputFile}`, content);

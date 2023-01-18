@@ -51,13 +51,27 @@ export class GithubPlugin implements DoculaPlugin {
 
 	async getReleases(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/releases`;
-		const result = await axios.get(url);
-		return result.data;
+		try {
+			const result = await axios.get(url);
+			return result.data;
+		} catch(error: any) {
+			if(error.response.status === 404) {
+				 throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+			}
+			throw error;
+		}
 	}
 
 	async getContributors(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/contributors`;
-		const result = await axios.get(url);
-		return result.data;
+		try {
+			const result = await axios.get(url);
+			return result.data;
+		} catch (error: any) {
+			if (error.response.status === 404) {
+				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+			}
+			throw error;
+		}
 	}
 }
