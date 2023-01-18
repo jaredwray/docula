@@ -59,6 +59,7 @@ export class GithubPlugin implements DoculaPlugin {
 			if (typedError.response?.status === 404) {
 				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
 			}
+
 			throw error;
 		}
 	}
@@ -73,6 +74,7 @@ export class GithubPlugin implements DoculaPlugin {
 			if (typedError.response?.status === 404) {
 				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
 			}
+
 			throw error;
 		}
 	}

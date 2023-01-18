@@ -11,6 +11,14 @@ describe('Github Plugin', () => {
 		plugins: ['github'],
 	};
 
+	beforeEach(() => {
+		(axios.get as jest.Mock).mockClear();
+	});
+
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
 	afterAll(() => {
 		fs.rmSync('./test/data/github-config.json', {force: true});
 	});
@@ -74,7 +82,7 @@ describe('Github Plugin', () => {
 	it('get contributors', async () => {
 		const githubData = fs.readFileSync('test/mock/github-contributors.json', 'utf8');
 		const parseGithubData = JSON.parse(githubData);
-		(axios.get as jest.Mock).mockResolvedValue({data: JSON.parse(githubData)});
+		(axios.get as jest.Mock).mockResolvedValueOnce({data: JSON.parse(githubData)});
 		const jsonConfig = {
 			...defaultConfig,
 			github: {
@@ -91,10 +99,54 @@ describe('Github Plugin', () => {
 		expect(result).toEqual(parseGithubData);
 	});
 
+	it('get contributors API call fails when author/repo is not valid', async () => {
+		(axios.get as jest.Mock).mockRejectedValueOnce({
+			response: {
+				status: 404,
+			},
+		});
+		const jsonConfig = {
+			...defaultConfig,
+			github: {
+				repo: 'demo',
+				author: 'demo',
+			},
+		};
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
+		const github = new GithubPlugin(config);
+		try {
+			await github.getContributors();
+			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
+		} catch (error: any) {
+			expect(error.message).toBe('Repository demo/demo not found.');
+		}
+	});
+
+	it('get contributors API call fails', async () => {
+		(axios.get as jest.Mock).mockRejectedValueOnce(new Error('error'));
+		const jsonConfig = {
+			...defaultConfig,
+			github: {
+				repo: 'demo',
+				author: 'demo',
+			},
+		};
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
+		const github = new GithubPlugin(config);
+		try {
+			await github.getContributors();
+			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
+		} catch (error: any) {
+			expect(error.message).toBe('error');
+		}
+	});
+
 	it('get releases', async () => {
 		const githubData = fs.readFileSync('test/mock/github-releases.json', 'utf8');
 		const parseGithubData = JSON.parse(githubData);
-		(axios.get as jest.Mock).mockResolvedValue({data: parseGithubData});
+		(axios.get as jest.Mock).mockResolvedValueOnce({data: parseGithubData});
 		const jsonConfig = {
 			...defaultConfig,
 			github: {
@@ -109,6 +161,52 @@ describe('Github Plugin', () => {
 
 		expect(axios.get).toHaveBeenCalledWith('https://api.github.com/repos/jaredwray/writr/releases');
 		expect(result).toEqual(parseGithubData);
+	});
+
+	it('get releases API call fails when author/repo is not valid', async () => {
+		(axios.get as jest.Mock).mockRejectedValueOnce({
+			response: {
+				status: 404,
+			},
+		});
+		const jsonConfig = {
+			...defaultConfig,
+			github: {
+				repo: 'test',
+				author: 'test',
+			},
+		};
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
+		const github = new GithubPlugin(config);
+
+		try {
+			await github.getReleases();
+			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
+		} catch (error: any) {
+			expect(error.message).toBe('Repository test/test not found.');
+		}
+	});
+
+	it('get releases API call fails', async () => {
+		(axios.get as jest.Mock).mockRejectedValueOnce(new Error('error'));
+		const jsonConfig = {
+			...defaultConfig,
+			github: {
+				repo: 'test',
+				author: 'test',
+			},
+		};
+		fs.writeFileSync('test/data/github-config.json', JSON.stringify(jsonConfig, null, 2));
+		const config = new Config('./test/data/github-config.json');
+		const github = new GithubPlugin(config);
+
+		try {
+			await github.getReleases();
+			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
+		} catch (error: any) {
+			expect(error.message).toBe('error');
+		}
 	});
 
 	it('execute and write out the github file', async () => {
