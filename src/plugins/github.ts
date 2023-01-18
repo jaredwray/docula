@@ -27,7 +27,7 @@ export class GithubPlugin implements DoculaPlugin {
 		sitePath: '',
 	};
 
-	runtime: Runtime = 'after';
+	runtime: Runtime = 'before';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;
