@@ -46,17 +46,17 @@ describe('Docula', () => {
 		expect(docula.config.originPath).toBe('test/data/site');
 	});
 
-	it('Docula - testing init function with folders', () => {
+	it('Docula - testing init function with folders', async () => {
 		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/docula-config.json'})};
 		const docula = new Docula(options);
 		expect(docula.config.originPath).toBe('test/data/site');
-		docula.init();
+		await docula.init();
 		expect(fs.existsSync('test/data/site')).toBe(true);
 		fs.rmSync('test/data/site', {force: true, recursive: true});
 	});
 
-	it('Docula - init should create root folder if does not exist', () => {
+	it('Docula - init should create root folder if does not exist', async () => {
 		const initConfigJson = {
 			...configJson,
 			originPath: 'test/data/root',
@@ -66,7 +66,7 @@ describe('Docula', () => {
 		const options = {opts: () => ({config: './test/data/docula-config.json'})};
 		const docula = new Docula(options);
 		expect(docula.config.originPath).toBe('test/data/root');
-		docula.init();
+		await docula.init();
 		expect(fs.existsSync('test/data/root')).toBe(true);
 		fs.rmSync('test/data/root', {force: true, recursive: true});
 	});
@@ -88,7 +88,7 @@ describe('Docula', () => {
 		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(configJson));
 		const options = {opts: () => ({config: './test/data/docula-config.json'})};
 		const docula = new Docula(options);
-		docula.init();
+		await docula.init();
 		await docula.build();
 		expect(logger.error).toHaveBeenCalledWith('Error');
 	});

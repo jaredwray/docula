@@ -54,9 +54,10 @@ export class GithubPlugin implements DoculaPlugin {
 		try {
 			const result = await axios.get(url);
 			return result.data;
-		} catch(error: any) {
-			if(error.response.status === 404) {
-				 throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+		} catch (error: unknown) {
+			const typedError = error as {response: {status: number}};
+			if (typedError.response?.status === 404) {
+				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
 			}
 			throw error;
 		}
@@ -67,8 +68,9 @@ export class GithubPlugin implements DoculaPlugin {
 		try {
 			const result = await axios.get(url);
 			return result.data;
-		} catch (error: any) {
-			if (error.response.status === 404) {
+		} catch (error: unknown) {
+			const typedError = error as {response: {status: number}};
+			if (typedError.response?.status === 404) {
 				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
 			}
 			throw error;

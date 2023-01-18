@@ -4,7 +4,7 @@ import process from 'node:process';
 import fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {getSiteURL, getUserPlugins} from './tools.js';
+import {getSiteUrl, getUserPlugins} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
 import type {CommanderOptions} from './index.js';
@@ -50,7 +50,6 @@ export class Docula {
 	}
 
 	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
-		//TODO: refactor and add a check to see if the folder exists
 		const __filename = fileURLToPath(import.meta.url);
 		const doculaPath = path.dirname(path.dirname(__filename));
 		const sourcePath = path.join(doculaPath, source);
@@ -74,12 +73,14 @@ export class Docula {
 
 	private async buildConfigFile(): Promise<void> {
 		const userConfig: any = {};
-		const siteUrl = await getSiteURL();
+		const siteUrl = await getSiteUrl();
 		const plugins = await getUserPlugins();
 		userConfig.siteUrl = siteUrl;
 
 		for (const plugin in plugins) {
-			userConfig[plugin] = plugins[plugin];
+			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
+				userConfig[plugin] = plugins[plugin];
+			}
 		}
 
 		const configPath = `${process.cwd()}/${this.config.originPath}/config.json`;
