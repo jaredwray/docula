@@ -12,7 +12,7 @@ export const reportError = (error: unknown): void => {
 
 const urlRegex = /^(http(s)?:\/\/.)[-\w@:%.+~#=]{2,256}\.[a-z]{2,6}\b([-\w@:%+.~#?&/=]*)$/g;
 
-const getGithubInfo = async (): Promise<Record<string, string>> => {
+export const getGithubInfo = async (): Promise<Record<string, string>> => {
 	const data = await inquirer.prompt([
 		{
 			type: 'input',
@@ -27,26 +27,36 @@ const getGithubInfo = async (): Promise<Record<string, string>> => {
 	return data;
 };
 
+export const validateUrl = (value: string): boolean | string => {
+	if (value.length > 0 && urlRegex.test(value)) {
+		return true;
+	}
+
+	return 'Please enter a complete URL.';
+};
+
 export const getSiteUrl = async (): Promise<Record<string, string>> => {
 	const siteAnswer = await inquirer.prompt([
 		{
 			type: 'input',
 			name: 'url',
 			message: 'What is the URL of your site?',
-			validate(value: string) {
-				if (value.length > 0 && urlRegex.test(value)) {
-					return true;
-				}
-
-				return 'Please enter a complete URL.';
-			},
+			validate: validateUrl,
 		},
 	]);
 	return siteAnswer.url;
 };
 
-export const getUserPlugins = async (): Promise<Record<string, unknown>> => {
-	const pluginsAnswer = await inquirer.prompt([
+export const parsePlugins = (plugins: string[]): string[] => plugins.map((plugin: string) => {
+	if (plugin.endsWith('.txt') || plugin.endsWith('.xml')) {
+		return plugin.split('.')[0];
+	}
+
+	return plugin;
+});
+
+export const getUserPlugins = async (): Promise<string[]> => {
+	const userPlugins = await inquirer.prompt([
 		{
 			type: 'checkbox',
 			name: 'plugins',
@@ -54,33 +64,19 @@ export const getUserPlugins = async (): Promise<Record<string, unknown>> => {
 			choices: [{name: 'github'}, {name: 'robots.txt'}, {name: 'sitemap.xml'}],
 		},
 	]);
+	return userPlugins;
+};
 
-	if (pluginsAnswer.plugins.length > 0) {
-		let githubInfo: Record<string, string> | undefined;
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		const parsedPlugins: string[] = pluginsAnswer.plugins.map((plugin: string) => {
-			if (plugin === 'robots.txt') {
-				return 'robots';
-			}
-
-			if (plugin === 'sitemap.xml') {
-				return 'sitemap';
-			}
-
-			return plugin;
-		});
-		if (parsedPlugins.includes('github')) {
-			githubInfo = await getGithubInfo();
-		}
-
-		return {
-			plugins: [...parsedPlugins, 'pagefind'],
-			github: githubInfo,
-		};
+export const parsePluginsData = async (plugins: string[]): Promise<Record<string, unknown>> => {
+	const parsedPlugins = parsePlugins(plugins);
+	let githubInfo: Record<string, string> | undefined;
+	if (parsedPlugins.includes('github')) {
+		githubInfo = await getGithubInfo();
 	}
 
 	return {
-		plugins: ['pagefind'],
+		plugins: [...parsedPlugins, 'pagefind'],
+		...(githubInfo && {github: githubInfo}),
 	};
 };
 

@@ -4,7 +4,7 @@ import process from 'node:process';
 import fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {getSiteUrl, getUserPlugins} from './tools.js';
+import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
 import type {CommanderOptions} from './index.js';
@@ -44,6 +44,7 @@ export class Docula {
 		if (!fs.existsSync(userOriginPath)) {
 			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
 		}
+
 		await this.executePlugins(this.beforePlugins);
 		await this.eleventy.build();
 		await this.executePlugins(this.afterPlugins);
@@ -75,11 +76,12 @@ export class Docula {
 		const userConfig: any = {};
 		const siteUrl = await getSiteUrl();
 		const plugins = await getUserPlugins();
+		const parsedPlugins = await parsePluginsData(plugins);
 		userConfig.siteUrl = siteUrl;
 
-		for (const plugin in plugins) {
-			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
-				userConfig[plugin] = plugins[plugin];
+		for (const plugin in parsedPlugins) {
+			if (Object.prototype.hasOwnProperty.call(parsedPlugins, plugin)) {
+				userConfig[plugin] = parsedPlugins[plugin];
 			}
 		}
 
