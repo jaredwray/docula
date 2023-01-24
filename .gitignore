@@ -68,3 +68,6 @@ dist
 # IDE
 .vscode/
 .idea/
+
+# Test
+test/data
