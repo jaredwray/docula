@@ -38,11 +38,11 @@ describe('Tools', () => {
 	});
 
 	it('getUserPlugins returns the user plugins', async () => {
-		const plugins: string[] = ['robots.txt'];
+		const plugins: Record<string, string[]> = {plugins: ['robots.txt']};
 		// @ts-expect-error - Mocking the inquirer.prompt method
 		(inquirer.prompt as jest.Mock).mockResolvedValue(Promise.resolve(plugins));
 		const result = await getUserPlugins();
-		expect(result).toEqual(plugins);
+		expect(result).toEqual(plugins.plugins);
 	});
 
 	describe('parsePlugins', () => {
