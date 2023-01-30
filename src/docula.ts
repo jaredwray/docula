@@ -52,7 +52,7 @@ export class Docula {
 
 	public copyFolder(source: string, target: string): void {
 		const __filename = getFileName();
-		const doculaPath = path.dirname(path.dirname(__filename));
+		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
 		const sourcePath = path.join(doculaPath, source);
 		const sourceExists = fs.existsSync(sourcePath);
 		const targetExists = fs.existsSync(target);

@@ -53,7 +53,7 @@ export const getUserPlugins = async (): Promise<string[]> => {
 			choices: [{name: 'github'}, {name: 'robots.txt'}, {name: 'sitemap.xml'}],
 		},
 	]);
-	return userPlugins;
+	return userPlugins.plugins;
 };
 
 export const parsePluginsData = async (plugins: string[]): Promise<Record<string, unknown>> => {
