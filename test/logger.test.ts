@@ -1,5 +1,5 @@
 import logger from '../src/logger.js';
-import {reportError} from '../src/tools.js';
+import {reportError} from '../src/tools/tools.js';
 
 describe('Logger', () => {
 	beforeEach(() => {

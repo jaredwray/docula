@@ -1,16 +1,5 @@
 import inquirer from 'inquirer';
-import logger from './logger.js';
-
-export const reportError = (error: unknown): void => {
-	let message = String(error);
-	if (error instanceof Error) {
-		message = error.message;
-	}
-
-	logger.error(message);
-};
-
-const urlRegex = /^(http(s)?:\/\/.)[-\w@:%.+~#=]{2,256}\.[a-z]{2,6}\b([-\w@:%+.~#?&/=]*)$/g;
+import {urlRegex} from './tools.js';
 
 export const getGithubInfo = async (): Promise<Record<string, string>> => {
 	const data = await inquirer.prompt([
@@ -79,4 +68,3 @@ export const parsePluginsData = async (plugins: string[]): Promise<Record<string
 		...(githubInfo && {github: githubInfo}),
 	};
 };
-

@@ -1,12 +1,12 @@
 import * as path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools.js';
+import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools/inquirer-prompt.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
+import {getConfigPath, getFileName} from './tools/path.js';
 import type {CommanderOptions} from './index.js';
 
 export class Docula {
@@ -19,7 +19,7 @@ export class Docula {
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
-		const configPath = `${process.cwd()}/site/config.json`;
+		const configPath = getConfigPath();
 		const config: string = parameters ? parameters?.config : configPath;
 		this.config = new Config(config);
 		this.eleventy = new Eleventy(this.config);
@@ -50,8 +50,8 @@ export class Docula {
 		await this.executePlugins(this.afterPlugins);
 	}
 
-	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
-		const __filename = fileURLToPath(import.meta.url);
+	public copyFolder(source: string, target: string): void {
+		const __filename = getFileName();
 		const doculaPath = path.dirname(path.dirname(__filename));
 		const sourcePath = path.join(doculaPath, source);
 		const sourceExists = fs.existsSync(sourcePath);
@@ -65,9 +65,11 @@ export class Docula {
 			}
 
 			for (const file of fs.readdirSync(sourcePath)) {
-				this.copyFolder(path.join(source, file), path.join(target, file));
+				if (!fs.existsSync(path.join(target, file))) {
+					this.copyFolder(path.join(source, file), path.join(target, file));
+				}
 			}
-		} else {
+		} else if (!fs.existsSync(target)) {
 			fs.copyFileSync(sourcePath, target);
 		}
 	}
@@ -85,7 +87,7 @@ export class Docula {
 			}
 		}
 
-		const configPath = `${process.cwd()}/${this.config.originPath}/config.json`;
+		const configPath = getConfigPath();
 		fs.writeFileSync(configPath, JSON.stringify(userConfig, null, 2));
 	}
 

@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import {getGithubInfo, getSiteUrl, getUserPlugins, parsePlugins, parsePluginsData, validateUrl} from '../src/tools.js';
+import {getGithubInfo, getSiteUrl, getUserPlugins, parsePlugins, parsePluginsData, validateUrl} from '../src/tools/inquirer-prompt.js';
 
 jest.mock('inquirer');
 describe('Tools', () => {
@@ -27,27 +27,14 @@ describe('Tools', () => {
 		expect(result).toEqual(githubInfo);
 	});
 
-	describe('getSiteUrl', () => {
-		it('returns a valid URL', async () => {
-			const url = 'https://www.example.com';
-			// @ts-expect-error - Mocking the inquirer.prompt method
-			(inquirer.prompt as jest.Mock).mockResolvedValue(Promise.resolve({
-				url,
-			}));
-			const result = await getSiteUrl();
-			expect(result).toBe(url);
-		});
-
-		it('throws an error if the URL is not valid', async () => {
-			const url = 'example';
-			// @ts-expect-error - Mocking the inquirer.prompt method
-			(inquirer.prompt as jest.Mock).mockResolvedValue(Promise.resolve({
-				url,
-			}));
-
-			const result = await getSiteUrl();
-			console.log(result, 'result');
-		});
+	it('getSiteUrl returns a valid URL', async () => {
+		const url = 'https://www.example.com';
+		// @ts-expect-error - Mocking the inquirer.prompt method
+		(inquirer.prompt as jest.Mock).mockResolvedValue(Promise.resolve({
+			url,
+		}));
+		const result = await getSiteUrl();
+		expect(result).toBe(url);
 	});
 
 	it('getUserPlugins returns the user plugins', async () => {

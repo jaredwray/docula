@@ -1,6 +1,6 @@
 import {createCommand, type OptionValues} from 'commander';
 import {Docula} from './docula.js';
-import {reportError} from './tools.js';
+import {reportError} from './tools/tools.js';
 import logger from './logger.js';
 
 export type CommanderOptions = {

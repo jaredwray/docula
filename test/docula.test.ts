@@ -4,24 +4,40 @@ import {Eleventy} from '../src/eleventy.js';
 import logger from '../src/logger.js';
 
 jest.mock('../src/eleventy.js');
+jest.mock('../src/tools/path.js');
+jest.mock('../src/tools/inquirer-prompt.js');
 
 describe('Docula', () => {
 	const configJson: Record<string, any> = {
 		originPath: 'test/data/site',
 		outputPath: 'test/data/dist',
+		siteUrl: 'https://example.com',
 		plugins: ['npm', 'robots'],
 		npm: {
 			moduleName: 'keyv',
 		},
 	};
 
+	beforeAll(() => {
+		if (!fs.existsSync('test/data/site')) {
+			fs.mkdirSync('test/data/site');
+		}
+
+		fs.writeFileSync('test/data/site/config.json', JSON.stringify(configJson, null, 2));
+	});
+
 	beforeEach(() => {
 		jest.spyOn(Eleventy.prototype, 'build').mockImplementation();
 	});
 
 	afterEach(() => {
-		fs.rmSync('./test/data/docula-config.json', {force: true});
 		jest.clearAllMocks();
+	});
+
+	afterAll(() => {
+		fs.rmSync('test/data/site', {force: true, recursive: true});
+		fs.rmSync('test/data/site-copy', {force: true, recursive: true});
+		fs.rmSync('test/data/dist', {force: true, recursive: true});
 	});
 
 	it('Docula - init', () => {
@@ -31,49 +47,58 @@ describe('Docula', () => {
 
 	it('Docula - default originPath to site', () => {
 		const docula = new Docula();
-		expect(docula.config.originPath).toBe('site');
+		expect(docula.config.originPath).toBe('test/data/site');
 	});
 
 	it('Docula - default outputPath to dist', () => {
 		const docula = new Docula();
-		expect(docula.config.outputPath).toBe('dist');
+		expect(docula.config.outputPath).toBe('test/data/dist');
 	});
 
 	it('Docula - init with options config', () => {
-		fs.writeFileSync('test/data/docula-config.json', JSON.stringify(configJson, null, 2));
-		const options = {opts: () => ({config: './test/data/docula-config.json'})};
+		const options = {opts: () => ({config: './test/data/site/config.json'})};
 		const docula = new Docula(options);
 		expect(docula.config.originPath).toBe('test/data/site');
 	});
 
 	it('Docula - testing init function with folders', async () => {
-		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(configJson));
-		const options = {opts: () => ({config: './test/data/docula-config.json'})};
+		const options = {opts: () => ({config: './test/data/site/config.json'})};
 		const docula = new Docula(options);
-		expect(docula.config.originPath).toBe('test/data/site');
 		await docula.init();
 		expect(fs.existsSync('test/data/site')).toBe(true);
-		fs.rmSync('test/data/site', {force: true, recursive: true});
 	});
 
-	it('Docula - init should create root folder if does not exist', async () => {
-		const initConfigJson = {
-			...configJson,
-			originPath: 'test/data/root',
+	it('Docula init - create the directory if it does not exist', async () => {
+		const json: Record<string, any> = {
+			originPath: 'test/data/demo-site',
+			outputPath: 'test/data/dist',
+			siteUrl: 'https://example.com',
+			plugins: ['robots'],
 		};
-
-		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(initConfigJson));
-		const options = {opts: () => ({config: './test/data/docula-config.json'})};
+		fs.writeFileSync('test/data/site/new-config.json', JSON.stringify(json, null, 2));
+		const options = {opts: () => ({config: './test/data/site/new-config.json'})};
 		const docula = new Docula(options);
-		expect(docula.config.originPath).toBe('test/data/root');
 		await docula.init();
-		expect(fs.existsSync('test/data/root')).toBe(true);
-		fs.rmSync('test/data/root', {force: true, recursive: true});
+		expect(fs.existsSync('test/data/demo-site')).toBe(true);
+		fs.rmSync('test/data/site/new-config.json');
+		fs.rmSync('test/data/demo-site', {force: true, recursive: true});
+	});
+
+	it('Docula - build should throw an error if the origin path does not exist', async () => {
+		const invalidConfig = {
+			originPath: 'test/data/site-invalid',
+		};
+		fs.writeFileSync('./test/data/site/invalid-config.json', JSON.stringify(invalidConfig));
+		const options = {opts: () => ({config: './test/data/site/invalid-config.json'})};
+		jest.spyOn(logger, 'error');
+		const docula = new Docula(options);
+		await expect(async () => docula.build()).rejects.toThrow();
+
+		fs.rmSync('./test/data/site/invalid-config.json');
 	});
 
 	it('Docula - should build using Eleventy', async () => {
-		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(configJson));
-		const options = {opts: () => ({config: './test/data/docula-config.json'})};
+		const options = {opts: () => ({config: './test/data/site/config.json'})};
 		const docula = new Docula(options);
 		await docula.build();
 		expect(Eleventy.prototype.build).toHaveBeenCalled();
@@ -85,12 +110,9 @@ describe('Docula', () => {
 		});
 		jest.spyOn(logger, 'error');
 
-		fs.writeFileSync('./test/data/docula-config.json', JSON.stringify(configJson));
-		const options = {opts: () => ({config: './test/data/docula-config.json'})};
+		const options = {opts: () => ({config: './test/data/site/config.json'})};
 		const docula = new Docula(options);
-		await docula.init();
-		await docula.build();
-		expect(logger.error).toHaveBeenCalledWith('Error');
+		await expect(async () => docula.build()).rejects.toThrow('Error');
 	});
 
 	it('Docula - should copy a folder to a target location', () => {
@@ -102,9 +124,8 @@ describe('Docula', () => {
 
 	it('Docula - should copy a folder to a default target location', () => {
 		const docula = new Docula();
-		docula.copyFolder('test/data/site');
-		expect(fs.existsSync('site/template')).toBe(true);
-		fs.rmSync('site/template', {force: true, recursive: true});
+		docula.copyFolder('init', 'test/data/site');
+		expect(fs.existsSync('test/data/site/_includes')).toBe(true);
 	});
 });
 
