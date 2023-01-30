@@ -1,10 +1,12 @@
 import * as path from 'node:path';
-import * as fs from 'fs-extra';
+import process from 'node:process';
+import fs from 'fs-extra';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {reportError} from './tools.js';
+import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools/inquirer-prompt.js';
 import DoculaPlugins from './plugins/index.js';
-import type {PluginInstances, PluginInstance} from './types/config.js';
+import type {PluginInstance, PluginInstances} from './types/config.js';
+import {getConfigPath, getFileName} from './tools/path.js';
 import type {CommanderOptions} from './index.js';
 
 export class Docula {
@@ -17,14 +19,17 @@ export class Docula {
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
-		this.config = new Config(parameters?.config);
+		const configPath = getConfigPath();
+		const config: string = parameters ? parameters?.config : configPath;
+		this.config = new Config(config);
 		this.eleventy = new Eleventy(this.config);
 		this.loadPlugins();
 	}
 
-	public init(sitePath?: string): void {
-		const rootSitePath = sitePath ?? this.config.originPath;
-
+	public async init(sitePath?: string): Promise<void> {
+		await this.buildConfigFile();
+		const {originPath} = this.config;
+		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
 		// Create the <site> folder
 		if (!fs.existsSync(rootSitePath)) {
 			fs.mkdirSync(rootSitePath);
@@ -34,19 +39,24 @@ export class Docula {
 	}
 
 	public async build(): Promise<void> {
-		try {
-			await this.executePlugins(this.beforePlugins);
-			await this.eleventy.build();
-			await this.executePlugins(this.afterPlugins);
-		} catch (error: unknown) {
-			reportError(error);
+		const {originPath} = this.config;
+		const userOriginPath = `${process.cwd()}/${originPath}`;
+		if (!fs.existsSync(userOriginPath)) {
+			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
 		}
+
+		await this.executePlugins(this.beforePlugins);
+		await this.eleventy.build();
+		await this.executePlugins(this.afterPlugins);
 	}
 
-	public copyFolder(source: string, target = `${this.config.originPath}/${this.config.templatePath}`): void {
-		const sourceExists = fs.existsSync(source);
+	public copyFolder(source: string, target: string): void {
+		const __filename = getFileName();
+		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
+		const sourcePath = path.join(doculaPath, source);
+		const sourceExists = fs.existsSync(sourcePath);
 		const targetExists = fs.existsSync(target);
-		const sourceStats = fs.statSync(source);
+		const sourceStats = fs.statSync(sourcePath);
 		const isDirectory = sourceExists && sourceStats.isDirectory();
 
 		if (isDirectory) {
@@ -54,12 +64,31 @@ export class Docula {
 				fs.mkdirSync(target);
 			}
 
-			for (const file of fs.readdirSync(source)) {
-				this.copyFolder(path.join(source, file), path.join(target, file));
+			for (const file of fs.readdirSync(sourcePath)) {
+				if (!fs.existsSync(path.join(target, file))) {
+					this.copyFolder(path.join(source, file), path.join(target, file));
+				}
 			}
-		} else {
-			fs.copyFileSync(source, target);
+		} else if (!fs.existsSync(target)) {
+			fs.copyFileSync(sourcePath, target);
 		}
+	}
+
+	private async buildConfigFile(): Promise<void> {
+		const userConfig: any = {};
+		const siteUrl = await getSiteUrl();
+		const plugins = await getUserPlugins();
+		const parsedPlugins = await parsePluginsData(plugins);
+		userConfig.siteUrl = siteUrl;
+
+		for (const plugin in parsedPlugins) {
+			if (Object.prototype.hasOwnProperty.call(parsedPlugins, plugin)) {
+				userConfig[plugin] = parsedPlugins[plugin];
+			}
+		}
+
+		const configPath = getConfigPath();
+		fs.writeFileSync(configPath, JSON.stringify(userConfig, null, 2));
 	}
 
 	private loadPlugins(): void {

@@ -1,6 +1,6 @@
 import {createCommand, type OptionValues} from 'commander';
 import {Docula} from './docula.js';
-import {reportError} from './tools.js';
+import {reportError} from './tools/tools.js';
 import logger from './logger.js';
 
 export type CommanderOptions = {
@@ -19,22 +19,10 @@ export class Executable {
 			.option('-c, --config <config>', 'Path of where the config file is located')
 			.action(async (options: CommanderOptions) => {
 				try {
-					logger.info('Initializing Docula...');
+					logger.info('Building your documentation...');
 					const docula = new Docula(options);
 					await docula.build();
 					logger.info('Site was built successfully!');
-				} catch (error: unknown) {
-					reportError(error);
-				}
-			});
-
-		program.command('template')
-			.description('The template to work with')
-			.argument('<name>', 'The template name to work with')
-			.action(async (argument: string) => {
-				try {
-					const docula = new Docula();
-					docula.copyFolder(`templates/${argument}`);
 				} catch (error: unknown) {
 					reportError(error);
 				}
@@ -44,8 +32,9 @@ export class Executable {
 			.description('Initialize the site')
 			.action(async (options: CommanderOptions) => {
 				try {
+					logger.info('Initializing Docula...');
 					const docula = new Docula(options);
-					docula.init();
+					await docula.init();
 				} catch (error: unknown) {
 					reportError(error);
 				}

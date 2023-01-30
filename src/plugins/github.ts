@@ -27,7 +27,7 @@ export class GithubPlugin implements DoculaPlugin {
 		sitePath: '',
 	};
 
-	runtime: Runtime = 'after';
+	runtime: Runtime = 'before';
 
 	constructor(config: Config) {
 		this.options.sitePath = config.originPath;
@@ -51,13 +51,31 @@ export class GithubPlugin implements DoculaPlugin {
 
 	async getReleases(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/releases`;
-		const result = await axios.get(url);
-		return result.data;
+		try {
+			const result = await axios.get(url);
+			return result.data;
+		} catch (error: unknown) {
+			const typedError = error as {response: {status: number}};
+			if (typedError.response?.status === 404) {
+				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+			}
+
+			throw error;
+		}
 	}
 
 	async getContributors(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/contributors`;
-		const result = await axios.get(url);
-		return result.data;
+		try {
+			const result = await axios.get(url);
+			return result.data;
+		} catch (error: unknown) {
+			const typedError = error as {response: {status: number}};
+			if (typedError.response?.status === 404) {
+				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+			}
+
+			throw error;
+		}
 	}
 }

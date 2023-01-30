@@ -40,18 +40,6 @@ describe('Sitemap Plugin', () => {
 		expect(sitemap).toBeDefined();
 	});
 
-	it('throw an error if baseurl is not defined', () => {
-		const jsonConfig = {
-			...defaultConfig,
-			sitemap: {},
-		};
-		expect(() => {
-			fs.writeFileSync('test/data/sitemap-config.json', JSON.stringify(jsonConfig, null, 2));
-			config = new Config('./test/data/sitemap-config.json');
-			const sitemap = new SitemapPlugin(config);
-		}).toThrow();
-	});
-
 	it('should call Eleventy toJSON method', async () => {
 		const jsonConfig = {
 			...defaultConfig,
@@ -72,19 +60,6 @@ describe('Sitemap Plugin', () => {
 			sitemap: {
 				baseUrl: 'https://example.com',
 			},
-		};
-		fs.writeFileSync('test/data/sitemap-config.json', JSON.stringify(jsonConfig, null, 2));
-		config = new Config('./test/data/sitemap-config.json');
-		const sitemap = new SitemapPlugin(config);
-		await sitemap.execute();
-		expect(fs.existsSync('test/site/sitemap.xml')).toBe(true);
-		fs.rmSync('test/site/sitemap.xml');
-	});
-
-	it('set the baseUrl property from siteUrl', async () => {
-		const jsonConfig = {
-			...defaultConfig,
-			siteUrl: 'https://example.com',
 		};
 		fs.writeFileSync('test/data/sitemap-config.json', JSON.stringify(jsonConfig, null, 2));
 		config = new Config('./test/data/sitemap-config.json');
