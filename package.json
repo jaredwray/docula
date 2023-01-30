@@ -12,7 +12,7 @@
     "build": "tsc -p .",
     "clean": "rm -rf dist && rm -rf test/data/site && rm -rf node_modules",
     "test": "xo --fix && jest --coverage",
-    "test:code": "yarn build && node ./bin/docula.js init",
+    "test:code": "yarn build && node ./bin/docula.js",
     "lint": "xo --fix"
   },
   "repository": {
@@ -44,14 +44,14 @@
     "@11ty/eleventy-navigation": "^0.3.5",
     "@types/fs-extra": "^9.0.13",
     "@types/inquirer": "^9.0.3",
-    "@types/jest": "^29.2.0",
+    "@types/jest": "^29.4.0",
     "@types/luxon": "^3.1.0",
     "@types/markdown-it": "^12.2.3",
-    "jest": "^29.2.2",
+    "jest": "^29.4.1",
     "jest-ts-webcompat-resolver": "^1.0.0",
-    "ts-jest": "^29.0.3",
+    "ts-jest": "^29.0.5",
     "ts-jest-resolver": "^2.0.0",
-    "typescript": "^4.8.4",
+    "typescript": "^4.9.4",
     "xo": "^0.53.1"
   },
   "dependencies": {
