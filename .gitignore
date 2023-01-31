@@ -71,3 +71,6 @@ dist
 
 # Test
 test/data
+
+# Site
+site/_data/
