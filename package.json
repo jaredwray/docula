@@ -59,7 +59,7 @@
     "ajv": "^6.12.6",
     "algoliasearch": "^4.14.2",
     "axios": "^1.2.1",
-    "commander": "^9.4.1",
+    "commander": "^10.0.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "download-stats": "^0.3.4",
