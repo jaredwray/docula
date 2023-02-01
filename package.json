@@ -60,7 +60,7 @@
     "algoliasearch": "^4.14.2",
     "axios": "^1.2.1",
     "commander": "^9.4.1",
-    "dayjs": "^1.11.6",
+    "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "download-stats": "^0.3.4",
     "eleventy-plugin-toc": "^1.1.5",
