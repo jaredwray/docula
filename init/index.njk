@@ -14,7 +14,7 @@
     </div>
     <section class="home-container">
       {% if github %}
-        {% if github.contributors %}
+        {% if (github.contributors) and (github.contributors.length) %}
           <div class="content-container">
             <h2 class="home-title">Contributors</h2>
             <div class="facepile-container">
@@ -29,7 +29,7 @@
           </div>
         {% endif %}
 
-        {% if github.releases %}
+        {% if (github.releases) and (github.releases.length) %}
           <div class="content-container">
             <h2 class="home-title">Latest's Releases</h2>
             {% set releasesLength = github.releases | length %}
