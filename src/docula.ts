@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import process from 'node:process';
 import fs from 'fs-extra';
+import express from 'express';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
 import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools/inquirer-prompt.js';
@@ -8,6 +9,7 @@ import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
 import {getConfigPath, getFileName} from './tools/path.js';
 import type {CommanderOptions} from './index.js';
+import logger from './logger.js';
 
 export class Docula {
 	readonly config: Config;
@@ -48,6 +50,20 @@ export class Docula {
 		await this.executePlugins(this.beforePlugins);
 		await this.eleventy.build();
 		await this.executePlugins(this.afterPlugins);
+	}
+
+	public async serve(): Promise<void> {
+		const {outputPath} = this.config;
+		if (!fs.existsSync(outputPath)) {
+			throw new Error(`The origin path "${outputPath}" does not exist.`);
+		}
+
+		const app = express();
+		const port = 8080;
+		app.use(express.static(outputPath));
+		app.listen(port, () => {
+			logger.info(`Docula is running on http://localhost:${port}`);
+		});
 	}
 
 	public copyFolder(source: string, target: string): void {
