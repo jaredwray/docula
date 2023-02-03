@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import express from 'express';
 import {Docula} from '../src/docula.js';
 import {Eleventy} from '../src/eleventy.js';
 import logger from '../src/logger.js';
@@ -6,6 +7,21 @@ import logger from '../src/logger.js';
 jest.mock('../src/eleventy.js');
 jest.mock('../src/tools/path.js');
 jest.mock('../src/tools/inquirer-prompt.js');
+
+type ExpressAppMock = {
+	use: jest.Mock;
+	listen: jest.Mock;
+};
+
+jest.mock('express', () => {
+	const expressStatic = jest.fn();
+	const expressApp = jest.fn() as unknown as ExpressAppMock;
+	expressApp.use = jest.fn();
+	expressApp.listen = jest.fn((port, cb: () => void) => {
+		cb();
+	});
+	return Object.assign(jest.fn(() => expressApp), {static: expressStatic});
+});
 
 describe('Docula', () => {
 	const configJson: Record<string, any> = {
@@ -126,6 +142,31 @@ describe('Docula', () => {
 		const docula = new Docula();
 		docula.copyFolder('init', 'test/data/site');
 		expect(fs.existsSync('test/data/site/_includes')).toBe(true);
+	});
+
+	it('Docula serve - should throw an error if outputPath does not exist', async () => {
+		const invalidConfig = {
+			outputPath: 'output',
+		};
+		fs.writeFileSync('./test/data/site/invalid-config.json', JSON.stringify(invalidConfig));
+		const options = {opts: () => ({config: './test/data/site/invalid-config.json'})};
+		const docula = new Docula(options);
+		await expect(docula.serve()).rejects.toThrow(
+			'The origin path "output" does not exist.',
+		);
+
+		fs.rmSync('./test/data/site/invalid-config.json');
+	});
+
+	it('should start a server and listen to a port', async () => {
+		const docula = new Docula();
+		const outputPath = 'outputPath';
+		const port = 8080;
+		docula.config.outputPath = outputPath;
+		fs.existsSync = jest.fn(() => true);
+		await docula.serve();
+		expect(express).toHaveBeenCalled();
+		expect(express().listen).toHaveBeenCalledWith(port, expect.any(Function));
 	});
 });
 
