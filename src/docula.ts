@@ -8,8 +8,8 @@ import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools/inquirer-pro
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
 import {getConfigPath, getFileName} from './tools/path.js';
-import type {CommanderOptions} from './index.js';
 import logger from './logger.js';
+import type {CommanderOptions} from './index.js';
 
 export class Docula {
 	readonly config: Config;
