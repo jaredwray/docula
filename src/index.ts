@@ -40,6 +40,20 @@ export class Executable {
 				}
 			});
 
+		program.command('serve')
+			.description('build and serve the site')
+			.action(async (options: CommanderOptions) => {
+				try {
+					logger.info('Building your documentation...');
+					const docula = new Docula(options);
+					await docula.build();
+					logger.info('Site was built successfully!');
+					await docula.serve();
+				} catch (error: unknown) {
+					reportError(error);
+				}
+			});
+
 		program.parse(process.argv);
 	}
 }
