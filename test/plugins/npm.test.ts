@@ -1,12 +1,23 @@
 import fs from 'fs-extra';
+import axios from 'axios';
 import {NpmPlugin} from '../../src/plugins/npm.js';
 import {Config} from '../../src/config.js';
+
+jest.mock('axios');
 
 describe('NPM Plugin', () => {
 	const defaultConfig = {
 		originPath: 'test/site',
 		plugins: ['npm'],
 	};
+
+	beforeEach(() => {
+		(axios.get as jest.Mock).mockClear();
+	});
+
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
 
 	afterAll(() => {
 		fs.rmSync('./test/data/npm-config.json', {force: true});
@@ -16,14 +27,14 @@ describe('NPM Plugin', () => {
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
-				moduleName: 'writr',
+				moduleName: 'docula',
 			},
 		};
 
 		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
 		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
-		expect(npm.options.moduleName).toEqual('writr');
+		expect(npm.options.moduleName).toEqual('docula');
 	});
 
 	it('getting the sitePath from the originPath prop in config', () => {
@@ -75,24 +86,30 @@ describe('NPM Plugin', () => {
 	});
 
 	it('get monthly downloads should return downloads', async () => {
+		const npmData = fs.readFileSync('test/mock/npm-downloads.json', 'utf8');
+		const parsedNpmData = JSON.parse(npmData);
+		(axios.get as jest.Mock).mockResolvedValueOnce({data: parsedNpmData});
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
-				moduleName: 'writr',
+				moduleName: 'docula',
 			},
 		};
 		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));
 		const config = new Config('./test/data/npm-config.json');
 		const npm = new NpmPlugin(config);
-		const data = await npm.getMonthlyDownloads();
-		expect(data.downloads).toBeDefined();
+		const result = await npm.getMonthlyDownloads();
+
+		expect(axios.get).toHaveBeenCalledWith('https://api.npmjs.org/downloads/point/last-month/docula');
+		expect(result).toEqual(parsedNpmData);
 	});
 
 	it('execute and write out file', async () => {
+		(axios.get as jest.Mock).mockResolvedValue({data: {}});
 		const jsonConfig = {
 			...defaultConfig,
 			npm: {
-				moduleName: 'writr',
+				moduleName: 'docula',
 			},
 		};
 		fs.writeFileSync('test/data/npm-config.json', JSON.stringify(jsonConfig, null, 2));

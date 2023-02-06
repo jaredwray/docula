@@ -28,10 +28,7 @@ describe('Docula', () => {
 		originPath: 'test/data/site',
 		outputPath: 'test/data/dist',
 		siteUrl: 'https://example.com',
-		plugins: ['npm', 'robots'],
-		npm: {
-			moduleName: 'keyv',
-		},
+		plugins: ['robots'],
 	};
 
 	beforeAll(() => {
