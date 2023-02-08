@@ -3,6 +3,7 @@ import {type NpmConfig, NpmPlugin} from './npm.js';
 import {type RobotsConfig, RobotsPlugin} from './robots.js';
 import {SitemapPlugin} from './sitemap.js';
 import {PagefindPlugin} from './pagefind.js';
+import {AlgoliaConfig, AlgoliaPlugin} from "./algolia.js";
 
 const plugins = {
 	github: GithubPlugin,
@@ -10,10 +11,11 @@ const plugins = {
 	robots: RobotsPlugin,
 	sitemap: SitemapPlugin,
 	pagefind: PagefindPlugin,
+	algolia: AlgoliaPlugin,
 };
 
-export type PluginConfig = GithubConfig | NpmConfig | RobotsConfig;
+export type PluginConfig = GithubConfig | NpmConfig | RobotsConfig | AlgoliaConfig;
 
-export type PluginInstance = GithubPlugin | NpmPlugin | RobotsPlugin | SitemapPlugin | PagefindPlugin;
+export type PluginInstance = GithubPlugin | NpmPlugin | RobotsPlugin | SitemapPlugin | PagefindPlugin | AlgoliaPlugin;
 
 export default plugins;

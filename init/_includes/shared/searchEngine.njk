@@ -1,0 +1,5 @@
+{% if project.searchEngine == 'algolia' %}
+  {% include "search/algolia.njk" %}
+{% elif project.searchEngine == 'pagefind' %}
+  {% include "search/pagefind.njk" %}
+{% endif %}

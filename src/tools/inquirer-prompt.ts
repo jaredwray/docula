@@ -36,35 +36,86 @@ export const getSiteUrl = async (): Promise<Record<string, string>> => {
 	return siteAnswer.url;
 };
 
-export const parsePlugins = (plugins: string[]): string[] => plugins.map((plugin: string) => {
-	if (plugin.endsWith('.txt') || plugin.endsWith('.xml')) {
-		return plugin.split('.')[0];
-	}
-
-	return plugin;
-});
-
-export const getUserPlugins = async (): Promise<string[]> => {
+export const getUserPlugins = async (searchEngine: 'algolia'| 'pagefind'): Promise<string[]> => {
 	const userPlugins = await inquirer.prompt([
 		{
 			type: 'checkbox',
 			name: 'plugins',
 			message: 'Select the plugins you want to use',
-			choices: [{name: 'github'}, {name: 'robots.txt'}, {name: 'sitemap.xml'}],
+			choices: [
+				{
+					name: 'github',
+					value: 'github',
+				}, {
+				  name: 'robots.txt',
+					value: 'robots',
+				}, {
+					name: 'sitemap.xml',
+					value: 'sitemap',
+				}],
 		},
 	]);
-	return userPlugins.plugins;
+	return [...userPlugins.plugins, searchEngine];
 };
 
-export const parsePluginsData = async (plugins: string[]): Promise<Record<string, unknown>> => {
-	const parsedPlugins = parsePlugins(plugins);
+export const getSearchEngine = async (): Promise<'algolia'| 'pagefind'> => {
+	const searchEngine = await inquirer.prompt([
+		{
+			type: 'list',
+			name: 'engine',
+			message: 'Which search engine do you want to use?',
+			choices: ['Algolia', 'Pagefind'],
+			default: "Pagefind",
+			filter(val): any {
+				return val.toLowerCase();
+			}
+		},
+	]);
+	return searchEngine.engine;
+}
+
+export const getAlgoliaInfo = async (): Promise<Record<string, string>> => {
+	const algoliaInfo = await inquirer.prompt([
+		{
+			type: 'password',
+			name: 'appId',
+			message: 'What is your Algolia application ID?',
+		},
+		{
+			type: 'password',
+			name: 'apiKey',
+			message: 'What is your Algolia API key?',
+		},
+		{
+			type: 'input',
+			name: 'indexName',
+			message: 'What is your Algolia index name?',
+		}
+	])
+	return algoliaInfo;
+}
+
+
+export const setPlugins = async (): Promise<Record<string, unknown>> => {
 	let githubInfo: Record<string, string> | undefined;
-	if (parsedPlugins.includes('github')) {
+	let algoliaInfo: Record<string, string> | undefined;
+	const siteUrl = await getSiteUrl();
+	const searchEngine = await getSearchEngine();
+	const plugins = await getUserPlugins(searchEngine);
+
+	if (searchEngine === 'algolia') {
+		algoliaInfo = await getAlgoliaInfo();
+	}
+
+	if (plugins.includes('github')) {
 		githubInfo = await getGithubInfo();
 	}
 
 	return {
-		plugins: [...parsedPlugins, 'pagefind'],
+		siteUrl,
+		searchEngine,
+		plugins,
 		...(githubInfo && {github: githubInfo}),
+		...(algoliaInfo && {algolia: algoliaInfo}),
 	};
-};
+}

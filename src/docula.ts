@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import express from 'express';
 import {Eleventy} from './eleventy.js';
 import {Config} from './config.js';
-import {getSiteUrl, getUserPlugins, parsePluginsData} from './tools/inquirer-prompt.js';
+import {setPlugins} from './tools/inquirer-prompt.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
 import {getConfigPath, getFileName} from './tools/path.js';
@@ -12,7 +12,7 @@ import logger from './logger.js';
 import type {CommanderOptions} from './index.js';
 
 export class Docula {
-	readonly config: Config;
+	private config: Config;
 	private readonly eleventy: Eleventy;
 	private pluginInstances: PluginInstances = {};
 
@@ -29,7 +29,7 @@ export class Docula {
 	}
 
 	public async init(sitePath?: string): Promise<void> {
-		await this.buildConfigFile();
+		await this.writeConfigFile();
 		const {originPath} = this.config;
 		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
 		// Create the <site> folder
@@ -38,6 +38,7 @@ export class Docula {
 		}
 
 		this.copyFolder('init', rootSitePath);
+		this.copySearchEngineFiles()
 	}
 
 	public async build(): Promise<void> {
@@ -76,6 +77,10 @@ export class Docula {
 		const isDirectory = sourceExists && sourceStats.isDirectory();
 
 		if (isDirectory) {
+			//exclude the search folder
+			if (source.indexOf("search") > -1) {
+				return;
+			}
 			if (!targetExists) {
 				fs.mkdirSync(target);
 			}
@@ -86,20 +91,53 @@ export class Docula {
 				}
 			}
 		} else if (!fs.existsSync(target)) {
+			//exclude the search-index file
+			if (source.indexOf("search-index.md") > -1) {
+				return;
+			}
+			//exclude the search-index file
+			if (source.indexOf("search-index.md") > -1) {
+				return;
+			}
 			fs.copyFileSync(sourcePath, target);
 		}
 	}
 
-	private async buildConfigFile(): Promise<void> {
-		const userConfig: any = {};
-		const siteUrl = await getSiteUrl();
-		const plugins = await getUserPlugins();
-		const parsedPlugins = await parsePluginsData(plugins);
-		userConfig.siteUrl = siteUrl;
+	private copySearchEngineFiles():void {
+		const {searchEngine, originPath} = this.config;
+		const __filename = getFileName();
+		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
+		const sourcePath = path.join(doculaPath, `init/_includes/search/${searchEngine}.njk`)
+		const searchPath = path.join(process.cwd(), `${originPath}/_includes/search`)
+		const targetPath = path.join(process.cwd(), `${originPath}/_includes/search/${searchEngine}.njk`);
 
-		for (const plugin in parsedPlugins) {
-			if (Object.prototype.hasOwnProperty.call(parsedPlugins, plugin)) {
-				userConfig[plugin] = parsedPlugins[plugin];
+		if(!fs.existsSync(searchPath)) {
+			fs.mkdirSync(searchPath);
+		}
+
+		if(!fs.existsSync(targetPath)) {
+			fs.copyFileSync(sourcePath, targetPath);
+		}
+
+		//TODO: add validations for algolia
+		if(searchEngine === 'algolia') {
+			const indexSource = path.join(doculaPath, `init/search-index.md`)
+			const indexTarget = path.join(process.cwd(), `${originPath}/search-index.md`);
+
+			if(!fs.existsSync(indexTarget)) {
+				fs.copyFileSync(indexSource, indexTarget);
+			}
+		}
+	}
+
+	private async writeConfigFile(): Promise<void>  {
+		const userConfig: any = {};
+		const plugins = await setPlugins();
+		for (const plugin in plugins) {
+			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
+				userConfig[plugin] = plugins[plugin];
+				// @ts-ignore fix later
+				this.config[plugin] = plugins[plugin];
 			}
 		}
 
