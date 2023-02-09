@@ -17,7 +17,8 @@ export const getGithubInfo = async (): Promise<Record<string, string>> => {
 };
 
 export const validateUrl = (value: string): boolean | string => {
-	if (value.length > 0 && urlRegex.test(value)) {
+	const trimmed = value.trim();
+	if (trimmed.length > 0 && urlRegex.test(trimmed)) {
 		return true;
 	}
 
@@ -77,12 +78,12 @@ export const getSearchEngine = async (): Promise<'algolia'| 'pagefind'> => {
 export const getAlgoliaInfo = async (): Promise<Record<string, string>> => {
 	const algoliaInfo = await inquirer.prompt([
 		{
-			type: 'password',
+			type: 'input',
 			name: 'appId',
 			message: 'What is your Algolia application ID?',
 		},
 		{
-			type: 'password',
+			type: 'input',
 			name: 'apiKey',
 			message: 'What is your Algolia API key?',
 		},

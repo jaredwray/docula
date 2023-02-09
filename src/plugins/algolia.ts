@@ -1,7 +1,6 @@
 import algoliasearch from 'algoliasearch';
 import type {Config} from '../config.js';
 import type {DoculaPlugin, Options, Schema, Runtime} from '../docula-plugin.js';
-import {Eleventy} from "../eleventy.js";
 import fs from "fs-extra";
 
 export type AlgoliaConfig = {
@@ -30,11 +29,9 @@ export class AlgoliaPlugin implements DoculaPlugin {
   }
 
   runtime: Runtime = 'after';
-  private readonly eleventy: Eleventy;
   private readonly client: any;
 
   constructor(config: Config) {
-    this.eleventy = new Eleventy(config);
     const {appId, apiKey, indexName} = config.pluginConfig.algolia as AlgoliaConfig;
     this.options.outputPath = config.outputPath;
     this.options.appId = appId;
@@ -51,9 +48,12 @@ export class AlgoliaPlugin implements DoculaPlugin {
     const jsonPath = `${process.cwd()}/${this.options.outputPath}/algolia.json`;
     if(fs.existsSync(jsonPath)) {
       const data = fs.readFileSync(jsonPath, 'utf8');
-      jsonContent = JSON.parse(data);
+      const content = JSON.parse(data);
+      jsonContent = content.filter((item: any) => item.description.length)
     }
     try {
+      // @ts-ignore TODO: updateOptions type
+      await this.options.index.clearObjects();
       // @ts-ignore TODO: updateOptions type
       await this.options.index.saveObjects(jsonContent, {
         autoGenerateObjectIDIfNotExist: true,
