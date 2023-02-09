@@ -2,6 +2,7 @@ import algoliasearch from 'algoliasearch';
 import type {Config} from '../config.js';
 import type {DoculaPlugin, Options, Schema, Runtime} from '../docula-plugin.js';
 import {Eleventy} from "../eleventy.js";
+import fs from "fs-extra";
 
 export type AlgoliaConfig = {
   apiKey: string;
@@ -25,6 +26,7 @@ export class AlgoliaPlugin implements DoculaPlugin {
     appId: '',
     indexName: '',
     index: '',
+    outputPath: ''
   }
 
   runtime: Runtime = 'after';
@@ -34,6 +36,7 @@ export class AlgoliaPlugin implements DoculaPlugin {
   constructor(config: Config) {
     this.eleventy = new Eleventy(config);
     const {appId, apiKey, indexName} = config.pluginConfig.algolia as AlgoliaConfig;
+    this.options.outputPath = config.outputPath;
     this.options.appId = appId;
     this.options.apiKey = apiKey;
     this.options.indexName = indexName;
@@ -44,37 +47,20 @@ export class AlgoliaPlugin implements DoculaPlugin {
   }
 
   async execute(): Promise<void> {
+    let jsonContent:string = '';
+    const jsonPath = `${process.cwd()}/${this.options.outputPath}/algolia.json`;
+    if(fs.existsSync(jsonPath)) {
+      const data = fs.readFileSync(jsonPath, 'utf8');
+      jsonContent = JSON.parse(data);
+    }
     try {
-    const jsonContent = await this.eleventy.toJSON();
-      console.log(jsonContent, 'jsonContent')
-    // @ts-ignore TODO: updateOptions type
-    this.options.index.saveObjects(jsonContent, {
-      autoGenerateObjectIDIfNotExist: true,
-    })
-    } catch (error: unknown) {
-      throw new Error(`Error while indexing to Algolia: ${error}`);
+      // @ts-ignore TODO: updateOptions type
+      await this.options.index.saveObjects(jsonContent, {
+        autoGenerateObjectIDIfNotExist: true,
+      })
+    } catch (error: any) {
+      throw new Error(`Error while indexing to Algolia: ${error.message}`);
     }
   };
 }
 
-//
-// //   const content = `{
-// //       "apiKey": "${this.options.apiKey}",
-// //       "indexName": "${this.options.indexName}",
-// //       "appId": "${this.options.appId}",
-// //       "inputSelector": "#search-input",
-// //       "debug": true,
-// //       "searchParameters": {
-// //         "hitsPerPage": 10
-// //       },
-// //       "transformData": function(hits) {
-// //         hits.forEach(function(hit) {
-// //           hit.url = hit.url.replace('https://example.com', '');
-// //         });
-// //         return hits;
-// //       },
-// //       "hits": ${JSON.stringify(jsonContent)}
-// //     }`;
-// //
-// //   fs.writeFileSync(`${this.options.outputPath}/algolia.json`, content);
-// // }

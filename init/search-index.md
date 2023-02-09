@@ -1,5 +1,5 @@
 ---
-permalink: search.json
+permalink: algolia.json
 templateEngineOverride: njk
 ---
 [
@@ -7,7 +7,8 @@ templateEngineOverride: njk
 {
 "url" : "{{ item.url }}",
 "title" : "{{ item.data.title }}",
-"description" : "{{ item.templateContent | striptags | squash }}"
+"description" : "{{ item.templateContent | striptags }}",
+"objectID": "{{ item.url }}"
 }{% if not loop.last %},{% else %}{%- endif -%}
 {%- endfor -%}
 ]
