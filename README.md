@@ -25,7 +25,6 @@
 
 - `site/docs` - contains the documentation files
 - `site/template` - contains the templates files
-- `site/blog` - contains the blog files and images
 
 This will all be generated in the `dist` folder by default. To change that you can use the `--output=<folder_name>` flag.
 
