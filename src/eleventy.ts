@@ -9,7 +9,7 @@ import markdownItAnchor from 'markdown-it-anchor';
 import type {Config} from './config.js';
 import {squashCallback} from './eleventy/filters.js';
 import {getYear, formatDate, parseRelease} from './eleventy/shortcodes.js';
-import {getConfig} from "./eleventy/globalData.js";
+import {getConfig} from './eleventy/global-data.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
@@ -84,7 +84,7 @@ export class Eleventy {
 		try {
 			await this.eleventy.write();
 		} catch (error: unknown) {
-			throw new Error(`Eleventy build failed: ${error}`);
+			throw new Error(`Eleventy build failed: ${(error as Error).message}`);
 		}
 	}
 
@@ -124,7 +124,7 @@ export class Eleventy {
 	}
 
 	private addGlobalData(eleventyConfig: ElevConfig) {
-		// eleventyConfig.addGlobalData('algoliaKeys', () => algoliaKeys(this.config));
+		// EleventyConfig.addGlobalData('algoliaKeys', () => algoliaKeys(this.config));
 		eleventyConfig.addGlobalData('config', () => getConfig(this.config));
 	}
 }

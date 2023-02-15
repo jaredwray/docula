@@ -3,7 +3,7 @@ import {type NpmConfig, NpmPlugin} from './npm.js';
 import {type RobotsConfig, RobotsPlugin} from './robots.js';
 import {SitemapPlugin} from './sitemap.js';
 import {PagefindPlugin} from './pagefind.js';
-import {AlgoliaConfig, AlgoliaPlugin} from "./algolia.js";
+import {type AlgoliaConfig, AlgoliaPlugin} from './algolia.js';
 
 const plugins = {
 	github: GithubPlugin,

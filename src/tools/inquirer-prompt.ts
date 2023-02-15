@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import {urlRegex} from './tools.js';
 
 export const getGithubInfo = async (): Promise<Record<string, string>> => {
-	const data = await inquirer.prompt([
+	return inquirer.prompt([
 		{
 			type: 'input',
 			name: 'author',
@@ -13,7 +13,6 @@ export const getGithubInfo = async (): Promise<Record<string, string>> => {
 			message: 'What is your GitHub repository\'s name?',
 		},
 	]);
-	return data;
 };
 
 export const validateUrl = (value: string): boolean | string => {
@@ -37,7 +36,7 @@ export const getSiteUrl = async (): Promise<Record<string, string>> => {
 	return siteAnswer.url;
 };
 
-export const getUserPlugins = async (searchEngine: 'algolia'| 'pagefind'): Promise<string[]> => {
+export const getUserPlugins = async (searchEngine: 'algolia' | 'pagefind'): Promise<string[]> => {
 	const userPlugins = await inquirer.prompt([
 		{
 			type: 'checkbox',
@@ -48,35 +47,36 @@ export const getUserPlugins = async (searchEngine: 'algolia'| 'pagefind'): Promi
 					name: 'github',
 					value: 'github',
 				}, {
-				  name: 'robots.txt',
+					name: 'robots.txt',
 					value: 'robots',
 				}, {
 					name: 'sitemap.xml',
 					value: 'sitemap',
-				}],
+				},
+			],
 		},
 	]);
 	return [...userPlugins.plugins, searchEngine];
 };
 
-export const getSearchEngine = async (): Promise<'algolia'| 'pagefind'> => {
+export const getSearchEngine = async (): Promise<'algolia' | 'pagefind'> => {
 	const searchEngine = await inquirer.prompt([
 		{
 			type: 'list',
 			name: 'engine',
 			message: 'Which search engine do you want to use?',
 			choices: ['Algolia', 'Pagefind'],
-			default: "Pagefind",
-			filter(val): any {
-				return val.toLowerCase();
-			}
+			default: 'Pagefind',
+			filter(value: string): string {
+				return value.toLowerCase();
+			},
 		},
 	]);
 	return searchEngine.engine;
-}
+};
 
 export const getAlgoliaInfo = async (): Promise<Record<string, string>> => {
-	const algoliaInfo = await inquirer.prompt([
+	return inquirer.prompt([
 		{
 			type: 'input',
 			name: 'appId',
@@ -91,11 +91,9 @@ export const getAlgoliaInfo = async (): Promise<Record<string, string>> => {
 			type: 'input',
 			name: 'indexName',
 			message: 'What is your Algolia index name?',
-		}
-	])
-	return algoliaInfo;
-}
-
+		},
+	]);
+};
 
 export const setPlugins = async (): Promise<Record<string, unknown>> => {
 	let githubInfo: Record<string, string> | undefined;
@@ -119,4 +117,4 @@ export const setPlugins = async (): Promise<Record<string, unknown>> => {
 		...(githubInfo && {github: githubInfo}),
 		...(algoliaInfo && {algolia: algoliaInfo}),
 	};
-}
+};

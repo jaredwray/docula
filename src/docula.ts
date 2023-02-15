@@ -12,7 +12,7 @@ import logger from './logger.js';
 import type {CommanderOptions} from './index.js';
 
 export class Docula {
-	private config: Config;
+	readonly config: Config;
 	private readonly eleventy: Eleventy;
 	private pluginInstances: PluginInstances = {};
 
@@ -38,7 +38,7 @@ export class Docula {
 		}
 
 		this.copyFolder('init', rootSitePath);
-		this.copySearchEngineFiles()
+		this.copySearchEngineFiles();
 	}
 
 	public async build(): Promise<void> {
@@ -77,10 +77,11 @@ export class Docula {
 		const isDirectory = sourceExists && sourceStats.isDirectory();
 
 		if (isDirectory) {
-			//exclude the search folder
-			if (source.indexOf("search") > -1) {
+			// Exclude the search folder
+			if (source.includes('search')) {
 				return;
 			}
+
 			if (!targetExists) {
 				fs.mkdirSync(target);
 			}
@@ -91,52 +92,54 @@ export class Docula {
 				}
 			}
 		} else if (!fs.existsSync(target)) {
-			//exclude the search-index file
-			if (source.indexOf("search-index.md") > -1) {
+			// Exclude the search-index file
+			if (source.includes('search-index.md')) {
 				return;
 			}
-			//exclude the search-index file
-			if (source.indexOf("search-index.md") > -1) {
+
+			// Exclude the search-index file
+			if (source.includes('search-index.md')) {
 				return;
 			}
+
 			fs.copyFileSync(sourcePath, target);
 		}
 	}
 
-	private copySearchEngineFiles():void {
+	private copySearchEngineFiles(): void {
 		const {searchEngine, originPath} = this.config;
 		const __filename = getFileName();
 		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
-		const sourcePath = path.join(doculaPath, `init/_includes/search/${searchEngine}.njk`)
-		const searchPath = path.join(process.cwd(), `${originPath}/_includes/search`)
+		const sourcePath = path.join(doculaPath, `init/_includes/search/${searchEngine}.njk`);
+		const searchPath = path.join(process.cwd(), `${originPath}/_includes/search`);
 		const targetPath = path.join(process.cwd(), `${originPath}/_includes/search/${searchEngine}.njk`);
 
-		if(!fs.existsSync(searchPath)) {
+		if (!fs.existsSync(searchPath)) {
 			fs.mkdirSync(searchPath);
 		}
 
-		if(!fs.existsSync(targetPath)) {
+		if (!fs.existsSync(targetPath)) {
 			fs.copyFileSync(sourcePath, targetPath);
 		}
 
-		//TODO: add validations for algolia
-		if(searchEngine === 'algolia') {
-			const indexSource = path.join(doculaPath, `init/search-index.md`)
+		// TODO: add validations for algolia
+		if (searchEngine === 'algolia') {
+			const indexSource = path.join(doculaPath, 'init/search-index.md');
 			const indexTarget = path.join(process.cwd(), `${originPath}/search-index.md`);
 
-			if(!fs.existsSync(indexTarget)) {
+			if (!fs.existsSync(indexTarget)) {
 				fs.copyFileSync(indexSource, indexTarget);
 			}
 		}
 	}
 
-	private async writeConfigFile(): Promise<void>  {
+	private async writeConfigFile(): Promise<void> {
 		const userConfig: any = {};
 		const plugins = await setPlugins();
 		for (const plugin in plugins) {
 			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
 				userConfig[plugin] = plugins[plugin];
-				// @ts-ignore fix later
+				// @ts-expect-error fix later
 				this.config[plugin] = plugins[plugin];
 			}
 		}
