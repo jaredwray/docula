@@ -11,7 +11,9 @@ export const getUserPlugins = jest.fn(() => ({
 	plugins: ['robots.txt', 'npm'],
 }));
 
-export const parsePluginsData = jest.fn((plugins: string[]) => ({
+export const setPlugins = jest.fn(() => ({
+	siteUrl: 'https://www.example.com',
+	searchEngine: 'pagefind',
 	plugins: ['github'],
 	github: {
 		author: 'jaredwray',

@@ -22,7 +22,7 @@ export const validateUrl = (value: string): boolean | string => {
 	return 'Please enter a complete URL.';
 };
 
-export const getSiteUrl = async (): Promise<Record<string, string>> => {
+export const getSiteUrl = async (): Promise<string> => {
 	const siteAnswer = await inquirer.prompt([
 		{
 			type: 'input',
