@@ -97,16 +97,11 @@ export class Docula {
 				return;
 			}
 
-			// Exclude the search-index file
-			if (source.includes('search-index.md')) {
-				return;
-			}
-
 			fs.copyFileSync(sourcePath, target);
 		}
 	}
 
-	private copySearchEngineFiles(): void {
+	copySearchEngineFiles(): void {
 		const {searchEngine, originPath} = this.config;
 		const __filename = getFileName();
 		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
