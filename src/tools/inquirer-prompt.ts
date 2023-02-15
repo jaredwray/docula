@@ -1,19 +1,17 @@
 import inquirer from 'inquirer';
 import {urlRegex} from './tools.js';
 
-export const getGithubInfo = async (): Promise<Record<string, string>> => {
-	return inquirer.prompt([
-		{
-			type: 'input',
-			name: 'author',
-			message: 'What is your GitHub username?',
-		}, {
-			type: 'input',
-			name: 'repo',
-			message: 'What is your GitHub repository\'s name?',
-		},
-	]);
-};
+export const getGithubInfo = async (): Promise<Record<string, string>> => inquirer.prompt([
+	{
+		type: 'input',
+		name: 'author',
+		message: 'What is your GitHub username?',
+	}, {
+		type: 'input',
+		name: 'repo',
+		message: 'What is your GitHub repository\'s name?',
+	},
+]);
 
 export const validateUrl = (value: string): boolean | string => {
 	const trimmed = value.trim();
@@ -75,25 +73,23 @@ export const getSearchEngine = async (): Promise<'algolia' | 'pagefind'> => {
 	return searchEngine.engine;
 };
 
-export const getAlgoliaInfo = async (): Promise<Record<string, string>> => {
-	return inquirer.prompt([
-		{
-			type: 'input',
-			name: 'appId',
-			message: 'What is your Algolia application ID?',
-		},
-		{
-			type: 'input',
-			name: 'apiKey',
-			message: 'What is your Algolia API key?',
-		},
-		{
-			type: 'input',
-			name: 'indexName',
-			message: 'What is your Algolia index name?',
-		},
-	]);
-};
+export const getAlgoliaInfo = async (): Promise<Record<string, string>> => inquirer.prompt([
+	{
+		type: 'input',
+		name: 'appId',
+		message: 'What is your Algolia application ID?',
+	},
+	{
+		type: 'input',
+		name: 'apiKey',
+		message: 'What is your Algolia API key?',
+	},
+	{
+		type: 'input',
+		name: 'indexName',
+		message: 'What is your Algolia index name?',
+	},
+]);
 
 export const setPlugins = async (): Promise<Record<string, unknown>> => {
 	let githubInfo: Record<string, string> | undefined;
