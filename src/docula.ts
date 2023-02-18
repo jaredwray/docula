@@ -117,7 +117,6 @@ export class Docula {
 			fs.copyFileSync(sourcePath, targetPath);
 		}
 
-		// TODO: add validations for algolia
 		if (searchEngine === 'algolia') {
 			const indexSource = path.join(doculaPath, 'init/search-index.md');
 			const indexTarget = path.join(process.cwd(), `${originPath}/search-index.md`);
