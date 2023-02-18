@@ -22,6 +22,22 @@ describe('Eleventy', () => {
 		expect(Elev.prototype.write).toHaveBeenCalled();
 	});
 
+	it('Eleventy - build failed error', async () => {
+		jest.spyOn(Elev.prototype, 'write').mockImplementation(() => {
+			throw new Error('test');
+		});
+		const config = new Config();
+		const eleventy = new Eleventy(config);
+
+		try {
+			await eleventy.build();
+		} catch (error: unknown) {
+			expect((error as Error).message).toBe('Eleventy build failed: test');
+		}
+
+		expect(Elev.prototype.write).toHaveBeenCalled();
+	});
+
 	it('Eleventy - add filter', async () => {
 		const eleventyConfig = {
 			addFilter: jest.fn(),

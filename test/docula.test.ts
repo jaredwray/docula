@@ -1,3 +1,5 @@
+import * as path from 'node:path';
+import process from 'node:process';
 import fs from 'fs-extra';
 import express from 'express';
 import {Docula} from '../src/docula.js';
@@ -164,6 +166,18 @@ describe('Docula', () => {
 		await docula.serve();
 		expect(express).toHaveBeenCalled();
 		expect(express().listen).toHaveBeenCalledWith(port, expect.any(Function));
+	});
+
+	// Test the copySearchEngineFiles function
+	it('should copy the search engine files', async () => {
+		const docula = new Docula();
+		docula.config.outputPath = 'outputPath';
+		docula.config.searchEngine = 'algolia';
+		const indexTarget = path.join(process.cwd(), `${docula.config.originPath}/search-index.md`);
+		fs.existsSync = jest.fn(target => target !== indexTarget);
+		fs.copyFileSync = jest.fn();
+		docula.copySearchEngineFiles();
+		expect(fs.copyFileSync).toHaveBeenCalled();
 	});
 });
 

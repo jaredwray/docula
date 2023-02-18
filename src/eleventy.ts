@@ -9,6 +9,7 @@ import markdownItAnchor from 'markdown-it-anchor';
 import type {Config} from './config.js';
 import {squashCallback} from './eleventy/filters.js';
 import {getYear, formatDate, parseRelease} from './eleventy/shortcodes.js';
+import {getConfig} from './eleventy/global-data.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Elev = pkg.default;
@@ -23,6 +24,7 @@ type ElevConfig = {
 	addShortcode: (name: string, callback: (...args: any[]) => unknown) => void;
 	addFilter: (name: string, callback: (text: string) => string) => void;
 	setTemplateFormats(strings: string[]): void;
+	addGlobalData(name: string, config: () => unknown): void;
 };
 
 type ElevInterface = {
@@ -62,6 +64,7 @@ export class Eleventy {
 				this.addPlugin(eleventyConfig);
 				this.addShortcode(eleventyConfig);
 				this.addFilter(eleventyConfig);
+				this.addGlobalData(eleventyConfig);
 
 				eleventyConfig.setTemplateFormats(['njk', 'md', 'html']);
 
@@ -78,7 +81,11 @@ export class Eleventy {
 	}
 
 	public async build() {
-		await this.eleventy.write();
+		try {
+			await this.eleventy.write();
+		} catch (error: unknown) {
+			throw new Error(`Eleventy build failed: ${(error as Error).message}`);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -114,5 +121,10 @@ export class Eleventy {
 
 	private addFilter(eleventyConfig: ElevConfig) {
 		eleventyConfig.addFilter('squash', squashCallback);
+	}
+
+	private addGlobalData(eleventyConfig: ElevConfig) {
+		// EleventyConfig.addGlobalData('algoliaKeys', () => algoliaKeys(this.config));
+		eleventyConfig.addGlobalData('config', () => getConfig(this.config));
 	}
 }

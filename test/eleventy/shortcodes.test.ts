@@ -8,7 +8,7 @@ describe('shortcodes', () => {
 	});
 
 	test('formatDate formats a date correctly', () => {
-		const date = new Date('2022-01-01T00:00:00.000Z');
+		const date = new Date('2022-01-01T00:00:00.000Z').toISOString();
 		const format = 'yyyy-MM-dd';
 		const expectedDateString = '2022-01-01';
 		const formattedDate = formatDate(format, date);

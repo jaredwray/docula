@@ -8,10 +8,12 @@
   const handleScroll = () => {
     const onPage = document.querySelector('#on-page');
     if(!isHome) {
-      if (window.scrollY > 0 && window.innerWidth >= 1458) {
+      if (window.scrollY > 250 && window.innerWidth >= 1458) {
         onPage.classList.remove('hidden');
+        onPage.classList.add('on-page-fixed');
       } else {
         onPage.classList.add('hidden');
+        onPage.classList.remove('on-page-fixed');
       }
     }
   };

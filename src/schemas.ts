@@ -29,7 +29,7 @@ export const jsonConfigSchema: ConfigSchema = {
 		outputPath: {type: 'string'},
 		dataPath: {type: 'string'},
 		templatePath: {type: 'string'},
-		searchEngine: {type: 'string', enum: ['algolia']},
+		searchEngine: {type: 'string', enum: ['algolia', 'pagefind']},
 		plugins: {
 			type: 'array',
 			items: {
