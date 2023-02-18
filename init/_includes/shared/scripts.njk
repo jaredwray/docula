@@ -9,9 +9,11 @@
     const onPage = document.querySelector('#on-page');
     if(!isHome) {
       if (window.scrollY > 250 && window.innerWidth >= 1458) {
-        onPage.classList.remove('on-page--hidden');
+        onPage.classList.remove('hidden');
+        onPage.classList.add('on-page-fixed');
       } else {
-        onPage.classList.add('on-page--hidden');
+        onPage.classList.add('hidden');
+        onPage.classList.remove('on-page-fixed');
       }
     }
   };
