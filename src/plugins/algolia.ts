@@ -34,7 +34,7 @@ export class AlgoliaPlugin implements DoculaPlugin {
 	};
 
 	runtime: Runtime = 'after';
-	private readonly client: SearchClient;
+	readonly client: SearchClient;
 
 	constructor(config: Config) {
 		const {appId, apiKey, indexName} = config.pluginConfig.algolia as AlgoliaConfig;
