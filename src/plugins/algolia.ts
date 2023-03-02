@@ -1,7 +1,6 @@
 import process from 'node:process';
-import algoliasearch, {type SearchClient} from 'algoliasearch';
+import algoliasearch, {type SearchClient, type SearchIndex} from 'algoliasearch';
 import fs from 'fs-extra';
-import type {SearchIndex} from 'algoliasearch';
 import type {Config} from '../config.js';
 import type {DoculaPlugin, Options, Schema, Runtime} from '../docula-plugin.js';
 
