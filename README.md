@@ -4,6 +4,7 @@
 
 [![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
 [![codecov](https://codecov.io/github/jaredwray/docula/branch/main/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/github/jaredwray/docula)
+[![release](https://github.com/jaredwray/docula/actions/workflows/release.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/release.yaml)
 [![npm](https://img.shields.io/npm/dm/docula.svg)](https://www.npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula.svg)](https://www.npmjs.com/package/docula)
 
