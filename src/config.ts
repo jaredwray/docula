@@ -16,7 +16,7 @@ export class Config {
 	imagesPath = 'images';
 	assetsPath = 'css';
 	siteUrl = '';
-	ajv = new Ajv();
+	ajv = new Ajv.default();
 
 	private readonly schema: ConfigSchema;
 
@@ -53,13 +53,13 @@ export class Config {
 
 		if (validate.errors) {
 			const [error] = validate.errors;
-			const {dataPath, message, keyword, params} = error;
+			const {data, message, keyword, params} = error;
 			if (keyword === 'additionalProperties') {
 				const {additionalProperty} = params as Record<string, string>;
 				throw new Error(`The config file has an invalid property: ${additionalProperty}`);
 			}
 
-			throw new Error(`${dataPath} ${message!}`);
+			throw new Error(`${data} ${message!}`);
 		}
 
 		this.originPath = jsonConfig.originPath ?? this.originPath;
