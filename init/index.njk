@@ -11,6 +11,7 @@
       <div class="home-container">
         <h1>{{ site.homeTitle }}</h1>
       </div>
+        <a href="/docs" class="home-docs-button">Documentation</a>
     </div>
     <section class="home-container">
       {% if github %}
@@ -63,6 +64,11 @@
     </section>
 
   </main>
+
+  <footer>
+    Powered by <a href="https://www.docula.org" target="_blank" rel="noopener noreferrer"><img src="/assets/images/docula-logo-horizontal.webp" alt="Docula logo" width="122" height="32" />
+  </a>
+  </footer>
 
   {% include "shared/searchModal.njk" %}
   {% include "shared/scripts.njk" %}
