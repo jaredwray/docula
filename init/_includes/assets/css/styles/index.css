@@ -586,6 +586,10 @@ details > summary {
   border-bottom: 1px solid var(--border);
 }
 
+.pagefind-ui__search-clear {
+  display: none !important;
+}
+
 .pagefind-ui__result, .pagefind-ui__message {
   padding-left: 16px !important;
   padding-right: 16px !important;
