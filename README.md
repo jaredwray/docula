@@ -8,7 +8,7 @@
 [![npm](https://img.shields.io/npm/dm/docula.svg)](https://www.npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula.svg)](https://www.npmjs.com/package/docula)
 
-## :warning: - this is currently under development. Please do not use.
+## :warning: Please do not use until v1.x.x is released 
 
 ## Features
 
