@@ -16,6 +16,7 @@ export class Config {
 	imagesPath = 'images';
 	assetsPath = 'css';
 	siteUrl = '';
+	// @ts-expect-error - ajv is not callable
 	ajv = new Ajv();
 
 	private readonly schema: ConfigSchema;
@@ -46,20 +47,21 @@ export class Config {
 
 		this.schema.required = [...new Set(this.schema.required)];
 
-		const validate = this.ajv.compile(this.schema);
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		const validate: Ajv.ValidateFunction = this.ajv.compile(this.schema);
 
-		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		validate(jsonConfig);
 
 		if (validate.errors) {
 			const [error] = validate.errors;
+			// @ts-expect-error - dataPath exist without error"
 			const {dataPath, message, keyword, params} = error;
 			if (keyword === 'additionalProperties') {
 				const {additionalProperty} = params as Record<string, string>;
 				throw new Error(`The config file has an invalid property: ${additionalProperty}`);
 			}
 
-			throw new Error(`${dataPath} ${message!}`);
+			throw new Error(`${dataPath as string} ${message!}`);
 		}
 
 		this.originPath = jsonConfig.originPath ?? this.originPath;
