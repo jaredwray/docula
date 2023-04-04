@@ -34,7 +34,7 @@ export const getSiteUrl = async (): Promise<string> => {
 	return siteAnswer.url;
 };
 
-export const getUserPlugins = async (searchEngine: 'algolia' | 'pagefind'): Promise<string[]> => {
+export const getUserPlugins = async (): Promise<string[]> => {
 	const userPlugins = await inquirer.prompt([
 		{
 			type: 'checkbox',
@@ -54,7 +54,7 @@ export const getUserPlugins = async (searchEngine: 'algolia' | 'pagefind'): Prom
 			],
 		},
 	]);
-	return [...userPlugins.plugins, searchEngine];
+	return userPlugins.plugins;
 };
 
 export const getSearchEngine = async (): Promise<'algolia' | 'pagefind'> => {
@@ -91,12 +91,45 @@ export const getAlgoliaInfo = async (): Promise<Record<string, string>> => inqui
 	},
 ]);
 
-export const setPlugins = async (): Promise<Record<string, unknown>> => {
+export const getSiteType = async (): Promise<'landing' | 'multipage'> => {
+	const siteType = await inquirer.prompt([
+		{
+			type: 'list',
+			name: 'type',
+			message: 'What type of site do you want to build?',
+			choices: ['Landing', 'Multi page'],
+			default: 'Multi page',
+			filter(value: string): string {
+				return value.toLowerCase();
+			},
+		},
+	]);
+	return siteType.type;
+};
+
+
+export const buildLandingPage = async (): Promise<Record<string, unknown>> => {
+	let githubInfo: Record<string, string> | undefined;
+	const siteUrl = await getSiteUrl();
+	const plugins = await getUserPlugins();
+
+	if (plugins.includes('github')) {
+		githubInfo = await getGithubInfo();
+	}
+
+	return {
+		siteUrl,
+		plugins,
+		...(githubInfo && {github: githubInfo}),
+	};
+}
+
+export const buildMultipageSite = async (): Promise<Record<string, unknown>> => {
 	let githubInfo: Record<string, string> | undefined;
 	let algoliaInfo: Record<string, string> | undefined;
 	const siteUrl = await getSiteUrl();
 	const searchEngine = await getSearchEngine();
-	const plugins = await getUserPlugins(searchEngine);
+	const plugins = await getUserPlugins();
 
 	if (searchEngine === 'algolia') {
 		algoliaInfo = await getAlgoliaInfo();
@@ -109,8 +142,20 @@ export const setPlugins = async (): Promise<Record<string, unknown>> => {
 	return {
 		siteUrl,
 		searchEngine,
-		plugins,
+		plugins: [...plugins, searchEngine],
 		...(githubInfo && {github: githubInfo}),
 		...(algoliaInfo && {algolia: algoliaInfo}),
 	};
+}
+
+export const setPlugins = async (): Promise<Record<string, unknown>> => {
+	let config
+	const siteType = await getSiteType();
+	 if(siteType.includes('landing')) {
+		config = await buildLandingPage();
+	 } else {
+		config = await buildMultipageSite();
+	 }
+
+ return { siteType, ...config }
 };

@@ -16,6 +16,7 @@ export class Config {
 	imagesPath = 'images';
 	assetsPath = 'css';
 	siteUrl = '';
+	siteType = '';
 	ajv = new Ajv();
 
 	private readonly schema: ConfigSchema;
