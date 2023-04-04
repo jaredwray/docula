@@ -12,8 +12,9 @@
     "build": "tsc -p .",
     "clean": "rm -rf dist && rm -rf test/data/site && rm -rf node_modules",
     "test": "xo --fix && jest --coverage",
-    "test:code": "yarn build && node ./bin/docula.js",
-    "lint": "xo --fix"
+    "test:code": "npm run build && node ./bin/docula.js",
+    "lint": "xo --fix",
+    "build:site": "npm run build && echo 'Building site...'"
   },
   "repository": {
     "type": "git",
