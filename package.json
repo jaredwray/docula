@@ -14,7 +14,7 @@
     "test": "xo --fix && jest --coverage",
     "test:code": "npm run build && node ./bin/docula.js",
     "lint": "xo --fix",
-    "build:site": "npm run build && echo 'Building site...'"
+    "build:site": "npm run build && node ./bin/docula.js"
   },
   "repository": {
     "type": "git",

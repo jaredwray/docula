@@ -1,0 +1,14 @@
+{
+  "siteType": "landing",
+  "outputPath": "site/dist",
+  "siteUrl": "https://docula.org",
+  "plugins": [
+    "github",
+    "robots",
+    "sitemap"
+  ],
+  "github": {
+    "author": "jaredwray",
+    "repo": "docula"
+  }
+}
