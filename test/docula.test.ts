@@ -103,6 +103,7 @@ describe('Docula', () => {
 		const docula = new Docula();
 		docula.config.outputPath = 'outputPath';
 		docula.config.siteType = 'multi page';
+		docula.config.originPath = 'test/data/demo-site';
 
 		jest.spyOn(docula, 'writeConfigFile').mockImplementation(async () => ({siteType: 'multi page'}));
 		jest.spyOn(docula, 'copyFolder');
@@ -117,6 +118,7 @@ describe('Docula', () => {
 		const docula = new Docula();
 		docula.config.outputPath = 'outputPath';
 		docula.config.siteType = 'landing';
+		docula.config.originPath = 'test/data/demo-site';
 
 		jest.spyOn(docula, 'writeConfigFile').mockImplementation(async () => ({siteType: 'landing'}));
 		jest.spyOn(docula, 'copyLandingFolder');
