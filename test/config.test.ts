@@ -60,7 +60,16 @@ describe('Config', () => {
 
 	it('Config - does not throw an error if the config file is valid', () => {
 		const config = new Config();
-		const validConfig = {originPath: 'site'};
+		const validConfig = {
+			originPath: 'test/data/site',
+			outputPath: 'test/data/dist',
+			siteUrl: 'https://docula.org',
+			plugins: ['github'],
+			github: {
+				repo: 'docula',
+				author: 'jaredwray',
+			},
+		};
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(validConfig, null, 2));
 		expect(() => {
 			config.loadConfig('./test/data/config.json');
@@ -69,7 +78,14 @@ describe('Config', () => {
 
 	it('Config - loadConfig throws an error if the property value is not allowed', () => {
 		const config = new Config();
-		const invalidConfig = {searchEngine: 'google'};
+		const invalidConfig = {
+			engine: 'google',
+			plugins: ['github'],
+			github: {
+				repo: 'docula',
+				author: 'jaredwray',
+			},
+		};
 		fs.writeFileSync('./test/data/config.json', JSON.stringify(invalidConfig, null, 2));
 		expect(() => {
 			config.loadConfig('./test/data/config.json');
