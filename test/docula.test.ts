@@ -233,5 +233,23 @@ describe('Docula', () => {
 		expect(fs.mkdirSync).toHaveBeenCalled();
 		expect(fs.copyFileSync).toHaveBeenCalled();
 	});
+
+	it('Docula init - should call copyFolder and copySearchEngineFiles when siteType is multi page', async () => {
+		const docula = new Docula();
+		docula.config.siteType = 'landing';
+		docula.config.originPath = 'test/data/search';
+
+		jest.spyOn(docula, 'writeConfigFile').mockImplementation(async () => ({siteType: 'landing'}));
+		jest.spyOn(docula, 'validateFilePath').mockImplementation(() => ({
+			sourcePath: 'test/data/site',
+			targetExist: true,
+			isDirectory: true,
+		}));
+		fs.copyFileSync = jest.fn();
+
+		docula.copyLandingFolder('test/docs', 'test/data/site');
+
+		expect(fs.copyFileSync).toHaveBeenCalledTimes(0);
+	});
 });
 

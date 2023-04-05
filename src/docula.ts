@@ -182,7 +182,7 @@ export class Docula {
 		return plugins;
 	}
 
-	private validateFilePath(source: string, target: string): Record<string, any> {
+	validateFilePath(source: string, target: string): Record<string, any> {
 		const __filename = getFileName();
 		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
 		const sourcePath = path.join(doculaPath, source);
