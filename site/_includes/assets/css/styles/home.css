@@ -9,7 +9,7 @@
 }
 
 .home-hero {
-  padding: 56px 0 72px;
+  padding: 0;
   background-color: var(--home-background)
 }
 
@@ -47,7 +47,7 @@
 
 .home-hero img {
   width: 100%;
-  max-width: 400px;
+  max-width: 320px;
 }
 
 .content-container {
@@ -189,7 +189,7 @@ footer img {
 
 @media screen and (min-width: 640px) {
   .home-hero {
-    padding: 64px 0 72px;
+    padding: 0;
   }
 
   .home-container {
@@ -201,7 +201,7 @@ footer img {
 
 @media screen and (min-width: 768px) {
   .home-hero {
-    padding: 72px 0;
+    padding: 0;
   }
 
   .header-logo {
@@ -209,7 +209,7 @@ footer img {
   }
 
   .home-hero img {
-    max-width: 180px;
+    max-width: 500px;
   }
 
   .content-container {

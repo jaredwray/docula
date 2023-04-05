@@ -9,8 +9,6 @@ layout: "landing/singlePage.njk"
 [![npm](https://img.shields.io/npm/dm/docula.svg)](https://www.npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula.svg)](https://www.npmjs.com/package/docula)
 
-## :warning: Please do not use until v1.x.x is released 
-
 ## Features
 
 - Zero Config - Just drop it in and it works
@@ -23,12 +21,11 @@ layout: "landing/singlePage.njk"
 - Will generate a sitemap.xml
 - Will generate a robots.txt
 - Will generate a release based on Github Releases
-- Generatses an RSS feed.xml file to use and share 
 
 ## Site Structure
 
 - `site/docs` - contains the documentation files
-- `site/template` - contains the templates files
+- `site/_data` - contains the data used to generate the site
 
 This will all be generated in the `dist` folder by default. To change that you can use the `--output=<folder_name>` flag.
 
@@ -36,6 +33,7 @@ This will all be generated in the `dist` folder by default. To change that you c
 - Pull all of your Contributors and Display Them
 - Pulls your release notes and puts it into a good looking data format for your templates
 - Pulls your project stats based on Github Forks, Stars, and Watchers
+
 ## How the CLI should work
 To create a new project it should be as simple as:
 ```bash

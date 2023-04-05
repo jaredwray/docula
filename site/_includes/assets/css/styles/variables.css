@@ -1,18 +1,18 @@
 :root {
   --font-family: 'Open Sans', sans-serif;
 
-  --color-primary:  #08c2ff;
-  --color-secondary: #bd72d1;
-  --color-secondary-dark: #af34d0;
+  --color-primary:  #322d3c;
+  --color-secondary: #8cdc00;
+  --color-secondary-dark: #8cdc00;
   --color-text: #322d3c;
 
   --background: #ffffff;
-  --home-background: #F0F2FA;
-  --header-background: #fbfbfb;
+  --home-background: #ffffff;
+  --header-background: #ffffff;
 
   --sidebar-background: #ffffff;
   --sidebar-text: #322d3c;
-  --sidebar-text-active: #08c2ff;
+  --sidebar-text-active: #7d7887;
 
   --border: rgba(238,238,245,1);
 
