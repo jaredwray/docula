@@ -23,7 +23,7 @@ describe('Config', () => {
 
 	it('Config - default config without path', () => {
 		const config = new Config();
-		expect(config.outputPath).toBe('dist');
+		expect(config.outputPath).toBe('site/dist');
 	});
 
 	it('Config - config path not found', async () => {
