@@ -1,81 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  {% include "shared/head.njk" %}
-  <title>{{ site.name }}</title>
-</head>
+{% include "shared/head.njk" %}
 
 <body>
-  {% include "shared/homeHeader.njk" %}
+{% include "multipage/homeHeader.njk" %}
 
-  <main class="home">
-    <div class="home-hero">
-      <img src="/../assets/images/logo.svg" alt="logo" />
-      <div class="home-container">
-        <h1>{{ site.homeTitle }}</h1>
-      </div>
-        <a href="/docs" class="home-docs-button">Documentation</a>
+<main class="home">
+  <div class="home-hero">
+    <img src="/../assets/images/logo.svg" alt="logo" />
+    <div class="home-container">
+      <h1>{{ site.homeTitle }}</h1>
     </div>
-    <section class="home-container">
-      {% if github %}
-        {% if (github.contributors) and (github.contributors.length) %}
-          <div class="content-container">
-            <h2 class="home-title">Contributors</h2>
-            <div class="facepile-container">
-              <div class="facepile">
-                {% for contributor in github.contributors %}
-                <a href="{{ contributor.html_url }}" target="_blank" title="{{ contributor.login }}" rel="noopener noreferrer">
-                  <img src="{{ contributor.avatar_url }}" alt="{{ contributor.login }}" />
-                </a>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        {% endif %}
+    <a href="/docs" class="home-docs-button">Documentation</a>
+  </div>
 
-        {% if (github.releases) and (github.releases.length) %}
-          <div class="content-container">
-            <h2 class="home-title">Latest's Releases</h2>
-            {% set releasesLength = github.releases | length %}
-            {% for release in github.releases %}
-             {% if loop.index <= 3 %}
-                <div class="release">
-                  <div class="release-header">
-                    <a class="release-title" href="{{ release.html_url }}" target="_blank" rel="noopener noreferrer">{{ release.name }}</a>
-                    <span class="release-date">{% formatDate "MMM dd, yyyy", release.published_at %}</span>
-                  </div>
-                  <div class="release-body">
-                    {% if release.body %}
-                      <p>{% parseRelease release.body %}</p>
-                    {% endif %}
-                  </div>
-                </div>
-              {% endif %}
-            {% endfor %}
+  {% include "shared/homeData.njk" %}
+</main>
 
-            {% if releasesLength > 5 %}
-              <a class="release-btn" href="/versions">
-                All Releases
-                <span>→</span>
-              </a>
-            {% endif %}
-          </div>
-        {% endif %}
+{% include "shared/footer.njk" %}
 
-      {% endif %}
-
-    </section>
-
-  </main>
-
-  <footer>
-    Powered by <a href="https://www.docula.org" target="_blank" rel="noopener noreferrer"><img src="/assets/images/docula-logo-horizontal.webp" alt="Docula logo" width="122" height="32" />
-  </a>
-  </footer>
-
-  {% include "shared/searchModal.njk" %}
-  {% include "shared/scripts.njk" %}
-  {% include "shared/searchEngine.njk" %}
+{% include "multipage/searchModal.njk" %}
+{% include "multipage/scripts.njk" %}
+{% include "shared/highlightScript.njk" %}
+{% include "multipage/searchEngine.njk" %}
 
 </body>
 </html>

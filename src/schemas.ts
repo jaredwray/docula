@@ -40,6 +40,7 @@ export const jsonConfigSchema: ConfigSchema = {
 		imagesPath: {type: 'string'},
 		assetsPath: {type: 'string'},
 		siteUrl: {type: 'string'},
+		siteType: {type: 'string', enum: ['landing', 'multi page']},
 	},
 	required: [],
 };

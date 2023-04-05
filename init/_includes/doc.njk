@@ -7,14 +7,15 @@
 
 <body>
 <div class="layout">
-    {% include "shared/header.njk" %}
-    {% include "shared/sidebar.njk" %}
-    {% include "shared/main.njk" %}
-    {% include "shared/searchModal.njk" %}
+    {% include "multipage/header.njk" %}
+    {% include "multipage/sidebar.njk" %}
+    {% include "multipage/main.njk" %}
+    {% include "multipage/searchModal.njk" %}
 </div>
 
-{% include "shared/searchEngine.njk" %}
-{% include "shared/scripts.njk" %}
+{% include "multipage/searchEngine.njk" %}
+{% include "shared/highlightScript.njk" %}
+{% include "multipage/scripts.njk" %}
 
 
 </body>

@@ -16,6 +16,7 @@ export class Config {
 	imagesPath = 'images';
 	assetsPath = 'css';
 	siteUrl = '';
+	siteType = '';
 	// @ts-expect-error - ajv is not callable
 	ajv = new Ajv();
 

@@ -99,6 +99,32 @@ describe('Docula', () => {
 		fs.rmSync('test/data/demo-site', {force: true, recursive: true});
 	});
 
+	it('Docula init - create the multipage folder if siteType is multi page', async () => {
+		const docula = new Docula();
+		docula.config.outputPath = 'outputPath';
+		docula.config.siteType = 'multi page';
+
+		jest.spyOn(docula, 'writeConfigFile').mockImplementation(async () => ({siteType: 'multi page'}));
+		jest.spyOn(docula, 'copyFolder');
+		jest.spyOn(docula, 'copySearchEngineFiles');
+
+		await docula.init();
+		expect(docula.copyFolder).toHaveBeenCalled();
+		expect(docula.copySearchEngineFiles).toHaveBeenCalled();
+	});
+
+	it('Docula init - create the landing folder if siteType is landing', async () => {
+		const docula = new Docula();
+		docula.config.outputPath = 'outputPath';
+		docula.config.siteType = 'landing';
+
+		jest.spyOn(docula, 'writeConfigFile').mockImplementation(async () => ({siteType: 'landing'}));
+		jest.spyOn(docula, 'copyLandingFolder');
+
+		await docula.init();
+		expect(docula.copyLandingFolder).toHaveBeenCalled();
+	});
+
 	it('Docula - build should throw an error if the origin path does not exist', async () => {
 		const invalidConfig = {
 			originPath: 'test/data/site-invalid',
@@ -130,9 +156,18 @@ describe('Docula', () => {
 		await expect(async () => docula.build()).rejects.toThrow('Error');
 	});
 
-	it('Docula - should copy a folder to a target location', () => {
+	it('Docula - should copy the multi page folder to a target location', () => {
 		const docula = new Docula();
+		docula.config.siteType = 'multipage';
 		docula.copyFolder('test/data/site', 'test/data/site-copy');
+		expect(fs.existsSync('test/data/site-copy')).toBe(true);
+		fs.rmSync('test/data/site-copy', {force: true, recursive: true});
+	});
+
+	it('Docula - should copy the landing folder to a target location', () => {
+		const docula = new Docula();
+		docula.config.siteType = 'landing';
+		docula.copyLandingFolder('test/data/site', 'test/data/site-copy');
 		expect(fs.existsSync('test/data/site-copy')).toBe(true);
 		fs.rmSync('test/data/site-copy', {force: true, recursive: true});
 	});
@@ -169,15 +204,52 @@ describe('Docula', () => {
 	});
 
 	// Test the copySearchEngineFiles function
-	it('should copy the search engine files', async () => {
+	it('should copy the algolia search files', async () => {
 		const docula = new Docula();
 		docula.config.outputPath = 'outputPath';
 		docula.config.searchEngine = 'algolia';
+
 		const indexTarget = path.join(process.cwd(), `${docula.config.originPath}/search-index.md`);
 		fs.existsSync = jest.fn(target => target !== indexTarget);
 		fs.copyFileSync = jest.fn();
 		docula.copySearchEngineFiles();
 		expect(fs.copyFileSync).toHaveBeenCalled();
+	});
+
+	it('should create the search folder and copy the search engine files', async () => {
+		const docula = new Docula();
+		docula.config.outputPath = 'search-css';
+		docula.config.searchEngine = 'pagefind';
+		docula.config.originPath = 'test/data/search';
+
+		fs.existsSync = jest.fn()
+			.mockReturnValueOnce(false)
+			.mockReturnValueOnce(false);
+
+		fs.mkdirSync = jest.fn();
+		fs.copyFileSync = jest.fn();
+
+		docula.copySearchEngineFiles();
+		expect(fs.mkdirSync).toHaveBeenCalled();
+		expect(fs.copyFileSync).toHaveBeenCalled();
+	});
+
+	it('Docula init - should not copy files when is a mulit page folder if you choose landing', async () => {
+		const docula = new Docula();
+		docula.config.siteType = 'landing';
+		docula.config.originPath = 'test/data/search';
+
+		jest.spyOn(docula, 'writeConfigFile').mockImplementation(async () => ({siteType: 'landing'}));
+		jest.spyOn(docula, 'validateFilePath').mockImplementation(() => ({
+			sourcePath: 'test/data/site',
+			targetExist: true,
+			isDirectory: true,
+		}));
+		fs.copyFileSync = jest.fn();
+
+		docula.copyLandingFolder('test/docs', 'test/data/site');
+
+		expect(fs.copyFileSync).toHaveBeenCalledTimes(0);
 	});
 });
 

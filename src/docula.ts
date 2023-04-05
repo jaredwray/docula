@@ -18,6 +18,7 @@ export class Docula {
 
 	private readonly beforePlugins: PluginInstance[] = [];
 	private readonly afterPlugins: PluginInstance[] = [];
+	private readonly landingFilesExceptions: string[] = ['search-index.md', 'versions.njk', 'index.njk', 'doc.njk'];
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
@@ -29,7 +30,7 @@ export class Docula {
 	}
 
 	public async init(sitePath?: string): Promise<void> {
-		await this.writeConfigFile();
+		const config = await this.writeConfigFile();
 		const {originPath} = this.config;
 		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
 		// Create the <site> folder
@@ -37,8 +38,14 @@ export class Docula {
 			fs.mkdirSync(rootSitePath);
 		}
 
-		this.copyFolder('init', rootSitePath);
-		this.copySearchEngineFiles();
+		if (config.siteType === 'multi page') {
+			this.copyFolder('init', rootSitePath);
+			this.copySearchEngineFiles();
+		}
+
+		if (config.siteType === 'landing') {
+			this.copyLandingFolder('init', rootSitePath);
+		}
 	}
 
 	public async build(): Promise<void> {
@@ -67,18 +74,40 @@ export class Docula {
 		});
 	}
 
+	public copyLandingFolder(source: string, target: string): void {
+		const {sourcePath, targetExists, isDirectory} = this.validateFilePath(source, target);
+
+		if (isDirectory) {
+			const regex = /(search|docs|multipage)+/gi;
+			if (regex.test(source)) {
+				return;
+			}
+
+			if (!targetExists) {
+				fs.mkdirSync(target);
+			}
+
+			for (const file of fs.readdirSync(sourcePath)) {
+				if (!fs.existsSync(path.join(target, file))) {
+					this.copyLandingFolder(path.join(source, file), path.join(target, file));
+				}
+			}
+		} else if (!fs.existsSync(target)) {
+			const isExcepted = this.landingFilesExceptions.some(file => source.includes(file));
+			if (isExcepted) {
+				return;
+			}
+
+			fs.copyFileSync(sourcePath, target);
+		}
+	}
+
 	public copyFolder(source: string, target: string): void {
-		const __filename = getFileName();
-		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
-		const sourcePath = path.join(doculaPath, source);
-		const sourceExists = fs.existsSync(sourcePath);
-		const targetExists = fs.existsSync(target);
-		const sourceStats = fs.statSync(sourcePath);
-		const isDirectory = sourceExists && sourceStats.isDirectory();
+		const {sourcePath, targetExists, isDirectory} = this.validateFilePath(source, target);
 
 		if (isDirectory) {
 			// Exclude the search folder
-			if (source.includes('search')) {
+			if (source.includes('search') || source.includes('landing')) {
 				return;
 			}
 
@@ -93,7 +122,7 @@ export class Docula {
 			}
 		} else if (!fs.existsSync(target)) {
 			// Exclude the search-index file
-			if (source.includes('search-index.md')) {
+			if (source.includes('search-index.md') || source.includes('releases')) {
 				return;
 			}
 
@@ -108,6 +137,9 @@ export class Docula {
 		const sourcePath = path.join(doculaPath, `init/_includes/search/${searchEngine}.njk`);
 		const searchPath = path.join(process.cwd(), `${originPath}/_includes/search`);
 		const targetPath = path.join(process.cwd(), `${originPath}/_includes/search/${searchEngine}.njk`);
+		const searchStylesPath = path.join(process.cwd(), `${originPath}/_includes/assets/css/styles/search`);
+		const sourceSearchStylesPath = path.join(doculaPath, `init/_includes/assets/css/styles/search/${searchEngine}.css`);
+		const searchStylesTargetPath = path.join(process.cwd(), `${originPath}/_includes/assets/css/styles/search/${searchEngine}.css`);
 
 		if (!fs.existsSync(searchPath)) {
 			fs.mkdirSync(searchPath);
@@ -115,6 +147,15 @@ export class Docula {
 
 		if (!fs.existsSync(targetPath)) {
 			fs.copyFileSync(sourcePath, targetPath);
+		}
+
+		// Copy search styles
+		if (!fs.existsSync(searchStylesPath)) {
+			fs.mkdirSync(searchStylesPath);
+		}
+
+		if (!fs.existsSync(searchStylesTargetPath)) {
+			fs.copyFileSync(sourceSearchStylesPath, searchStylesTargetPath);
 		}
 
 		if (searchEngine === 'algolia') {
@@ -127,19 +168,35 @@ export class Docula {
 		}
 	}
 
-	private async writeConfigFile(): Promise<void> {
-		const userConfig: any = {};
+	async writeConfigFile(): Promise<Record<string, unknown>> {
 		const plugins = await setPlugins();
 		for (const plugin in plugins) {
 			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
-				userConfig[plugin] = plugins[plugin];
 				// @ts-expect-error fix later
 				this.config[plugin] = plugins[plugin];
 			}
 		}
 
 		const configPath = getConfigPath();
-		fs.writeFileSync(configPath, JSON.stringify(userConfig, null, 2));
+		fs.writeFileSync(configPath, JSON.stringify(plugins, null, 2));
+		return plugins;
+	}
+
+	validateFilePath(source: string, target: string): Record<string, any> {
+		const __filename = getFileName();
+		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
+		const sourcePath = path.join(doculaPath, source);
+		const sourceExists = fs.existsSync(sourcePath);
+		const targetExists = fs.existsSync(target);
+		const sourceStats = fs.statSync(sourcePath);
+		const isDirectory = sourceExists && sourceStats.isDirectory();
+
+		return {
+			sourcePath,
+			sourceExists,
+			targetExists,
+			isDirectory,
+		};
 	}
 
 	private loadPlugins(): void {
