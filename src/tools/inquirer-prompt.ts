@@ -107,7 +107,6 @@ export const getSiteType = async (): Promise<'landing' | 'multipage'> => {
 	return siteType.type;
 };
 
-
 export const buildLandingPage = async (): Promise<Record<string, unknown>> => {
 	let githubInfo: Record<string, string> | undefined;
 	const siteUrl = await getSiteUrl();
@@ -122,7 +121,7 @@ export const buildLandingPage = async (): Promise<Record<string, unknown>> => {
 		plugins,
 		...(githubInfo && {github: githubInfo}),
 	};
-}
+};
 
 export const buildMultipageSite = async (): Promise<Record<string, unknown>> => {
 	let githubInfo: Record<string, string> | undefined;
@@ -146,16 +145,11 @@ export const buildMultipageSite = async (): Promise<Record<string, unknown>> => 
 		...(githubInfo && {github: githubInfo}),
 		...(algoliaInfo && {algolia: algoliaInfo}),
 	};
-}
+};
 
 export const setPlugins = async (): Promise<Record<string, unknown>> => {
-	let config
 	const siteType = await getSiteType();
-	 if(siteType.includes('landing')) {
-		config = await buildLandingPage();
-	 } else {
-		config = await buildMultipageSite();
-	 }
+	const config = await (siteType.includes('landing') ? buildLandingPage() : buildMultipageSite());
 
- return { siteType, ...config }
+	return {siteType, ...config};
 };
