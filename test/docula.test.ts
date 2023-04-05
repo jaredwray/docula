@@ -234,7 +234,7 @@ describe('Docula', () => {
 		expect(fs.copyFileSync).toHaveBeenCalled();
 	});
 
-	it('Docula init - should call copyFolder and copySearchEngineFiles when siteType is multi page', async () => {
+	it('Docula init - should not copy files when is a mulit page folder if you choose landing', async () => {
 		const docula = new Docula();
 		docula.config.siteType = 'landing';
 		docula.config.originPath = 'test/data/search';
