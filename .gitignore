@@ -73,4 +73,5 @@ dist
 test/data
 
 # Site
-site/_data/
+!site/_data/site.json
+site/_data
