@@ -228,7 +228,7 @@ footer img {
 
 @media screen and (min-width: 992px) {
   .home-container {
-    margin: 0;
+    margin: 72px auto 56px;
     max-width: 70%;
   }
 
@@ -238,10 +238,6 @@ footer img {
 
   .home-docs-button {
     font-size: 24px;
-  }
-
-  .home-hero {
-    padding: 120px 0;
   }
 
   .nav {
