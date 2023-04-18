@@ -69,7 +69,7 @@
     "fs-extra": "^11.1.0",
     "inquirer": "^9.1.4",
     "instantsearch.js": "^4.51.1",
-    "luxon": "^3.2.1",
+    "luxon": "^3.3.0",
     "markdown-it": "^13.0.1",
     "markdown-it-anchor": "^8.6.7",
     "node-fetch": "3.3.0",
