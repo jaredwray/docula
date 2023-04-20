@@ -8,8 +8,6 @@
 [![npm](https://img.shields.io/npm/dm/docula.svg)](https://www.npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula.svg)](https://www.npmjs.com/package/docula)
 
-## :warning: Please do not use until v1.x.x is released 
-
 ## Features
 
 - Zero Config - Just drop it in and it works
