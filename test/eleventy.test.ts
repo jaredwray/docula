@@ -1,6 +1,5 @@
 // @ts-expect-error - 11ty doesn't have types
 import * as elev from '@11ty/eleventy';
-
 import {Eleventy} from '../src/eleventy.js';
 import {Config} from '../src/config.js';
 

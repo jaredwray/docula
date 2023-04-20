@@ -33,6 +33,7 @@ type ElevInterface = {
 		config: (config: ElevConfig) => Record<string, unknown>;
 	}) => void;
 	write: () => Promise<void>;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	toJSON: () => Promise<ElevJSONOutput[]>;
 };
 
