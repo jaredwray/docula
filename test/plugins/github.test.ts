@@ -117,7 +117,6 @@ describe('Github Plugin', () => {
 		const github = new GithubPlugin(config);
 		try {
 			await github.getContributors();
-			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
 		} catch (error: any) {
 			expect(error.message).toBe('Repository demo/demo not found.');
 		}
@@ -137,7 +136,6 @@ describe('Github Plugin', () => {
 		const github = new GithubPlugin(config);
 		try {
 			await github.getContributors();
-			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
 		} catch (error: any) {
 			expect(error.message).toBe('error');
 		}
@@ -182,7 +180,6 @@ describe('Github Plugin', () => {
 
 		try {
 			await github.getReleases();
-			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
 		} catch (error: any) {
 			expect(error.message).toBe('Repository test/test not found.');
 		}
@@ -203,7 +200,6 @@ describe('Github Plugin', () => {
 
 		try {
 			await github.getReleases();
-			// eslint-disable-next-line @typescript-eslint/no-implicit-any-catch
 		} catch (error: any) {
 			expect(error.message).toBe('error');
 		}
