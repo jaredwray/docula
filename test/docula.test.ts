@@ -85,18 +85,18 @@ describe('Docula', () => {
 
 	it('Docula init - create the directory if it does not exist', async () => {
 		const json: Record<string, any> = {
-			originPath: 'test/data/demo-site',
+			originPath: 'test/data/demo',
 			outputPath: 'test/data/dist',
 			siteUrl: 'https://example.com',
 			plugins: ['robots'],
 		};
-		fs.writeFileSync('test/data/site/new-config.json', JSON.stringify(json, null, 2));
 		const options = {opts: () => ({config: './test/data/site/new-config.json'})};
+		fs.writeFileSync('test/data/site/new-config.json', JSON.stringify(json, null, 2));
 		const docula = new Docula(options);
-		await docula.init();
-		expect(fs.existsSync('test/data/demo-site')).toBe(true);
+		await docula.init('test/data/demo');
+		expect(fs.existsSync('test/data/demo')).toBe(true);
 		fs.rmSync('test/data/site/new-config.json');
-		fs.rmSync('test/data/demo-site', {force: true, recursive: true});
+		fs.rmSync('test/data/demo', {force: true, recursive: true});
 	});
 
 	it('Docula init - create the multipage folder if siteType is multi page', async () => {

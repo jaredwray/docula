@@ -7,7 +7,7 @@ import {Config} from './config.js';
 import {setPlugins} from './tools/inquirer-prompt.js';
 import DoculaPlugins from './plugins/index.js';
 import type {PluginInstance, PluginInstances} from './types/config.js';
-import {getConfigPath, getFileName} from './tools/path.js';
+import {getConfigPath, getFileName, getSitePath} from './tools/path.js';
 import logger from './logger.js';
 import type {CommanderOptions} from './index.js';
 
@@ -22,21 +22,17 @@ export class Docula {
 
 	constructor(options?: CommanderOptions) {
 		const parameters = options?.opts();
-		const configPath = getConfigPath();
-		const config: string = parameters ? parameters?.config : configPath;
-		this.config = new Config(config);
+		const defaultConfigPath = getConfigPath();
+		const configPath: string = parameters ? parameters?.config : defaultConfigPath;
+		this.config = new Config(configPath);
 		this.eleventy = new Eleventy(this.config);
 		this.loadPlugins();
 	}
 
 	public async init(sitePath?: string): Promise<void> {
-		const config = await this.writeConfigFile();
+		const config = await this.writeConfigFile(sitePath);
 		const {originPath} = this.config;
 		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
-		// Create the <site> folder
-		if (!fs.existsSync(rootSitePath)) {
-			fs.mkdirSync(rootSitePath);
-		}
 
 		if (config.siteType === 'multi page') {
 			this.copyFolder('init', rootSitePath);
@@ -168,7 +164,7 @@ export class Docula {
 		}
 	}
 
-	async writeConfigFile(): Promise<Record<string, unknown>> {
+	async writeConfigFile(sitePath?: string): Promise<Record<string, unknown>> {
 		const plugins = await setPlugins();
 		for (const plugin in plugins) {
 			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
@@ -177,7 +173,16 @@ export class Docula {
 			}
 		}
 
+		const originPath = getSitePath();
 		const configPath = getConfigPath();
+
+		const rootSitePath = sitePath ? path.join(process.cwd(), sitePath) : originPath;
+
+		// Create the <site> folder
+		if (!fs.existsSync(rootSitePath)) {
+			fs.mkdirSync(rootSitePath);
+		}
+
 		fs.writeFileSync(configPath, JSON.stringify(plugins, null, 2));
 		return plugins;
 	}
