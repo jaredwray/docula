@@ -14,7 +14,7 @@ describe('Eleventy', () => {
 	});
 
 	it('Eleventy - init with config', async () => {
-		jest.spyOn(Elev.prototype, 'write').mockImplementation();
+		jest.spyOn(Elev.prototype!, 'write').mockImplementation();
 		const config = new Config();
 		const eleventy = new Eleventy(config);
 		await eleventy.build();
@@ -22,7 +22,7 @@ describe('Eleventy', () => {
 	});
 
 	it('Eleventy - build failed error', async () => {
-		jest.spyOn(Elev.prototype, 'write').mockImplementation(() => {
+		jest.spyOn(Elev.prototype!, 'write').mockImplementation(() => {
 			throw new Error('test');
 		});
 		const config = new Config();
@@ -60,7 +60,7 @@ describe('Eleventy', () => {
 	});
 
 	it('Eleventy - toJSON method', async () => {
-		jest.spyOn(Elev.prototype, 'toJSON').mockImplementation(async () => [
+		jest.spyOn(Elev.prototype!, 'toJSON').mockImplementation(async () => [
 			{
 				url: '/demo',
 				inputPath: 'test/site/demo/index.html',
