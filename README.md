@@ -14,8 +14,7 @@
 - Can run from `npx` or installed globally
 - Knowledge Base that is easy to setup and manage
 - Beautiful and Responsive Design (Like Stripe or 11ty)
-- Search Engine Optimized
-- Search Engine Plugin (Algolia) and local search by default.
+- Search Engine Optimized and Plugin (Algolia) and local search by default.
 - Convention over Configuration - just add your files, use a template (or build your own) and you're done.
 - Will generate a sitemap.xml
 - Will generate a robots.txt
