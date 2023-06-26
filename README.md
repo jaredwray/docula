@@ -10,7 +10,7 @@
 
 ## Features
 
-- Zero Config - Just drop it in and it works
+- Zero Config - no config needed
 - Can run from `npx` or installed globally
 - Knowledge Base that is easy to setup and manage
 - Beautiful and Responsive Design (Like Stripe or 11ty)
