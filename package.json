@@ -73,7 +73,7 @@
     "markdown-it": "^13.0.1",
     "markdown-it-anchor": "^8.6.7",
     "node-fetch": "3.3.1",
-    "winston": "^3.9.0"
+    "winston": "^3.10.0"
   },
   "files": [
     "dist",
