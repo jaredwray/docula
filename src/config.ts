@@ -48,7 +48,6 @@ export class Config {
 
 		this.schema.required = [...new Set(this.schema.required)];
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		const validate: Ajv.ValidateFunction = this.ajv.compile(this.schema);
 
 		validate(jsonConfig);

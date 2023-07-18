@@ -77,7 +77,6 @@ export class Eleventy {
 			},
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		this.eleventy = new Elev(this.config.originPath, this.config.outputPath, this.eleventyConfig);
 	}
 
