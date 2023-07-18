@@ -7,5 +7,5 @@ export const squashCallback = (text: string): string => {
 	const dedupedString = deduped.join(' ');
 
 	// Remove repeated spaces
-	return dedupedString.replace(/ {2,}/g, ' ');
+	return dedupedString.replaceAll(/ {2,}/g, ' ');
 };
