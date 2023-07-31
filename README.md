@@ -13,7 +13,7 @@
 - Zero Config - no config needed
 - Can run from `npx` or installed globally
 - Knowledge Base that is easy to setup and manage
-- Beautiful and Responsive Design (Like Stripe or 11ty)
+- Beautiful and Responsive Design
 - Search Engine Optimized and Plugin (Algolia) and local search by default.
 - Convention over Configuration - just add your files, use a template (or build your own) and you're done.
 - Will generate a sitemap.xml
