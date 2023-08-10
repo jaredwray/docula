@@ -28,11 +28,7 @@
     "source",
     "static",
     "site",
-    "github",
-    "zendesk",
-    "intercom",
-    "swagger",
-    "stripe"
+    "github"
   ],
   "author": "Jared Wray (me@jaredwray.com)",
   "license": "MIT",
