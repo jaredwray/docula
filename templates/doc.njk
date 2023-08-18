@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "shared/head.njk" %}
+    <title>{{site.name}} - {{ title }}</title>
+</head>
+
+<body>
+<div class="layout">
+    {% include "multipage/header.njk" %}
+    {% include "multipage/sidebar.njk" %}
+    {% include "multipage/main.njk" %}
+    {% include "multipage/searchModal.njk" %}
+</div>
+
+{% include "multipage/searchEngine.njk" %}
+{% include "shared/highlightScript.njk" %}
+{% include "multipage/scripts.njk" %}
+
+
+</body>
+</html>

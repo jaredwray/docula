@@ -1,0 +1,98 @@
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.14.3/dist/algoliasearch-lite.umd.js" integrity="sha256-dyJcbGuYfdzNfifkHxYVd/rzeR6SLLcDFYEidcybldM=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.50.3/dist/instantsearch.production.min.js" integrity="sha256-VIZm35iFB4ETVstmsxpzZrlLm99QKqIzPuQb1T0ooOc=" crossorigin="anonymous"></script>
+
+
+
+{% set algoliaKey = config.pluginConfig.algolia.apiKey %}
+{% set algoliaAppId = config.pluginConfig.algolia.appId %}
+{% set algoliaIndexName = config.pluginConfig.algolia.indexName %}
+
+<script>
+  const searchClient = algoliasearch('{{algoliaAppId}}', '{{algoliaKey}}');
+  const search = instantsearch({
+    indexName: '{{algoliaIndexName}}',
+    searchClient,
+    searchFunction(helper) {
+      const results = document.querySelector('#hits');
+      results.style.display = helper.state.query === '' ? 'none' : '';
+      helper.search();
+    }
+  });
+  search.addWidgets([
+    instantsearch.widgets.searchBox({
+      container: '#searchbox',
+      placeholder: 'Search for concepts',
+      autofocus: true,
+    }),
+    instantsearch.widgets.hits({
+      container: '#hits',
+      templates: {
+        empty(results, { html }) {
+          return html`No results for <q>${results.query}</q>`;
+        },
+        item(hit, { html, components }) {
+          return html`
+          <article class="search-result">
+              <a href="${hit.url}">
+                <h2>${components.Highlight({ hit, attribute: 'title', highlightedTagName: 'span' })}</h2>
+                <p>${components.Highlight({ hit, attribute: 'description', highlightedTagName: 'span' })}</p>
+              </a>
+              <hr />
+          </article>
+        `;
+        }
+      }
+    }),
+  ]);
+  search.start();
+</script>
+
+<script>
+  const searchBtn = document.querySelector('#search-btn');
+  const closeModalBtn = document.querySelector('#close-modal-btn');
+  const searchModal = document.querySelector('#search-modal');
+
+  const closeEmptyModal = (e) => {
+    const algoliaInput = document.querySelector('.ais-SearchBox-input');
+    if(algoliaInput) {
+      if(!algoliaInput.value ) {
+        if (algoliaInput === e.target || algoliaInput.contains(e.target)) return;
+        searchModal.classList.remove('show-modal');
+      }
+    }
+  }
+
+  const closeDesktopModal = (e) => {
+    const algoliaInput = document.querySelector('.ais-SearchBox-input');
+    if(isDesktop && algoliaInput) {
+      if(algoliaInput.value ) {
+        if (searchModalContainer === e.target || searchModalContainer.contains(e.target)) return;
+        searchModal.classList.remove('show-modal');
+      }
+    }
+  }
+
+  searchModal.addEventListener('click', (e) => {
+    closeEmptyModal(e);
+    closeDesktopModal(e)
+  });
+
+  const autofocusInput = () => {
+    const algoliaInput = document.querySelector('.ais-SearchBox-input');
+    if (algoliaInput) {
+      algoliaInput.focus();
+    }
+  };
+
+  const handleSearchModal = () => {
+    searchModal.classList.add('show-modal');
+    autofocusInput()
+  };
+  searchBtn.addEventListener('click', handleSearchModal);
+
+  if(closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      searchModal.classList.remove('show-modal');
+    });
+  }
+</script>
