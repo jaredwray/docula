@@ -1,6 +1,6 @@
 {
   "name": "docula",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Open Source Static Site Generator",
   "exports": "./dist/docula.js",
   "types": "./dist/docula.d.ts",
