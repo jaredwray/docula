@@ -77,7 +77,7 @@
   "files": [
     "dist",
     "bin",
-    "init"
+    "templates"
   ],
   "xo": {
     "rules": {
