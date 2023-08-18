@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "shared/head.njk" %}
+
+<body>
+{% include "multipage/homeHeader.njk" %}
+
+<main class="home">
+  <div class="home-hero">
+    <img src="/../assets/images/logo.svg" alt="logo" />
+    <div class="home-container">
+      <h1>{{ site.homeTitle }}</h1>
+    </div>
+    <a href="/docs" class="home-docs-button">Documentation</a>
+  </div>
+
+  {% include "shared/homeData.njk" %}
+</main>
+
+{% include "shared/footer.njk" %}
+
+{% include "multipage/searchModal.njk" %}
+{% include "multipage/scripts.njk" %}
+{% include "shared/highlightScript.njk" %}
+{% include "multipage/searchEngine.njk" %}
+
+</body>
+</html>
