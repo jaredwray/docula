@@ -28,6 +28,20 @@ export class Executable {
 				}
 			});
 
+		program.command('build2')
+			.description('Build the site with ecto')
+			.option('-c, --config <config>', 'Path of where the config file is located')
+			.action(async (options: CommanderOptions) => {
+				try {
+					logger.info('Building your documentation...');
+					const docula = new Docula(options);
+					await docula.build2();
+					logger.info('Site was built successfully!');
+				} catch (error: unknown) {
+					reportError(error);
+				}
+			});
+
 		program.command('init')
 			.description('Initialize the site')
 			.action(async (options: CommanderOptions) => {

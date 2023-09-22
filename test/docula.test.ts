@@ -140,10 +140,30 @@ describe('Docula', () => {
 		fs.rmSync('./test/data/site/invalid-config.json');
 	});
 
+	it('Docula - build should throw an error if the origin path does not exist on build2', async () => {
+		const invalidConfig = {
+			originPath: 'test/data/site-invalid',
+		};
+		fs.writeFileSync('./test/data/site/invalid-config.json', JSON.stringify(invalidConfig));
+		const options = {opts: () => ({config: './test/data/site/invalid-config.json'})};
+		jest.spyOn(logger, 'error');
+		const docula = new Docula(options);
+		await expect(async () => docula.build2()).rejects.toThrow();
+
+		fs.rmSync('./test/data/site/invalid-config.json');
+	});
+
 	it('Docula - should build using Eleventy', async () => {
 		const options = {opts: () => ({config: './test/data/site/config.json'})};
 		const docula = new Docula(options);
 		await docula.build();
+		expect(Eleventy.prototype.build).toHaveBeenCalled();
+	});
+
+	it('Docula - should build using build2', async () => {
+		const options = {opts: () => ({config: './test/data/site/config.json'})};
+		const docula = new Docula(options);
+		await docula.build2();
 		expect(Eleventy.prototype.build).toHaveBeenCalled();
 	});
 

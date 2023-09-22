@@ -56,6 +56,18 @@ export class Docula {
 		await this.executePlugins(this.afterPlugins);
 	}
 
+	public async build2(): Promise<void> {
+		const {originPath} = this.config;
+		const userOriginPath = `${process.cwd()}/${originPath}`;
+		if (!fs.existsSync(userOriginPath)) {
+			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
+		}
+
+		await this.executePlugins(this.beforePlugins);
+		await this.eleventy.build();
+		await this.executePlugins(this.afterPlugins);
+	}
+
 	public async serve(): Promise<void> {
 		const {outputPath} = this.config;
 		if (!fs.existsSync(outputPath)) {
