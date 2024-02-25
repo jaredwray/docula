@@ -1,241 +1,186 @@
-import * as path from 'node:path';
+import type http from 'node:http';
+import path from 'node:path';
 import process from 'node:process';
 import fs from 'fs-extra';
+import updateNotifier from 'update-notifier';
 import express from 'express';
-import {Eleventy} from './eleventy.js';
-import {Config} from './config.js';
-import {setPlugins} from './tools/inquirer-prompt.js';
-import DoculaPlugins from './plugins/index.js';
-import type {PluginInstance, PluginInstances} from './types/config.js';
-import {getConfigPath, getFileName, getSitePath} from './tools/path.js';
-import logger from './logger.js';
-import type {CommanderOptions} from './index.js';
+import {DoculaOptions} from './options.js';
+import {DoculaConsole} from './console.js';
+import {DoculaBuilder} from './builder.js';
+import {MarkdownHelper} from './helpers/markdown.js';
 
-export class Docula {
-	readonly config: Config;
-	private readonly eleventy: Eleventy;
-	private pluginInstances: PluginInstances = {};
+export default class Docula {
+	private _options: DoculaOptions = new DoculaOptions();
+	private readonly _console: DoculaConsole = new DoculaConsole();
+	private _configFileModule: any = {};
+	private _server: http.Server | undefined;
 
-	private readonly beforePlugins: PluginInstance[] = [];
-	private readonly afterPlugins: PluginInstance[] = [];
-	private readonly landingFilesExceptions: string[] = ['search-index.md', 'versions.njk', 'index.njk', 'doc.njk'];
-
-	constructor(options?: CommanderOptions) {
-		const parameters = options?.opts();
-		const defaultConfigPath = getConfigPath();
-		const configPath: string = parameters ? parameters?.config : defaultConfigPath;
-		this.config = new Config(configPath);
-		this.eleventy = new Eleventy(this.config);
-		this.loadPlugins();
-	}
-
-	public async init(sitePath?: string): Promise<void> {
-		const config = await this.writeConfigFile(sitePath);
-		const {originPath} = this.config;
-		const rootSitePath = path.join(process.cwd(), sitePath ?? originPath);
-
-		if (config.siteType === 'multi page') {
-			this.copyFolder('init', rootSitePath);
-			this.copySearchEngineFiles();
-		}
-
-		if (config.siteType === 'landing') {
-			this.copyLandingFolder('init', rootSitePath);
+	constructor(options?: DoculaOptions) {
+		if (options) {
+			this._options = options;
 		}
 	}
 
-	public async build(): Promise<void> {
-		const {originPath} = this.config;
-		const userOriginPath = `${process.cwd()}/${originPath}`;
-		if (!fs.existsSync(userOriginPath)) {
-			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
-		}
-
-		await this.executePlugins(this.beforePlugins);
-		await this.eleventy.build();
-		await this.executePlugins(this.afterPlugins);
+	public get options(): DoculaOptions {
+		return this._options;
 	}
 
-	public async build2(): Promise<void> {
-		const {originPath} = this.config;
-		const userOriginPath = `${process.cwd()}/${originPath}`;
-		if (!fs.existsSync(userOriginPath)) {
-			throw new Error(`The origin path "${userOriginPath}" does not exist.`);
-		}
-
-		await this.executePlugins(this.beforePlugins);
-		await this.eleventy.build();
-		await this.executePlugins(this.afterPlugins);
+	public set options(value: DoculaOptions) {
+		this._options = value;
 	}
 
-	public async serve(): Promise<void> {
-		const {outputPath} = this.config;
-		if (!fs.existsSync(outputPath)) {
-			throw new Error(`The origin path "${outputPath}" does not exist.`);
+	public get server(): http.Server | undefined {
+		return this._server;
+	}
+
+	public get configFileModule(): any {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+		return this._configFileModule;
+	}
+
+	public checkForUpdates(): void {
+		const packageJsonPath = path.join(process.cwd(), 'package.json');
+		if (fs.existsSync(packageJsonPath)) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			updateNotifier({pkg: packageJson}).notify();
+		}
+	}
+
+	public async execute(process: NodeJS.Process): Promise<void> {
+		// Check for updates
+		this.checkForUpdates();
+
+		const consoleProcess = this._console.parseProcessArgv(process.argv);
+
+		// Update options
+		if (consoleProcess.args.sitePath) {
+			this.options.sitePath = consoleProcess.args.sitePath;
+		}
+
+		// Load the Config File
+		await this.loadConfigFile(this.options.sitePath);
+
+		// Parse the config file
+		if (this._configFileModule.options) {
+			this.options.parseOptions(this._configFileModule.options as Record<string, any>);
+		}
+
+		// Run the onPrepare function
+		if (this._configFileModule.onPrepare) {
+			try {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				await this._configFileModule.onPrepare(this.options);
+			} catch (error) {
+				this._console.error((error as Error).message);
+			}
+		}
+
+		if (consoleProcess.args.output) {
+			this.options.outputPath = consoleProcess.args.output;
+		}
+
+		const engineConfig = {
+			nodes: {
+				fence: MarkdownHelper.fence(),
+			},
+		};
+
+		switch (consoleProcess.command) {
+			case 'init': {
+				const isTypescript = fs.existsSync('./tsconfig.json') ?? false;
+				this.generateInit(this.options.sitePath);
+				break;
+			}
+
+			case 'help': {
+				this._console.printHelp();
+				break;
+			}
+
+			case 'version': {
+				this._console.log(this.getVersion());
+				break;
+			}
+
+			case 'serve': {
+				const builder = new DoculaBuilder(this.options, engineConfig);
+				await builder.build();
+				await this.serve(this.options);
+				break;
+			}
+
+			default: {
+				const builder = new DoculaBuilder(this.options, engineConfig);
+				await builder.build();
+				break;
+			}
+		}
+	}
+
+	public isSinglePageWebsite(sitePath: string): boolean {
+		const docsPath = `${sitePath}/docs`;
+		if (!fs.existsSync(docsPath)) {
+			return true;
+		}
+
+		const files = fs.readdirSync(docsPath);
+		return files.length === 0;
+	}
+
+	public generateInit(sitePath: string): void {
+		// Check if the site path exists
+		if (!fs.existsSync(sitePath)) {
+			fs.mkdirSync(sitePath);
+		}
+
+		// Add the docula.config file based on js or ts
+		const doculaConfigFile = './init/docula.config.cjs';
+		fs.copyFileSync(doculaConfigFile, `${sitePath}/docula.config.cjs`);
+
+		// Add in the image and favicon
+		fs.copyFileSync('./init/logo.png', `${sitePath}/logo.png`);
+		fs.copyFileSync('./init/favicon.ico', `${sitePath}/favicon.ico`);
+
+		// Add in the variables file
+		fs.copyFileSync('./init/variables.css', `${sitePath}/variables.css`);
+
+		// Output the instructions
+		this._console.log(`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and stype the site with site.css file.`);
+	}
+
+	public getVersion(): string {
+		const packageJson = fs.readFileSync('./package.json', 'utf8');
+		const packageObject = JSON.parse(packageJson) as {version: string};
+		return packageObject.version;
+	}
+
+	public async loadConfigFile(sitePath: string): Promise<void> {
+		if (fs.existsSync(sitePath)) {
+			const configFile = `${sitePath}/docula.config.cjs`;
+			if (fs.existsSync(configFile)) {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				this._configFileModule = await import(configFile);
+			}
+		}
+	}
+
+	public async serve(options: DoculaOptions): Promise<void> {
+		if (this._server) {
+			this._server.close();
 		}
 
 		const app = express();
-		const port = 8080;
+		const {port} = options;
+		const {outputPath} = options;
+
 		app.use(express.static(outputPath));
-		app.listen(port, () => {
-			logger.info(`Docula is running on http://localhost:${port}`);
+
+		this._server = app.listen(port, () => {
+			this._console.log(`docula listening at http://localhost:${port}`);
 		});
 	}
-
-	public copyLandingFolder(source: string, target: string): void {
-		const {sourcePath, targetExists, isDirectory} = this.validateFilePath(source, target);
-
-		if (isDirectory) {
-			const regex = /(search|docs|multipage)+/gi;
-			if (regex.test(source)) {
-				return;
-			}
-
-			if (!targetExists) {
-				fs.mkdirSync(target);
-			}
-
-			for (const file of fs.readdirSync(sourcePath)) {
-				if (!fs.existsSync(path.join(target, file))) {
-					this.copyLandingFolder(path.join(source, file), path.join(target, file));
-				}
-			}
-		} else if (!fs.existsSync(target)) {
-			const isExcepted = this.landingFilesExceptions.some(file => source.includes(file));
-			if (isExcepted) {
-				return;
-			}
-
-			fs.copyFileSync(sourcePath, target);
-		}
-	}
-
-	public copyFolder(source: string, target: string): void {
-		const {sourcePath, targetExists, isDirectory} = this.validateFilePath(source, target);
-
-		if (isDirectory) {
-			// Exclude the search folder
-			if (source.includes('search') || source.includes('landing')) {
-				return;
-			}
-
-			if (!targetExists) {
-				fs.mkdirSync(target);
-			}
-
-			for (const file of fs.readdirSync(sourcePath)) {
-				if (!fs.existsSync(path.join(target, file))) {
-					this.copyFolder(path.join(source, file), path.join(target, file));
-				}
-			}
-		} else if (!fs.existsSync(target)) {
-			// Exclude the search-index file
-			if (source.includes('search-index.md') || source.includes('releases')) {
-				return;
-			}
-
-			fs.copyFileSync(sourcePath, target);
-		}
-	}
-
-	copySearchEngineFiles(): void {
-		const {searchEngine, originPath} = this.config;
-		const __filename = getFileName();
-		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
-		const sourcePath = path.join(doculaPath, `init/_includes/search/${searchEngine}.njk`);
-		const searchPath = path.join(process.cwd(), `${originPath}/_includes/search`);
-		const targetPath = path.join(process.cwd(), `${originPath}/_includes/search/${searchEngine}.njk`);
-		const searchStylesPath = path.join(process.cwd(), `${originPath}/_includes/assets/css/styles/search`);
-		const sourceSearchStylesPath = path.join(doculaPath, `init/_includes/assets/css/styles/search/${searchEngine}.css`);
-		const searchStylesTargetPath = path.join(process.cwd(), `${originPath}/_includes/assets/css/styles/search/${searchEngine}.css`);
-
-		if (!fs.existsSync(searchPath)) {
-			fs.mkdirSync(searchPath);
-		}
-
-		if (!fs.existsSync(targetPath)) {
-			fs.copyFileSync(sourcePath, targetPath);
-		}
-
-		// Copy search styles
-		if (!fs.existsSync(searchStylesPath)) {
-			fs.mkdirSync(searchStylesPath);
-		}
-
-		if (!fs.existsSync(searchStylesTargetPath)) {
-			fs.copyFileSync(sourceSearchStylesPath, searchStylesTargetPath);
-		}
-
-		if (searchEngine === 'algolia') {
-			const indexSource = path.join(doculaPath, 'init/search-index.md');
-			const indexTarget = path.join(process.cwd(), `${originPath}/search-index.md`);
-
-			if (!fs.existsSync(indexTarget)) {
-				fs.copyFileSync(indexSource, indexTarget);
-			}
-		}
-	}
-
-	async writeConfigFile(sitePath?: string): Promise<Record<string, unknown>> {
-		const plugins = await setPlugins();
-		for (const plugin in plugins) {
-			if (Object.prototype.hasOwnProperty.call(plugins, plugin)) {
-				// @ts-expect-error fix later
-				this.config[plugin] = plugins[plugin];
-			}
-		}
-
-		const originPath = getSitePath();
-		const configPath = getConfigPath();
-
-		const rootSitePath = sitePath ? path.join(process.cwd(), sitePath) : originPath;
-
-		// Create the <site> folder
-		if (!fs.existsSync(rootSitePath)) {
-			fs.mkdirSync(rootSitePath);
-		}
-
-		fs.writeFileSync(configPath, JSON.stringify(plugins, null, 2));
-		return plugins;
-	}
-
-	validateFilePath(source: string, target: string): Record<string, any> {
-		const __filename = getFileName();
-		const doculaPath = path.dirname(path.dirname(path.dirname(__filename)));
-		const sourcePath = path.join(doculaPath, source);
-		const sourceExists = fs.existsSync(sourcePath);
-		const targetExists = fs.existsSync(target);
-		const sourceStats = fs.statSync(sourcePath);
-		const isDirectory = sourceExists && sourceStats.isDirectory();
-
-		return {
-			sourcePath,
-			sourceExists,
-			targetExists,
-			isDirectory,
-		};
-	}
-
-	private loadPlugins(): void {
-		const {plugins} = this.config;
-
-		for (const plugin of plugins) {
-			const pluginClass = DoculaPlugins[plugin];
-			// eslint-disable-next-line new-cap
-			const pluginInstance = new pluginClass(this.config);
-			this.pluginInstances[plugin] = pluginInstance;
-
-			const {runtime} = pluginInstance;
-			if (runtime === 'before') {
-				this.beforePlugins.push(pluginInstance);
-			} else if (runtime === 'after') {
-				this.afterPlugins.push(pluginInstance);
-			}
-		}
-	}
-
-	private readonly executePlugins = async (plugins: PluginInstance[]): Promise<void> => {
-		await Promise.all(plugins.map(async plugin => plugin.execute()));
-	};
 }
 
+export {DoculaHelpers} from './helpers.js';
