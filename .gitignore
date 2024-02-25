@@ -70,8 +70,5 @@ dist
 .vscode/
 .idea/
 
-# Test
-test/data
-
 # Site
-site/_data/github.json
+site/README.md

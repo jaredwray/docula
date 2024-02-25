@@ -1,13 +1,11 @@
-![Docula](site/logo.svg)
 
 ---
 
 ## Beautiful Website for Your Projects
-[![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
+[![Build](https://github.com/jaredwray/docula/actions/workflows/tests.yml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yml)
 [![GitHub license](https://img.shields.io/github/license/jaredwray/docula)](https://github.com/jaredwray/docula/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/jaredwray/docula/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/gh/jaredwray/docula)
+[![codecov](https://codecov.io/gh/jaredwray/docula/branch/master/graph/badge.svg?token=1YdMesM07X)](https://codecov.io/gh/jaredwray/docula)
 [![npm](https://img.shields.io/npm/dm/docula)](https://npmjs.com/package/docula)
-[![npm](https://img.shields.io/npm/v/docula)](https://npmjs.com/package/docula)
 
 ---
 ## Table of Contents
@@ -17,15 +15,16 @@
 - [Building Multiple Pages](#building-multiple-pages)
 - [Helper Functions for Markdown](#helper-functions-for-markdown)
 - [Code of Conduct and Contributing](#code-of-conduct-and-contributing)
+- [What Happened to it Generating a Blog](#what-happened-to-it-generating-a-blog)
 - [License - MIT](#license)
 
 ## Features
 * No configuration requrired. Just setup the folder structure with a logo, favicon, and css file. 
 * Builds a static website that can be hosted anywhere.
-* For more complex projects easily add a `docula.config.js` or `docula.config.ts` file to customize the build process. With PRE and POST methods. 
-* Support for single page with readme or multiple markdown pages in a docs folder.
-* Will generate a sitemap.xml and robots.txt for your site.
-* Uses Github release notes to generate a changelog / releases page.
+* For more complex projects easily add a `docula.config.js` or `docula.config.ts` file to customize the build process.
+* Support for single page with readme or multiple pages with a table of contents.
+* Will generate a sitemap.xml, robots.txt, and  file for SEO.
+* Uses Github release notes to generate a changelog page.
 * Uses Github to show contributors and link to their profiles.
 * Simple search is provided by default out of the box. 
 
@@ -43,9 +42,8 @@ site
 ├───logo.png
 ├───favicon.ico
 ├───README.md
-├───docula.config.js
+├───docula.json
 ```
-Note: for typescript do 'docula init --typescript'
 
 ## 2. Add your content
 
@@ -59,7 +57,13 @@ This will build your site and place it in the `dist` folder. You can then host i
 
 ## Using Your own Template
 
-If you want to use your own template you can do so by adding a `docula.config.ts` file to the root of your project. This file will be used to configure the build process.
+If you want to use your own template you can do so by adding a `docula.json` file to the root of your project. This file will be used to configure the build process. Here is an example of what it looks like:
+
+```js
+{
+    template: 'path/to/template',
+}
+```
 
 or at the command line:
 
@@ -74,8 +78,9 @@ site
 ├───site.css
 ├───logo.png
 ├───favicon.ico
-├───docula.config.ts
+├───docula.json
 ├───docs
+│   ├───readme.md
 │   ├───getting-started.md
 │   ├───contributing.md
 │   ├───license.md
@@ -94,26 +99,35 @@ order: 2
 ## Helper Functions for Markdown
 
 docula comes with some helper functions that you can use in your markdown files.
-* `doculaHelpers.getFrontMatter(fileName)` - Gets the front matter of a markdown file.
-* `doculaHelpers.setFrontMatter(fileName, frontMatter)` - Sets the front matter of a markdown file.
-* `doculaHelpers.createDoc(source, destination, frontMatter?, contentFn[]?)` - Creates a markdown file with the specified front matter and content. The contentFn is a function that is executed on the original content of the file. This is useful if you want to remove content from the original file.
+* `docula.helpers.getFrontMatter(fileName)` - Gets the front matter of a markdown file.
+* `docula.helpers.setFrontMatter(fileName, frontMatter)` - Sets the front matter of a markdown file.
+* `docula.helpers.createDoc(source, destination, frontMatter?, contentFn[]?)` - Creates a markdown file with the specified front matter and content. The contentFn is a function that is executed on the original content of the file. This is useful if you want to remove content from the original file.
 
 ### Remove html content
 
-In some cases your markdown file will have html content in it such as the logo of your project or a badge. You can use the `wrtirHelpers.removeHtmlContent()` helper function to remove that content from the page. Here is an example:
+In some cases your markdown file will have html content in it such as the logo of your project or a badge. You can use the `wrtir.helpers.removeHtmlContent()` helper function to remove that content from the page. Here is an example:
+
+```js
+docula.helpers.removeHtmlContent('../readme.md', '<img src=');
+```
 
 ### Get and Set the Front Matter of a Markdown File
 
-You can use the `doculaHelpers.getFrontMatter()` and `doculaHelpers.setFrontMatter()` helper functions to get and set the front matter of a markdown file. Here is an example:
+You can use the `docula.helpers.getFrontMatter()` and `docula.helpers.setFrontMatter()` helper functions to get and set the front matter of a markdown file. Here is an example:
 
 ```js
-const frontMatter = doculaHelpers.getFrontMatter('../readme.md');
+const frontMatter = docula.helpers.getFrontMatter('../readme.md');
 frontMatter.title = 'My Title';
-doculaHelpers.setFrontMatter('../readme.md', frontMatter);
+docula.helpers.setFrontMatter('../readme.md', frontMatter);
 ```
 
 ## Code of Conduct and Contributing
-[Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing](CONTRIBUTING.md) guidelines.
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing](CONTRIBUTING.md) guidelines.
+
+## What Happened to it Generating a Blog
+
+The original version of docula was a blog generator. Since there are plenty of blog generators out there we made the decision to make it a static site generator for open source projects. This is something that we constantly need and we hope you find it useful as well.
 
 ## License
 

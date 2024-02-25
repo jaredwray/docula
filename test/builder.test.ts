@@ -1,0 +1,273 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import {afterEach, beforeEach, expect, it, describe, vi} from 'vitest';
+import * as fs from 'fs-extra';
+import axios from 'axios';
+import {DoculaBuilder, type DoculaData} from '../src/builder.js';
+import {DoculaOptions} from '../src/options.js';
+import githubMockContributors from './fixtures/data-mocks/github-contributors.json';
+import githubMockReleases from './fixtures/data-mocks/github-releases.json';
+
+vi.mock('axios');
+
+describe('DoculaBuilder', () => {
+	const doculaData: DoculaData = {
+		siteUrl: 'http://foo.com',
+		siteTitle: 'docula',
+		siteDescription: 'Beautiful Website for Your Projects',
+		sitePath: 'test/fixtures/single-page-site',
+		templatePath: 'test/fixtures/template-example',
+		outputPath: 'test/temp-sitemap-test',
+	};
+
+	afterEach(() => {
+		// Reset the mock after each test
+		vi.resetAllMocks();
+	});
+	beforeEach(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		(axios.get as any).mockImplementation(async (url: string) => {
+			if (url.endsWith('releases')) {
+				return {data: githubMockReleases};
+			}
+
+			if (url.endsWith('contributors')) {
+				return {data: githubMockContributors};
+			}
+
+			// Default response or throw an error if you prefer
+			return {data: {}};
+		});
+	});
+
+	it('should initiate', () => {
+		const builder = new DoculaBuilder();
+		expect(builder).toBeTruthy();
+	});
+
+	it('should initiate with options', () => {
+		const options = new DoculaOptions();
+		const builder = new DoculaBuilder(options);
+		expect(builder).toBeTruthy();
+		expect(builder.options).toBe(options);
+	});
+
+	it('should build', async () => {
+		const options = new DoculaOptions();
+		options.outputPath = 'test/temp-build-test';
+		const builder = new DoculaBuilder(options);
+		const consoleLog = console.log;
+		let consoleMessage = '';
+		console.log = message => {
+			consoleMessage = message as string;
+		};
+
+		try {
+			await builder.build();
+		} finally {
+			await fs.rm(builder.options.outputPath, {recursive: true});
+		}
+
+		expect(consoleMessage).toContain('Build');
+
+		console.log = consoleLog;
+	});
+	it('should validate githubPath options', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		try {
+			options.githubPath = '';
+			builder.validateOptions(options);
+		} catch (error: any) {
+			expect(error.message).toBe('No github options provided');
+		}
+	});
+	it('should validate siteDescription options', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		try {
+			options.siteDescription = '';
+			builder.validateOptions(options);
+		} catch (error: any) {
+			expect(error.message).toBe('No site description options provided');
+		}
+	});
+	it('should validate site title options', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		try {
+			options.siteTitle = '';
+			builder.validateOptions(options);
+		} catch (error: any) {
+			expect(error.message).toBe('No site title options provided');
+		}
+	});
+	it('should validate site url options', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		try {
+			options.siteUrl = '';
+			builder.validateOptions(options);
+		} catch (error: any) {
+			expect(error.message).toBe('No site url options provided');
+		}
+	});
+	it('should get github data', async () => {
+		const builder = new DoculaBuilder();
+		vi.spyOn(axios, 'get').mockResolvedValue({data: {}});
+		const githubData = await builder.getGithubData('jaredwray/docula');
+		expect(githubData).toBeTruthy();
+		vi.resetAllMocks();
+	});
+	it('should get the file without extension', async () => {
+		const builder = new DoculaBuilder();
+		const file = await builder.getTemplateFile('test/fixtures/template-example/', 'index');
+		expect(file).toBe('index.hbs');
+	});
+	it('should not get the file without extension', async () => {
+		const builder = new DoculaBuilder();
+		const file = await builder.getTemplateFile('test/fixtures/template-example/', 'foo');
+		expect(file).toBe(undefined);
+	});
+	it('should get the template data', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		options.templatePath = 'test/fixtures/template-example/';
+		const templateData = await builder.getTemplates(options);
+		expect(templateData.releases).toBe('releases.hbs');
+	});
+	it('should throw error when template path doesnt exist', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		options.templatePath = 'test/fixtures/template-example1/';
+		try {
+			await builder.getTemplates(options);
+		} catch (error: any) {
+			expect(error.message).toContain('No template path found');
+		}
+	});
+	it('should build the robots.txt (/robots.txt)', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		options.sitePath = 'test/fixtures/single-page-site';
+		options.outputPath = 'test/temp-robots-test';
+
+		await fs.remove(options.outputPath);
+		try {
+			await builder.buildRobotsPage(options);
+			const robots = await fs.readFile(`${options.outputPath}/robots.txt`, 'utf8');
+			expect(robots).toBe('User-agent: *\nDisallow:');
+		} finally {
+			await fs.remove(options.outputPath);
+		}
+	});
+	it('should copy the robots.txt (/robots.txt)', async () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		options.sitePath = 'test/fixtures/multi-page-site';
+		options.outputPath = 'test/temp-robots-test-copy';
+
+		await fs.remove(options.outputPath);
+		try {
+			await builder.buildRobotsPage(options);
+			const robots = await fs.readFile(`${options.outputPath}/robots.txt`, 'utf8');
+			expect(robots).toBe('User-agent: *\nDisallow: /meow');
+		} finally {
+			await fs.remove(options.outputPath);
+		}
+	});
+	it('should build the sitemap.xml (/sitemap.xml)', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+
+		await fs.remove(data.outputPath);
+		try {
+			await builder.buildSiteMapPage(data);
+			const sitemap = await fs.readFile(`${data.outputPath}/sitemap.xml`, 'utf8');
+			expect(sitemap).toContain('<loc>http://foo.com</loc>');
+		} finally {
+			await fs.remove(data.outputPath);
+		}
+	});
+	it('should build the index.html (/index.html)', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+		data.templates = {
+			index: 'index.hbs',
+			releases: 'releases.hbs',
+		};
+		data.sitePath = 'site';
+		data.templatePath = 'test/fixtures/template-example';
+		data.outputPath = 'test/temp-index-test';
+
+		await fs.remove(data.outputPath);
+		try {
+			await builder.buildIndexPage(data);
+			const index = await fs.readFile(`${data.outputPath}/index.html`, 'utf8');
+			expect(index).toContain('<title>docula</title>');
+		} finally {
+			await fs.remove(data.outputPath);
+		}
+	});
+	it('should throw an error build the index.html (/index.html)', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+		data.sitePath = 'template';
+		data.outputPath = 'test/temp-index-test';
+		data.templates = undefined;
+
+		try {
+			await builder.buildIndexPage(data);
+		} catch (error: any) {
+			expect(error.message).toBe('No templates found');
+		} finally {
+			await fs.remove(data.outputPath);
+		}
+	});
+	it('should build release page (/releases/index.html)', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+		data.templates = {
+			index: 'index.hbs',
+			releases: 'releases.hbs',
+		};
+		data.sitePath = 'site';
+		data.templatePath = 'template';
+		data.outputPath = 'test/temp-release-test';
+
+		data.github = {
+			releases: {},
+			contributors: {},
+		};
+
+		await fs.remove(data.outputPath);
+		try {
+			await builder.buildReleasePage(data);
+			const index = await fs.readFile(`${data.outputPath}/releases/index.html`, 'utf8');
+			expect(index).toContain('<title>docula Releases</title>');
+		} finally {
+			await fs.remove(data.outputPath);
+		}
+	});
+	it('should error on build release page (/releases/index.html)', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+		data.templates = {
+			index: 'index.hbs',
+			releases: 'releases.hbs',
+		};
+		data.sitePath = 'site';
+		data.templatePath = 'template';
+		data.outputPath = 'test/temp-release-test';
+
+		data.github = undefined;
+
+		await fs.remove(data.outputPath);
+		try {
+			await builder.buildReleasePage(data);
+		} catch (error: any) {
+			expect(error.message).toBe('No github data found');
+		} finally {
+			await fs.remove(data.outputPath);
+		}
+	});
+});
