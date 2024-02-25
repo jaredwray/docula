@@ -103,7 +103,7 @@ describe('docula', () => {
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 		} finally {
-			fs.rmdirSync(temporarySitePath, {recursive: true});
+			fs.rmSync(temporarySitePath, {recursive: true});
 		}
 	});
 	it('should generate the site init files and folders for javascript', () => {
@@ -127,7 +127,7 @@ describe('docula', () => {
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 		} finally {
-			fs.rmdirSync(temporarySitePath, {recursive: true});
+			fs.rmSync(temporarySitePath, {recursive: true});
 		}
 	});
 	it('should get the package version', () => {
@@ -156,7 +156,7 @@ describe('docula execute', () => {
 
 		expect(fs.existsSync(buildOptions.outputPath)).toEqual(true);
 
-		fs.rmdirSync(buildOptions.outputPath, {recursive: true});
+		await fs.rm(buildOptions.outputPath, {recursive: true});
 		console.log = consoleLog;
 	});
 	it('should be able to execute with output parameter', async () => {
@@ -274,7 +274,7 @@ describe('docula execute', () => {
 
 			expect(docula.server).toBeDefined();
 		} finally {
-			fs.rmdirSync(options.outputPath, {recursive: true});
+			await fs.rm(options.outputPath, {recursive: true});
 			if (docula.server) {
 				docula.server.close();
 			}
