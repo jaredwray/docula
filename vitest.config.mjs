@@ -7,7 +7,8 @@ export default defineConfig({
 				'bin/**',
 				'init/**',
 				'template/**',
-				'test/fixtures/**'
+				'test/fixtures/**',
+				'src/helpers/markdown.ts'
 			],
 		},
 	},
