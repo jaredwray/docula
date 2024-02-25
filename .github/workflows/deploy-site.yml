@@ -27,9 +27,12 @@ jobs:
 
     - name: Install Dependencies  
       run: npm install
-      
+
+    - name: Build
+      run: npm run build
+
     - name: Build Website
-      run: npm run build:site
+      run: npm run build-site
 
     - name: Publish to Cloudflare Pages
       uses: cloudflare/pages-action@1
@@ -37,5 +40,5 @@ jobs:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: b09b24c345713c704e71dea8bd81f713
         projectName: docula
-        directory: site/dist
+        directory: site-output
         gitHubToken: ${{ secrets.GH_TOKEN }}
