@@ -30,9 +30,9 @@
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./site/README.md",
     "build": "rimraf ./dist && tsc",
-    "build-site": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./dist/site-output",
+    "build-site": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site-output",
     "test": "xo --fix && vitest run --coverage",
-    "serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./dist/site-output",
+    "serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site-output",
     "prepare": "yarn run build"
   },
   "bin": {
