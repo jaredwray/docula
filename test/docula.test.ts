@@ -236,7 +236,7 @@ describe('docula execute', () => {
 		options.outputPath = 'test/fixtures/single-page-site/dist3';
 		options.templatePath = 'test/fixtures/template-example/';
 		const docula = new Docula(options);
-		process.argv = ['node', 'docula', 'serve'];
+		process.argv = ['node', 'docula', 'serve', '-p', '8181'];
 		const consoleLog = console.log;
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = message => {};
@@ -257,7 +257,7 @@ describe('docula execute', () => {
 		options.sitePath = path.join(process.cwd(), 'test/fixtures/single-page-site');
 		options.outputPath = path.join(process.cwd(), 'test/fixtures/single-page-site/dist3');
 		const docula = new Docula(options);
-		process.argv = ['node', 'docula', 'serve'];
+		process.argv = ['node', 'docula', 'serve', '-p', '8182'];
 		const consoleLog = console.log;
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = message => {};
@@ -279,7 +279,7 @@ describe('docula execute', () => {
 		options.sitePath = 'test/fixtures/single-page-site';
 		options.outputPath = 'test/fixtures/single-page-site/dist3';
 		const docula = new Docula(options);
-		process.argv = ['node', 'docula', 'serve', '-p', '8181'];
+		process.argv = ['node', 'docula', 'serve', '-p', '8183'];
 		const consoleLog = console.log;
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = message => {};
