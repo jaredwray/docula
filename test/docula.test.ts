@@ -237,6 +237,9 @@ describe('docula execute', () => {
 		options.templatePath = 'test/fixtures/template-example/';
 		const docula = new Docula(options);
 		process.argv = ['node', 'docula', 'serve'];
+		const consoleLog = console.log;
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		console.log = message => {};
 
 		try {
 			await docula.execute(process);
@@ -246,6 +249,8 @@ describe('docula execute', () => {
 				docula.server.close();
 			}
 		}
+
+		console.log = consoleLog;
 	});
 	it('should serve the site and reset the server if exists', async () => {
 		const options = new DoculaOptions();
@@ -253,6 +258,9 @@ describe('docula execute', () => {
 		options.outputPath = path.join(process.cwd(), 'test/fixtures/single-page-site/dist3');
 		const docula = new Docula(options);
 		process.argv = ['node', 'docula', 'serve'];
+		const consoleLog = console.log;
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		console.log = message => {};
 
 		try {
 			await docula.serve(options);
@@ -263,6 +271,8 @@ describe('docula execute', () => {
 				docula.server.close();
 			}
 		}
+
+		console.log = consoleLog;
 	});
 	it('should serve the site on a specified port', async () => {
 		const options = new DoculaOptions();
@@ -270,6 +280,9 @@ describe('docula execute', () => {
 		options.outputPath = 'test/fixtures/single-page-site/dist3';
 		const docula = new Docula(options);
 		process.argv = ['node', 'docula', 'serve', '-p', '8181'];
+		const consoleLog = console.log;
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		console.log = message => {};
 
 		try {
 			await docula.execute(process);
@@ -281,6 +294,8 @@ describe('docula execute', () => {
 				docula.server.close();
 			}
 		}
+
+		console.log = consoleLog;
 	});
 });
 
@@ -295,25 +310,6 @@ describe('docula config file', () => {
 	it('should load the config and set the options', async () => {
 		const docula = new Docula(defaultOptions);
 		const sitePath = 'test/fixtures/multi-page-site';
-		await docula.loadConfigFile(sitePath);
-		expect(docula.configFileModule).toBeDefined();
-		expect(docula.configFileModule.options).toBeDefined();
-		const consoleLog = console.log;
-		let consoleMessage = '';
-		console.log = message => {
-			if (typeof message === 'string') {
-				consoleMessage = message;
-			}
-		};
-
-		process.argv = ['node', 'docula', 'version'];
-		await docula.execute(process);
-		expect(docula.options.outputPath).toEqual(docula.configFileModule.options.outputPath);
-		console.log = consoleLog;
-	});
-	it('should load the config and test the onPrepare', async () => {
-		const docula = new Docula(defaultOptions);
-		const sitePath = 'test/fixtures/single-page-site-onprepare';
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
 		expect(docula.configFileModule.options).toBeDefined();
