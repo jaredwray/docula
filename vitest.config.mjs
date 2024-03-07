@@ -10,6 +10,7 @@ export default defineConfig({
 				'test/fixtures/**',
 				'src/helpers/markdown.ts',
 				'site-output/**',
+				'site/**',
 			],
 		},
 	},

@@ -1,5 +1,5 @@
+import fs from 'node:fs';
 import {Ecto} from 'ecto';
-import fs from 'fs-extra';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {Github, type GithubData, type GithubOptions} from './github.js';
@@ -77,32 +77,32 @@ export class DoculaBuilder {
 		const siteRelativePath = this.options.sitePath;
 
 		// Copy over favicon
-		if (await fs.pathExists(`${siteRelativePath}/favicon.ico`)) {
-			await fs.copy(
+		if (fs.existsSync(`${siteRelativePath}/favicon.ico`)) {
+			await fs.promises.copyFile(
 				`${siteRelativePath}/favicon.ico`,
 				`${this.options.outputPath}/favicon.ico`,
 			);
 		}
 
 		// Copy over logo
-		if (await fs.pathExists(`${siteRelativePath}/logo.svg`)) {
-			await fs.copy(
+		if (fs.existsSync(`${siteRelativePath}/logo.svg`)) {
+			await fs.promises.copyFile(
 				`${siteRelativePath}/logo.svg`,
 				`${this.options.outputPath}/logo.svg`,
 			);
 		}
 
 		// Copy over css
-		if (await fs.pathExists(`${this.options.templatePath}/css`)) {
-			await fs.copy(
+		if (fs.existsSync(`${this.options.templatePath}/css`)) {
+			this.copyDirectory(
 				`${this.options.templatePath}/css`,
 				`${this.options.outputPath}/css`,
 			);
 		}
 
 		// Copy over variables
-		if (await fs.pathExists(`${siteRelativePath}/variables.css`)) {
-			await fs.copy(
+		if (fs.existsSync(`${siteRelativePath}/variables.css`)) {
+			await fs.promises.copyFile(
 				`${siteRelativePath}/variables.css`,
 				`${this.options.outputPath}/css/variables.css`,
 			);
@@ -149,7 +149,7 @@ export class DoculaBuilder {
 			releases: '',
 		};
 
-		if (await fs.pathExists(options.templatePath)) {
+		if (fs.existsSync(options.templatePath)) {
 			const index = await this.getTemplateFile(options.templatePath, 'index');
 			if (index) {
 				templates.index = index;
@@ -174,7 +174,7 @@ export class DoculaBuilder {
 		name: string,
 	): Promise<string | undefined> {
 		let result;
-		const files = await fs.readdir(path);
+		const files = await fs.promises.readdir(path);
 		for (const file of files) {
 			const fileName = file.split('.');
 			if (fileName[0].toString().toLowerCase() === name.toLowerCase()) {
@@ -191,11 +191,11 @@ export class DoculaBuilder {
 		const {outputPath} = options;
 		const robotsPath = `${outputPath}/robots.txt`;
 
-		await fs.ensureDir(outputPath);
+		await fs.promises.mkdir(outputPath, {recursive: true});
 
-		await ((await fs.pathExists(`${sitePath}/robots.txt`))
-			? fs.copy(`${sitePath}/robots.txt`, robotsPath)
-			: fs.writeFile(robotsPath, 'User-agent: *\nDisallow:'));
+		await ((fs.existsSync(`${sitePath}/robots.txt`))
+			? fs.promises.copyFile(`${sitePath}/robots.txt`, robotsPath)
+			: fs.promises.writeFile(robotsPath, 'User-agent: *\nDisallow:'));
 	}
 
 	public async buildSiteMapPage(data: DoculaData): Promise<void> {
@@ -213,16 +213,16 @@ export class DoculaBuilder {
 
 		xml += '</urlset>';
 
-		await fs.ensureDir(data.outputPath);
+		await fs.promises.mkdir(data.outputPath, {recursive: true});
 
-		await fs.writeFile(sitemapPath, xml, 'utf8');
+		await fs.promises.writeFile(sitemapPath, xml, 'utf8');
 	}
 
 	public async buildIndexPage(data: DoculaData): Promise<void> {
 		if (data.templates) {
 			const indexPath = `${data.outputPath}/index.html`;
 
-			await fs.ensureDir(data.outputPath);
+			await fs.promises.mkdir(data.outputPath, {recursive: true});
 
 			const indexTemplate = `${data.templatePath}/${data.templates.index}`;
 
@@ -233,7 +233,7 @@ export class DoculaBuilder {
 				{...data, content: htmlReadme},
 				data.templatePath,
 			);
-			await fs.writeFile(indexPath, indexContent, 'utf8');
+			await fs.promises.writeFile(indexPath, indexContent, 'utf8');
 		} else {
 			throw new Error('No templates found');
 		}
@@ -244,7 +244,7 @@ export class DoculaBuilder {
 			const releasesPath = `${data.outputPath}/releases/index.html`;
 			const releaseOutputPath = `${data.outputPath}/releases`;
 
-			await fs.ensureDir(releaseOutputPath);
+			await fs.promises.mkdir(releaseOutputPath, {recursive: true});
 
 			const releasesTemplate = `${data.templatePath}/${data.templates.releases}`;
 			const releasesContent = await this._ecto.renderFromFile(
@@ -252,7 +252,7 @@ export class DoculaBuilder {
 				data,
 				data.templatePath,
 			);
-			await fs.writeFile(releasesPath, releasesContent, 'utf8');
+			await fs.promises.writeFile(releasesPath, releasesContent, 'utf8');
 		} else {
 			throw new Error('No github data found');
 		}
@@ -269,5 +269,27 @@ export class DoculaBuilder {
 		}
 
 		return htmlReadme;
+	}
+
+	private copyDirectory(source: string, target: string): void {
+		const files = fs.readdirSync(source);
+
+		for (const file of files) {
+			if (file.startsWith('.')) {
+				continue;
+			}
+
+			const sourcePath = `${source}/${file}`;
+			const targetPath = `${target}/${file}`;
+
+			const stat = fs.lstatSync(sourcePath);
+
+			if (stat.isDirectory()) {
+				fs.mkdirSync(targetPath, {recursive: true});
+				this.copyDirectory(sourcePath, targetPath);
+			} else {
+				fs.copyFileSync(sourcePath, targetPath);
+			}
+		}
 	}
 }

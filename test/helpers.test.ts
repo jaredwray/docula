@@ -1,5 +1,5 @@
+import fs from 'node:fs';
 import {expect, it, describe} from 'vitest';
-import fs from 'fs';
 import {DoculaHelpers} from '../src/helpers.js';
 
 describe('DoculaHelpers', () => {

@@ -1,7 +1,7 @@
 import type http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
-import fs from 'fs-extra';
+import fs from 'node:fs';
 import updateNotifier from 'update-notifier';
 import express from 'express';
 import {DoculaOptions} from './options.js';

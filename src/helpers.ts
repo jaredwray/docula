@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import fs from 'node:fs';
 import yaml from 'js-yaml';
 
 export class DoculaHelpers {
