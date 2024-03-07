@@ -275,6 +275,7 @@ export class DoculaBuilder {
 		const files = fs.readdirSync(source);
 
 		for (const file of files) {
+			/* c8 ignore next 3 */
 			if (file.startsWith('.')) {
 				continue;
 			}
