@@ -7,7 +7,6 @@ import express from 'express';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {DoculaBuilder} from './builder.js';
-import {MarkdownHelper} from './helpers/markdown.js';
 
 export default class Docula {
 	private _options: DoculaOptions = new DoculaOptions();
@@ -81,12 +80,6 @@ export default class Docula {
 			this.options.outputPath = consoleProcess.args.output;
 		}
 
-		const engineConfig = {
-			nodes: {
-				fence: MarkdownHelper.fence(),
-			},
-		};
-
 		switch (consoleProcess.command) {
 			case 'init': {
 				const isTypescript = fs.existsSync('./tsconfig.json') ?? false;
@@ -105,14 +98,14 @@ export default class Docula {
 			}
 
 			case 'serve': {
-				const builder = new DoculaBuilder(this.options, engineConfig);
+				const builder = new DoculaBuilder(this.options);
 				await builder.build();
 				await this.serve(this.options);
 				break;
 			}
 
 			default: {
-				const builder = new DoculaBuilder(this.options, engineConfig);
+				const builder = new DoculaBuilder(this.options);
 				await builder.build();
 				break;
 			}
