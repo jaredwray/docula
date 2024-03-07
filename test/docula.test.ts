@@ -326,6 +326,26 @@ describe('docula config file', () => {
 		expect(docula.options.outputPath).toEqual(docula.configFileModule.options.outputPath);
 		console.log = consoleLog;
 	});
+	it('should load the config and test the onPrepare', async () => {
+		const docula = new Docula(defaultOptions);
+		const sitePath = 'test/fixtures/single-page-site-onprepare';
+		await docula.loadConfigFile(sitePath);
+		expect(docula.configFileModule).toBeDefined();
+		expect(docula.configFileModule.options).toBeDefined();
+		expect(docula.configFileModule.onPrepare).toBeDefined();
+		const consoleLog = console.log;
+		let consoleMessage = '';
+		console.log = message => {
+			if (typeof message === 'string') {
+				consoleMessage = message;
+			}
+		};
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		await docula.configFileModule.onPrepare();
+		expect(consoleMessage).toContain('onPrepare');
+		console.log = consoleLog;
+	});
 	it('should throw error onPrepare', async () => {
 		const docula = new Docula(defaultOptions);
 		docula.options.sitePath = 'test/fixtures/single-page-site-error';
