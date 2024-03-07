@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import {afterEach, beforeEach, expect, it, describe, vi} from 'vitest';
-import * as fs from 'fs-extra';
+import fs from 'node:fs';
+import {
+	afterEach, beforeEach, expect, it, describe, vi,
+} from 'vitest';
 import axios from 'axios';
 import {DoculaBuilder, type DoculaData} from '../src/builder.js';
 import {DoculaOptions} from '../src/options.js';
@@ -64,7 +66,7 @@ describe('DoculaBuilder', () => {
 		try {
 			await builder.build();
 		} finally {
-			await fs.rm(builder.options.outputPath, {recursive: true});
+			await fs.promises.rm(builder.options.outputPath, {recursive: true});
 		}
 
 		expect(consoleMessage).toContain('Build');
@@ -151,13 +153,18 @@ describe('DoculaBuilder', () => {
 		options.sitePath = 'test/fixtures/single-page-site';
 		options.outputPath = 'test/temp-robots-test';
 
-		await fs.remove(options.outputPath);
+		if (fs.existsSync(options.outputPath)) {
+			await fs.promises.rmdir(options.outputPath, {recursive: true});
+		}
+
 		try {
 			await builder.buildRobotsPage(options);
-			const robots = await fs.readFile(`${options.outputPath}/robots.txt`, 'utf8');
+			const robots = await fs.promises.readFile(`${options.outputPath}/robots.txt`, 'utf8');
 			expect(robots).toBe('User-agent: *\nDisallow:');
 		} finally {
-			await fs.remove(options.outputPath);
+			if (fs.existsSync(options.outputPath)) {
+				await fs.promises.rmdir(options.outputPath, {recursive: true});
+			}
 		}
 	});
 	it('should copy the robots.txt (/robots.txt)', async () => {
@@ -166,26 +173,36 @@ describe('DoculaBuilder', () => {
 		options.sitePath = 'test/fixtures/multi-page-site';
 		options.outputPath = 'test/temp-robots-test-copy';
 
-		await fs.remove(options.outputPath);
+		if (fs.existsSync(options.outputPath)) {
+			await fs.promises.rmdir(options.outputPath, {recursive: true});
+		}
+
 		try {
 			await builder.buildRobotsPage(options);
-			const robots = await fs.readFile(`${options.outputPath}/robots.txt`, 'utf8');
+			const robots = await fs.promises.readFile(`${options.outputPath}/robots.txt`, 'utf8');
 			expect(robots).toBe('User-agent: *\nDisallow: /meow');
 		} finally {
-			await fs.remove(options.outputPath);
+			if (fs.existsSync(options.outputPath)) {
+				await fs.promises.rmdir(options.outputPath, {recursive: true});
+			}
 		}
 	});
 	it('should build the sitemap.xml (/sitemap.xml)', async () => {
 		const builder = new DoculaBuilder();
 		const data = doculaData;
 
-		await fs.remove(data.outputPath);
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
 		try {
 			await builder.buildSiteMapPage(data);
-			const sitemap = await fs.readFile(`${data.outputPath}/sitemap.xml`, 'utf8');
+			const sitemap = await fs.promises.readFile(`${data.outputPath}/sitemap.xml`, 'utf8');
 			expect(sitemap).toContain('<loc>http://foo.com</loc>');
 		} finally {
-			await fs.remove(data.outputPath);
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rmdir(data.outputPath, {recursive: true});
+			}
 		}
 	});
 	it('should build the index.html (/index.html)', async () => {
@@ -199,13 +216,18 @@ describe('DoculaBuilder', () => {
 		data.templatePath = 'test/fixtures/template-example';
 		data.outputPath = 'test/temp-index-test';
 
-		await fs.remove(data.outputPath);
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
 		try {
 			await builder.buildIndexPage(data);
-			const index = await fs.readFile(`${data.outputPath}/index.html`, 'utf8');
+			const index = await fs.promises.readFile(`${data.outputPath}/index.html`, 'utf8');
 			expect(index).toContain('<title>docula</title>');
 		} finally {
-			await fs.remove(data.outputPath);
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rmdir(data.outputPath, {recursive: true});
+			}
 		}
 	});
 	it('should throw an error build the index.html (/index.html)', async () => {
@@ -220,7 +242,9 @@ describe('DoculaBuilder', () => {
 		} catch (error: any) {
 			expect(error.message).toBe('No templates found');
 		} finally {
-			await fs.remove(data.outputPath);
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rmdir(data.outputPath, {recursive: true});
+			}
 		}
 	});
 	it('should build release page (/releases/index.html)', async () => {
@@ -239,13 +263,18 @@ describe('DoculaBuilder', () => {
 			contributors: {},
 		};
 
-		await fs.remove(data.outputPath);
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
 		try {
 			await builder.buildReleasePage(data);
-			const index = await fs.readFile(`${data.outputPath}/releases/index.html`, 'utf8');
+			const index = await fs.promises.readFile(`${data.outputPath}/releases/index.html`, 'utf8');
 			expect(index).toContain('<title>docula Releases</title>');
 		} finally {
-			await fs.remove(data.outputPath);
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rmdir(data.outputPath, {recursive: true});
+			}
 		}
 	});
 	it('should error on build release page (/releases/index.html)', async () => {
@@ -261,13 +290,18 @@ describe('DoculaBuilder', () => {
 
 		data.github = undefined;
 
-		await fs.remove(data.outputPath);
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
 		try {
 			await builder.buildReleasePage(data);
 		} catch (error: any) {
 			expect(error.message).toBe('No github data found');
 		} finally {
-			await fs.remove(data.outputPath);
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rmdir(data.outputPath, {recursive: true});
+			}
 		}
 	});
 });

@@ -1,14 +1,14 @@
-import fs from 'fs-extra';
+import fs from 'node:fs';
 import yaml from 'js-yaml';
 
 export class DoculaHelpers {
-	createDoc(path: string, destination: string, frontMatter?: Record<string, string>, contentFn?: (content: string) => string): void {
+	createDoc(path: string, destination: string, frontMatter?: Record<string, string>, contentFunction?: (content: string) => string): void {
 		const content = fs.readFileSync(path, 'utf8');
 
 		let newContent = this.setFrontMatterInContent(content, frontMatter);
 
-		if (contentFn) {
-			newContent = contentFn(newContent);
+		if (contentFunction) {
+			newContent = contentFunction(newContent);
 		}
 
 		fs.writeFileSync(destination, newContent, 'utf8');

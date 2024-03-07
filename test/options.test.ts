@@ -1,4 +1,6 @@
-import {expect, it, beforeEach, describe} from 'vitest';
+import {
+	expect, it, beforeEach, describe,
+} from 'vitest';
 import {DoculaOptions} from '../src/options.js';
 
 describe('DoculaOptions', () => {
