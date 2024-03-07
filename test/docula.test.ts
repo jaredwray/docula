@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import process from 'node:process';
 import path from 'node:path';
-import {afterEach, beforeEach, expect, it, describe, vi} from 'vitest';
-import fs from 'fs-extra';
+import fs from 'node:fs';
+import {
+	afterEach, beforeEach, expect, it, describe, vi,
+} from 'vitest';
 import axios from 'axios';
 import Docula, {DoculaHelpers} from '../src/docula.js';
 import {DoculaOptions} from '../src/options.js';
@@ -156,7 +158,7 @@ describe('docula execute', () => {
 
 		expect(fs.existsSync(buildOptions.outputPath)).toEqual(true);
 
-		await fs.rm(buildOptions.outputPath, {recursive: true});
+		await fs.promises.rm(buildOptions.outputPath, {recursive: true});
 		console.log = consoleLog;
 	});
 	it('should be able to execute with output parameter', async () => {
@@ -175,7 +177,7 @@ describe('docula execute', () => {
 
 		expect(fs.existsSync(realOutputPath)).toEqual(true);
 
-		await fs.rm(realOutputPath, {recursive: true});
+		await fs.promises.rm(realOutputPath, {recursive: true});
 		console.log = consoleLog;
 	});
 	it('should init based on the init command', async () => {
@@ -194,7 +196,7 @@ describe('docula execute', () => {
 			expect(fs.existsSync(`${sitePath}/docula.config.cjs`)).toEqual(true);
 			expect(consoleMessage).toContain('docula initialized.');
 		} finally {
-			await fs.rm(sitePath, {recursive: true});
+			await fs.promises.rm(sitePath, {recursive: true});
 			console.log = consoleLog;
 		}
 	});
@@ -239,7 +241,7 @@ describe('docula execute', () => {
 		try {
 			await docula.execute(process);
 		} finally {
-			await fs.rm(options.outputPath, {recursive: true});
+			await fs.promises.rm(options.outputPath, {recursive: true});
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -256,7 +258,7 @@ describe('docula execute', () => {
 			await docula.serve(options);
 			await docula.execute(process);
 		} finally {
-			await fs.rm(options.outputPath, {recursive: true});
+			await fs.promises.rm(options.outputPath, {recursive: true});
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -274,7 +276,7 @@ describe('docula execute', () => {
 
 			expect(docula.server).toBeDefined();
 		} finally {
-			await fs.rm(options.outputPath, {recursive: true});
+			await fs.promises.rm(options.outputPath, {recursive: true});
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -315,11 +317,18 @@ describe('docula config file', () => {
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
 		expect(docula.configFileModule.options).toBeDefined();
-		expect(docula.configFileModule.onPrepare).toBeDefined();
+		const consoleLog = console.log;
+		let consoleMessage = '';
+		console.log = message => {
+			if (typeof message === 'string') {
+				consoleMessage = message;
+			}
+		};
 
 		process.argv = ['node', 'docula', 'version'];
 		await docula.execute(process);
-		expect(docula.options.outputPath).toContain('dist');
+		expect(docula.options.outputPath).toEqual(docula.configFileModule.options.outputPath);
+		console.log = consoleLog;
 	});
 	it('should throw error onPrepare', async () => {
 		const docula = new Docula(defaultOptions);

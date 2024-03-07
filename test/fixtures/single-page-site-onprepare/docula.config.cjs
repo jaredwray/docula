@@ -1,6 +1,6 @@
 module.exports.options = {
 	templatePath: './template',
-	outputPath: './dist',
+	outputPath: './dist-onprepare',
 	sitePath: './site',
 	githubPath: 'jaredwray/docula',
 	siteTitle: 'docula',

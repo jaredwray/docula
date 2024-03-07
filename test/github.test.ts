@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import {
+	afterEach, beforeEach, describe, expect, it, vi,
+} from 'vitest';
 import axios from 'axios';
 import {Github, type GithubOptions} from '../src/github.js';
 import githubMockContributors from './fixtures/data-mocks/github-contributors.json';

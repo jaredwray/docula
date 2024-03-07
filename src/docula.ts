@@ -120,12 +120,12 @@ export default class Docula {
 	}
 
 	public isSinglePageWebsite(sitePath: string): boolean {
-		const docsPath = `${sitePath}/docs`;
-		if (!fs.existsSync(docsPath)) {
+		const documentationPath = `${sitePath}/docs`;
+		if (!fs.existsSync(documentationPath)) {
 			return true;
 		}
 
-		const files = fs.readdirSync(docsPath);
+		const files = fs.readdirSync(documentationPath);
 		return files.length === 0;
 	}
 

@@ -8,7 +8,8 @@ export default defineConfig({
 				'init/**',
 				'template/**',
 				'test/fixtures/**',
-				'src/helpers/markdown.ts'
+				'src/helpers/markdown.ts',
+				'site-output/**',
 			],
 		},
 	},

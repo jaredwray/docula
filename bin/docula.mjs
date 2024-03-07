@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 
 import * as process from 'node:process';
 import Docula from '../dist/docula.js';

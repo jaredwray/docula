@@ -5,6 +5,7 @@ const process = require('node:process');
 module.exports.options = {
 	templatePath: './template',
 	githubPath: 'jaredwray/docula',
+	outputPath: './site-output',
 	siteTitle: 'docula',
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',

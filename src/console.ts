@@ -38,19 +38,19 @@ export class DoculaConsole {
 
 	public parseProcessArgv(argv: string[]): DoculaConsoleProcess {
 		const command = this.getCommand(argv);
-		const args = this.getArguments(argv);
+		const arguments_ = this.getArguments(argv);
 		return {
 			argv,
 			command,
-			args,
+			args: arguments_,
 		};
 	}
 
 	public getCommand(argv: string[]): string | undefined {
 		let result;
-		for (const arg of argv) {
-			// eslint-disable-next-line default-case
-			switch (arg) {
+		for (const argument of argv) {
+			// eslint-disable-next-line default-case, @typescript-eslint/switch-exhaustiveness-check
+			switch (argument) {
 				case 'init': {
 					result = 'init';
 					break;
@@ -72,7 +72,7 @@ export class DoculaConsole {
 				}
 
 				case 'version': {
-					result = arg;
+					result = argument;
 					break;
 				}
 			}
@@ -82,7 +82,7 @@ export class DoculaConsole {
 	}
 
 	public getArguments(argv: string[]): DoculaConsoleArguments {
-		const args = {
+		const arguments_ = {
 			sitePath: '',
 			templatePath: '',
 			output: '',
@@ -90,14 +90,15 @@ export class DoculaConsole {
 			port: 3000,
 		};
 		for (let i = 0; i < argv.length; i++) {
-			const arg = argv[i];
-			// eslint-disable-next-line default-case
-			switch (arg) {
+			const argument = argv[i];
+
+			// eslint-disable-next-line default-case, @typescript-eslint/switch-exhaustiveness-check
+			switch (argument) {
 				case '-p':
 				case '--port': {
 					const portString = argv[i + 1];
 					if (portString !== undefined) {
-						args.port = Number.parseInt(portString, 10);
+						arguments_.port = Number.parseInt(portString, 10);
 					}
 
 					break;
@@ -105,34 +106,34 @@ export class DoculaConsole {
 
 				case '-o':
 				case '--output': {
-					args.output = argv[i + 1];
-					args.output = path.join(process.cwd(), args.output);
+					arguments_.output = argv[i + 1];
+					arguments_.output = path.join(process.cwd(), arguments_.output);
 					break;
 				}
 
 				case '-w':
 				case '--watch': {
-					args.watch = true;
+					arguments_.watch = true;
 					break;
 				}
 
 				case '-s':
 				case '--site': {
-					args.sitePath = argv[i + 1];
-					args.sitePath = path.join(process.cwd(), args.sitePath);
+					arguments_.sitePath = argv[i + 1];
+					arguments_.sitePath = path.join(process.cwd(), arguments_.sitePath);
 					break;
 				}
 
 				case '-t':
 				case '--templatePath': {
-					args.templatePath = argv[i + 1];
-					args.templatePath = path.join(process.cwd(), args.templatePath);
+					arguments_.templatePath = argv[i + 1];
+					arguments_.templatePath = path.join(process.cwd(), arguments_.templatePath);
 					break;
 				}
 			}
 		}
 
-		return args;
+		return arguments_;
 	}
 }
 

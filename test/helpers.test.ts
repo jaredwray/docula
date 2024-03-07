@@ -1,5 +1,5 @@
 import {expect, it, describe} from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import {DoculaHelpers} from '../src/helpers.js';
 
 describe('DoculaHelpers', () => {
@@ -26,10 +26,10 @@ describe('DoculaHelpers', () => {
 				fs.unlinkSync(destination);
 			}
 
-			const fn = (content: string) => content.replace('description: Beautiful Website for Your Projects', 'description: More Beautiful');
+			const function_ = (content: string) => content.replace('description: Beautiful Website for Your Projects', 'description: More Beautiful');
 
 			const helpers = new DoculaHelpers();
-			helpers.createDoc(source, destination, {title: 'docula', description: 'Beautiful Website for Your Projects'}, fn);
+			helpers.createDoc(source, destination, {title: 'docula', description: 'Beautiful Website for Your Projects'}, function_);
 			const frontMatter = helpers.getFrontMatterFromFile(destination);
 			expect(frontMatter.title).toEqual('docula');
 			expect(frontMatter.description).toEqual('More Beautiful');
