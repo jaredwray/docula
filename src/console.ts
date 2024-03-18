@@ -49,7 +49,7 @@ export class DoculaConsole {
 	public getCommand(argv: string[]): string | undefined {
 		let result;
 		for (const argument of argv) {
-			// eslint-disable-next-line default-case, @typescript-eslint/switch-exhaustiveness-check
+			// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 			switch (argument) {
 				case 'init': {
 					result = 'init';
@@ -92,7 +92,7 @@ export class DoculaConsole {
 		for (let i = 0; i < argv.length; i++) {
 			const argument = argv[i];
 
-			// eslint-disable-next-line default-case, @typescript-eslint/switch-exhaustiveness-check
+			// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 			switch (argument) {
 				case '-p':
 				case '--port': {
