@@ -92,6 +92,13 @@ export class DoculaBuilder {
 			);
 		}
 
+		if (fs.existsSync(`${siteRelativePath}/logo_horizontal.png`)) {
+			await fs.promises.copyFile(
+				`${siteRelativePath}/logo_horizontal.png`,
+				`${this.options.outputPath}/logo_horizontal.png`,
+			);
+		}
+
 		// Copy over css
 		if (fs.existsSync(`${this.options.templatePath}/css`)) {
 			this.copyDirectory(
