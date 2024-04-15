@@ -90,6 +90,10 @@ export class DoculaBuilder {
 				`${siteRelativePath}/logo.svg`,
 				`${this.options.outputPath}/logo.svg`,
 			);
+			await fs.promises.copyFile(
+				`${siteRelativePath}/logo_horizontal.png`,
+				`${this.options.outputPath}/logo_horizontal.png`,
+			);
 		}
 
 		// Copy over css
