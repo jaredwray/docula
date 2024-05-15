@@ -38,5 +38,5 @@ jobs:
         accountId: b09b24c345713c704e71dea8bd81f713
         projectName: docula
         directory: site-output
-        branch: production
+        branch: main
         gitHubToken: ${{ secrets.GH_TOKEN }}
