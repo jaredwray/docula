@@ -53,6 +53,9 @@ export default class Docula {
 
 		const consoleProcess = this._console.parseProcessArgv(process.argv);
 
+		// Automatic detect singlePage option
+		this.options.singlePage = this.isSinglePageWebsite(this.options.sitePath);
+
 		// Update options
 		if (consoleProcess.args.sitePath) {
 			this.options.sitePath = consoleProcess.args.sitePath;

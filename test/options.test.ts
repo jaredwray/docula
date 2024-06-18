@@ -14,6 +14,7 @@ describe('DoculaOptions', () => {
 			expect(options.siteTitle).toEqual('docula');
 			expect(options.siteDescription).toEqual('Beautiful Website for Your Projects');
 			expect(options.siteUrl).toEqual('https://docula.org');
+			expect(options.singlePage).toEqual(true);
 		});
 
 		it('should create an instance of DoculaOptions with custom values', () => {
@@ -25,6 +26,7 @@ describe('DoculaOptions', () => {
 				siteTitle: 'Custom Title',
 				siteDescription: 'Custom Description',
 				siteUrl: 'https://custom-url.com',
+				singlePage: false,
 			});
 			expect(options.templatePath).toContain('/custom-template');
 			expect(options.outputPath).toContain('/custom-dist');
@@ -33,6 +35,7 @@ describe('DoculaOptions', () => {
 			expect(options.siteTitle).toEqual('Custom Title');
 			expect(options.siteDescription).toEqual('Custom Description');
 			expect(options.siteUrl).toEqual('https://custom-url.com');
+			expect(options.singlePage).toEqual(false);
 		});
 	});
 

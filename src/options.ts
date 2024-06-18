@@ -10,6 +10,7 @@ export class DoculaOptions {
 	public siteDescription = 'Beautiful Website for Your Projects';
 	public siteUrl = 'https://docula.org';
 	public port = 3000;
+	public singlePage = true;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -51,6 +52,10 @@ export class DoculaOptions {
 
 		if (options.port) {
 			this.port = options.port as number;
+		}
+
+		if (options.singlePage !== undefined && typeof options.singlePage === 'boolean') {
+			this.singlePage = options.singlePage;
 		}
 	}
 }
