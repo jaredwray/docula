@@ -272,7 +272,7 @@ export class DoculaBuilder {
 				`${data.sitePath}/README.md`,
 				'utf8',
 			);
-			htmlReadme = await this._ecto.markdown.render(readmeContent);
+			htmlReadme = await this._ecto.render(readmeContent, undefined, 'markdown');
 		}
 
 		return htmlReadme;
