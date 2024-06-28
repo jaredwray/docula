@@ -74,3 +74,4 @@ dist
 site/README.md
 site-output
 pnpm-lock.yaml
+package-lock.json
