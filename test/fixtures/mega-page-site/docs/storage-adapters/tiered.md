@@ -1,7 +1,5 @@
 ---
 title: '@keyv/tiered'
-sidebarTitle: '@keyv/tiered'
-parent: 'Storage Adapters'
 ---
 
 # @keyv/tiered 

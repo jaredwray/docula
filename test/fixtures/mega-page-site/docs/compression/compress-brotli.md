@@ -1,7 +1,5 @@
 ---
 title: '@keyv/compress-brotli'
-sidebarTitle: '@keyv/compress-brotli'
-parent: 'Compression'
 ---
 
 # @keyv/compress-brotli 

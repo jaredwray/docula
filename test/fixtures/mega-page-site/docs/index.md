@@ -1,6 +1,5 @@
 ---
 title: 'Getting Started Guide'
-permalink: /docs/
 order: 0
 ---
 

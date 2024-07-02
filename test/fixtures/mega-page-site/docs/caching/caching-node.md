@@ -1,7 +1,6 @@
 ---
 title: 'Utilizing Keyv for Caching in Node.js: A Step-by-Step Guide'
-sidebarTitle: 'Caching in Node.js'
-parent: 'Caching'
+navTitle: 'Caching in Node.js'
 ---
 
 # Utilizing Keyv for Caching in Node.js: A Step-by-Step Guide

@@ -1,7 +1,5 @@
 ---
 title: '@keyv/mysql'
-sidebarTitle: '@keyv/mysql'
-parent: 'Storage Adapters'
 ---
 
 # @keyv/mysql 

@@ -1,7 +1,5 @@
 ---
 title: '@keyv/compress-gzip'
-sidebarTitle: '@keyv/compress-gzip'
-parent: 'Compression'
 ---
 
 # @keyv/compress-gzip 
