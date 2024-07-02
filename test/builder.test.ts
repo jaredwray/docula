@@ -4,7 +4,7 @@ import {
 	afterEach, beforeEach, expect, it, describe, vi,
 } from 'vitest';
 import axios from 'axios';
-import {DoculaBuilder, type DoculaData} from '../src/builder.js';
+import {DoculaBuilder, type DoculaSection, type DoculaData} from '../src/builder.js';
 import {DoculaOptions} from '../src/options.js';
 import githubMockContributors from './fixtures/data-mocks/github-contributors.json';
 import githubMockReleases from './fixtures/data-mocks/github-releases.json';
@@ -303,5 +303,28 @@ describe('DoculaBuilder', () => {
 				await fs.promises.rmdir(data.outputPath, {recursive: true});
 			}
 		}
+	});
+	it('should get top level documents from mega fixtures', () => {
+		const builder = new DoculaBuilder();
+		const documentsPath = 'test/fixtures/mega-page-site/docs';
+		const documents = builder.getDocumentinDirectory(documentsPath);
+		expect(documents.length).toBe(2);
+	});
+	it('should merge sections based on what you find in options', () => {
+		const builder = new DoculaBuilder();
+		const options = new DoculaOptions();
+		options.sections = [
+			{name: 'foo snizzle', path: 'caching', order: 1},
+			{name: 'bar', path: 'bar', order: 2},
+		];
+
+		const section: DoculaSection = {
+			name: 'foo',
+			path: 'caching',
+		};
+
+		const mergedSection = builder.mergeSectionWithOptions(section, options);
+		expect(mergedSection.name).toBe('foo snizzle');
+		expect(mergedSection.order).toBe(1);
 	});
 });
