@@ -353,15 +353,7 @@ export class DoculaBuilder {
 
 					};
 
-					if (doculaOptions.sections) {
-						const sectionOptions = doculaOptions.sections.find(section => section.path === document);
-						// eslint-disable-next-line max-depth
-						if (sectionOptions) {
-							section.name = sectionOptions.name;
-							section.order = sectionOptions.order;
-							section.path = sectionOptions.path;
-						}
-					}
+					this.mergeSectionWithOptions(section, doculaOptions);
 
 					sections.push(section);
 				}
@@ -369,6 +361,22 @@ export class DoculaBuilder {
 		}
 
 		return sections;
+	}
+
+	public mergeSectionWithOptions(section: DoculaSection, options: DoculaOptions): DoculaSection {
+		if (options.sections) {
+			const sectionOptions = options.sections.find(
+				sectionOption => sectionOption.path === section.path,
+			);
+
+			if (sectionOptions) {
+				section.name = sectionOptions.name;
+				section.order = sectionOptions.order;
+				section.path = sectionOptions.path;
+			}
+		}
+
+		return section;
 	}
 
 	public parseDocumentData(documentPath: string): DoculaDocument {
