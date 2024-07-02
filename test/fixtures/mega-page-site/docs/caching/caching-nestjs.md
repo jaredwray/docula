@@ -1,7 +1,6 @@
 ---
 title: 'Utilizing Keyv for Caching in NestJS: A Step-by-Step Guide'
-sidebarTitle: 'Caching in Nest.js'
-parent: 'Caching'
+navTitle: 'Caching in Nest.js'
 ---
 
 # Utilizing Keyv for Caching in NestJS: A Step-by-Step Guide

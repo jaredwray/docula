@@ -1,8 +1,7 @@
-<h1 align="center">
-	<img width="250" src="https://jaredwray.com/images/keyv.svg" alt="keyv">
-	<br>
-	<br>
-</h1>
+---
+title: 'Keyv API'
+order: 1
+---
 
 > Simple key-value storage with support for multiple backends
 

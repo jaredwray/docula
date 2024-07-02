@@ -1,5 +1,6 @@
 import path from 'node:path';
 import process from 'node:process';
+import {type DoculaSection} from './builder.js';
 
 export class DoculaOptions {
 	public templatePath = path.join(import.meta.url, '../../template').replace('file:', '');
@@ -11,6 +12,7 @@ export class DoculaOptions {
 	public siteUrl = 'https://docula.org';
 	public port = 3000;
 	public singlePage = true;
+	public sections?: DoculaSection[];
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {

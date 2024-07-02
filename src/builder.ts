@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import {Ecto} from 'ecto';
+import * as matter from 'gray-matter';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {Github, type GithubData, type GithubOptions} from './github.js';
@@ -14,11 +15,32 @@ export type DoculaData = {
 	githubPath?: string;
 	github?: GithubData;
 	templates?: DoculaTemplates;
+	hasDocuments?: boolean;
+	sections?: DoculaSection[];
+	documents?: DoculaDocument[];
 };
 
 export type DoculaTemplates = {
 	index: string;
 	releases: string;
+};
+
+export type DoculaSection = {
+	name: string;
+	order?: number;
+	path: string;
+};
+
+export type DoculaDocument = {
+	title: string;
+	navTitle: string;
+	description: string;
+	order?: number;
+	section?: string;
+	keywords: string[];
+	markdown: string;
+	generatedHtml: string;
+	documentPath: string;
 };
 
 export class DoculaBuilder {
@@ -61,6 +83,8 @@ export class DoculaBuilder {
 		doculaData.github = githubData;
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(this.options);
+		// Get the documents
+		doculaData.documents = this.getDocuments(`${doculaData.sitePath}/docs`, doculaData);
 
 		// Build the home page (index.html)
 		await this.buildIndexPage(doculaData);
@@ -276,6 +300,100 @@ export class DoculaBuilder {
 		}
 
 		return htmlReadme;
+	}
+
+	public getDocuments(sitePath: string, doculaData: DoculaData): DoculaDocument[] {
+		let documents = new Array<DoculaDocument>();
+		if (fs.existsSync(sitePath)) {
+			// Get top level documents
+			documents = this.getDocumentinDirectory(sitePath);
+
+			// Get all sections and parse them
+			doculaData.sections = this.getSections(sitePath, this.options);
+
+			// Get all documents in each section
+			for (const section of doculaData.sections) {
+				const sectionPath = `${sitePath}/${section.path}`;
+				const sectionDocuments = this.getDocumentinDirectory(sectionPath);
+				documents = [...documents, ...sectionDocuments];
+			}
+		}
+
+		return documents;
+	}
+
+	public getDocumentinDirectory(sitePath: string): DoculaDocument[] {
+		const documents = new Array<DoculaDocument>();
+		const documentList = fs.readdirSync(sitePath);
+		if (documentList.length > 0) {
+			for (const document of documentList) {
+				const documentPath = `${sitePath}/${document}`;
+				const stats = fs.statSync(documentPath);
+				if (stats.isFile()) {
+					const documentData = this.parseDocumentData(documentPath);
+					documents.push(documentData);
+				}
+			}
+		}
+
+		return documents;
+	}
+
+	public getSections(sitePath: string, doculaOptions: DoculaOptions): DoculaSection[] {
+		const sections = new Array<DoculaSection>();
+		const documentList = fs.readdirSync(sitePath);
+		if (documentList.length > 0) {
+			for (const document of documentList) {
+				const documentPath = `${sitePath}/${document}`;
+				const stats = fs.statSync(documentPath);
+				if (stats.isDirectory()) {
+					const section: DoculaSection = {
+						name: document.replaceAll('-', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()),
+						path: document,
+
+					};
+
+					if (doculaOptions.sections) {
+						const sectionOptions = doculaOptions.sections.find(section => section.path === document);
+						// eslint-disable-next-line max-depth
+						if (sectionOptions) {
+							section.name = sectionOptions.name;
+							section.order = sectionOptions.order;
+							section.path = sectionOptions.path;
+						}
+					}
+
+					sections.push(section);
+				}
+			}
+		}
+
+		return sections;
+	}
+
+	public parseDocumentData(documentPath: string): DoculaDocument {
+		const documentContent = fs.readFileSync(documentPath, 'utf8');
+		const matterData = matter.default(documentContent);
+
+		const documentData: DoculaDocument = {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			title: matterData.data.title,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			navTitle: matterData.data.navTitle || matterData.data.title,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			description: matterData.data.description || '',
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			order: matterData.data.rank || undefined,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			section: matterData.data.section || undefined,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			keywords: matterData.data.keywords || [],
+			markdown: documentContent,
+			generatedHtml: this._ecto.renderSync(documentContent, undefined, 'markdown'),
+			documentPath,
+		};
+
+		return documentData;
 	}
 
 	private copyDirectory(source: string, target: string): void {

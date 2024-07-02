@@ -1,7 +1,5 @@
 ---
 title: '@keyv/postgres'
-sidebarTitle: '@keyv/postgres'
-parent: 'Storage Adapters'
 ---
 
 # @keyv/postgres 

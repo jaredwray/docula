@@ -1,10 +1,9 @@
 ---
-title: 'How to Implement Caching in Javascript'
-sidebarTitle: 'Caching in Javascript'
-parent: 'Caching'
+title: 'Utilizing Keyv for Caching in Javascript: A Step-by-Step Guide'
+navTitle: 'Caching in Javascript'
 ---
 
-# How to Implement Caching in Javascript
+# Utilizing Keyv for Caching in Javascript: A Step-by-Step Guide
 
 ## What is a Cache?
 A cache is a short-term, high-speed data storage layer that stores a subset of data, enabling it to be retrieved faster than accessing it from its primary storage location. Caching allows you to reuse previously retrieved data efficiently.
