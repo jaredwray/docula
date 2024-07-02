@@ -38,6 +38,7 @@ export type DoculaDocument = {
 	order?: number;
 	section?: string;
 	keywords: string[];
+	content: string;
 	markdown: string;
 	generatedHtml: string;
 	documentPath: string;
@@ -382,6 +383,7 @@ export class DoculaBuilder {
 	public parseDocumentData(documentPath: string): DoculaDocument {
 		const documentContent = fs.readFileSync(documentPath, 'utf8');
 		const matterData = matter.default(documentContent);
+		const markdownContent = this.removeFrontmatter(documentContent);
 
 		const documentData: DoculaDocument = {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -396,12 +398,17 @@ export class DoculaBuilder {
 			section: matterData.data.section || undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			keywords: matterData.data.keywords || [],
-			markdown: documentContent,
-			generatedHtml: this._ecto.renderSync(documentContent, undefined, 'markdown'),
+			content: documentContent,
+			markdown: markdownContent,
+			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
 			documentPath,
 		};
 
 		return documentData;
+	}
+
+	private removeFrontmatter(markdown: string): string {
+		return markdown.replace(/^-{3}[\s\S]*?-{3}\s*/, '');
 	}
 
 	private copyDirectory(source: string, target: string): void {
