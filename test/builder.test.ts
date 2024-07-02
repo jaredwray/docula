@@ -327,4 +327,33 @@ describe('DoculaBuilder', () => {
 		expect(mergedSection.name).toBe('foo snizzle');
 		expect(mergedSection.order).toBe(1);
 	});
+	it('should get all the sections from the mega fixtures', () => {
+		const builder = new DoculaBuilder();
+		const documentsPath = 'test/fixtures/mega-page-site/docs';
+		const options = new DoculaOptions();
+		options.sections = [
+			{name: 'Caching', path: 'caching', order: 2},
+			{name: 'Compression', path: 'compression', order: 1},
+		];
+		const sections = builder.getSections(documentsPath, options);
+		expect(sections.length).toBe(3);
+		expect(sections[0].name).toBe('Compression');
+		expect(sections[1].name).toBe('Caching');
+		expect(sections[2].name).toBe('Storage Adapters');
+		expect(sections[2].order).toBe(undefined);
+	});
+	it('should get all the documents from the mega fixtures', () => {
+		const builder = new DoculaBuilder();
+		const doculaData: DoculaData = {
+			siteUrl: 'http://foo.com',
+			siteTitle: 'docula',
+			siteDescription: 'Beautiful Website for Your Projects',
+			sitePath: 'test/fixtures/mega-page-site',
+			templatePath: 'test/fixtures/template-example',
+			outputPath: 'test/temp-sitemap-test',
+		};
+		const documentsPath = 'test/fixtures/mega-page-site/docs';
+		const documents = builder.getDocuments(documentsPath, doculaData);
+		expect(documents.length).toBe(20);
+	});
 });

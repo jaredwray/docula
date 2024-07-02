@@ -86,6 +86,8 @@ export class DoculaBuilder {
 		doculaData.templates = await this.getTemplates(this.options);
 		// Get the documents
 		doculaData.documents = this.getDocuments(`${doculaData.sitePath}/docs`, doculaData);
+		// Get the sections
+		doculaData.sections = this.getSections(`${doculaData.sitePath}/docs`, this.options);
 
 		// Build the home page (index.html)
 		await this.buildIndexPage(doculaData);
@@ -117,6 +119,7 @@ export class DoculaBuilder {
 			);
 		}
 
+		// Copy over logo_horizontal
 		if (fs.existsSync(`${siteRelativePath}/logo_horizontal.png`)) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/logo_horizontal.png`,
@@ -337,28 +340,36 @@ export class DoculaBuilder {
 			}
 		}
 
+		// Sort the documents by order
+		documents.sort((a, b) => (a.order ?? documents.length) - (b.order ?? documents.length));
+
 		return documents;
 	}
 
 	public getSections(sitePath: string, doculaOptions: DoculaOptions): DoculaSection[] {
 		const sections = new Array<DoculaSection>();
-		const documentList = fs.readdirSync(sitePath);
-		if (documentList.length > 0) {
-			for (const document of documentList) {
-				const documentPath = `${sitePath}/${document}`;
-				const stats = fs.statSync(documentPath);
-				if (stats.isDirectory()) {
-					const section: DoculaSection = {
-						name: document.replaceAll('-', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()),
-						path: document,
+		if (fs.existsSync(sitePath)) {
+			const documentList = fs.readdirSync(sitePath);
+			if (documentList.length > 0) {
+				for (const document of documentList) {
+					const documentPath = `${sitePath}/${document}`;
+					const stats = fs.statSync(documentPath);
+					if (stats.isDirectory()) {
+						const section: DoculaSection = {
+							name: document.replaceAll('-', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()),
+							path: document,
 
-					};
+						};
 
-					this.mergeSectionWithOptions(section, doculaOptions);
+						this.mergeSectionWithOptions(section, doculaOptions);
 
-					sections.push(section);
+						sections.push(section);
+					}
 				}
 			}
+
+			// Sort the sections by order
+			sections.sort((a, b) => (a.order ?? sections.length) - (b.order ?? sections.length));
 		}
 
 		return sections;
