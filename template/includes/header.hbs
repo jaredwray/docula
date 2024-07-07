@@ -1,8 +1,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="/css/variables.css" />
-<link rel="stylesheet" href="/css/index.css" />
-<link rel="stylesheet" href="/css/home.css" />
+
+<link rel="stylesheet" href="/css/base.css" />
+{{#if hasDocuments}}
+  <link rel="stylesheet" href="/css/multipage.css" />
+{{else}}
+  <link rel="stylesheet" href="/css/landing.css" />
+{{/if}}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link

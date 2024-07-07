@@ -23,6 +23,7 @@ export type DoculaData = {
 export type DoculaTemplates = {
 	index: string;
 	releases: string;
+	docPage?: string;
 };
 
 export type DoculaSection = {
@@ -82,12 +83,15 @@ export class DoculaBuilder {
 		const githubData = await this.getGithubData(this.options.githubPath);
 		// Get data of the site
 		doculaData.github = githubData;
-		// Get the templates to use
-		doculaData.templates = await this.getTemplates(this.options);
 		// Get the documents
 		doculaData.documents = this.getDocuments(`${doculaData.sitePath}/docs`, doculaData);
 		// Get the sections
 		doculaData.sections = this.getSections(`${doculaData.sitePath}/docs`, this.options);
+
+		doculaData.hasDocuments = doculaData.documents?.length > 0;
+
+		// Get the templates to use
+		doculaData.templates = await this.getTemplates(this.options, doculaData.hasDocuments);
 
 		// Build the home page (index.html)
 		await this.buildIndexPage(doculaData);
@@ -178,14 +182,15 @@ export class DoculaBuilder {
 		return github.getData();
 	}
 
-	public async getTemplates(options: DoculaOptions): Promise<DoculaTemplates> {
+	public async getTemplates(options: DoculaOptions, hasDocuments: boolean): Promise<DoculaTemplates> {
 		const templates: DoculaTemplates = {
 			index: '',
 			releases: '',
 		};
 
 		if (fs.existsSync(options.templatePath)) {
-			const index = await this.getTemplateFile(options.templatePath, 'index');
+			const indexFile = hasDocuments ? 'index-multi' : 'index-single';
+			const index = await this.getTemplateFile(options.templatePath, indexFile);
 			if (index) {
 				templates.index = index;
 			}
@@ -196,6 +201,15 @@ export class DoculaBuilder {
 			);
 			if (releases) {
 				templates.releases = releases;
+			}
+
+			let docPage = hasDocuments ? await this.getTemplateFile(
+				options.templatePath,
+				'doc-page',
+			) : undefined;
+
+			if (docPage) {
+				templates.docPage = docPage;
 			}
 		} else {
 			throw new Error(`No template path found at ${options.templatePath}`);
@@ -261,11 +275,17 @@ export class DoculaBuilder {
 
 			const indexTemplate = `${data.templatePath}/${data.templates.index}`;
 
-			const htmlReadme = await this.buildReadmeSection(data);
+			let content = '';
+
+			if (data.hasDocuments) {
+				content = await this.buildMultiPageHome(data);
+			} else {
+				content = await this.buildReadmeSection(data);
+			}
 
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
-				{...data, content: htmlReadme},
+				{...data, content},
 				data.templatePath,
 			);
 			await fs.promises.writeFile(indexPath, indexContent, 'utf8');
@@ -305,6 +325,14 @@ export class DoculaBuilder {
 
 		return htmlReadme;
 	}
+
+
+	public async buildMultiPageHome(data: DoculaData): Promise<string> {
+		let content = '';
+
+		return content;
+	}
+
 
 	public getDocuments(sitePath: string, doculaData: DoculaData): DoculaDocument[] {
 		let documents = new Array<DoculaDocument>();

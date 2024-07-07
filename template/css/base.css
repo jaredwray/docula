@@ -1,50 +1,51 @@
-.header-logo {
-  margin-right: 30px;
+* {
+  margin: 0;
+  box-sizing: border-box;
 }
 
-.home-header {
-  position: sticky;
-  background-color: var(--home-background);
-  border-bottom: 1px solid var(--border);
+.hidden {
+  display: none;
 }
 
-.home-hero {
-  display: flex;
-  justify-content: center;
-  height: 20vh;
-  background-color: var(--home-background)
+.fixed {
+  position: fixed;
+  top: 0;
+  width: 100%;
 }
 
-.home-container {
-  max-width: 90%;
-  margin: 0 auto;
+body {
+  position: relative;
+  font-family: var(--font-family);
   color: var(--color-text);
+  font-size: 16px;
+  background-color: var(--background);
+  min-height: 100vh;
 }
 
-.home-container h1 {
-  font-weight: 500;
-  font-size: 28px;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
-.home-title {
-  text-align: center;
-  margin-bottom: 32px;
-  font-size: 30px;
-  background: linear-gradient(30deg, var(--color-primary) 40%, var(--color-secondary-dark) 70%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+button {
+  font-family: var(--font-family);
+  font-size: 14px;
 }
 
-.home-docs-button {
-  padding: 12px 24px;
-  border: 2px solid var(--color-secondary-dark);
-  border-radius: 8px;
-  color: var(--color-secondary-dark);
-  font-weight: 600;
+.bottom {
+  z-index: -12;
 }
 
+hr {
+  border-top: 0;
+  border-bottom: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+
+/* Home */
 .home-hero {
+  background-color: var(--home-background);
   text-align: center;
 }
 
@@ -53,16 +54,24 @@
   max-width: 200px;
 }
 
-.github-fork-ribbon {
-  position: fixed !important;
+.home-container {
+  max-width: 90%;
+  margin: 0 auto;
+  color: var(--color-text);
 }
 
-.github-fork-ribbon:before {
-  background-color: var(--color-primary) !important;
+.home-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 30px;
+  background: linear-gradient(30deg, var(--color-primary) 40%, var(--color-secondary-dark) 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 .content-container {
-  margin: 96px 0;
+  margin: 6rem 0;
 }
 
 .facepile-container {
@@ -99,7 +108,6 @@
   display: inline-block;
 }
 
-
 .facepile > a:hover {
   opacity: 1;
   position: relative;
@@ -110,7 +118,7 @@
   overflow: hidden;
   width: 100%;
   line-break: anywhere;
-  margin-top: 32px;
+  margin-top: 2rem;
   color: var(--color-text);
 }
 
@@ -140,7 +148,7 @@
   border: 2px solid var(--color-secondary);
   color: var(--color-secondary);
   width: fit-content;
-  margin-top: 32px;
+  margin-top: 2rem;
   display: block;
 }
 
@@ -151,30 +159,30 @@
 }
 
 .release-btn:hover span {
-  margin-left: 16px;
+  margin-left: 1rem;
 }
 
 .release-body p {
-  margin: 8px 0;
+  margin: 0.5rem 0;
 }
 
 .release-body pre {
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
 }
 
 .release-body h1 {
   font-size: 22px;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .release-body h2 {
   font-size: 18px;
   margin-top: 28px;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .release-body ul {
-  padding-left: 16px;
+  padding-left: 1rem;
 }
 
 .release-body ul > li {
@@ -185,8 +193,16 @@
   text-decoration: underline;
 }
 
+.github-fork-ribbon {
+  position: fixed !important;
+}
+
+.github-fork-ribbon:before {
+  background-color: var(--color-primary) !important;
+}
+
 footer {
-  height: 64px;
+  height: 4rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -199,86 +215,60 @@ footer img {
   margin-top: 4px;
 }
 
+.items-start {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+
 @media screen and (min-width: 640px) {
   .home-container {
     max-width: 82%;
   }
 }
 
-
 @media screen and (min-width: 768px) {
-  .home-hero {
-    height: 40vh;
-  }
-
-  .header-logo {
-    margin-right: 56px;
-  }
-
   .home-hero img {
     max-width: 340px;
   }
-
-  .content-container {
-    margin: 96px 0;
-  }
-
-  .versions-container {
-    margin: 72px 0;
-  }
-
   .release {
-    margin-bottom: 64px;
+    margin-bottom: 4rem;
+  }
+  .versions-container {
+    margin: 4.5rem 0;
+  }
+  .content-container {
+    margin: 6rem 0;
   }
 }
 
-
 @media screen and (min-width: 992px) {
-  .home-container {
-    max-width: 70%;
+  .hide-d {
+    display: none;
   }
-
-  .home-container h1 {
-    font-size: 32px;
-  }
-
-  .home-docs-button {
-    font-size: 24px;
-  }
-
-  .nav {
-    padding-right: 56px;
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .header-content {
-    height: 72px;
-  }
-
   .home-hero img {
     max-width: 600px;
   }
-
+  .home-container {
+    max-width: 70%;
+  }
   .home-title {
-    margin-bottom: 64px;
-    font-size: 48px;
+    margin-bottom: 4rem;
+    font-size: 3rem;
   }
-
   .content-container {
-    margin: 120px 0;
+    margin: 7.5rem 0;
   }
-
   .release-btn {
     margin-top: 0;
   }
-
   footer {
-    height: 76px;
+    height: 4.75rem;
   }
-
   footer img {
-    height: 28px;
+    height: 1.75rem;
     width: auto;
   }
 }
@@ -287,21 +277,17 @@ footer img {
   .home-container {
     max-width: 950px;
   }
-
   .content-container {
-    margin: 160px 0;
+    margin: 10rem 0;
   }
-
-  .versions-container {
-    margin: 120px 0;
-  }
-
   .facepile > a {
-    margin-left: -30px;
+    margin-left: -1.9rem;
   }
-
   .facepile img {
-    max-width: 70px;
-    max-height: 70px;
+    max-width: 4.4rem;
+    max-height: 4.4rem;
+  }
+  .versions-container {
+    margin: 7.5rem 0;
   }
 }

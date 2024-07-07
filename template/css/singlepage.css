@@ -1,0 +1,11 @@
+.home-hero {
+  display: flex;
+  justify-content: center;
+  height: 20vh;
+}
+
+@media screen and (min-width: 768px) {
+  .home-hero {
+    height: 40vh;
+  }
+}
