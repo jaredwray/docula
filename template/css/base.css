@@ -222,6 +222,135 @@ footer img {
   margin-bottom: 4px;
 }
 
+.content {
+  width: 100%;
+}
+
+.content h1 {
+  letter-spacing: -.5px;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 3rem;
+}
+
+.content h2 {
+  font-size: 20px;
+  line-height: 2rem;
+  padding-top: 68px;
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.content h3 {
+  font-size: 18px;
+  line-height: 1.5rem;
+  padding-top: 3rem;
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.content h4, .content h5, .content h6 {
+  padding-top: 30px;
+}
+
+.content h4, .content h5, .content h6 {
+  font-weight: 600;
+}
+
+.content p {
+  margin-top: 1rem;
+  line-height: 1.5rem;
+}
+
+
+.content > ul, .content > ol {
+  margin-top: 12px;
+  padding-left: 1rem;
+}
+
+.content > ul {
+  list-style: none;
+}
+
+.content > ul li, .content > ol li {
+  margin: 8px 0;
+}
+
+.content > ul li::before {
+  content: "\2022";
+  text-indent: -1rem;
+  display: inline-block;
+  color: var(--color-secondary);
+  float: left;
+}
+
+.content li {
+  line-height: 1.5;
+}
+
+.content pre {
+  margin-top: 22px;
+  margin-bottom: 2rem;
+}
+
+.content a > code , code {
+  padding: 0.25rem  0.5rem;
+  border-radius: 2px;
+  background-color: var(--code);
+}
+
+.content table {
+  margin: 1rem 0;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.content table thead {
+  color: var(--color-primary);
+}
+
+.content table, tr, td {
+  border: none;
+}
+
+.content table td {
+  max-width: 200px;
+  min-width: 120px;
+  white-space: initial;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.content tr {
+  border-bottom: 1px;
+  border-color: rgba(90,94,154,.1);
+  border-style: solid;
+}
+
+.content tr td, .content tr th {
+  vertical-align: middle;
+  text-align: left;
+}
+
+.content tr th, .content tr td{
+  padding: 1rem;
+}
+
+.content tr th:first-child, .content tr td:first-child {
+  padding-left: 0;
+}
+
+.content table tbody tr td:first-child {
+  width: 98px;
+}
+
+@media screen and (min-width: 576px) {
+  .content h2 {
+    font-size: 1.5rem;
+  }
+}
 
 @media screen and (min-width: 640px) {
   .home-container {
@@ -242,6 +371,9 @@ footer img {
   .content-container {
     margin: 6rem 0;
   }
+  .content h1 {
+    font-size: 30px;
+  }
 }
 
 @media screen and (min-width: 992px) {
@@ -260,6 +392,15 @@ footer img {
   }
   .content-container {
     margin: 7.5rem 0;
+  }
+  .content h1 {
+    font-size: 1.9rem;
+  }
+  .content > ul, .content > ol {
+    padding-left: 2rem;
+  }
+  .content table td {
+    max-width: 380px;
   }
   .release-btn {
     margin-top: 0;
@@ -289,5 +430,17 @@ footer img {
   }
   .versions-container {
     margin: 7.5rem 0;
+  }
+}
+
+@media screen and (min-width: 1458px) {
+  .content {
+    max-width: 750px;
+  }
+}
+
+@media screen and (min-width: 2400px) {
+  .content {
+    max-width: 880px;
   }
 }
