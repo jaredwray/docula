@@ -13,20 +13,18 @@
 }
 
 .home-docs-button {
-  padding: 12px 1.5rem;
+  padding: 0.75rem 1.5rem;
   border: 2px solid var(--color-secondary-dark);
   border-radius: 0.5rem;
   color: var(--color-secondary-dark);
   font-weight: 600;
 }
 
-
-
 /* Docs */
 .nav {
   padding-left: 1rem;
   padding-right: 1rem;
-  height: 72px;
+  height: 4.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -57,19 +55,15 @@
   cursor: pointer;
 }
 
-.menu-btn {
-  margin-right: 22px;
-}
-
 .menu-btn svg {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
 }
 
 .menu-btn span {
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 0.625rem;
   vertical-align: super;
   color: var(--color-text);
 }
@@ -100,7 +94,7 @@ details > summary {
 }
 
 .child-list {
-  padding-left: 18px;
+  padding-left: 1.125rem;
 }
 
 .child-list li {
@@ -110,7 +104,7 @@ details > summary {
 
 .sidebar {
   background: var(--sidebar-background);
-  z-index: 4;
+  z-index: 10000;
   width: 100%;
   top: 0;
   height: 100vh;
@@ -131,7 +125,7 @@ details > summary {
 .sidebar-content {
   padding: 3rem 2.5rem 1.5rem;
   overflow-y: auto;
-  font-size: 14px;
+  font-size: 0.875rem;
   height: 90vh;
 }
 
@@ -161,7 +155,7 @@ details > summary {
 .main-container {
   width: 100%;
   overflow-x: hidden;
-  padding-top: 100px;
+  padding-top: 2rem;
 }
 
 .main-content {
@@ -171,7 +165,7 @@ details > summary {
 
 .breadcrumb {
   line-height: 1rem;
-  font-size: 10px;
+  font-size: 0.625rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 600;
@@ -182,7 +176,7 @@ details > summary {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-top: 1px solid var(--border);
   justify-content: space-between;
   position: absolute;
@@ -192,7 +186,7 @@ details > summary {
 }
 
 .sidebar-footer a {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--sidebar-text);
 }
 
@@ -201,15 +195,15 @@ details > summary {
 }
 
 .on-page-container {
-  padding-top: 28px;
-  padding-bottom: 28px;
+  padding-top: 1.75rem;
+  padding-bottom: 1.75rem;
 }
 
 .on-page-container h5 {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   margin-bottom: 1rem;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 600;
   color: var(--color-secondary);
 }
@@ -219,7 +213,7 @@ details > summary {
   line-height: 1.5rem;
   padding-left: 0;
   width: 100%;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .on-page-container ol {
@@ -237,7 +231,7 @@ details > summary {
 .on-page-container ol > li > a {
   transition: all .2s ease-out;
   color: var(--color-secondary);
-  padding: 8px 0;
+  padding: 0.5rem 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -248,7 +242,7 @@ details > summary {
 }
 
 .on-page-container ol > li:hover > a {
-  transform: translateX(4px);
+  transform: translateX(0.25rem);
 }
 
 .on-page-main ol > li > a::after {
@@ -256,16 +250,16 @@ details > summary {
   right: 0;
   content: '';
   display: inline-block;
-  width: 4px;
-  height: 4px;
+  width: 0.25rem;
+  height: 0.25rem;
   border-right: 1px solid var(--color-secondary);
   border-bottom: 1px solid var(--color-secondary);
   transform: rotate(-45deg);
 }
 
 .on-page-list {
-  margin-left: 8px;
-  font-size: 12px;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
 }
 
 @media screen and (min-width: 576px) {
@@ -275,7 +269,7 @@ details > summary {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: var(--color-secondary);
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 600;
   }
 
@@ -284,8 +278,8 @@ details > summary {
     content: '';
     background-image: url("data:image/svg+xml,%3Csvg class='block h-full' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M11 22A11 11 0 1 1 22 11 11 11 0 0 1 11 22ZM11 2a9 9 0 1 0 9 9A9 9 0 0 0 11 2Z'%3E%3C/path%3E%3Cpath d='M15 14a.93.93 0 0 1-.45-.11l-4-2A1 1 0 0 1 10 11V5a1 1 0 0 1 2 0v5.38l3.45 1.73a1 1 0 0 1 .44 1.34A1 1 0 0 1 15 14Z'%3E%3C/path%3E%3C/svg%3E");
     left: -1.5rem;
-    width: 12px;
-    height: 12px;
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .nav {
@@ -311,14 +305,14 @@ details > summary {
   }
 
   .main-content {
-    padding: 0 56px 1.5rem;
+    padding: 0 3.5rem 1.5rem;
   }
   .main-container {
-    padding-top: 120px;
+    padding-top: 7.5rem;
   }
   .nav {
-    padding-left: 56px;
-    padding-right: 56px;
+    padding-left: 3.5rem;
+    padding-right: 3.5rem;
   }
 }
 
@@ -330,7 +324,7 @@ details > summary {
     padding: 7.5rem 0;
   }
   .home-hero img {
-    max-width: 450px;
+    max-width: 28rem;
   }
   .home-container h1 {
     font-size: 2rem;
@@ -339,7 +333,9 @@ details > summary {
     font-size: 1.5rem;
   }
 
-
+  .header {
+    display: none;
+  }
   .nav {
     width: 100%;
     justify-content: space-between;
@@ -349,7 +345,7 @@ details > summary {
     z-index: 30;
   }
   .sidebar {
-    width: 324px;
+    width: 20.25rem;
     display: flex;
     height: 100%;
     z-index: 20;
@@ -369,25 +365,25 @@ details > summary {
     padding-top: 0;
   }
   .header-link {
-    margin-top: 20px;
+    margin-top: 1.25rem;
   }
   .header-link img {
-    width: 180px;
+    width: 11.25rem;
   }
   .layout {
     display: grid;
-    grid-template-columns: 324px 1fr;
+    grid-template-columns: 20.25rem 1fr;
     grid-template-rows: 1fr;
     grid-gap: 0;
   }
   aside {
     grid-area: 1 / 1 / 4 / 2;
     position: fixed;
-    top: 200px;
+    top: 12.5rem;
     left: 0;
     z-index: 40;
     height: 100%;
-    width: 324px;
+    width: 20.25rem;
   }
   .main-container {
     grid-area: 1 / 2 / 4 / 3;
@@ -397,7 +393,7 @@ details > summary {
     top: 0;
     left: 0;
     z-index: 80;
-    width: 324px;
+    width: 20.25rem;
     background-color: var(--sidebar-background);
     display: flex;
     align-items: center;
@@ -430,11 +426,11 @@ details > summary {
 
 @media screen and (min-width: 1458px) {
   .on-page--desktop ol {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .on-page--desktop ol li a {
-    padding: 4px 0;
+    padding: 0.25rem 0;
   }
   .on-page--desktop {
     width: 100%;
@@ -445,27 +441,27 @@ details > summary {
   }
   .on-page-fixed {
     position: fixed;
-    max-width: 200px
+    max-width: 12.5rem;
   }
   .main-content {
-    padding: 0 56px 24px;
+    padding: 0 3.5rem 1.5rem;
   }
 }
 
 @media screen and (min-width: 1600px) {
   .layout {
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 23.75rem 1fr;
   }
   .sidebar, aside, .sidebar-logo  {
-    width: 380px;
+    width: 23.75rem;
   }
   .sidebar-logo, .sidebar-content, .sidebar-footer {
-    padding-left: 54px;
-    padding-right: 54px;
+    padding-left: 3.25rem;
+    padding-right: 3.25rem;
   }
   .main-content {
-    padding-left: 72px;
-    padding-right: 72px;
+    padding-left: 4.5rem;
+    padding-right: 4.5rem;
   }
   .on-page--desktop {
     justify-content: center;
@@ -474,27 +470,27 @@ details > summary {
 
 @media screen and (min-width: 1800px) {
   .layout {
-    grid-template-columns: 460px 1fr;
+    grid-template-columns: 28.75rem 1fr;
   }
   .sidebar, aside, .sidebar-logo  {
-    width: 460px;
+    width: 28.75rem;
   }
   .sidebar-logo, .sidebar-content, .sidebar-footer {
-    padding-left: 88px;
-    padding-right: 88px;
+    padding-left: 5.5rem;
+    padding-right: 5.5rem;
   }
 }
 
 
 @media screen and (min-width: 2400px) {
   .layout {
-    grid-template-columns: 600px 1fr;
+    grid-template-columns: 37.5rem 1fr;
   }
   .sidebar, aside, .sidebar-logo  {
-    width: 600px;
+    width: 37.5rem;
   }
   .sidebar-logo, .sidebar-content, .sidebar-footer {
-    padding-left: 120px;
-    padding-right: 120px;
+    padding-left: 7.5rem;
+    padding-right: 7.5rem;
   }
 }
