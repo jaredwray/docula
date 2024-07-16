@@ -42,5 +42,19 @@
       closeSidebar();
     }
   }
-  document.addEventListener('DOMContentLoaded', handleMobileSidebar, false)
+
+  document.addEventListener('DOMContentLoaded', handleMobileSidebar, false);
+
+  const sidebarElements = document.querySelectorAll('.nav-list li a');
+  sidebarElements.forEach((element) => {
+    if (element.href === window.location.href) {
+      element.classList.add('active');
+
+      if (element.parentElement.parentElement.parentElement.tagName === 'DETAILS') {
+        element.parentElement.parentElement.parentElement.open = true;
+        element.parentElement.parentElement.parentElement.classList.add('active');
+      }
+    }
+  });
+
 </script>

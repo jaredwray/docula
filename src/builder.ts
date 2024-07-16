@@ -18,6 +18,7 @@ export type DoculaData = {
 	hasDocuments?: boolean;
 	sections?: DoculaSection[];
 	documents?: DoculaDocument[];
+	sidebarItems?: DoculaSection[];
 };
 
 export type DoculaTemplates = {
@@ -30,6 +31,7 @@ export type DoculaSection = {
 	name: string;
 	order?: number;
 	path: string;
+	children?: DoculaSection[];
 };
 
 export type DoculaDocument = {
@@ -43,6 +45,8 @@ export type DoculaDocument = {
 	markdown: string;
 	generatedHtml: string;
 	documentPath: string;
+	urlPath: string;
+	isRoot: boolean;
 };
 
 export class DoculaBuilder {
@@ -104,6 +108,10 @@ export class DoculaBuilder {
 
 		// Build the robots.txt (/robots.txt)
 		await this.buildRobotsPage(this.options);
+
+		if(doculaData.hasDocuments){
+			await this.buildDocsPages(doculaData);
+		}
 
 		const siteRelativePath = this.options.sitePath;
 
@@ -205,7 +213,7 @@ export class DoculaBuilder {
 
 			let docPage = hasDocuments ? await this.getTemplateFile(
 				options.templatePath,
-				'doc-page',
+				'docs',
 			) : undefined;
 
 			if (docPage) {
@@ -277,9 +285,7 @@ export class DoculaBuilder {
 
 			let content = '';
 
-			if (data.hasDocuments) {
-				content = await this.buildMultiPageHome(data);
-			} else {
+			if (!data.hasDocuments) {
 				content = await this.buildReadmeSection(data);
 			}
 
@@ -326,13 +332,51 @@ export class DoculaBuilder {
 		return htmlReadme;
 	}
 
+	public async buildDocsPages(data: DoculaData): Promise<void> {
+		if(data.templates && data.documents?.length){
+			const docsTemplate = `${data.templatePath}/${data.templates.docPage}`;
+			await fs.promises.mkdir(`${data.outputPath}/docs`, {recursive: true});
+			data.sidebarItems = this.generateSidebarItems(data);
 
-	public async buildMultiPageHome(data: DoculaData): Promise<string> {
-		let content = '';
-
-		return content;
+			for (const document of data.documents) {
+				const folder = document.urlPath.split('/').slice(0, -1).join('/');
+				await fs.promises.mkdir(`${data.outputPath}/${folder}`, {recursive: true});
+				const slug = `${data.outputPath}${document.urlPath}`;
+				const docContent = await this._ecto.renderFromFile(
+					docsTemplate,
+					{...data, ...document},
+					data.templatePath,
+				);
+				await fs.promises.writeFile(slug, docContent, 'utf8');
+			}
+		} else {
+			throw new Error('No templates found');
+		}
 	}
 
+
+	public generateSidebarItems(data: DoculaData): DoculaSection[] {
+		const sidebarItems = [...(data.sections ?? [])];
+
+		for (const document of (data.documents ?? [])) {
+			if(document.isRoot){
+				sidebarItems.unshift({
+					path: document.urlPath,
+					name: document.navTitle
+				});
+			} else {
+				const sectionIndex = sidebarItems.findIndex(section => section.path === document.section);
+				if(!sidebarItems[sectionIndex].children) {
+					sidebarItems[sectionIndex].children = [];
+				}
+				sidebarItems[sectionIndex].children.push({
+					path: document.urlPath,
+					name: document.navTitle
+				});
+			}
+		}
+		return sidebarItems;
+	}
 
 	public getDocuments(sitePath: string, doculaData: DoculaData): DoculaDocument[] {
 		let documents = new Array<DoculaDocument>();
@@ -423,6 +467,9 @@ export class DoculaBuilder {
 		const documentContent = fs.readFileSync(documentPath, 'utf8');
 		const matterData = matter.default(documentContent);
 		const markdownContent = this.removeFrontmatter(documentContent);
+		const docsFolderIndex = documentPath.lastIndexOf('/docs/');
+		const urlPath = documentPath.slice(docsFolderIndex).replace('.md', '.html');
+		const isRoot = urlPath.split('/').length === 3;
 
 		const documentData: DoculaDocument = {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -441,6 +488,8 @@ export class DoculaBuilder {
 			markdown: markdownContent,
 			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
 			documentPath,
+			urlPath,
+			isRoot
 		};
 
 		return documentData;
@@ -468,6 +517,7 @@ export class DoculaBuilder {
 				fs.mkdirSync(targetPath, {recursive: true});
 				this.copyDirectory(sourcePath, targetPath);
 			} else {
+				fs.mkdirSync(target, {recursive: true});
 				fs.copyFileSync(sourcePath, targetPath);
 			}
 		}
