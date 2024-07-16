@@ -134,7 +134,7 @@ describe('DoculaBuilder', () => {
 		const builder = new DoculaBuilder();
 		const options = new DoculaOptions();
 		options.templatePath = 'test/fixtures/template-example/';
-		const templateData = await builder.getTemplates(options);
+		const templateData = await builder.getTemplates(options, false);
 		expect(templateData.releases).toBe('releases.hbs');
 	});
 	it('should throw error when template path doesnt exist', async () => {
@@ -142,7 +142,7 @@ describe('DoculaBuilder', () => {
 		const options = new DoculaOptions();
 		options.templatePath = 'test/fixtures/template-example1/';
 		try {
-			await builder.getTemplates(options);
+			await builder.getTemplates(options, false);
 		} catch (error: any) {
 			expect(error.message).toContain('No template path found');
 		}
@@ -307,7 +307,7 @@ describe('DoculaBuilder', () => {
 	it('should get top level documents from mega fixtures', () => {
 		const builder = new DoculaBuilder();
 		const documentsPath = 'test/fixtures/mega-page-site/docs';
-		const documents = builder.getDocumentinDirectory(documentsPath);
+		const documents = builder.getDocumentInDirectory(documentsPath);
 		expect(documents.length).toBe(2);
 	});
 	it('should merge sections based on what you find in options', () => {

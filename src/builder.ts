@@ -81,6 +81,7 @@ export class DoculaBuilder {
 			templatePath: this.options.templatePath,
 			outputPath: this.options.outputPath,
 			githubPath: this.options.githubPath,
+			sections: this.options.sections,
 		};
 
 		// Get data from github
@@ -354,15 +355,15 @@ export class DoculaBuilder {
 		}
 	}
 
-
 	public generateSidebarItems(data: DoculaData): DoculaSection[] {
-		const sidebarItems = [...(data.sections ?? [])];
+		let sidebarItems = [...(data.sections ?? [])];
 
 		for (const document of (data.documents ?? [])) {
 			if(document.isRoot){
 				sidebarItems.unshift({
 					path: document.urlPath,
-					name: document.navTitle
+					name: document.navTitle,
+					order: document.order,
 				});
 			} else {
 				const sectionIndex = sidebarItems.findIndex(section => section.path === document.section);
@@ -371,10 +372,23 @@ export class DoculaBuilder {
 				}
 				sidebarItems[sectionIndex].children.push({
 					path: document.urlPath,
-					name: document.navTitle
+					name: document.navTitle,
+					order: document.order,
 				});
 			}
 		}
+
+		// Sort the sidebarItems children
+		sidebarItems = sidebarItems.map(section => {
+			if(section.children){
+				section.children.sort((a, b) => (a.order ?? section.children!.length) - (b.order ?? section.children!.length));
+			}
+			return section;
+		});
+
+		// Sort the sidebarItems
+		sidebarItems.sort((a, b) => (a.order ?? sidebarItems.length) - (b.order ?? sidebarItems.length));
+
 		return sidebarItems;
 	}
 
@@ -382,7 +396,7 @@ export class DoculaBuilder {
 		let documents = new Array<DoculaDocument>();
 		if (fs.existsSync(sitePath)) {
 			// Get top level documents
-			documents = this.getDocumentinDirectory(sitePath);
+			documents = this.getDocumentInDirectory(sitePath);
 
 			// Get all sections and parse them
 			doculaData.sections = this.getSections(sitePath, this.options);
@@ -390,7 +404,7 @@ export class DoculaBuilder {
 			// Get all documents in each section
 			for (const section of doculaData.sections) {
 				const sectionPath = `${sitePath}/${section.path}`;
-				const sectionDocuments = this.getDocumentinDirectory(sectionPath);
+				const sectionDocuments = this.getDocumentInDirectory(sectionPath);
 				documents = [...documents, ...sectionDocuments];
 			}
 		}
@@ -398,7 +412,7 @@ export class DoculaBuilder {
 		return documents;
 	}
 
-	public getDocumentinDirectory(sitePath: string): DoculaDocument[] {
+	public getDocumentInDirectory(sitePath: string): DoculaDocument[] {
 		const documents = new Array<DoculaDocument>();
 		const documentList = fs.readdirSync(sitePath);
 		if (documentList.length > 0) {
@@ -459,7 +473,6 @@ export class DoculaBuilder {
 				section.path = sectionOptions.path;
 			}
 		}
-
 		return section;
 	}
 
@@ -479,7 +492,7 @@ export class DoculaBuilder {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			description: matterData.data.description || '',
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			order: matterData.data.rank || undefined,
+			order: matterData.data.order || undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			section: matterData.data.section || undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -52,6 +52,10 @@ export class DoculaOptions {
 			this.siteUrl = options.siteUrl as string;
 		}
 
+		if(options.sections) {
+			this.sections = options.sections as DoculaSection[];
+		}
+
 		if (options.port) {
 			this.port = options.port as number;
 		}
