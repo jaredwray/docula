@@ -4,7 +4,9 @@ import {
 	afterEach, beforeEach, expect, it, describe, vi,
 } from 'vitest';
 import axios from 'axios';
-import {DoculaBuilder, type DoculaSection, type DoculaData} from '../src/builder.js';
+import {
+	DoculaBuilder, type DoculaSection, type DoculaData, type DoculaDocument,
+} from '../src/builder.js';
 import {DoculaOptions} from '../src/options.js';
 import githubMockContributors from './fixtures/data-mocks/github-contributors.json';
 import githubMockReleases from './fixtures/data-mocks/github-releases.json';
@@ -409,6 +411,46 @@ describe('DoculaBuilder', () => {
 		}];
 		const sidebarItemsNoOrder = builder.generateSidebarItems(data);
 		expect(sidebarItemsNoOrder[0].children).toStrictEqual([barChildrenNoOrder, fooChildreNoOrder]);
+	});
+	it('generateSidebarItems should sort sidebarItems children with documents', async () => {
+		const builder = new DoculaBuilder();
+		const fooChildren = {name: 'foo', path: 'foo', order: 1};
+		const barChildren = {name: 'bar', path: 'bar', order: 2};
+		const documentChildren = {name: 'Document', path: 'document', order: undefined};
+		const documents: DoculaDocument[] = [{
+			title: 'Document title',
+			navTitle: 'Document',
+			description: 'Document description',
+			keywords: [],
+			content: '',
+			markdown: '',
+			generatedHtml: '',
+			documentPath: '',
+			urlPath: 'document',
+			isRoot: false,
+			section: 'foo',
+		}];
+
+		const data = doculaData;
+		data.templates = {
+			index: 'index.hbs',
+			releases: 'releases.hbs',
+		};
+		data.sitePath = 'site';
+		data.templatePath = 'test/fixtures/template-example';
+		data.outputPath = 'test/temp-index-test';
+
+		data.sections = [{
+			name: 'foo', path: 'foo', order: 2, children: [barChildren, fooChildren],
+		}];
+		data.documents = documents;
+
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
+		const sidebarItems = builder.generateSidebarItems(data);
+		expect(sidebarItems[0].children).toStrictEqual([fooChildren, barChildren, documentChildren]);
 	});
 	it('should throw error when template doesnt exist', async () => {
 		const builder = new DoculaBuilder();
