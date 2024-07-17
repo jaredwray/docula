@@ -52,7 +52,7 @@ export class DoculaOptions {
 			this.siteUrl = options.siteUrl as string;
 		}
 
-		if(options.sections) {
+		if (options.sections) {
 			this.sections = options.sections as DoculaSection[];
 		}
 

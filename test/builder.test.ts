@@ -122,8 +122,8 @@ describe('DoculaBuilder', () => {
 	});
 	it('should get the file without extension', async () => {
 		const builder = new DoculaBuilder();
-		const file = await builder.getTemplateFile('test/fixtures/template-example/', 'index');
-		expect(file).toBe('index.hbs');
+		const file = await builder.getTemplateFile('test/fixtures/template-example/', 'index-single');
+		expect(file).toBe('index-single.hbs');
 	});
 	it('should not get the file without extension', async () => {
 		const builder = new DoculaBuilder();
@@ -205,11 +205,11 @@ describe('DoculaBuilder', () => {
 			}
 		}
 	});
-	it('should build the index.html (/index.html)', async () => {
+	it('should build the index-single.html (/index-single.html)', async () => {
 		const builder = new DoculaBuilder();
 		const data = doculaData;
 		data.templates = {
-			index: 'index.hbs',
+			index: 'index-single.hbs',
 			releases: 'releases.hbs',
 		};
 		data.sitePath = 'site';
@@ -355,5 +355,78 @@ describe('DoculaBuilder', () => {
 		const documentsPath = 'test/fixtures/mega-page-site/docs';
 		const documents = builder.getDocuments(documentsPath, doculaData);
 		expect(documents.length).toBe(20);
+	});
+	it('generateSidebarItems should return an empty array if sections and documents does not exist', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+		data.templates = {
+			index: 'index.hbs',
+			releases: 'releases.hbs',
+		};
+		data.sitePath = 'site';
+		data.templatePath = 'test/fixtures/template-example';
+		data.outputPath = 'test/temp-index-test';
+
+		data.sections = undefined;
+		data.documents = undefined;
+
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
+		const sidebarItems = builder.generateSidebarItems(data);
+		expect(sidebarItems).toStrictEqual([]);
+	});
+	it('generateSidebarItems should sort sidebarItems children', async () => {
+		const builder = new DoculaBuilder();
+		const fooChildren = {name: 'foo', path: 'foo', order: 1};
+		const barChildren = {name: 'bar', path: 'bar', order: 2};
+		const fooChildreNoOrder = {name: 'foo', path: 'foo'};
+		const barChildrenNoOrder = {name: 'bar', path: 'bar'};
+
+		const data = doculaData;
+		data.templates = {
+			index: 'index.hbs',
+			releases: 'releases.hbs',
+		};
+		data.sitePath = 'site';
+		data.templatePath = 'test/fixtures/template-example';
+		data.outputPath = 'test/temp-index-test';
+
+		data.sections = [{
+			name: 'foo', path: 'foo', order: 2, children: [barChildren, fooChildren],
+		}];
+
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
+		const sidebarItems = builder.generateSidebarItems(data);
+		expect(sidebarItems[0].children).toStrictEqual([fooChildren, barChildren]);
+
+		data.sections = [{
+			name: 'foo', path: 'foo', children: [barChildrenNoOrder, fooChildreNoOrder],
+		}];
+		const sidebarItemsNoOrder = builder.generateSidebarItems(data);
+		expect(sidebarItemsNoOrder[0].children).toStrictEqual([barChildrenNoOrder, fooChildreNoOrder]);
+	});
+	it('should throw error when template doesnt exist', async () => {
+		const builder = new DoculaBuilder();
+		const data = doculaData;
+		data.templates = undefined;
+		data.sitePath = 'site';
+		data.templatePath = 'test/fixtures/no-template-example';
+		data.outputPath = 'test/temp-index-test';
+
+		if (fs.existsSync(data.outputPath)) {
+			await fs.promises.rmdir(data.outputPath, {recursive: true});
+		}
+
+		try {
+			await builder.buildDocsPages(data);
+		} catch (error: any) {
+			console.log(error);
+			expect(error.message).toBe('No templates found');
+		}
 	});
 });

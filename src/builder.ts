@@ -110,7 +110,7 @@ export class DoculaBuilder {
 		// Build the robots.txt (/robots.txt)
 		await this.buildRobotsPage(this.options);
 
-		if(doculaData.hasDocuments){
+		if (doculaData.hasDocuments) {
 			await this.buildDocsPages(doculaData);
 		}
 
@@ -212,13 +212,13 @@ export class DoculaBuilder {
 				templates.releases = releases;
 			}
 
-			let docPage = hasDocuments ? await this.getTemplateFile(
+			const documentPage = hasDocuments ? await this.getTemplateFile(
 				options.templatePath,
 				'docs',
 			) : undefined;
 
-			if (docPage) {
-				templates.docPage = docPage;
+			if (documentPage) {
+				templates.docPage = documentPage;
 			}
 		} else {
 			throw new Error(`No template path found at ${options.templatePath}`);
@@ -334,22 +334,23 @@ export class DoculaBuilder {
 	}
 
 	public async buildDocsPages(data: DoculaData): Promise<void> {
-		if(data.templates && data.documents?.length){
-			const docsTemplate = `${data.templatePath}/${data.templates.docPage}`;
+		if (data.templates && data.documents?.length) {
+			const documentsTemplate = `${data.templatePath}/${data.templates.docPage}`;
 			await fs.promises.mkdir(`${data.outputPath}/docs`, {recursive: true});
 			data.sidebarItems = this.generateSidebarItems(data);
 
-			for (const document of data.documents) {
+			const promises = data.documents.map(async document => {
 				const folder = document.urlPath.split('/').slice(0, -1).join('/');
 				await fs.promises.mkdir(`${data.outputPath}/${folder}`, {recursive: true});
 				const slug = `${data.outputPath}${document.urlPath}`;
-				const docContent = await this._ecto.renderFromFile(
-					docsTemplate,
+				const documentContent = await this._ecto.renderFromFile(
+					documentsTemplate,
 					{...data, ...document},
 					data.templatePath,
 				);
-				await fs.promises.writeFile(slug, docContent, 'utf8');
-			}
+				return fs.promises.writeFile(slug, documentContent, 'utf8');
+			});
+			await Promise.all(promises);
 		} else {
 			throw new Error('No templates found');
 		}
@@ -359,7 +360,7 @@ export class DoculaBuilder {
 		let sidebarItems = [...(data.sections ?? [])];
 
 		for (const document of (data.documents ?? [])) {
-			if(document.isRoot){
+			if (document.isRoot) {
 				sidebarItems.unshift({
 					path: document.urlPath,
 					name: document.navTitle,
@@ -367,9 +368,8 @@ export class DoculaBuilder {
 				});
 			} else {
 				const sectionIndex = sidebarItems.findIndex(section => section.path === document.section);
-				if(!sidebarItems[sectionIndex].children) {
-					sidebarItems[sectionIndex].children = [];
-				}
+				sidebarItems[sectionIndex].children ??= [];
+
 				sidebarItems[sectionIndex].children.push({
 					path: document.urlPath,
 					name: document.navTitle,
@@ -380,9 +380,10 @@ export class DoculaBuilder {
 
 		// Sort the sidebarItems children
 		sidebarItems = sidebarItems.map(section => {
-			if(section.children){
+			if (section.children) {
 				section.children.sort((a, b) => (a.order ?? section.children!.length) - (b.order ?? section.children!.length));
 			}
+
 			return section;
 		});
 
@@ -473,6 +474,7 @@ export class DoculaBuilder {
 				section.path = sectionOptions.path;
 			}
 		}
+
 		return section;
 	}
 
@@ -480,8 +482,8 @@ export class DoculaBuilder {
 		const documentContent = fs.readFileSync(documentPath, 'utf8');
 		const matterData = matter.default(documentContent);
 		const markdownContent = this.removeFrontmatter(documentContent);
-		const docsFolderIndex = documentPath.lastIndexOf('/docs/');
-		const urlPath = documentPath.slice(docsFolderIndex).replace('.md', '.html');
+		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
+		const urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
 		const isRoot = urlPath.split('/').length === 3;
 
 		const documentData: DoculaDocument = {
@@ -502,7 +504,7 @@ export class DoculaBuilder {
 			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
 			documentPath,
 			urlPath,
-			isRoot
+			isRoot,
 		};
 
 		return documentData;

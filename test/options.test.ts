@@ -27,6 +27,7 @@ describe('DoculaOptions', () => {
 				siteDescription: 'Custom Description',
 				siteUrl: 'https://custom-url.com',
 				singlePage: false,
+				sections: [{name: 'Custom Section', path: 'custom-section'}],
 			});
 			expect(options.templatePath).toContain('/custom-template');
 			expect(options.outputPath).toContain('/custom-dist');
@@ -36,6 +37,7 @@ describe('DoculaOptions', () => {
 			expect(options.siteDescription).toEqual('Custom Description');
 			expect(options.siteUrl).toEqual('https://custom-url.com');
 			expect(options.singlePage).toEqual(false);
+			expect(options.sections).toEqual([{name: 'Custom Section', path: 'custom-section'}]);
 		});
 	});
 

@@ -6,11 +6,14 @@
   </head>
 
   <body>
-    {{> landing/hero }}
     <a class="github-fork-ribbon" href="https://github.com/{{ githubPath }}" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
-    {{> landing/content }}
+    <main class="home">
+      {{> multipage/hero }}
+      {{> multipage/home }}
+    </main>
     {{> footer}}
 
     {{> scripts }}
+    {{> multipage/scripts }}
   </body>
 </html>
