@@ -53,18 +53,19 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.14.11",
     "@types/update-notifier": "^6.0.8",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/coverage-v8": "^2.0.3",
     "rimraf": "^5.0.7",
     "typescript": "^5.5.3",
-    "vitest": "^1.6.0",
+    "vitest": "^2.0.3",
     "webpack": "^5.93.0",
     "xo": "^0.59.0"
   },
   "xo": {
     "ignores": [
       "docula.config.*",
-      "vitest.config.mjs",
-      "bin/docula.js"
+      "vitest.config.*",
+      "bin/docula.js",
+      "docula.d.ts"
     ],
     "rules": {
       "n/file-extension-in-import": "off"
