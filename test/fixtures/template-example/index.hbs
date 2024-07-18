@@ -4,16 +4,24 @@
     {{> header }}
     <title>{{ siteTitle }}</title>
   </head>
-
   <body>
     <a class="github-fork-ribbon" href="https://github.com/{{ githubPath }}" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
-    <main class="home">
-      {{> multipage/hero }}
-      {{> multipage/home }}
-    </main>
-    {{> footer}}
 
+    {{#if content}}
+      {{> singlepage/hero }}
+      {{> singlepage/content }}
+    {{else}}
+      <main class="home">
+        {{> multipage/hero }}
+        {{> multipage/home }}
+      </main>
+    {{/if}}
+
+    {{> footer}}
     {{> scripts }}
-    {{> multipage/scripts }}
+
+    {{#unless content}}
+      {{> multipage/scripts }}
+    {{/unless}}
   </body>
 </html>

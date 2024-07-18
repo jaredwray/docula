@@ -124,8 +124,8 @@ describe('DoculaBuilder', () => {
 	});
 	it('should get the file without extension', async () => {
 		const builder = new DoculaBuilder();
-		const file = await builder.getTemplateFile('test/fixtures/template-example/', 'index-single');
-		expect(file).toBe('index-single.hbs');
+		const file = await builder.getTemplateFile('test/fixtures/template-example/', 'index');
+		expect(file).toBe('index.hbs');
 	});
 	it('should not get the file without extension', async () => {
 		const builder = new DoculaBuilder();
@@ -207,11 +207,11 @@ describe('DoculaBuilder', () => {
 			}
 		}
 	});
-	it('should build the index-single.html (/index-single.html)', async () => {
+	it('should build the index.html (/index.html)', async () => {
 		const builder = new DoculaBuilder();
 		const data = doculaData;
 		data.templates = {
-			index: 'index-single.hbs',
+			index: 'index.hbs',
 			releases: 'releases.hbs',
 		};
 		data.sitePath = 'site';

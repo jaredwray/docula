@@ -198,8 +198,7 @@ export class DoculaBuilder {
 		};
 
 		if (fs.existsSync(options.templatePath)) {
-			const indexFile = hasDocuments ? 'index-multi' : 'index-single';
-			const index = await this.getTemplateFile(options.templatePath, indexFile);
+			const index = await this.getTemplateFile(options.templatePath, 'index');
 			if (index) {
 				templates.index = index;
 			}
@@ -284,7 +283,7 @@ export class DoculaBuilder {
 
 			const indexTemplate = `${data.templatePath}/${data.templates.index}`;
 
-			let content = '';
+			let content;
 
 			if (!data.hasDocuments) {
 				content = await this.buildReadmeSection(data);
