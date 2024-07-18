@@ -58,14 +58,17 @@
     "typescript": "^5.5.3",
     "vitest": "^1.6.0",
     "webpack": "^5.92.1",
-    "xo": "^0.58.0"
+    "xo": "^0.59.0"
   },
   "xo": {
     "ignores": [
       "docula.config.*",
       "vitest.config.mjs",
       "bin/docula.js"
-    ]
+    ],
+    "rules": {
+      "n/file-extension-in-import": "off"
+    }
   },
   "files": [
     "dist",
