@@ -13,5 +13,5 @@ module.exports.options = {
 };
 
 module.exports.onPrepare = async (config) => {
-	console.log('onPrepare');
+	console.info('onPrepare');
 }
