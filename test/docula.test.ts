@@ -297,6 +297,28 @@ describe('docula execute', () => {
 
 		console.log = consoleLog;
 	});
+	it('should run onPrepare method if exists', async () => {
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = 'test/fixtures/single-page-site-onprepare';
+		buildOptions.outputPath = 'test/fixtures/single-page-site-onprepare/dist';
+		buildOptions.templatePath = 'test/fixtures/template-example/';
+
+		const consoleLog = console.log;
+		let consoleMessage = '';
+		console.info = message => {
+			consoleMessage = message as string;
+		};
+
+		const docula = new Docula(buildOptions);
+
+		process.argv = ['node', 'docula'];
+		await docula.execute(process);
+
+		expect(consoleMessage).toContain('onPrepare');
+
+		await fs.promises.rm(buildOptions.outputPath, {recursive: true});
+		console.info = consoleLog;
+	});
 });
 
 describe('docula config file', () => {
@@ -335,7 +357,7 @@ describe('docula config file', () => {
 		expect(docula.configFileModule.onPrepare).toBeDefined();
 		const consoleLog = console.log;
 		let consoleMessage = '';
-		console.log = message => {
+		console.info = message => {
 			if (typeof message === 'string') {
 				consoleMessage = message;
 			}
@@ -344,7 +366,7 @@ describe('docula config file', () => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		await docula.configFileModule.onPrepare();
 		expect(consoleMessage).toContain('onPrepare');
-		console.log = consoleLog;
+		console.info = consoleLog;
 	});
 	it('should throw error onPrepare', async () => {
 		const docula = new Docula(defaultOptions);

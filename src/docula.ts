@@ -85,7 +85,6 @@ export default class Docula {
 
 		switch (consoleProcess.command) {
 			case 'init': {
-				const isTypescript = fs.existsSync('./tsconfig.json') ?? false;
 				this.generateInit(this.options.sitePath);
 				break;
 			}

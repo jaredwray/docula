@@ -9,7 +9,8 @@
     "skipLibCheck": true, // Skip type checking of declaration files
     "outDir": "./dist", // Output directory for compiled files
     "declaration": true, // Generates corresponding '.d.ts' file.
-    "sourceMap": true // Generates corresponding '.map' file for debugging
+    "sourceMap": true, // Generates corresponding '.map' file for debugging
+    "resolveJsonModule": true // Enable importing JSON files as modules
   },
   "include": ["src/**/*"], // Specify which files to include in compilation
   "exclude": ["node_modules", "dist"] // Exclude directories from compilation
