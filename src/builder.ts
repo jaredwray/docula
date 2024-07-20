@@ -85,9 +85,7 @@ export class DoculaBuilder {
 		};
 
 		// Get data from github
-		const githubData = await this.getGithubData(this.options.githubPath);
-		// Get data of the site
-		doculaData.github = githubData;
+		doculaData.github = await this.getGithubData(this.options.githubPath);
 		// Get the documents
 		doculaData.documents = this.getDocuments(`${doculaData.sitePath}/docs`, doculaData);
 		// Get the sections
@@ -366,7 +364,16 @@ export class DoculaBuilder {
 					order: document.order,
 				});
 			} else {
-				const sectionIndex = sidebarItems.findIndex(section => section.path === document.section);
+				const relativeFilePath = document.documentPath.replace(`${data.sitePath}/docs/`, '');
+				const sectionPath = relativeFilePath.slice(0, Math.max(0, relativeFilePath.lastIndexOf('/')));
+				const documentSection = document.section ?? sectionPath;
+
+				const sectionIndex = sidebarItems.findIndex(section => section.path === documentSection);
+
+				if (sectionIndex === -1) {
+					continue;
+				}
+
 				sidebarItems[sectionIndex].children ??= [];
 
 				sidebarItems[sectionIndex].children.push({
@@ -444,7 +451,6 @@ export class DoculaBuilder {
 						const section: DoculaSection = {
 							name: document.replaceAll('-', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()),
 							path: document,
-
 						};
 
 						this.mergeSectionWithOptions(section, doculaOptions);
@@ -485,7 +491,7 @@ export class DoculaBuilder {
 		const urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
 		const isRoot = urlPath.split('/').length === 3;
 
-		const documentData: DoculaDocument = {
+		return {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			title: matterData.data.title,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -505,8 +511,6 @@ export class DoculaBuilder {
 			urlPath,
 			isRoot,
 		};
-
-		return documentData;
 	}
 
 	private removeFrontmatter(markdown: string): string {

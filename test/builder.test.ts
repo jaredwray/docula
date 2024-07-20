@@ -481,10 +481,6 @@ describe('DoculaBuilder', () => {
 			data.sections = undefined;
 			data.documents = undefined;
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
-			}
-
 			const sidebarItems = builder.generateSidebarItems(data);
 			expect(sidebarItems).toStrictEqual([]);
 		});
@@ -507,10 +503,6 @@ describe('DoculaBuilder', () => {
 			data.sections = [{
 				name: 'foo', path: 'foo', order: 2, children: [barChildren, fooChildren],
 			}];
-
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
-			}
 
 			const sidebarItems = builder.generateSidebarItems(data);
 			expect(sidebarItems[0].children).toStrictEqual([fooChildren, barChildren]);
@@ -554,12 +546,40 @@ describe('DoculaBuilder', () => {
 			}];
 			data.documents = documents;
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
-			}
-
 			const sidebarItems = builder.generateSidebarItems(data);
 			expect(sidebarItems[0].children).toStrictEqual([fooChildren, barChildren, documentChildren]);
+		});
+		it('generateSidebarItems should ignore a document if documentPath does not have a valid section', async () => {
+			const builder = new DoculaBuilder();
+			const documents: DoculaDocument[] = [{
+				title: 'Document title',
+				navTitle: 'Document',
+				description: 'Document description',
+				keywords: [],
+				content: '',
+				markdown: '',
+				generatedHtml: '',
+				documentPath: '/site/docs/bar/document.html',
+				urlPath: 'document',
+				isRoot: false,
+			}];
+
+			const data = doculaData;
+			data.templates = {
+				index: 'index.hbs',
+				releases: 'releases.hbs',
+			};
+			data.sitePath = 'site';
+			data.templatePath = 'test/fixtures/template-example';
+			data.outputPath = 'test/temp-index-test';
+
+			data.sections = [{
+				name: 'foo', path: 'foo', order: 2,
+			}];
+			data.documents = documents;
+
+			const sidebarItems = builder.generateSidebarItems(data);
+			expect(sidebarItems[0].children).toBeUndefined();
 		});
 	});
 });
