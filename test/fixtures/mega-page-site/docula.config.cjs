@@ -1,7 +1,7 @@
 module.exports.options = {
 	templatePath: './template',
 	outputPath: './dist-js',
-	sitePath: './site',
+	sitePath: './test/fixtures/mega-page-site',
 	githubPath: 'jaredwray/docula',
 	siteTitle: 'docula',
 	siteDescription: 'Beautiful Website for Your Projects',
