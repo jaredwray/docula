@@ -1,5 +1,7 @@
 ---
 title: '@keyv/serialize'
+sidebarTitle: '@keyv/serialize'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/serialize 

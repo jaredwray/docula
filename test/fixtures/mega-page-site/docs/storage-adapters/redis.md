@@ -1,5 +1,7 @@
 ---
 title: '@keyv/redis'
+sidebarTitle: '@keyv/redis'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/redis 

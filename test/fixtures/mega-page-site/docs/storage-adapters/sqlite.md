@@ -1,5 +1,7 @@
 ---
 title: '@keyv/sqlite'
+sidebarTitle: '@keyv/sqlite'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/sqlite 

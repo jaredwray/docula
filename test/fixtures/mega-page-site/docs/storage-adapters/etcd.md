@@ -1,5 +1,7 @@
 ---
 title: '@keyv/etcd'
+sidebarTitle: '@keyv/etcd'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/etcd 

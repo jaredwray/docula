@@ -1,5 +1,7 @@
 ---
 title: '@keyv/memcache'
+sidebarTitle: '@keyv/memcache'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/memcache 

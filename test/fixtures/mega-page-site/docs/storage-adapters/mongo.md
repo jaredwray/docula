@@ -1,5 +1,7 @@
 ---
 title: '@keyv/mongo'
+sidebarTitle: '@keyv/mongo'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/mongo 

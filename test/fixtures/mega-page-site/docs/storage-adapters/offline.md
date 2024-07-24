@@ -1,5 +1,7 @@
 ---
 title: '@keyv/offline'
+sidebarTitle: '@keyv/offline'
+parent: 'Storage Adapters'
 ---
 
 # @keyv/offline 

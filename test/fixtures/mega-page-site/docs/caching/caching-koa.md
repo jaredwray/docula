@@ -1,9 +1,10 @@
 ---
-title: 'Utilizing Keyv for Caching in Koa: A Step-by-Step Guide'
-navTitle: 'Caching with Koa'
+title: 'How to Implement Caching with Koa'
+sidebarTitle: 'Caching with Koa'
+parent: 'Caching'
 ---
 
-# Utilizing Keyv for Caching in Koa: A Step-by-Step Guide
+# How to Implement Caching with Koa
 
 ## What is Koa?
 Koa is a web framework from the team behind Express that offers a smaller, more expressive, more robust foundation for APIs and web applications. Koa's use of async functions removes the need for callbacks and increases error handling. A Koa Context combines a node request and response object into a single object providing numerous helpful methods for writing APIs and web apps.
