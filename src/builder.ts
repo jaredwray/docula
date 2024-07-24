@@ -259,10 +259,11 @@ export class DoculaBuilder {
 
 		// Add all the document urls
 		for (const document of data.documents ?? []) {
-			let urlPath = document.urlPath;
+			let {urlPath} = document;
 			if (urlPath.endsWith('index.html')) {
 				urlPath = urlPath.slice(0, -10);
 			}
+
 			urls.push({url: `${data.siteUrl}${urlPath}`});
 		}
 
@@ -499,10 +500,10 @@ export class DoculaBuilder {
 		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
 		let urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '/index.html');
 		let isRoot = urlPath.split('/').length === 3;
-		if(documentPath.slice(documentsFolderIndex+6).indexOf('/') === -1) {
+		if (!documentPath.slice(documentsFolderIndex + 6).includes('/')) {
 			isRoot = true;
-			const filePath = documentPath.slice(documentsFolderIndex+6);
-			if(filePath == 'index.md') {
+			const filePath = documentPath.slice(documentsFolderIndex + 6);
+			if (filePath === 'index.md') {
 				urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
 			}
 		}
