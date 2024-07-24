@@ -369,7 +369,7 @@ export class DoculaBuilder {
 		for (const document of (data.documents ?? [])) {
 			if (document.isRoot) {
 				sidebarItems.unshift({
-					path: document.urlPath,
+					path: document.urlPath.replace('index.html', ''),
 					name: document.navTitle,
 					order: document.order,
 				});
@@ -387,7 +387,7 @@ export class DoculaBuilder {
 				sidebarItems[sectionIndex].children ??= [];
 
 				sidebarItems[sectionIndex].children.push({
-					path: document.urlPath,
+					path: document.urlPath.replace('index.html', ''),
 					name: document.navTitle,
 					order: document.order,
 				});
