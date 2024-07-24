@@ -1,10 +1,10 @@
 ---
-title: 'Utilizing Keyv for Caching in Fastify: A Step-by-Step Guide'
-navTitle: 'Caching with Fastify'
-section: 'caching'
+title: 'How to Implement Caching with Fastify'
+sidebarTitle: 'Caching with Fastify'
+parent: 'Caching'
 ---
 
-# Utilizing Keyv for Caching in Fastify: A Step-by-Step Guide
+# How to Implement Caching with Fastify
 
 ## What is Fastify?
 Fastify is a web framework that provides a powerful plugin-based developer experience (inspired by Hapi and Express) with minimal overhead and is one of the fastest frameworks available, serving up to 30k requests per second. It is fully extensible via hooks, plugins, and decorators. Being schema-based, Fastify compiles schemas very efficiently. A TypeScript type declaration file is also maintained to support the growing TypeScript community.

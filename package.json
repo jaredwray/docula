@@ -1,6 +1,6 @@
 {
   "name": "docula",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Beautiful Website for Your Projects",
   "type": "module",
   "exports": "./dist/index.js",
@@ -31,6 +31,7 @@
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/README.md ./site-output",
     "build": "rimraf ./dist && tsc",
     "build-site": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site-output",
+    "serve-mega": "rimraf ./test/fixtures/mega-page-site/site-output && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
     "test": "xo --fix && vitest run --coverage",
     "serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site-output",
     "prepare": "npm run build"

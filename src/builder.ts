@@ -257,6 +257,16 @@ export class DoculaBuilder {
 		const sitemapPath = `${data.outputPath}/sitemap.xml`;
 		const urls = [{url: data.siteUrl}, {url: `${data.siteUrl}/releases`}];
 
+		// Add all the document urls
+		for (const document of data.documents ?? []) {
+			let {urlPath} = document;
+			if (urlPath.endsWith('index.html')) {
+				urlPath = urlPath.slice(0, -10);
+			}
+
+			urls.push({url: `${data.siteUrl}${urlPath}`});
+		}
+
 		let xml = '<?xml version="1.0" encoding="UTF-8"?>';
 		xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
@@ -488,8 +498,15 @@ export class DoculaBuilder {
 		const matterData = matter.default(documentContent);
 		const markdownContent = this.removeFrontmatter(documentContent);
 		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
-		const urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
-		const isRoot = urlPath.split('/').length === 3;
+		let urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '/index.html');
+		let isRoot = urlPath.split('/').length === 3;
+		if (!documentPath.slice(documentsFolderIndex + 6).includes('/')) {
+			isRoot = true;
+			const filePath = documentPath.slice(documentsFolderIndex + 6);
+			if (filePath === 'index.md') {
+				urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
+			}
+		}
 
 		return {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

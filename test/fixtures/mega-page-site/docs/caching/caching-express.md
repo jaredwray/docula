@@ -1,9 +1,10 @@
 ---
-title: 'Utilizing Keyv for Caching in Express: A Step-by-Step Guide'
-navTitle: 'Caching with Express'
+title: 'How to Implement Caching with Express'
+sidebarTitle: 'Caching with Express'
+parent: 'Caching'
 ---
 
-# Utilizing Keyv for Caching in Express: A Step-by-Step Guide
+# How to Implement Caching with Express
 
 ## What is Express?
 Express is a minimal Node.js web application framework. Its APIs provide web and mobile application functionality. Its simplicity enables users to quickly create a robust API in a familiar environment with enhanced features, including Robust routing, high performance, HTTP helpers, support for 14+ view template engines, content negotiation, and an executable for generating applications quickly.

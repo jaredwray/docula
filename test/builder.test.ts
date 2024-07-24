@@ -413,7 +413,7 @@ describe('DoculaBuilder', () => {
 			const builder = new DoculaBuilder();
 			const documentsPath = 'test/fixtures/mega-page-site/docs';
 			const documents = builder.getDocumentInDirectory(documentsPath);
-			expect(documents.length).toBe(2);
+			expect(documents.length).toBe(3);
 		});
 		it('should get all the documents from the mega fixtures', () => {
 			const builder = new DoculaBuilder();
@@ -427,7 +427,7 @@ describe('DoculaBuilder', () => {
 			};
 			const documentsPath = 'test/fixtures/mega-page-site/docs';
 			const documents = builder.getDocuments(documentsPath, doculaData);
-			expect(documents.length).toBe(20);
+			expect(documents.length).toBe(21);
 		});
 	});
 
