@@ -488,8 +488,16 @@ export class DoculaBuilder {
 		const matterData = matter.default(documentContent);
 		const markdownContent = this.removeFrontmatter(documentContent);
 		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
-		const urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
-		const isRoot = urlPath.split('/').length === 3;
+		let urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '/index.html');
+		let isRoot = urlPath.split('/').length === 3;
+		if(documentPath.slice(documentsFolderIndex+6).indexOf('/') === -1) {
+			isRoot = true;
+			const filePath = documentPath.slice(documentsFolderIndex+6);
+			console.log('filePath', filePath);
+			if(filePath == 'index.md') {
+				urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
+			}
+		}
 
 		return {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
