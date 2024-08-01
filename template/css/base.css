@@ -54,7 +54,7 @@ hr {
   max-width: 12.5rem;
 }
 
-.home-container {
+.home-container, .versions-container {
   max-width: 90%;
   margin: 0 auto;
   color: var(--color-text);
@@ -71,7 +71,7 @@ hr {
 }
 
 .content-container {
-  margin: 6rem 0;
+  margin: 3rem 0;
 }
 
 .facepile-container {
@@ -230,22 +230,27 @@ footer img {
   letter-spacing: -.5px;
   font-weight: 700;
   font-size: 1.5rem;
-  line-height: 3rem;
+  line-height: 2rem;
 }
 
 .content h2 {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   line-height: 2rem;
-  padding-top: 4.25rem;
+  padding-top: 2rem;
   margin-bottom: 0;
   font-weight: 600;
 }
 
 .content h3 {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   line-height: 1.5rem;
-  padding-top: 3rem;
+  padding-top: 1.8rem;
   margin-bottom: 0;
+  font-weight: 600;
+}
+
+.content h4 {
+  font-size: 1.125rem;
   font-weight: 600;
 }
 
@@ -253,15 +258,15 @@ footer img {
   padding-top: 1.875rem;
 }
 
-.content h4, .content h5, .content h6 {
+.content h5, .content h6 {
   font-weight: 600;
+  font-size: 1rem;
 }
 
 .content p {
   margin-top: 1rem;
   line-height: 1.5rem;
 }
-
 
 .content > ul, .content > ol {
   margin-top: 0.75rem;
@@ -286,6 +291,15 @@ footer img {
 
 .content li {
   line-height: 1.5;
+}
+
+.content li > a {
+  transition: all .2s ease-out;
+  cursor: pointer;
+}
+
+.content li > a:hover {
+  text-decoration: underline;
 }
 
 .content pre {
@@ -353,8 +367,10 @@ footer img {
 }
 
 @media screen and (min-width: 640px) {
-  .home-container {
+  .home-container, .versions-container {
     max-width: 82%;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -366,13 +382,19 @@ footer img {
     margin-bottom: 4rem;
   }
   .versions-container {
-    margin: 4.5rem 0;
+    margin-bottom: 4.5rem;
   }
   .content-container {
-    margin: 6rem 0;
+    margin: 4rem 0;
   }
   .content h1 {
     font-size: 1.875rem;
+  }
+  .content h2 {
+    padding-top: 3rem;
+  }
+  .content h3 {
+    padding-top: 2.5rem;
   }
 }
 
@@ -383,8 +405,10 @@ footer img {
   .home-hero img {
     max-width: 37.5rem;
   }
-  .home-container {
+  .home-container, .versions-container {
     max-width: 70%;
+    margin-left: auto;
+    margin-right: auto;
   }
   .home-title {
     margin-bottom: 4rem;
@@ -415,11 +439,11 @@ footer img {
 }
 
 @media screen and (min-width: 1200px) {
-  .home-container {
+  .home-container, .versions-container {
     max-width: 59.25rem;
   }
   .content-container {
-    margin: 10rem 0;
+    margin: 7rem 0;
   }
   .facepile > a {
     margin-left: -1.9rem;
@@ -429,7 +453,7 @@ footer img {
     max-height: 4.4rem;
   }
   .versions-container {
-    margin: 7.5rem 0;
+    margin-bottom: 7rem;
   }
 }
 
