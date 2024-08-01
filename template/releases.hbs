@@ -8,8 +8,8 @@
 <body>
   {{> singlepage/hero }}
   <a class="github-fork-ribbon" href="https://github.com/jaredwray/docula" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
-  <main class="home-container">
-    <div class="content-container versions-container">
+  <main class="versions-container">
+    <div class="versions-content">
       <h2 class="home-title">Releases</h2>
       {{#if github}}
         {{#if github.releases}}
@@ -28,9 +28,9 @@
                 </span>
               </div>
               <div class="release-body">
-                {{#if release.body}}
-                  {{#markdown}}{{release.body}}{{/markdown}}
-                {{/if}}
+{{#if release.body}}
+{{#markdown}}{{release.body}}{{/markdown}}
+{{/if}}
               </div>
             </div>
           {{/each}}

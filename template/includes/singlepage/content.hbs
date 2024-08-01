@@ -1,26 +1,26 @@
 <article class="home-container">
-  <div class="content">{{{content}}}</div>
+<div class="content">{{{content}}}</div>
 
-  {{#if github}}
-    {{#if github.contributors}}
-      <div class="content-container">
-        <h2 class="home-title">Contributors</h2>
-        <div class="facepile-container">
-          <div class="facepile">
-            {{#each github.contributors}}
-              <a
-                href="{{html_url}}"
-                target="_blank"
-                title="{{login}}"
-                rel="noopener noreferrer"
-              >
-                <img src="{{avatar_url}}" alt="{{login}}" />
-              </a>
-            {{/each}}
-          </div>
+{{#if github}}
+  {{#if github.contributors}}
+    <div class="content-container">
+      <h2 class="home-title">Contributors</h2>
+      <div class="facepile-container">
+        <div class="facepile">
+          {{#each github.contributors}}
+            <a
+              href="{{html_url}}"
+              target="_blank"
+              title="{{login}}"
+              rel="noopener noreferrer"
+            >
+              <img src="{{avatar_url}}" alt="{{login}}" />
+            </a>
+          {{/each}}
         </div>
       </div>
-    {{/if}}
+    </div>
+  {{/if}}
 
     {{#if github.releases}}
       <div class="content-container">
@@ -41,9 +41,9 @@
                 </span>
               </div>
               <div class="release-body">
-                {{#if release.body}}
-                  {{#markdown}}{{release.body}}{{/markdown}}
-                {{/if}}
+{{#if release.body}}
+{{#markdown}}{{release.body}}{{/markdown}}
+{{/if}}
               </div>
             </div>
           {{/if}}
