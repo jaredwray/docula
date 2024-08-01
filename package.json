@@ -52,12 +52,12 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.14.11",
+    "@types/node": "^22.0.2",
     "@types/update-notifier": "^6.0.8",
-    "@vitest/coverage-v8": "^2.0.3",
+    "@vitest/coverage-v8": "^2.0.5",
     "rimraf": "^5.0.7",
-    "typescript": "^5.5.3",
-    "vitest": "^2.0.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5",
     "webpack": "^5.93.0",
     "xo": "^0.59.3"
   },
