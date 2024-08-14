@@ -6,14 +6,12 @@
   const isDesktop  = window.innerWidth >= 992;
 
   const handleScroll = () => {
-    const onPage = document.querySelector('#on-page');
+    const fixedToc = document.querySelector('#fixed-toc');
     if(!isHome) {
       if (window.scrollY > 250 && window.innerWidth >= 1458) {
-        onPage.style.display = 'block';
-        onPage.classList.add('on-page-fixed');
+        fixedToc.style.display = 'block';
       } else {
-        onPage.classList.remove('on-page-fixed');
-        onPage.style.display = 'none';
+        fixedToc.style.display = 'none';
       }
     }
   };
