@@ -199,44 +199,36 @@ details > summary {
   margin-right: 2rem
 }
 
-.on-page-container {
-  padding-top: 1.75rem;
-  padding-bottom: 1.75rem;
+.main-toc {
+  padding-bottom: 1.5rem;
 }
 
-.on-page-container h5 {
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 1rem;
-  font-size: 0.625rem;
-  font-weight: 600;
-  color: var(--color-secondary);
-}
-
-.on-page-container .toc {
-  list-style: none;
-  line-height: 1.5rem;
-  padding-left: 0;
-  width: 100%;
+.toc {
   font-size: 0.875rem;
 }
 
-.on-page-container ol {
-  padding-left: 0;
+.toc #table-of-contents {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.toc ul {
   list-style: none;
-  width: 100%;
+  padding-left: 0;
 }
 
-.on-page-container ol > li {
-  display: flex;
-  align-items: baseline;
-  position: relative;
+.toc ul li {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
-.on-page-container ol > li > a {
-  transition: all .2s ease-out;
-  color: var(--color-secondary);
-  padding: 0.5rem 0;
+.toc ul li > ul {
+  display: none;
+}
+
+.toc ul li a {
+  opacity: 0.8;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -244,27 +236,36 @@ details > summary {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: initial;
+  position: relative;
+  transition: all .2s ease-out;
 }
 
-.on-page-container ol > li:hover > a {
+.toc ul > li:hover > a {
   transform: translateX(0.25rem);
+  text-decoration: none;
 }
 
-.on-page-main ol > li > a::after {
+.main-toc ul > li > a::after {
   position: absolute;
   right: 0;
   content: '';
   display: inline-block;
   width: 0.25rem;
   height: 0.25rem;
-  border-right: 1px solid var(--color-secondary);
-  border-bottom: 1px solid var(--color-secondary);
+  border-right: 1px solid var(--color-primary);
+  border-bottom: 1px solid var(--color-primary);
   transform: rotate(-45deg);
 }
 
-.on-page-list {
-  margin-left: 0.5rem;
-  font-size: 0.75rem;
+.fixed-toc {
+  display: none;
+  position: fixed;
+  max-width: 15rem;
+  margin-top: 2rem;
+}
+
+.fixed-toc-container {
+  flex: 0.8;
 }
 
 @media screen and (min-width: 576px) {
@@ -309,7 +310,7 @@ details > summary {
     padding: 0 3.5rem 1.5rem;
   }
   .main-container {
-    padding-top: 7.5rem;
+    padding-top: 3.5rem;
   }
   .nav {
     padding-left: 3.5rem;
@@ -417,35 +418,18 @@ details > summary {
   .nav-list {
     padding-left: 0;
   }
-  .on-page--desktop ~ .on-page-list {
-    margin-left: 0;
-  }
   .sidebar-footer {
     position: sticky;
+  }
+  .main-toc {
+    padding-bottom: 3rem;
   }
 }
 
 @media screen and (min-width: 1458px) {
-  .on-page--desktop ol {
-    font-size: 0.75rem;
-  }
-
-  .on-page--desktop ol li a {
-    padding: 0.25rem 0;
-  }
-  .on-page--desktop {
-    width: 100%;
-    position: relative;
-    transition: all .3s ease-in;
-    display: flex;
-    justify-content: flex-end;
-  }
-  .on-page-fixed {
-    position: fixed;
-    max-width: 12.5rem;
-  }
   .main-content {
     padding: 0 3.5rem 1.5rem;
+    justify-content: space-between;
   }
 }
 
@@ -464,8 +448,11 @@ details > summary {
     padding-left: 4.5rem;
     padding-right: 4.5rem;
   }
-  .on-page--desktop {
-    justify-content: center;
+}
+
+@media screen and (min-width: 1728px) {
+  .fixed-toc {
+    max-width: 17rem;
   }
 }
 
@@ -481,7 +468,6 @@ details > summary {
     padding-right: 4rem;
   }
 }
-
 
 @media screen and (min-width: 2400px) {
   .layout {

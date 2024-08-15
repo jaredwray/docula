@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import {Ecto} from 'ecto';
 import * as matter from 'gray-matter';
+import he from 'he';
+import * as cheerio from 'cheerio';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {Github, type GithubData, type GithubOptions} from './github.js';
@@ -44,6 +46,7 @@ export type DoculaDocument = {
 	content: string;
 	markdown: string;
 	generatedHtml: string;
+	tableOfContents?: string;
 	documentPath: string;
 	urlPath: string;
 	isRoot: boolean;
@@ -350,11 +353,13 @@ export class DoculaBuilder {
 				const folder = document.urlPath.split('/').slice(0, -1).join('/');
 				await fs.promises.mkdir(`${data.outputPath}/${folder}`, {recursive: true});
 				const slug = `${data.outputPath}${document.urlPath}`;
-				const documentContent = await this._ecto.renderFromFile(
+				let documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
 					{...data, ...document},
 					data.templatePath,
 				);
+				documentContent = he.decode(documentContent);
+
 				return fs.promises.writeFile(slug, documentContent, 'utf8');
 			});
 			await Promise.all(promises);
@@ -496,7 +501,8 @@ export class DoculaBuilder {
 	public parseDocumentData(documentPath: string): DoculaDocument {
 		const documentContent = fs.readFileSync(documentPath, 'utf8');
 		const matterData = matter.default(documentContent);
-		const markdownContent = this.removeFrontmatter(documentContent);
+		let markdownContent = this.removeFrontmatter(documentContent);
+		markdownContent = markdownContent.replace(/^# .*\n/, '');
 		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
 		let urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '/index.html');
 		let isRoot = urlPath.split('/').length === 3;
@@ -524,6 +530,7 @@ export class DoculaBuilder {
 			content: documentContent,
 			markdown: markdownContent,
 			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
+			tableOfContents: this.getTableOfContents(markdownContent),
 			documentPath,
 			urlPath,
 			isRoot,
@@ -532,6 +539,18 @@ export class DoculaBuilder {
 
 	private removeFrontmatter(markdown: string): string {
 		return markdown.replace(/^-{3}[\s\S]*?-{3}\s*/, '');
+	}
+
+	private getTableOfContents(markdown: string): string | undefined {
+		markdown = `## Table of Contents\n\n${markdown}`;
+		const html = this._ecto.renderSync(markdown, undefined, 'markdown');
+		const $ = cheerio.load(html);
+		const tocTitle = $('h2').first();
+		const tocContent = tocTitle.next('ul').toString();
+		if (tocContent) {
+			return tocTitle.toString() + tocContent;
+		}
+		return undefined;
 	}
 
 	private copyDirectory(source: string, target: string): void {
