@@ -6,7 +6,7 @@ module.exports.options = {
 	templatePath: './template',
 	githubPath: 'jaredwray/docula',
 	sitePath: '../single-page-site-onprepare',
-	outputPath: './site-output',
+	outputPath: '../single-page-site-onprepare/dist',
 	siteTitle: 'docula',
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',
