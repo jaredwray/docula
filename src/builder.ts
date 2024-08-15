@@ -550,6 +550,7 @@ export class DoculaBuilder {
 		if (tocContent) {
 			return tocTitle.toString() + tocContent;
 		}
+
 		return undefined;
 	}
 
