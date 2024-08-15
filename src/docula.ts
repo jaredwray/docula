@@ -173,7 +173,7 @@ export default class Docula {
 		app.use(express.static(outputPath));
 
 		this._server = app.listen(port, () => {
-			this._console.log(`Docula 🦇 flying at http://localhost:${port}`);
+			this._console.log(`Docula 🦇 at http://localhost:${port}`);
 		});
 	}
 }
