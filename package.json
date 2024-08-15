@@ -1,6 +1,6 @@
 {
   "name": "docula",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "description": "Beautiful Website for Your Projects",
   "type": "module",
   "exports": "./dist/index.js",
@@ -8,7 +8,7 @@
   "repository": "https://github.com/jaredwray/docula.git",
   "author": "Jared Wray <me@jaredwray.com>",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20"
   },
   "license": "MIT",
   "keywords": [
