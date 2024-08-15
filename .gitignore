@@ -72,6 +72,7 @@ dist
 
 # Site
 site/README.md
-site-output
+test/fixtures/mega-page-site/dist
+site/dist
 pnpm-lock.yaml
 package-lock.json

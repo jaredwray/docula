@@ -8,7 +8,7 @@ export default defineConfig({
 				'init/**',
 				'template/**',
 				'src/helpers/markdown.ts',
-				'site-output/**',
+				'site/dist/**',
 				'site/**',
 				'vitest.config.mjs',
 				'dist/**',
