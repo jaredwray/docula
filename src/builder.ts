@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import {Ecto} from 'ecto';
 import * as matter from 'gray-matter';
+import he from 'he';
+import * as cheerio from 'cheerio';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {Github, type GithubData, type GithubOptions} from './github.js';
-import he from 'he';
-import * as cheerio from 'cheerio';
 
 export type DoculaData = {
 	siteUrl: string;
@@ -546,9 +546,9 @@ export class DoculaBuilder {
 		const html = this._ecto.renderSync(markdown, undefined, 'markdown');
 		const $ = cheerio.load(html);
 		const tocTitle = $('h2').first();
-		const tocContent = tocTitle.next('ul');
-		if (tocTitle && tocContent) {
-			return tocTitle.toString() + tocContent.toString();
+		const tocContent = tocTitle.next('ul').toString();
+		if (tocContent) {
+			return tocTitle.toString() + tocContent;
 		}
 		return undefined;
 	}

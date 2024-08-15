@@ -582,4 +582,14 @@ describe('DoculaBuilder', () => {
 			expect(sidebarItems[0].children).toBeUndefined();
 		});
 	});
+
+	describe('Docula Builder - Document Parser', () => {
+		it('should return tableOfContents undefined if markdown does not have data', async () => {
+			const builder = new DoculaBuilder();
+
+			const documentsPath = 'test/fixtures/empty.md';
+			const parsedDocument = builder.parseDocumentData(documentsPath);
+			expect(parsedDocument.tableOfContents).toBeUndefined();
+		});
+	});
 });
