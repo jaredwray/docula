@@ -193,12 +193,8 @@ hr {
   text-decoration: underline;
 }
 
-.github-fork-ribbon {
-  position: fixed !important;
-}
-
-.github-fork-ribbon:before {
-  background-color: var(--color-primary) !important;
+.github-corner {
+  fill: var(--color-primary) !important;
 }
 
 footer {
