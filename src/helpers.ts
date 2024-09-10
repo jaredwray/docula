@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import yaml from 'js-yaml';
+import {load, dump} from 'js-yaml';
 
 export class DoculaHelpers {
 	createDoc(path: string, destination: string, frontMatter?: Record<string, string>, contentFunction?: (content: string) => string): void {
@@ -24,7 +24,7 @@ export class DoculaHelpers {
 		const match = /^---\r?\n([\s\S]+?)\r?\n---/.exec(content);
 		if (match) {
 			// Parse the YAML string to an object
-			const frontMatter = yaml.load(match[1]);
+			const frontMatter = load(match[1]);
 			return frontMatter as Record<string, string>;
 		}
 
@@ -47,7 +47,7 @@ export class DoculaHelpers {
 
 		if (match) {
 			// Parse the existing FrontMatter
-			let oldFrontMatter = yaml.load(match[1]);
+			let oldFrontMatter = load(match[1]);
 
 			// Set or replace values
 			oldFrontMatter = {
@@ -56,7 +56,7 @@ export class DoculaHelpers {
 			};
 
 			// Serialize the FrontMatter back to a YAML string
-			const newYaml = yaml.dump(oldFrontMatter);
+			const newYaml = dump(oldFrontMatter);
 
 			// Replace the old FrontMatter with the new string
 			const newContent = `---\n${newYaml}---\n${match[2]}`;
@@ -66,7 +66,7 @@ export class DoculaHelpers {
 		}
 
 		// No FrontMatter found, add it
-		const newYaml = yaml.dump(frontMatter);
+		const newYaml = dump(frontMatter);
 		const newContent = `---\n${newYaml}---\n${content}`;
 		return newContent;
 	}
