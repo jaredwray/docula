@@ -36,7 +36,7 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/README.md ./site/dist",
-    "build": "rimraf ./dist && tsup src/docula.ts --format cjs,esm --dts --clean",
+    "build": "rimraf ./dist && tsup src/docula.ts --format esm --dts --clean",
     "build-site": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site/dist",
     "serve-mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
     "test": "xo --fix && vitest run --coverage",
@@ -50,7 +50,7 @@
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
     "ecto": "^3.0.8",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "feed": "^4.2.2",
     "gray-matter": "^4.0.3",
     "he": "^1.2.0",
