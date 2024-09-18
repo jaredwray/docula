@@ -55,7 +55,7 @@
     "gray-matter": "^4.0.3",
     "he": "^1.2.0",
     "js-yaml": "^4.1.0",
-    "keyv": "^4.5.4",
+    "keyv": "^5.0.1",
     "update-notifier": "^7.3.1"
   },
   "devDependencies": {
