@@ -131,8 +131,8 @@ export default class Docula {
 		}
 
 		// Add the docula.config file based on js or ts
-		const doculaConfigFile = './init/docula.config.cjs';
-		fs.copyFileSync(doculaConfigFile, `${sitePath}/docula.config.cjs`);
+		const doculaConfigFile = './init/docula.config.mjs';
+		fs.copyFileSync(doculaConfigFile, `${sitePath}/docula.config.mjs`);
 
 		// Add in the image and favicon
 		fs.copyFileSync('./init/logo.png', `${sitePath}/logo.png`);
@@ -153,7 +153,7 @@ export default class Docula {
 
 	public async loadConfigFile(sitePath: string): Promise<void> {
 		if (fs.existsSync(sitePath)) {
-			const configFile = `${sitePath}/docula.config.cjs`;
+			const configFile = `${sitePath}/docula.config.mjs`;
 			if (fs.existsSync(configFile)) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				this._configFileModule = await import(configFile);

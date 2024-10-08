@@ -1,4 +1,4 @@
-module.exports.options = {
+export const options = {
 	templatePath: './template',
 	outputPath: './dist',
 	sitePath: './site',
@@ -7,3 +7,4 @@ module.exports.options = {
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',
 };
+

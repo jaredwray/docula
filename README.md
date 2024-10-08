@@ -1,8 +1,7 @@
 ![Docula](site/logo.svg)
 
----
+# Beautiful Website for Your Projects
 
-## Beautiful Website for Your Projects
 [![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
 [![GitHub license](https://img.shields.io/github/license/jaredwray/docula)](https://github.com/jaredwray/docula/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/jaredwray/docula/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/gh/jaredwray/docula)
@@ -43,7 +42,7 @@ site
 ├───logo.png
 ├───favicon.ico
 ├───README.md
-├───docula.config.js
+├───docula.config.mjs
 ```
 Note: for typescript do 'docula init --typescript'
 
@@ -74,7 +73,7 @@ site
 ├───site.css
 ├───logo.png
 ├───favicon.ico
-├───docula.config.ts
+├───docula.config.mjs
 ├───docs
 │   ├───getting-started.md
 │   ├───contributing.md

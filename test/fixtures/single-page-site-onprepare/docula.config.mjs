@@ -1,8 +1,4 @@
-const fs = require('node:fs');
-const path = require('path');
-const process = require('node:process');
-
-module.exports.options = {
+export const options = {
 	templatePath: './template',
 	githubPath: 'jaredwray/docula',
 	sitePath: '../single-page-site-onprepare',
@@ -12,6 +8,6 @@ module.exports.options = {
 	siteUrl: 'https://docula.org',
 };
 
-module.exports.onPrepare = async (config) => {
+export const onPrepare = async (config) => {
 	console.info('onPrepare');
 }

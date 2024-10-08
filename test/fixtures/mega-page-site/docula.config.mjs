@@ -1,4 +1,4 @@
-module.exports.options = {
+export const options = {
 	templatePath: './template',
 	outputPath: './test/fixtures/mega-page-site/dist',
 	sitePath: './test/fixtures/mega-page-site',
