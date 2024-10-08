@@ -13,6 +13,7 @@ export default defineConfig({
 				'vitest.config.mjs',
 				'dist/**',
 				'test/**',
+				".git/**",
 			],
 		},
 	},
