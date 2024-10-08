@@ -21,7 +21,7 @@
 ## Features
 * No configuration requrired. Just setup the folder structure with a logo, favicon, and css file. 
 * Builds a static website that can be hosted anywhere.
-* For more complex projects easily add a `docula.config.js` or `docula.config.ts` file to customize the build process.
+* For more complex projects easily add a `docula.config.mjs` file to customize the build process.
 * Support for single page with readme or multiple pages with a table of contents.
 * Will generate a sitemap.xml, robots.txt, and  file for SEO.
 * Uses Github release notes to generate a changelog page.

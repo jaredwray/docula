@@ -100,7 +100,7 @@ describe('docula', () => {
 			console.log = consoleLog;
 
 			expect(fs.existsSync(temporarySitePath)).toEqual(true);
-			expect(fs.existsSync(`${temporarySitePath}/docula.config.cjs`)).toEqual(true);
+			expect(fs.existsSync(`${temporarySitePath}/docula.config.mjs`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
@@ -124,7 +124,7 @@ describe('docula', () => {
 			console.log = consoleLog;
 
 			expect(fs.existsSync(temporarySitePath)).toEqual(true);
-			expect(fs.existsSync(`${temporarySitePath}/docula.config.cjs`)).toEqual(true);
+			expect(fs.existsSync(`${temporarySitePath}/docula.config.mjs`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
@@ -193,7 +193,7 @@ describe('docula execute', () => {
 		try {
 			await docula.execute(process);
 			expect(fs.existsSync(sitePath)).toEqual(true);
-			expect(fs.existsSync(`${sitePath}/docula.config.cjs`)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.mjs`)).toEqual(true);
 			expect(consoleMessage).toContain('docula initialized.');
 		} finally {
 			await fs.promises.rm(sitePath, {recursive: true});
