@@ -3,12 +3,11 @@
   "version": "0.9.1",
   "description": "Beautiful Website for Your Projects",
   "type": "module",
-  "main": "./dist/docula.cjs",
+  "main": "./dist/docula.js",
   "module": "./dist/docula.js",
   "types": "./dist/docula.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/docula.cjs",
       "import": "./dist/docula.js"
     }
   },
@@ -49,13 +48,12 @@
   "dependencies": {
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
-    "ecto": "^4.0.0",
-    "express": "^4.21.0",
+    "ecto": "^4.1.1",
+    "express": "^4.21.1",
     "feed": "^4.2.2",
     "gray-matter": "^4.0.3",
     "he": "^1.2.0",
     "js-yaml": "^4.1.0",
-    "keyv": "^5.0.1",
     "update-notifier": "^7.3.1"
   },
   "devDependencies": {
