@@ -592,4 +592,16 @@ describe('DoculaBuilder', () => {
 			expect(parsedDocument.tableOfContents).toBeUndefined();
 		});
 	});
+
+	describe('Build Readme Section', async () => {
+		it('should build the readme section', async () => {
+			const builder = new DoculaBuilder();
+			const data = doculaData;
+			data.sitePath = 'test/fixtures/single-page-site';
+
+			const result = await builder.buildReadmeSection(data);
+
+			expect(result).toBeTruthy();
+		});
+	});
 });
