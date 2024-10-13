@@ -8,8 +8,9 @@ import {
 import axios from 'axios';
 import Docula, {DoculaHelpers} from '../src/docula.js';
 import {DoculaOptions} from '../src/options.js';
-import githubMockContributors from './fixtures/data-mocks/github-contributors.json';
-import githubMockReleases from './fixtures/data-mocks/github-releases.json';
+
+const githubMockContributors = JSON.parse(fs.readFileSync('./test/fixtures/data-mocks/github-contributors.json', 'utf8'));
+const githubMockReleases = JSON.parse(fs.readFileSync('./test/fixtures/data-mocks/github-releases.json', 'utf8'));
 
 const defaultOptions: DoculaOptions = new DoculaOptions({
 	templatePath: './custom-template',
