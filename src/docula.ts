@@ -14,29 +14,55 @@ export default class Docula {
 	private _configFileModule: any = {};
 	private _server: http.Server | undefined;
 
+	/**
+	 * Initialize the Docula class
+	 * @param {DoculaOptions} options
+	 * @returns {void}
+	 * @constructor
+	 */
 	constructor(options?: DoculaOptions) {
 		if (options) {
 			this._options = options;
 		}
 	}
 
+	/**
+	 * Get the options
+	 * @returns {DoculaOptions}
+	 */
 	public get options(): DoculaOptions {
 		return this._options;
 	}
 
+	/**
+	 * Set the options
+	 * @param {DoculaOptions} value
+	 */
 	public set options(value: DoculaOptions) {
 		this._options = value;
 	}
 
+	/**
+	 * The http server used to serve the site
+	 * @returns {http.Server | undefined}
+	 */
 	public get server(): http.Server | undefined {
 		return this._server;
 	}
 
+	/**
+	 * The config file module. This is the module that is loaded from the docula.config.mjs file
+	 * @returns {any}
+	 */
 	public get configFileModule(): any {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return this._configFileModule;
 	}
 
+	/**
+	 * Check for updates
+	 * @returns {void}
+	 */
 	public checkForUpdates(): void {
 		const packageJsonPath = path.join(process.cwd(), 'package.json');
 		if (fs.existsSync(packageJsonPath)) {
@@ -47,6 +73,11 @@ export default class Docula {
 		}
 	}
 
+	/**
+	 * Is the execution process that runs the docula command
+	 * @param {NodeJS.Process} process
+	 * @returns {Promise<void>}
+	 */
 	public async execute(process: NodeJS.Process): Promise<void> {
 		// Check for updates
 		this.checkForUpdates();
@@ -114,6 +145,11 @@ export default class Docula {
 		}
 	}
 
+	/**
+	 * Checks if the site is a single page website
+	 * @param {string} sitePath
+	 * @returns {boolean}
+	 */
 	public isSinglePageWebsite(sitePath: string): boolean {
 		const documentationPath = `${sitePath}/docs`;
 		if (!fs.existsSync(documentationPath)) {
@@ -124,6 +160,11 @@ export default class Docula {
 		return files.length === 0;
 	}
 
+	/**
+	 * Generate the init files
+	 * @param {string} sitePath
+	 * @returns {void}
+	 */
 	public generateInit(sitePath: string): void {
 		// Check if the site path exists
 		if (!fs.existsSync(sitePath)) {
@@ -145,12 +186,21 @@ export default class Docula {
 		this._console.log(`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and stype the site with site.css file.`);
 	}
 
+	/**
+	 * Get the version of the package
+	 * @returns {string}
+	 */
 	public getVersion(): string {
 		const packageJson = fs.readFileSync('./package.json', 'utf8');
 		const packageObject = JSON.parse(packageJson) as {version: string};
 		return packageObject.version;
 	}
 
+	/**
+	 * Load the config file
+	 * @param {string} sitePath
+	 * @returns {Promise<void>}
+	 */
 	public async loadConfigFile(sitePath: string): Promise<void> {
 		if (fs.existsSync(sitePath)) {
 			const configFile = `${sitePath}/docula.config.mjs`;
@@ -161,6 +211,11 @@ export default class Docula {
 		}
 	}
 
+	/**
+	 * Serve the site based on the options (port and output path)
+	 * @param {DoculaOptions} options
+	 * @returns {Promise<void>}
+	 */
 	public async serve(options: DoculaOptions): Promise<void> {
 		if (this._server) {
 			this._server.close();

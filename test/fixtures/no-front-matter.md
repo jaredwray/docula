@@ -1,6 +1,4 @@
 
----
-
 ## Beautiful Website for Your Projects
 [![Build](https://github.com/jaredwray/docula/actions/workflows/tests.yml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yml)
 [![GitHub license](https://img.shields.io/github/license/jaredwray/docula)](https://github.com/jaredwray/docula/blob/master/LICENSE)

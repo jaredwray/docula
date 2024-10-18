@@ -50,6 +50,12 @@ describe('DoculaHelpers', () => {
 			const frontMatter = helpers.getFrontMatterFromFile('./test/fixtures/front-matter.md');
 			expect(frontMatter.title).toEqual('docula');
 		});
+		it('should get valid front matter from content', () => {
+			const content = '---\ntitle: docula\n---\n# Hello World';
+			const helpers = new DoculaHelpers();
+			const frontMatter = helpers.getFrontMatter(content);
+			expect(frontMatter.title).toEqual('docula');
+		});
 	});
 	describe('setFrontMatterInContent', () => {
 		it('should get and append FrontMatter', () => {
