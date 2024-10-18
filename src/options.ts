@@ -3,15 +3,45 @@ import process from 'node:process';
 import {type DoculaSection} from './builder.js';
 
 export class DoculaOptions {
+	/**
+	 * Path to the template directory
+	 */
 	public templatePath = path.join(import.meta.url, '../../template').replace('file:', '');
+	/**
+	 * Path to the output directory
+	 */
 	public outputPath = path.join(process.cwd(), './dist');
+	/**
+	 * Path to the site directory
+	 */
 	public sitePath = path.join(process.cwd(), './site');
+	/**
+	 * Path to the github repository
+	 */
 	public githubPath = 'jaredwray/docula';
+	/**
+	 * Site title
+	 */
 	public siteTitle = 'docula';
+	/**
+	 * Site description
+	 */
 	public siteDescription = 'Beautiful Website for Your Projects';
+	/**
+	 * Site URL
+	 */
 	public siteUrl = 'https://docula.org';
+	/**
+	 * Port to run the server
+	 */
 	public port = 3000;
+	/**
+	 * Single page website
+	 */
 	public singlePage = true;
+	/**
+	 * Sections
+	 */
 	public sections?: DoculaSection[];
 
 	constructor(options?: Record<string, unknown>) {
