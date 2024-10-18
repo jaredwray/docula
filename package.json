@@ -1,6 +1,6 @@
 {
   "name": "docula",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Beautiful Website for Your Projects",
   "type": "module",
   "main": "./dist/docula.js",
