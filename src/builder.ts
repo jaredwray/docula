@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {Ecto} from 'ecto';
-import * as matter from 'gray-matter';
+import {Writr} from 'writr';
 import he from 'he';
 import * as cheerio from 'cheerio';
 import {DoculaOptions} from './options.js';
@@ -500,8 +500,9 @@ export class DoculaBuilder {
 
 	public parseDocumentData(documentPath: string): DoculaDocument {
 		const documentContent = fs.readFileSync(documentPath, 'utf8');
-		const matterData = matter.default(documentContent);
-		let markdownContent = this.removeFrontmatter(documentContent);
+		const writr = new Writr(documentContent);
+		const matterData = writr.frontMatter;
+		let markdownContent = writr.body;
 		markdownContent = markdownContent.replace(/^# .*\n/, '');
 		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
 		let urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '/index.html');
@@ -516,17 +517,17 @@ export class DoculaBuilder {
 
 		return {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			title: matterData.data.title,
+			title: matterData.title,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			navTitle: matterData.data.navTitle || matterData.data.title,
+			navTitle: matterData.navTitle || matterData.title,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			description: matterData.data.description || '',
+			description: matterData.description || '',
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			order: matterData.data.order || undefined,
+			order: matterData.order || undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			section: matterData.data.section || undefined,
+			section: matterData.section || undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			keywords: matterData.data.keywords || [],
+			keywords: matterData.keywords || [],
 			content: documentContent,
 			markdown: markdownContent,
 			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
@@ -535,10 +536,6 @@ export class DoculaBuilder {
 			urlPath,
 			isRoot,
 		};
-	}
-
-	private removeFrontmatter(markdown: string): string {
-		return markdown.replace(/^-{3}[\s\S]*?-{3}\s*/, '');
 	}
 
 	private getTableOfContents(markdown: string): string | undefined {
