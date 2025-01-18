@@ -1,12 +1,12 @@
-import type http from 'node:http';
+import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
 import fs from 'node:fs';
+import handler from 'serve-handler';
 import updateNotifier from 'update-notifier';
-import express from 'express';
-import {DoculaOptions} from './options.js';
-import {DoculaConsole} from './console.js';
-import {DoculaBuilder} from './builder.js';
+import { DoculaOptions } from './options.js';
+import { DoculaConsole } from './console.js';
+import { DoculaBuilder } from './builder.js';
 
 export default class Docula {
 	private _options: DoculaOptions = new DoculaOptions();
@@ -69,7 +69,7 @@ export default class Docula {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			updateNotifier({pkg: packageJson}).notify();
+			updateNotifier({ pkg: packageJson }).notify();
 		}
 	}
 
@@ -192,7 +192,7 @@ export default class Docula {
 	 */
 	public getVersion(): string {
 		const packageJson = fs.readFileSync('./package.json', 'utf8');
-		const packageObject = JSON.parse(packageJson) as {version: string};
+		const packageObject = JSON.parse(packageJson) as { version: string };
 		return packageObject.version;
 	}
 
@@ -221,16 +221,23 @@ export default class Docula {
 			this._server.close();
 		}
 
-		const app = express();
 		const {port} = options;
 		const {outputPath} = options;
 
-		app.use(express.static(outputPath));
+		const config = {
+			public: outputPath
+		}
 
-		this._server = app.listen(port, () => {
+		const server = http.createServer((request, response) => {
+			// You pass two more arguments for config and middleware
+			// More details here: https://github.com/vercel/serve-handler#options
+			return handler(request, response, config);
+		});
+
+		server.listen(port, () => {
 			this._console.log(`Docula 🦇 at http://localhost:${port}`);
 		});
 	}
 }
 
-export {DoculaHelpers} from './helpers.js';
+export { DoculaHelpers } from './helpers.js';
