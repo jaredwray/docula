@@ -1,9 +1,9 @@
-import type http from 'node:http';
+import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
 import fs from 'node:fs';
+import handler from 'serve-handler';
 import updateNotifier from 'update-notifier';
-import express from 'express';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {DoculaBuilder} from './builder.js';
@@ -216,20 +216,28 @@ export default class Docula {
 	 * @param {DoculaOptions} options
 	 * @returns {Promise<void>}
 	 */
-	public async serve(options: DoculaOptions): Promise<void> {
+	public async serve(options: DoculaOptions): Promise<http.Server> {
 		if (this._server) {
 			this._server.close();
 		}
 
-		const app = express();
 		const {port} = options;
 		const {outputPath} = options;
 
-		app.use(express.static(outputPath));
+		const config = {
+			public: outputPath,
+		};
 
-		this._server = app.listen(port, () => {
+		this._server = http.createServer(async (request, response) =>
+			/* c8 ignore next */
+			handler(request, response, config),
+		);
+
+		this._server.listen(port, () => {
 			this._console.log(`Docula 🦇 at http://localhost:${port}`);
 		});
+
+		return this._server;
 	}
 }
 
