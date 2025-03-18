@@ -28,7 +28,7 @@ jobs:
       run: pnpm build
 
     - name: Build Website
-      run: pnpm build-site
+      run: pnpm website:build
 
     - name: Publish to Cloudflare Pages
       uses: cloudflare/pages-action@1
