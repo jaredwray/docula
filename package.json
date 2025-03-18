@@ -36,10 +36,10 @@
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/README.md ./site/dist",
     "build": "rimraf ./dist && tsup src/docula.ts --format esm --dts --clean",
-    "build-site": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site/dist",
     "serve-mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
     "test": "xo --fix && vitest run --coverage",
-    "serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site/dist",
+    "website:build": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site/dist",
+    "website:serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site/dist",
     "prepare": "npm run build"
   },
   "bin": {
