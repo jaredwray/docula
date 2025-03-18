@@ -191,7 +191,7 @@ describe('DoculaBuilder', () => {
 			options.outputPath = 'test/temp-robots-test';
 
 			if (fs.existsSync(options.outputPath)) {
-				await fs.promises.rmdir(options.outputPath, {recursive: true});
+				await fs.promises.rm(options.outputPath, {recursive: true});
 			}
 
 			try {
@@ -200,7 +200,7 @@ describe('DoculaBuilder', () => {
 				expect(robots).toBe('User-agent: *\nDisallow:');
 			} finally {
 				if (fs.existsSync(options.outputPath)) {
-					await fs.promises.rmdir(options.outputPath, {recursive: true});
+					await fs.promises.rm(options.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -211,7 +211,7 @@ describe('DoculaBuilder', () => {
 			options.outputPath = 'test/temp-robots-test-copy';
 
 			if (fs.existsSync(options.outputPath)) {
-				await fs.promises.rmdir(options.outputPath, {recursive: true});
+				await fs.promises.rm(options.outputPath, {recursive: true});
 			}
 
 			try {
@@ -220,7 +220,7 @@ describe('DoculaBuilder', () => {
 				expect(robots).toBe('User-agent: *\nDisallow: /meow');
 			} finally {
 				if (fs.existsSync(options.outputPath)) {
-					await fs.promises.rmdir(options.outputPath, {recursive: true});
+					await fs.promises.rm(options.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -229,7 +229,7 @@ describe('DoculaBuilder', () => {
 			const data = doculaData;
 
 			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
+				await fs.promises.rm(data.outputPath, {recursive: true});
 			}
 
 			try {
@@ -238,7 +238,7 @@ describe('DoculaBuilder', () => {
 				expect(sitemap).toContain('<loc>http://foo.com</loc>');
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rmdir(data.outputPath, {recursive: true});
+					await fs.promises.rm(data.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -257,7 +257,7 @@ describe('DoculaBuilder', () => {
 			data.outputPath = 'test/temp-index-test';
 
 			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
+				await fs.promises.rm(data.outputPath, {recursive: true});
 			}
 
 			try {
@@ -266,7 +266,7 @@ describe('DoculaBuilder', () => {
 				expect(index).toContain('<title>docula</title>');
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rmdir(data.outputPath, {recursive: true});
+					await fs.promises.rm(data.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -283,7 +283,7 @@ describe('DoculaBuilder', () => {
 				expect(error.message).toBe('No templates found');
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rmdir(data.outputPath, {recursive: true});
+					await fs.promises.rm(data.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -307,7 +307,7 @@ describe('DoculaBuilder', () => {
 			};
 
 			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
+				await fs.promises.rm(data.outputPath, {recursive: true});
 			}
 
 			try {
@@ -316,7 +316,7 @@ describe('DoculaBuilder', () => {
 				expect(index).toContain('<title>docula Releases</title>');
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rmdir(data.outputPath, {recursive: true});
+					await fs.promises.rm(data.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -334,7 +334,7 @@ describe('DoculaBuilder', () => {
 			data.github = undefined;
 
 			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
+				await fs.promises.rm(data.outputPath, {recursive: true});
 			}
 
 			try {
@@ -343,7 +343,7 @@ describe('DoculaBuilder', () => {
 				expect(error.message).toBe('No github data found');
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rmdir(data.outputPath, {recursive: true});
+					await fs.promises.rm(data.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -379,7 +379,7 @@ describe('DoculaBuilder', () => {
 			}];
 
 			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
+				await fs.promises.rm(data.outputPath, {recursive: true});
 			}
 
 			try {
@@ -387,7 +387,7 @@ describe('DoculaBuilder', () => {
 				expect(fs.existsSync(`${data.outputPath}/docs/document.html`)).toBe(true);
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rmdir(data.outputPath, {recursive: true});
+					await fs.promises.rm(data.outputPath, {recursive: true});
 				}
 			}
 		});
@@ -400,7 +400,7 @@ describe('DoculaBuilder', () => {
 			data.outputPath = 'test/temp-index-test';
 
 			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rmdir(data.outputPath, {recursive: true});
+				await fs.promises.rm(data.outputPath, {recursive: true});
 			}
 
 			try {
