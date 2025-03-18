@@ -304,19 +304,25 @@ footer img {
   background-color: var(--code);
 }
 
+.content table,
+.content th,
+.content td {
+  border: 1px solid var(--border);
+}
+
 .content table {
-  margin: 1rem 0;
-  display: block;
-  overflow-x: auto;
-  white-space: nowrap;
+  border-collapse: collapse;
 }
 
 .content table thead {
   color: var(--color-primary);
 }
 
-.content table, tr, td {
-  border: none;
+.content table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.content table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
 }
 
 .content table td {
