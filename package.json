@@ -76,10 +76,7 @@
       "vitest.config.*",
       "bin/docula.js",
       "docula.d.ts"
-    ],
-    "rules": {
-      "n/file-extension-in-import": "off"
-    }
+    ]
   },
   "files": [
     "dist",
