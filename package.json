@@ -56,16 +56,16 @@
     "writr": "^4.4.1"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
+    "@types/express": "^5.0.1",
     "@types/he": "^1.2.3",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.14.1",
     "@types/serve-handler": "^6.1.4",
     "@types/update-notifier": "^6.0.8",
     "@vitest/coverage-v8": "^3.0.9",
     "rimraf": "^6.0.1",
     "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "vitest": "^3.0.9",
     "webpack": "^5.99.6",
     "xo": "^0.60.0"
