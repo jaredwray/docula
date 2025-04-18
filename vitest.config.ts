@@ -10,7 +10,7 @@ export default defineConfig({
 				'src/helpers/markdown.ts',
 				'site/dist/**',
 				'site/**',
-				'vitest.config.mjs',
+				'vitest.config.ts',
 				'dist/**',
 				'test/**',
 				".git/**",
