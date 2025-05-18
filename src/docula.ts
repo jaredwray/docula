@@ -7,6 +7,9 @@ import updateNotifier from 'update-notifier';
 import {DoculaOptions} from './options.js';
 import {DoculaConsole} from './console.js';
 import {DoculaBuilder} from './builder.js';
+import {
+	doculaconfigmjs, faviconico, logopng, variablescss,
+} from './init.js';
 
 export default class Docula {
 	private _options: DoculaOptions = new DoculaOptions();
@@ -172,15 +175,19 @@ export default class Docula {
 		}
 
 		// Add the docula.config file based on js or ts
-		const doculaConfigFile = './init/docula.config.mjs';
-		fs.copyFileSync(doculaConfigFile, `${sitePath}/docula.config.mjs`);
+		const doculaConfigFile = `${sitePath}/docula.config.mjs`;
+		const doculaConfigFileBuffer = Buffer.from(doculaconfigmjs, 'base64');
+		fs.writeFileSync(doculaConfigFile, doculaConfigFileBuffer);
 
 		// Add in the image and favicon
-		fs.copyFileSync('./init/logo.png', `${sitePath}/logo.png`);
-		fs.copyFileSync('./init/favicon.ico', `${sitePath}/favicon.ico`);
+		const logoBuffer = Buffer.from(logopng, 'base64');
+		fs.writeFileSync(`${sitePath}/logo.png`, logoBuffer);
+		const faviconBuffer = Buffer.from(faviconico, 'base64');
+		fs.writeFileSync(`${sitePath}/favicon.ico`, faviconBuffer);
 
 		// Add in the variables file
-		fs.copyFileSync('./init/variables.css', `${sitePath}/variables.css`);
+		const variablesBuffer = Buffer.from(variablescss, 'base64');
+		fs.writeFileSync(`${sitePath}/variables.css`, variablesBuffer);
 
 		// Output the instructions
 		this._console.log(`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and stype the site with site.css file.`);
