@@ -50,7 +50,7 @@
     "axios": "^1.9.0",
     "cheerio": "^1.0.0",
     "ecto": "^4.2.4",
-    "feed": "^5.0.1",
+    "feed": "^5.1.0",
     "he": "^1.2.0",
     "serve-handler": "^6.1.6",
     "update-notifier": "^7.3.1",
