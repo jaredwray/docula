@@ -41,7 +41,6 @@ export class Github {
 			const result = await axios.get(url);
 
 			if (result && result.data.length > 0) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 				return this.addAnchorLink(result.data as any[]);
 			}
 
@@ -61,7 +60,6 @@ export class Github {
 		try {
 			const result = await axios.get(url);
 			if (result && result.data.length > 0) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 				return result.data;
 			}
 		} catch (error: unknown) {

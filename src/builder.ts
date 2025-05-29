@@ -212,10 +212,12 @@ export class DoculaBuilder {
 				templates.releases = releases;
 			}
 
-			const documentPage = hasDocuments ? await this.getTemplateFile(
-				options.templatePath,
-				'docs',
-			) : undefined;
+			const documentPage = hasDocuments
+				? await this.getTemplateFile(
+					options.templatePath,
+					'docs',
+				)
+				: undefined;
 
 			if (documentPage) {
 				templates.docPage = documentPage;
@@ -484,9 +486,7 @@ export class DoculaBuilder {
 
 	public mergeSectionWithOptions(section: DoculaSection, options: DoculaOptions): DoculaSection {
 		if (options.sections) {
-			const sectionOptions = options.sections.find(
-				sectionOption => sectionOption.path === section.path,
-			);
+			const sectionOptions = options.sections.find(sectionOption => sectionOption.path === section.path);
 
 			if (sectionOptions) {
 				section.name = sectionOptions.name;
@@ -519,15 +519,15 @@ export class DoculaBuilder {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			title: matterData.title,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			navTitle: matterData.navTitle || matterData.title,
+			navTitle: matterData.navTitle ?? matterData.title,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			description: matterData.description || '',
+			description: matterData.description ?? '',
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			order: matterData.order || undefined,
+			order: matterData.order ?? undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			section: matterData.section || undefined,
+			section: matterData.section ?? undefined,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			keywords: matterData.keywords || [],
+			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,
 			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
