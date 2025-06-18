@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
@@ -70,9 +70,8 @@ export default class Docula {
 	public checkForUpdates(): void {
 		const packageJsonPath = path.join(process.cwd(), 'package.json');
 		if (fs.existsSync(packageJsonPath)) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			updateNotifier({pkg: packageJson}).notify();
 		}
 	}
@@ -218,7 +217,6 @@ export default class Docula {
 		if (fs.existsSync(sitePath)) {
 			const configFile = `${sitePath}/docula.config.mjs`;
 			if (fs.existsSync(configFile)) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				this._configFileModule = await import(configFile);
 			}
 		}

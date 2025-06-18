@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import axios from 'axios';
 
 export type GithubOptions = {
@@ -28,9 +28,9 @@ export class Github {
 			releases: {},
 			contributors: {},
 		};
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 		data.releases = await this.getReleases();
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 		data.contributors = await this.getContributors();
 
 		return data as GithubData;
@@ -85,7 +85,7 @@ export class Github {
 	private addAnchorLink(data: any[]): any[] {
 		return data.map(release => {
 			const regex = /(?<!]\()(https:\/\/[\w./]+)(?!\))/g;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			release.body = release.body.replaceAll(regex, '[$1]($1)');
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			return release;

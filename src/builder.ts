@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import fs from 'node:fs';
 import {Ecto} from 'ecto';
 import {Writr} from 'writr';

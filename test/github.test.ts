@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
 	afterEach, beforeEach, describe, expect, it, vi,
 } from 'vitest';
@@ -21,7 +20,6 @@ describe('Github', () => {
 		vi.resetAllMocks();
 	});
 	beforeEach(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		(axios.get as any).mockImplementation(async (url: string) => {
 			if (url.endsWith('releases')) {
 				return {data: githubMockReleases};
@@ -54,7 +52,7 @@ describe('Github', () => {
 	it('should be able to get the contributors', async () => {
 		const github = new Github(defaultOptions);
 		// @ts-expect-error - mock
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 		axios.get.mockResolvedValue({data: githubMockContributors});
 
 		const result = await github.getContributors();
@@ -69,7 +67,7 @@ describe('Github', () => {
 			},
 		};
 		// @ts-expect-error - mock
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 		axios.get.mockRejectedValue(errorResponse);
 
 		await expect(github.getContributors()).rejects.toThrow(`Repository ${defaultOptions.author}/${defaultOptions.repo} not found.`);
@@ -83,7 +81,7 @@ describe('Github', () => {
 			},
 		};
 		// @ts-expect-error - mock
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 		axios.get.mockRejectedValue(errorResponse);
 
 		await expect(github.getContributors()).rejects.toThrow();
@@ -91,7 +89,7 @@ describe('Github', () => {
 	it('should be able to get the releases', async () => {
 		const github = new Github(defaultOptions);
 		// @ts-expect-error - mock
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 		axios.get.mockResolvedValue({data: githubMockReleases});
 
 		const result = await github.getReleases();
@@ -107,7 +105,7 @@ describe('Github', () => {
 			},
 		};
 		// @ts-expect-error - mock
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 		axios.get.mockRejectedValue(errorResponse);
 
 		await expect(github.getReleases()).rejects.toThrow(`Repository ${defaultOptions.author}/${defaultOptions.repo} not found.`);
@@ -121,7 +119,7 @@ describe('Github', () => {
 			},
 		};
 		// @ts-expect-error - mock
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 		axios.get.mockRejectedValue(errorResponse);
 
 		await expect(github.getReleases()).rejects.toThrow();

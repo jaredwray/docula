@@ -73,6 +73,10 @@
     "xo": "^1.1.0"
   },
   "xo": {
+    "rules": {
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off"
+    },
     "ignores": [
       "docula.config.*",
       "vitest.config.*",

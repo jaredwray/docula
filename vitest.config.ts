@@ -15,7 +15,7 @@ export default defineConfig({
 				'vitest.config.ts',
 				'dist/**',
 				'test/**',
-				".git/**",
+				'.git/**',
 			],
 		},
 	},
