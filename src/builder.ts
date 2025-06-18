@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import fs from 'node:fs';
 import {Ecto} from 'ecto';
 import {Writr} from 'writr';
@@ -516,17 +517,17 @@ export class DoculaBuilder {
 		}
 
 		return {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			title: matterData.title,
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			navTitle: matterData.navTitle ?? matterData.title,
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			description: matterData.description ?? '',
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			order: matterData.order ?? undefined,
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			section: matterData.section ?? undefined,
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,

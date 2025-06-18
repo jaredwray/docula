@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import axios from 'axios';
 
 export type GithubOptions = {
@@ -84,7 +85,7 @@ export class Github {
 	private addAnchorLink(data: any[]): any[] {
 		return data.map(release => {
 			const regex = /(?<!]\()(https:\/\/[\w./]+)(?!\))/g;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			release.body = release.body.replaceAll(regex, '[$1]($1)');
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			return release;

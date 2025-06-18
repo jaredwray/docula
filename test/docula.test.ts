@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call */
 import process from 'node:process';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -30,7 +30,6 @@ describe('docula', () => {
 		vi.resetAllMocks();
 	});
 	beforeEach(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		(axios.get as any).mockImplementation(async (url: string) => {
 			if (url.endsWith('releases')) {
 				return {data: githubMockReleases};
@@ -364,7 +363,6 @@ describe('docula config file', () => {
 			}
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		await docula.configFileModule.onPrepare();
 		expect(consoleMessage).toContain('onPrepare');
 		console.info = consoleLog;

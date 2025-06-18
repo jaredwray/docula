@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
@@ -106,7 +107,6 @@ export default class Docula {
 		// Run the onPrepare function
 		if (this._configFileModule.onPrepare) {
 			try {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 				await this._configFileModule.onPrepare(this.options);
 			} catch (error) {
 				this._console.error((error as Error).message);
