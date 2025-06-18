@@ -47,7 +47,7 @@
     "docula": "./bin/docula.mjs"
   },
   "dependencies": {
-    "axios": "^1.9.0",
+    "axios": "^1.10.0",
     "cheerio": "^1.1.0",
     "ecto": "^4.3.0",
     "feed": "^5.1.0",
