@@ -13,6 +13,7 @@
 - [Getting Started](#getting-started)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
+- [Using a Github Token](#using-a-github-token)
 - [Helper Functions for Markdown](#helper-functions-for-markdown)
 - [Code of Conduct and Contributing](#code-of-conduct-and-contributing)
 - [License - MIT](#license)
@@ -85,6 +86,10 @@ The `readme.md` file will be the root page and the rest will be added to the tab
 title: Getting Started
 order: 2
 ```
+
+# Using a Github Token
+
+If you want to use the Github token to access the Github API you can do so by setting the `GITHUB_TOKEN` environment variable. This is useful if you want to access private repositories or if you want to access the Github API without hitting the rate limit. This is optional and you can still use docula without it but could hit rate limits and will not be able to access private repositories.
 
 # Helper Functions for Markdown
 
