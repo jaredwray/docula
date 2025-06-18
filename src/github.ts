@@ -1,4 +1,5 @@
 
+import process, {config} from 'node:process';
 import axios from 'axios';
 
 export type GithubOptions = {
@@ -38,8 +39,20 @@ export class Github {
 
 	async getReleases(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/releases`;
+		let config = {};
+		if (process.env.GITHUB_TOKEN) {
+			config = {
+				headers: {
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					Accept: 'application/vnd.github.v3+json',
+				},
+			};
+		}
+
 		try {
-			const result = await axios.get(url);
+			const result = await axios.get(url, config);
 
 			if (result && result.data.length > 0) {
 				return this.addAnchorLink(result.data as any[]);
@@ -58,8 +71,20 @@ export class Github {
 
 	async getContributors(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/contributors`;
+		let config = {};
+		if (process.env.GITHUB_TOKEN) {
+			config = {
+				headers: {
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					Accept: 'application/vnd.github.v3+json',
+				},
+			};
+		}
+
 		try {
-			const result = await axios.get(url);
+			const result = await axios.get(url, config);
 			if (result && result.data.length > 0) {
 				return result.data;
 			}

@@ -1,7 +1,9 @@
+import process from 'node:process';
 import {
 	afterEach, beforeEach, describe, expect, it, vi,
 } from 'vitest';
 import axios from 'axios';
+import dotenv from 'dotenv';
 import {Github, type GithubOptions} from '../src/github.js';
 import githubMockContributors from './fixtures/data-mocks/github-contributors.json';
 import githubMockReleases from './fixtures/data-mocks/github-releases.json';
@@ -133,5 +135,20 @@ describe('Github', () => {
 		expect(result).toBeDefined();
 		githubReleases.mockRestore();
 		githubContributors.mockRestore();
+	});
+});
+
+describe('docula with github token', () => {
+	it('should generate the site init files and folders with github token', async () => {
+		// Load environment variables from .env file
+		dotenv.config();
+		if (process.env.GITHUB_TOKEN) {
+			console.info('GITHUB_TOKEN is set, running test with token');
+			const github = new Github(defaultOptions);
+			const result = await github.getData();
+			expect(result).toBeDefined();
+		} else {
+			console.warn('Skipping test: GITHUB_TOKEN is not set');
+		}
 	});
 });
