@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
 jobs:
   setup-build-deploy:
     name: Deploy Website
