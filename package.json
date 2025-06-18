@@ -70,9 +70,13 @@
     "typescript": "^5.8.3",
     "vitest": "^3.1.4",
     "webpack": "^5.99.9",
-    "xo": "^1.0.0"
+    "xo": "^1.1.0"
   },
   "xo": {
+    "rules": {
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off"
+    },
     "ignores": [
       "docula.config.*",
       "vitest.config.*",

@@ -27,7 +27,6 @@ describe('DoculaBuilder', () => {
 		vi.resetAllMocks();
 	});
 	beforeEach(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		(axios.get as any).mockImplementation(async (url: string) => {
 			if (url.endsWith('releases')) {
 				return {data: githubMockReleases};

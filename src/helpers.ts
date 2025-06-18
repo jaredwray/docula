@@ -1,3 +1,4 @@
+/* @typescript-eslint/no-unsafe-call */
 import fs from 'node:fs';
 import {Writr} from 'writr';
 
