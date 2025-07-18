@@ -60,7 +60,7 @@
     "@types/express": "^5.0.3",
     "@types/he": "^1.2.3",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.14",
     "@types/serve-handler": "^6.1.4",
     "@types/update-notifier": "^6.0.8",
     "@vitest/coverage-v8": "^3.2.4",
@@ -70,7 +70,7 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
-    "webpack": "^5.99.9",
+    "webpack": "^5.100.2",
     "xo": "^1.2.1"
   },
   "xo": {
