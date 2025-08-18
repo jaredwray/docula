@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -161,7 +159,6 @@ describe("docula execute", () => {
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = (_message) => {};
 
 		process.argv = ["node", "docula"];
@@ -180,7 +177,6 @@ describe("docula execute", () => {
 		const realOutputPath = "test/fixtures/single-page-site/dist1";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = (_message) => {};
 
 		process.argv = ["node", "docula", "-o", realOutputPath];
@@ -249,7 +245,6 @@ describe("docula execute", () => {
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8181"];
 		const consoleLog = console.log;
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = (_message) => {};
 
 		try {
@@ -276,7 +271,6 @@ describe("docula execute", () => {
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8182"];
 		const consoleLog = console.log;
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = (_message) => {};
 
 		try {
@@ -298,7 +292,6 @@ describe("docula execute", () => {
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8183"];
 		const consoleLog = console.log;
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.log = (_message) => {};
 
 		try {
