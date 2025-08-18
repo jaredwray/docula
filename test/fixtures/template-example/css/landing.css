@@ -1,36 +1,36 @@
 /* Landing */
 .home-hero {
-  display: flex;
-  justify-content: center;
-  height: 20vh;
-  padding: 3rem 0 2.5rem;
+	display: flex;
+	justify-content: center;
+	height: 20vh;
+	padding: 3rem 0 2.5rem;
 }
 
 @media screen and (min-width: 768px) {
-  .home-hero {
-    height: 40vh;
-  }
+	.home-hero {
+		height: 40vh;
+	}
 }
 
 .hero-container {
-  margin: 2rem auto 3rem;
-  max-width: 90%;
+	margin: 2rem auto 3rem;
+	max-width: 90%;
 }
 
 .home-container {
-  margin: 0 auto 3rem;
+	margin: 0 auto 3rem;
 }
 
 .home-container h1,
 .hero-container h1 {
-  font-weight: 500;
-  font-size: 1.5rem;
+	font-weight: 500;
+	font-size: 1.5rem;
 }
 
 .home-docs-button {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid var(--color-secondary-dark);
-  border-radius: 0.5rem;
-  color: var(--color-secondary-dark);
-  font-weight: 600;
+	padding: 0.75rem 1.5rem;
+	border: 2px solid var(--color-secondary-dark);
+	border-radius: 0.5rem;
+	color: var(--color-secondary-dark);
+	font-weight: 600;
 }

@@ -1,5 +1,5 @@
-import path from 'node:path';
-import process from 'node:process';
+import path from "node:path";
+import process from "node:process";
 
 export class DoculaConsole {
 	log(message: string): void {
@@ -15,25 +15,33 @@ export class DoculaConsole {
 	}
 
 	printHelp(): void {
-		console.log('   Usage: docula [command] [arguments]');
+		console.log("   Usage: docula [command] [arguments]");
 		console.log();
-		console.log('   Commands:');
-		console.log('     init           Initialize a new project');
-		console.log('     build          Build the project. By default just npx docula will build the project if it finds a ./site folder');
-		console.log('     serve          Serve the project as a local website');
-		console.log('     help           Print this help');
-		console.log('     version        Print the version');
+		console.log("   Commands:");
+		console.log("     init           Initialize a new project");
+		console.log(
+			"     build          Build the project. By default just npx docula will build the project if it finds a ./site folder",
+		);
+		console.log("     serve          Serve the project as a local website");
+		console.log("     help           Print this help");
+		console.log("     version        Print the version");
 		console.log();
-		console.log('   Arguments Build:');
-		console.log('     -w, --watch            watch for changes and rebuild');
-		console.log('     -s, --site             Set the path where site files are located');
-		console.log('     -o, --outputPath       Set the output directory. Default is ./site/dist');
-		console.log('     -t, --templatePath     Set the custom template to use');
+		console.log("   Arguments Build:");
+		console.log("     -w, --watch            watch for changes and rebuild");
+		console.log(
+			"     -s, --site             Set the path where site files are located",
+		);
+		console.log(
+			"     -o, --outputPath       Set the output directory. Default is ./site/dist",
+		);
+		console.log("     -t, --templatePath     Set the custom template to use");
 		console.log();
-		console.log('   Arguments serve:');
-		console.log('     -p, --port         Set the port number used with serve');
-		console.log('     -w, --watch        watch for changes and rebuild');
-		console.log('     -s, --site         Set the path where site files are located');
+		console.log("   Arguments serve:");
+		console.log("     -p, --port         Set the port number used with serve");
+		console.log("     -w, --watch        watch for changes and rebuild");
+		console.log(
+			"     -s, --site         Set the path where site files are located",
+		);
 	}
 
 	public parseProcessArgv(argv: string[]): DoculaConsoleProcess {
@@ -47,45 +55,36 @@ export class DoculaConsole {
 	}
 
 	public getCommand(argv: string[]): string | undefined {
-		let result;
 		for (const argument of argv) {
-			// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 			switch (argument) {
-				case 'init': {
-					result = 'init';
-					break;
+				case "init": {
+					return "init";
 				}
 
-				case 'build': {
-					result = 'build';
-					break;
+				case "build": {
+					return "build";
 				}
 
-				case 'serve': {
-					result = 'serve';
-					break;
+				case "serve": {
+					return "serve";
 				}
 
-				case 'help': {
-					result = 'help';
-					break;
+				case "help": {
+					return "help";
 				}
 
-				case 'version': {
-					result = argument;
-					break;
+				case "version": {
+					return "version";
 				}
 			}
 		}
-
-		return result;
 	}
 
 	public getArguments(argv: string[]): DoculaConsoleArguments {
 		const arguments_ = {
-			sitePath: '',
-			templatePath: '',
-			output: '',
+			sitePath: "",
+			templatePath: "",
+			output: "",
 			watch: false,
 			port: 3000,
 		};
@@ -94,8 +93,8 @@ export class DoculaConsole {
 
 			// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 			switch (argument) {
-				case '-p':
-				case '--port': {
+				case "-p":
+				case "--port": {
 					const portString = argv[i + 1];
 					if (portString !== undefined) {
 						arguments_.port = Number.parseInt(portString, 10);
@@ -104,30 +103,33 @@ export class DoculaConsole {
 					break;
 				}
 
-				case '-o':
-				case '--output': {
+				case "-o":
+				case "--output": {
 					arguments_.output = argv[i + 1];
 					arguments_.output = path.join(process.cwd(), arguments_.output);
 					break;
 				}
 
-				case '-w':
-				case '--watch': {
+				case "-w":
+				case "--watch": {
 					arguments_.watch = true;
 					break;
 				}
 
-				case '-s':
-				case '--site': {
+				case "-s":
+				case "--site": {
 					arguments_.sitePath = argv[i + 1];
 					arguments_.sitePath = path.join(process.cwd(), arguments_.sitePath);
 					break;
 				}
 
-				case '-t':
-				case '--templatePath': {
+				case "-t":
+				case "--templatePath": {
 					arguments_.templatePath = argv[i + 1];
-					arguments_.templatePath = path.join(process.cwd(), arguments_.templatePath);
+					arguments_.templatePath = path.join(
+						process.cwd(),
+						arguments_.templatePath,
+					);
 					break;
 				}
 			}
@@ -150,4 +152,3 @@ type DoculaConsoleArguments = {
 	watch: boolean;
 	port: number;
 };
-

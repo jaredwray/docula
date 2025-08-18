@@ -1,6 +1,5 @@
-
-import process, {config} from 'node:process';
-import axios from 'axios';
+import process from "node:process";
+import axios from "axios";
 
 export type GithubOptions = {
 	api?: string | undefined;
@@ -15,9 +14,9 @@ export type GithubData = {
 
 export class Github {
 	options = {
-		api: 'https://api.github.com',
-		author: '',
-		repo: '',
+		api: "https://api.github.com",
+		author: "",
+		repo: "",
 	};
 
 	constructor(options: GithubOptions) {
@@ -37,16 +36,15 @@ export class Github {
 		return data as GithubData;
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	async getReleases(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/releases`;
 		let config = {};
 		if (process.env.GITHUB_TOKEN) {
 			config = {
 				headers: {
-					// eslint-disable-next-line @typescript-eslint/naming-convention
 					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-					// eslint-disable-next-line @typescript-eslint/naming-convention
-					Accept: 'application/vnd.github.v3+json',
+					Accept: "application/vnd.github.v3+json",
 				},
 			};
 		}
@@ -55,20 +53,24 @@ export class Github {
 			const result = await axios.get(url, config);
 
 			if (result && result.data.length > 0) {
+				// biome-ignore lint/suspicious/noExplicitAny: need to fix
 				return this.addAnchorLink(result.data as any[]);
 			}
 
 			return [];
 		} catch (error: unknown) {
-			const typedError = error as {response: {status: number}};
+			const typedError = error as { response: { status: number } };
 			if (typedError.response?.status === 404) {
-				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+				throw new Error(
+					`Repository ${this.options.author}/${this.options.repo} not found.`,
+				);
 			}
 
 			throw error;
 		}
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	async getContributors(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/contributors`;
 		let config = {};
@@ -78,7 +80,7 @@ export class Github {
 					// eslint-disable-next-line @typescript-eslint/naming-convention
 					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
 					// eslint-disable-next-line @typescript-eslint/naming-convention
-					Accept: 'application/vnd.github.v3+json',
+					Accept: "application/vnd.github.v3+json",
 				},
 			};
 		}
@@ -89,9 +91,11 @@ export class Github {
 				return result.data;
 			}
 		} catch (error: unknown) {
-			const typedError = error as {response: {status: number}};
+			const typedError = error as { response: { status: number } };
 			if (typedError.response?.status === 404) {
-				throw new Error(`Repository ${this.options.author}/${this.options.repo} not found.`);
+				throw new Error(
+					`Repository ${this.options.author}/${this.options.repo} not found.`,
+				);
 			}
 
 			throw error;
@@ -107,11 +111,12 @@ export class Github {
 		this.options.repo = options.repo;
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	private addAnchorLink(data: any[]): any[] {
-		return data.map(release => {
+		return data.map((release) => {
 			const regex = /(?<!]\()(https:\/\/[\w./]+)(?!\))/g;
 
-			release.body = release.body.replaceAll(regex, '[$1]($1)');
+			release.body = release.body.replaceAll(regex, "[$1]($1)");
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			return release;
 		});
