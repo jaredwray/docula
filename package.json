@@ -54,7 +54,7 @@
     "he": "^1.2.0",
     "serve-handler": "^6.1.6",
     "update-notifier": "^7.3.1",
-    "writr": "^4.4.5"
+    "writr": "^4.4.6"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
