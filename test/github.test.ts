@@ -141,7 +141,7 @@ describe('Github', () => {
 describe('docula with github token', () => {
 	it('should generate the site init files and folders with github token', async () => {
 		// Load environment variables from .env file
-		dotenv.config();
+		dotenv.config({quiet: true});
 		if (process.env.GITHUB_TOKEN) {
 			console.info('GITHUB_TOKEN is set, running test with token');
 			const github = new Github(defaultOptions);
