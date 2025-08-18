@@ -1,20 +1,18 @@
-
-import http from 'node:http';
-import path from 'node:path';
-import process from 'node:process';
-import fs from 'node:fs';
-import handler from 'serve-handler';
-import updateNotifier from 'update-notifier';
-import {DoculaOptions} from './options.js';
-import {DoculaConsole} from './console.js';
-import {DoculaBuilder} from './builder.js';
-import {
-	doculaconfigmjs, faviconico, logopng, variablescss,
-} from './init.js';
+import fs from "node:fs";
+import http from "node:http";
+import path from "node:path";
+import process from "node:process";
+import handler from "serve-handler";
+import updateNotifier from "update-notifier";
+import { DoculaBuilder } from "./builder.js";
+import { DoculaConsole } from "./console.js";
+import { doculaconfigmjs, faviconico, logopng, variablescss } from "./init.js";
+import { DoculaOptions } from "./options.js";
 
 export default class Docula {
 	private _options: DoculaOptions = new DoculaOptions();
 	private readonly _console: DoculaConsole = new DoculaConsole();
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	private _configFileModule: any = {};
 	private _server: http.Server | undefined;
 
@@ -58,8 +56,8 @@ export default class Docula {
 	 * The config file module. This is the module that is loaded from the docula.config.mjs file
 	 * @returns {any}
 	 */
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	public get configFileModule(): any {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return this._configFileModule;
 	}
 
@@ -68,11 +66,11 @@ export default class Docula {
 	 * @returns {void}
 	 */
 	public checkForUpdates(): void {
-		const packageJsonPath = path.join(process.cwd(), 'package.json');
+		const packageJsonPath = path.join(process.cwd(), "package.json");
 		if (fs.existsSync(packageJsonPath)) {
-			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
-			updateNotifier({pkg: packageJson}).notify();
+			updateNotifier({ pkg: packageJson }).notify();
 		}
 	}
 
@@ -100,7 +98,10 @@ export default class Docula {
 
 		// Parse the config file
 		if (this._configFileModule.options) {
-			this.options.parseOptions(this._configFileModule.options as Record<string, any>);
+			this.options.parseOptions(
+				// biome-ignore lint/suspicious/noExplicitAny: need to fix
+				this._configFileModule.options as Record<string, any>,
+			);
 		}
 
 		// Run the onPrepare function
@@ -116,24 +117,23 @@ export default class Docula {
 			this.options.outputPath = consoleProcess.args.output;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 		switch (consoleProcess.command) {
-			case 'init': {
+			case "init": {
 				this.generateInit(this.options.sitePath);
 				break;
 			}
 
-			case 'help': {
+			case "help": {
 				this._console.printHelp();
 				break;
 			}
 
-			case 'version': {
+			case "version": {
 				this._console.log(this.getVersion());
 				break;
 			}
 
-			case 'serve': {
+			case "serve": {
 				const builder = new DoculaBuilder(this.options);
 				await builder.build();
 				await this.serve(this.options);
@@ -176,26 +176,23 @@ export default class Docula {
 
 		// Add the docula.config file based on js or ts
 		const doculaConfigFile = `${sitePath}/docula.config.mjs`;
-		// eslint-disable-next-line n/prefer-global/buffer
-		const doculaConfigFileBuffer = Buffer.from(doculaconfigmjs, 'base64');
+		const doculaConfigFileBuffer = Buffer.from(doculaconfigmjs, "base64");
 		fs.writeFileSync(doculaConfigFile, doculaConfigFileBuffer);
 
 		// Add in the image and favicon
-		// eslint-disable-next-line n/prefer-global/buffer
-		const logoBuffer = Buffer.from(logopng, 'base64');
+		const logoBuffer = Buffer.from(logopng, "base64");
 		fs.writeFileSync(`${sitePath}/logo.png`, logoBuffer);
-		// eslint-disable-next-line n/prefer-global/buffer
-		const faviconBuffer = Buffer.from(faviconico, 'base64');
+		const faviconBuffer = Buffer.from(faviconico, "base64");
 		fs.writeFileSync(`${sitePath}/favicon.ico`, faviconBuffer);
 
 		// Add in the variables file
-		// eslint-disable-next-line n/prefer-global/buffer
-		const variablesBuffer = Buffer.from(variablescss, 'base64');
+		const variablesBuffer = Buffer.from(variablescss, "base64");
 		fs.writeFileSync(`${sitePath}/variables.css`, variablesBuffer);
 
 		// Output the instructions
-		// eslint-disable-next-line @stylistic/max-len
-		this._console.log(`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and stype the site with site.css file.`);
+		this._console.log(
+			`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and style the site with site.css file.`,
+		);
 	}
 
 	/**
@@ -203,8 +200,8 @@ export default class Docula {
 	 * @returns {string}
 	 */
 	public getVersion(): string {
-		const packageJson = fs.readFileSync('./package.json', 'utf8');
-		const packageObject = JSON.parse(packageJson) as {version: string};
+		const packageJson = fs.readFileSync("./package.json", "utf8");
+		const packageObject = JSON.parse(packageJson) as { version: string };
 		return packageObject.version;
 	}
 
@@ -232,8 +229,8 @@ export default class Docula {
 			this._server.close();
 		}
 
-		const {port} = options;
-		const {outputPath} = options;
+		const { port } = options;
+		const { outputPath } = options;
 
 		const config = {
 			public: outputPath,
@@ -241,7 +238,8 @@ export default class Docula {
 
 		this._server = http.createServer(async (request, response) =>
 			/* c8 ignore next */
-			handler(request, response, config));
+			handler(request, response, config),
+		);
 
 		this._server.listen(port, () => {
 			this._console.log(`Docula 🦇 at http://localhost:${port}`);
@@ -251,4 +249,4 @@ export default class Docula {
 	}
 }
 
-export {DoculaHelpers} from './helpers.js';
+export { DoculaHelpers } from "./helpers.js";

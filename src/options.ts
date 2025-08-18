@@ -1,37 +1,38 @@
-
-import path from 'node:path';
-import process from 'node:process';
-import {type DoculaSection} from './builder.js';
+import path from "node:path";
+import process from "node:process";
+import type { DoculaSection } from "./builder.js";
 
 export class DoculaOptions {
 	/**
 	 * Path to the template directory
 	 */
-	public templatePath = path.join(import.meta.url, '../../template').replace('file:', '');
+	public templatePath = path
+		.join(import.meta.url, "../../template")
+		.replace("file:", "");
 	/**
 	 * Path to the output directory
 	 */
-	public outputPath = path.join(process.cwd(), './dist');
+	public outputPath = path.join(process.cwd(), "./dist");
 	/**
 	 * Path to the site directory
 	 */
-	public sitePath = path.join(process.cwd(), './site');
+	public sitePath = path.join(process.cwd(), "./site");
 	/**
 	 * Path to the github repository
 	 */
-	public githubPath = 'jaredwray/docula';
+	public githubPath = "jaredwray/docula";
 	/**
 	 * Site title
 	 */
-	public siteTitle = 'docula';
+	public siteTitle = "docula";
 	/**
 	 * Site description
 	 */
-	public siteDescription = 'Beautiful Website for Your Projects';
+	public siteDescription = "Beautiful Website for Your Projects";
 	/**
 	 * Site URL
 	 */
-	public siteUrl = 'https://docula.org';
+	public siteUrl = "https://docula.org";
 	/**
 	 * Port to run the server
 	 */
@@ -51,6 +52,7 @@ export class DoculaOptions {
 		}
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	public parseOptions(options: Record<string, any>) {
 		if (options.templatePath) {
 			this.templatePath = options.templatePath as string;
@@ -91,7 +93,10 @@ export class DoculaOptions {
 			this.port = options.port as number;
 		}
 
-		if (options.singlePage !== undefined && typeof options.singlePage === 'boolean') {
+		if (
+			options.singlePage !== undefined &&
+			typeof options.singlePage === "boolean"
+		) {
 			this.singlePage = options.singlePage;
 		}
 	}

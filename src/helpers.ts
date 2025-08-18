@@ -1,10 +1,14 @@
-/* @typescript-eslint/no-unsafe-call */
-import fs from 'node:fs';
-import {Writr} from 'writr';
+import fs from "node:fs";
+import { Writr } from "writr";
 
 export class DoculaHelpers {
-	createDoc(path: string, destination: string, frontMatter?: Record<string, string>, contentFunction?: (content: string) => string): void {
-		const content = fs.readFileSync(path, 'utf8');
+	createDoc(
+		path: string,
+		destination: string,
+		frontMatter?: Record<string, string>,
+		contentFunction?: (content: string) => string,
+	): void {
+		const content = fs.readFileSync(path, "utf8");
 
 		let newContent = this.setFrontMatterInContent(content, frontMatter);
 
@@ -12,7 +16,7 @@ export class DoculaHelpers {
 			newContent = contentFunction(newContent);
 		}
 
-		fs.writeFileSync(destination, newContent, 'utf8');
+		fs.writeFileSync(destination, newContent, "utf8");
 	}
 
 	getFrontMatterFromFile(path: string): Record<string, string> {
@@ -26,14 +30,20 @@ export class DoculaHelpers {
 		return writr.frontMatter;
 	}
 
-	setFrontMatterToFile(path: string, frontMatter: Record<string, string>): void {
+	setFrontMatterToFile(
+		path: string,
+		frontMatter: Record<string, string>,
+	): void {
 		const writr = new Writr();
 		writr.loadFromFileSync(path);
 		writr.frontMatter = frontMatter;
-		fs.writeFileSync(path, writr.content, 'utf8');
+		fs.writeFileSync(path, writr.content, "utf8");
 	}
 
-	setFrontMatterInContent(content: string, frontMatter?: Record<string, string>): string {
+	setFrontMatterInContent(
+		content: string,
+		frontMatter?: Record<string, string>,
+	): string {
 		if (!frontMatter) {
 			return content;
 		}
@@ -43,4 +53,3 @@ export class DoculaHelpers {
 		return writr.content;
 	}
 }
-

@@ -32,7 +32,7 @@ jobs:
       run: pnpm build
 
     - name: Testing    
-      run: pnpm test
+      run: pnpm test:ci
       
     - name: Code Coverage
       uses: codecov/codecov-action@v5

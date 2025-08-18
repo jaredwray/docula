@@ -1,12 +1,11 @@
-
-import fs from 'node:fs';
-import {Ecto} from 'ecto';
-import {Writr} from 'writr';
-import he from 'he';
-import * as cheerio from 'cheerio';
-import {DoculaOptions} from './options.js';
-import {DoculaConsole} from './console.js';
-import {Github, type GithubData, type GithubOptions} from './github.js';
+import fs from "node:fs";
+import * as cheerio from "cheerio";
+import { Ecto } from "ecto";
+import he from "he";
+import { Writr } from "writr";
+import { DoculaConsole } from "./console.js";
+import { Github, type GithubData, type GithubOptions } from "./github.js";
+import { DoculaOptions } from "./options.js";
 
 export type DoculaData = {
 	siteUrl: string;
@@ -58,12 +57,12 @@ export class DoculaBuilder {
 	private readonly _ecto: Ecto;
 	private readonly _console: DoculaConsole = new DoculaConsole();
 
+	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	constructor(options?: DoculaOptions, engineOptions?: any) {
 		if (options) {
 			this._options = options;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		this._ecto = new Ecto(engineOptions);
 	}
 
@@ -91,14 +90,23 @@ export class DoculaBuilder {
 		// Get data from github
 		doculaData.github = await this.getGithubData(this.options.githubPath);
 		// Get the documents
-		doculaData.documents = this.getDocuments(`${doculaData.sitePath}/docs`, doculaData);
+		doculaData.documents = this.getDocuments(
+			`${doculaData.sitePath}/docs`,
+			doculaData,
+		);
 		// Get the sections
-		doculaData.sections = this.getSections(`${doculaData.sitePath}/docs`, this.options);
+		doculaData.sections = this.getSections(
+			`${doculaData.sitePath}/docs`,
+			this.options,
+		);
 
 		doculaData.hasDocuments = doculaData.documents?.length > 0;
 
 		// Get the templates to use
-		doculaData.templates = await this.getTemplates(this.options, doculaData.hasDocuments);
+		doculaData.templates = await this.getTemplates(
+			this.options,
+			doculaData.hasDocuments,
+		);
 
 		// Build the home page (index.html)
 		await this.buildIndexPage(doculaData);
@@ -167,24 +175,24 @@ export class DoculaBuilder {
 
 	public validateOptions(options: DoculaOptions): void {
 		if (options.githubPath.length < 3) {
-			throw new Error('No github options provided');
+			throw new Error("No github options provided");
 		}
 
 		if (options.siteDescription.length < 3) {
-			throw new Error('No site description options provided');
+			throw new Error("No site description options provided");
 		}
 
 		if (!options.siteTitle) {
-			throw new Error('No site title options provided');
+			throw new Error("No site title options provided");
 		}
 
 		if (!options.siteUrl) {
-			throw new Error('No site url options provided');
+			throw new Error("No site url options provided");
 		}
 	}
 
 	public async getGithubData(githubPath: string): Promise<GithubData> {
-		const paths = githubPath.split('/');
+		const paths = githubPath.split("/");
 		const options: GithubOptions = {
 			author: paths[0],
 			repo: paths[1],
@@ -193,31 +201,31 @@ export class DoculaBuilder {
 		return github.getData();
 	}
 
-	public async getTemplates(options: DoculaOptions, hasDocuments: boolean): Promise<DoculaTemplates> {
+	public async getTemplates(
+		options: DoculaOptions,
+		hasDocuments: boolean,
+	): Promise<DoculaTemplates> {
 		const templates: DoculaTemplates = {
-			index: '',
-			releases: '',
+			index: "",
+			releases: "",
 		};
 
 		if (fs.existsSync(options.templatePath)) {
-			const index = await this.getTemplateFile(options.templatePath, 'index');
+			const index = await this.getTemplateFile(options.templatePath, "index");
 			if (index) {
 				templates.index = index;
 			}
 
 			const releases = await this.getTemplateFile(
 				options.templatePath,
-				'releases',
+				"releases",
 			);
 			if (releases) {
 				templates.releases = releases;
 			}
 
 			const documentPage = hasDocuments
-				? await this.getTemplateFile(
-					options.templatePath,
-					'docs',
-				)
+				? await this.getTemplateFile(options.templatePath, "docs")
 				: undefined;
 
 			if (documentPage) {
@@ -234,10 +242,10 @@ export class DoculaBuilder {
 		path: string,
 		name: string,
 	): Promise<string | undefined> {
-		let result;
+		let result: string | undefined;
 		const files = await fs.promises.readdir(path);
 		for (const file of files) {
-			const fileName = file.split('.');
+			const fileName = file.split(".");
 			if (fileName[0].toString().toLowerCase() === name.toLowerCase()) {
 				result = file.toString();
 				break;
@@ -248,56 +256,56 @@ export class DoculaBuilder {
 	}
 
 	public async buildRobotsPage(options: DoculaOptions): Promise<void> {
-		const {sitePath} = options;
-		const {outputPath} = options;
+		const { sitePath } = options;
+		const { outputPath } = options;
 		const robotsPath = `${outputPath}/robots.txt`;
 
-		await fs.promises.mkdir(outputPath, {recursive: true});
+		await fs.promises.mkdir(outputPath, { recursive: true });
 
-		await ((fs.existsSync(`${sitePath}/robots.txt`))
+		await (fs.existsSync(`${sitePath}/robots.txt`)
 			? fs.promises.copyFile(`${sitePath}/robots.txt`, robotsPath)
-			: fs.promises.writeFile(robotsPath, 'User-agent: *\nDisallow:'));
+			: fs.promises.writeFile(robotsPath, "User-agent: *\nDisallow:"));
 	}
 
 	public async buildSiteMapPage(data: DoculaData): Promise<void> {
 		const sitemapPath = `${data.outputPath}/sitemap.xml`;
-		const urls = [{url: data.siteUrl}, {url: `${data.siteUrl}/releases`}];
+		const urls = [{ url: data.siteUrl }, { url: `${data.siteUrl}/releases` }];
 
 		// Add all the document urls
 		for (const document of data.documents ?? []) {
-			let {urlPath} = document;
-			if (urlPath.endsWith('index.html')) {
+			let { urlPath } = document;
+			if (urlPath.endsWith("index.html")) {
 				urlPath = urlPath.slice(0, -10);
 			}
 
-			urls.push({url: `${data.siteUrl}${urlPath}`});
+			urls.push({ url: `${data.siteUrl}${urlPath}` });
 		}
 
 		let xml = '<?xml version="1.0" encoding="UTF-8"?>';
 		xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-		for (const {url} of urls) {
-			xml += '<url>';
+		for (const { url } of urls) {
+			xml += "<url>";
 			xml += `<loc>${url}</loc>`;
-			xml += '</url>';
+			xml += "</url>";
 		}
 
-		xml += '</urlset>';
+		xml += "</urlset>";
 
-		await fs.promises.mkdir(data.outputPath, {recursive: true});
+		await fs.promises.mkdir(data.outputPath, { recursive: true });
 
-		await fs.promises.writeFile(sitemapPath, xml, 'utf8');
+		await fs.promises.writeFile(sitemapPath, xml, "utf8");
 	}
 
 	public async buildIndexPage(data: DoculaData): Promise<void> {
 		if (data.templates) {
 			const indexPath = `${data.outputPath}/index.html`;
 
-			await fs.promises.mkdir(data.outputPath, {recursive: true});
+			await fs.promises.mkdir(data.outputPath, { recursive: true });
 
 			const indexTemplate = `${data.templatePath}/${data.templates.index}`;
 
-			let content;
+			let content: string | undefined;
 
 			if (!data.hasDocuments) {
 				content = await this.buildReadmeSection(data);
@@ -305,12 +313,12 @@ export class DoculaBuilder {
 
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
-				{...data, content},
+				{ ...data, content },
 				data.templatePath,
 			);
-			await fs.promises.writeFile(indexPath, indexContent, 'utf8');
+			await fs.promises.writeFile(indexPath, indexContent, "utf8");
 		} else {
-			throw new Error('No templates found');
+			throw new Error("No templates found");
 		}
 	}
 
@@ -319,7 +327,7 @@ export class DoculaBuilder {
 			const releasesPath = `${data.outputPath}/releases/index.html`;
 			const releaseOutputPath = `${data.outputPath}/releases`;
 
-			await fs.promises.mkdir(releaseOutputPath, {recursive: true});
+			await fs.promises.mkdir(releaseOutputPath, { recursive: true });
 
 			const releasesTemplate = `${data.templatePath}/${data.templates.releases}`;
 			const releasesContent = await this._ecto.renderFromFile(
@@ -327,20 +335,24 @@ export class DoculaBuilder {
 				data,
 				data.templatePath,
 			);
-			await fs.promises.writeFile(releasesPath, releasesContent, 'utf8');
+			await fs.promises.writeFile(releasesPath, releasesContent, "utf8");
 		} else {
-			throw new Error('No github data found');
+			throw new Error("No github data found");
 		}
 	}
 
 	public async buildReadmeSection(data: DoculaData): Promise<string> {
-		let htmlReadme = '';
+		let htmlReadme = "";
 		if (fs.existsSync(`${data.sitePath}/README.md`)) {
 			const readmeContent = fs.readFileSync(
 				`${data.sitePath}/README.md`,
-				'utf8',
+				"utf8",
 			);
-			htmlReadme = await this._ecto.render(readmeContent, undefined, 'markdown');
+			htmlReadme = await this._ecto.render(
+				readmeContent,
+				undefined,
+				"markdown",
+			);
 		}
 
 		return htmlReadme;
@@ -349,44 +361,54 @@ export class DoculaBuilder {
 	public async buildDocsPages(data: DoculaData): Promise<void> {
 		if (data.templates && data.documents?.length) {
 			const documentsTemplate = `${data.templatePath}/${data.templates.docPage}`;
-			await fs.promises.mkdir(`${data.outputPath}/docs`, {recursive: true});
+			await fs.promises.mkdir(`${data.outputPath}/docs`, { recursive: true });
 			data.sidebarItems = this.generateSidebarItems(data);
 
-			const promises = data.documents.map(async document => {
-				const folder = document.urlPath.split('/').slice(0, -1).join('/');
-				await fs.promises.mkdir(`${data.outputPath}/${folder}`, {recursive: true});
+			const promises = data.documents.map(async (document) => {
+				const folder = document.urlPath.split("/").slice(0, -1).join("/");
+				await fs.promises.mkdir(`${data.outputPath}/${folder}`, {
+					recursive: true,
+				});
 				const slug = `${data.outputPath}${document.urlPath}`;
 				let documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
-					{...data, ...document},
+					{ ...data, ...document },
 					data.templatePath,
 				);
 				documentContent = he.decode(documentContent);
 
-				return fs.promises.writeFile(slug, documentContent, 'utf8');
+				return fs.promises.writeFile(slug, documentContent, "utf8");
 			});
 			await Promise.all(promises);
 		} else {
-			throw new Error('No templates found');
+			throw new Error("No templates found");
 		}
 	}
 
 	public generateSidebarItems(data: DoculaData): DoculaSection[] {
 		let sidebarItems = [...(data.sections ?? [])];
 
-		for (const document of (data.documents ?? [])) {
+		for (const document of data.documents ?? []) {
 			if (document.isRoot) {
 				sidebarItems.unshift({
-					path: document.urlPath.replace('index.html', ''),
+					path: document.urlPath.replace("index.html", ""),
 					name: document.navTitle,
 					order: document.order,
 				});
 			} else {
-				const relativeFilePath = document.documentPath.replace(`${data.sitePath}/docs/`, '');
-				const sectionPath = relativeFilePath.slice(0, Math.max(0, relativeFilePath.lastIndexOf('/')));
+				const relativeFilePath = document.documentPath.replace(
+					`${data.sitePath}/docs/`,
+					"",
+				);
+				const sectionPath = relativeFilePath.slice(
+					0,
+					Math.max(0, relativeFilePath.lastIndexOf("/")),
+				);
 				const documentSection = document.section ?? sectionPath;
 
-				const sectionIndex = sidebarItems.findIndex(section => section.path === documentSection);
+				const sectionIndex = sidebarItems.findIndex(
+					(section) => section.path === documentSection,
+				);
 
 				if (sectionIndex === -1) {
 					continue;
@@ -395,7 +417,7 @@ export class DoculaBuilder {
 				sidebarItems[sectionIndex].children ??= [];
 
 				sidebarItems[sectionIndex].children.push({
-					path: document.urlPath.replace('index.html', ''),
+					path: document.urlPath.replace("index.html", ""),
 					name: document.navTitle,
 					order: document.order,
 				});
@@ -403,22 +425,34 @@ export class DoculaBuilder {
 		}
 
 		// Sort the sidebarItems children
-		sidebarItems = sidebarItems.map(section => {
+		sidebarItems = sidebarItems.map((section) => {
 			if (section.children) {
-				section.children.sort((a, b) => (a.order ?? section.children!.length) - (b.order ?? section.children!.length));
+				section.children.sort(
+					(a, b) =>
+						// biome-ignore lint/style/noNonNullAssertion: need to fix
+						(a.order ?? section.children!.length) -
+						// biome-ignore lint/style/noNonNullAssertion: need to fix
+						(b.order ?? section.children!.length),
+				);
 			}
 
 			return section;
 		});
 
 		// Sort the sidebarItems
-		sidebarItems.sort((a, b) => (a.order ?? sidebarItems.length) - (b.order ?? sidebarItems.length));
+		sidebarItems.sort(
+			(a, b) =>
+				(a.order ?? sidebarItems.length) - (b.order ?? sidebarItems.length),
+		);
 
 		return sidebarItems;
 	}
 
-	public getDocuments(sitePath: string, doculaData: DoculaData): DoculaDocument[] {
-		let documents = new Array<DoculaDocument>();
+	public getDocuments(
+		sitePath: string,
+		doculaData: DoculaData,
+	): DoculaDocument[] {
+		let documents: DoculaDocument[] = [];
 		if (fs.existsSync(sitePath)) {
 			// Get top level documents
 			documents = this.getDocumentInDirectory(sitePath);
@@ -438,7 +472,7 @@ export class DoculaBuilder {
 	}
 
 	public getDocumentInDirectory(sitePath: string): DoculaDocument[] {
-		const documents = new Array<DoculaDocument>();
+		const documents: DoculaDocument[] = [];
 		const documentList = fs.readdirSync(sitePath);
 		if (documentList.length > 0) {
 			for (const document of documentList) {
@@ -452,13 +486,18 @@ export class DoculaBuilder {
 		}
 
 		// Sort the documents by order
-		documents.sort((a, b) => (a.order ?? documents.length) - (b.order ?? documents.length));
+		documents.sort(
+			(a, b) => (a.order ?? documents.length) - (b.order ?? documents.length),
+		);
 
 		return documents;
 	}
 
-	public getSections(sitePath: string, doculaOptions: DoculaOptions): DoculaSection[] {
-		const sections = new Array<DoculaSection>();
+	public getSections(
+		sitePath: string,
+		doculaOptions: DoculaOptions,
+	): DoculaSection[] {
+		const sections: DoculaSection[] = [];
 		if (fs.existsSync(sitePath)) {
 			const documentList = fs.readdirSync(sitePath);
 			if (documentList.length > 0) {
@@ -467,7 +506,9 @@ export class DoculaBuilder {
 					const stats = fs.statSync(documentPath);
 					if (stats.isDirectory()) {
 						const section: DoculaSection = {
-							name: document.replaceAll('-', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()),
+							name: document
+								.replaceAll("-", " ")
+								.replaceAll(/\b\w/g, (l) => l.toUpperCase()),
 							path: document,
 						};
 
@@ -479,15 +520,22 @@ export class DoculaBuilder {
 			}
 
 			// Sort the sections by order
-			sections.sort((a, b) => (a.order ?? sections.length) - (b.order ?? sections.length));
+			sections.sort(
+				(a, b) => (a.order ?? sections.length) - (b.order ?? sections.length),
+			);
 		}
 
 		return sections;
 	}
 
-	public mergeSectionWithOptions(section: DoculaSection, options: DoculaOptions): DoculaSection {
+	public mergeSectionWithOptions(
+		section: DoculaSection,
+		options: DoculaOptions,
+	): DoculaSection {
 		if (options.sections) {
-			const sectionOptions = options.sections.find(sectionOption => sectionOption.path === section.path);
+			const sectionOptions = options.sections.find(
+				(sectionOption) => sectionOption.path === section.path,
+			);
 
 			if (sectionOptions) {
 				section.name = sectionOptions.name;
@@ -500,29 +548,32 @@ export class DoculaBuilder {
 	}
 
 	public parseDocumentData(documentPath: string): DoculaDocument {
-		const documentContent = fs.readFileSync(documentPath, 'utf8');
+		const documentContent = fs.readFileSync(documentPath, "utf8");
 		const writr = new Writr(documentContent);
 		const matterData = writr.frontMatter;
 		let markdownContent = writr.body;
-		markdownContent = markdownContent.replace(/^# .*\n/, '');
-		const documentsFolderIndex = documentPath.lastIndexOf('/docs/');
-		let urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '/index.html');
-		let isRoot = urlPath.split('/').length === 3;
-		if (!documentPath.slice(documentsFolderIndex + 6).includes('/')) {
+		markdownContent = markdownContent.replace(/^# .*\n/, "");
+		const documentsFolderIndex = documentPath.lastIndexOf("/docs/");
+		let urlPath = documentPath
+			.slice(documentsFolderIndex)
+			.replace(".md", "/index.html");
+		let isRoot = urlPath.split("/").length === 3;
+		if (!documentPath.slice(documentsFolderIndex + 6).includes("/")) {
 			isRoot = true;
 			const filePath = documentPath.slice(documentsFolderIndex + 6);
-			if (filePath === 'index.md') {
-				urlPath = documentPath.slice(documentsFolderIndex).replace('.md', '.html');
+			if (filePath === "index.md") {
+				urlPath = documentPath
+					.slice(documentsFolderIndex)
+					.replace(".md", ".html");
 			}
 		}
 
 		return {
-
 			title: matterData.title,
 
 			navTitle: matterData.navTitle ?? matterData.title,
 
-			description: matterData.description ?? '',
+			description: matterData.description ?? "",
 
 			order: matterData.order ?? undefined,
 
@@ -531,7 +582,11 @@ export class DoculaBuilder {
 			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,
-			generatedHtml: this._ecto.renderSync(markdownContent, undefined, 'markdown'),
+			generatedHtml: this._ecto.renderSync(
+				markdownContent,
+				undefined,
+				"markdown",
+			),
 			tableOfContents: this.getTableOfContents(markdownContent),
 			documentPath,
 			urlPath,
@@ -541,10 +596,10 @@ export class DoculaBuilder {
 
 	private getTableOfContents(markdown: string): string | undefined {
 		markdown = `## Table of Contents\n\n${markdown}`;
-		const html = this._ecto.renderSync(markdown, undefined, 'markdown');
+		const html = this._ecto.renderSync(markdown, undefined, "markdown");
 		const $ = cheerio.load(html);
-		const tocTitle = $('h2').first();
-		const tocContent = tocTitle.next('ul').toString();
+		const tocTitle = $("h2").first();
+		const tocContent = tocTitle.next("ul").toString();
 		if (tocContent) {
 			return tocTitle.toString() + tocContent;
 		}
@@ -557,7 +612,7 @@ export class DoculaBuilder {
 
 		for (const file of files) {
 			/* c8 ignore next 3 */
-			if (file.startsWith('.')) {
+			if (file.startsWith(".")) {
 				continue;
 			}
 
@@ -567,10 +622,10 @@ export class DoculaBuilder {
 			const stat = fs.lstatSync(sourcePath);
 
 			if (stat.isDirectory()) {
-				fs.mkdirSync(targetPath, {recursive: true});
+				fs.mkdirSync(targetPath, { recursive: true });
 				this.copyDirectory(sourcePath, targetPath);
 			} else {
-				fs.mkdirSync(target, {recursive: true});
+				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
 			}
 		}

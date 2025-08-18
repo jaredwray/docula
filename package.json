@@ -36,11 +36,13 @@
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/README.md ./site/dist",
     "build": "pnpm generate-init-file && rimraf ./dist && tsup src/docula.ts --format esm --dts --clean",
-    "serve-mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
-    "test": "xo --fix && vitest run --coverage",
+    "lint": "biome check --write",
+    "test": "pnpm lint && vitest run --coverage",
+    "test:ci": "biome check && vitest run --coverage",
     "generate-init-file": "tsx scripts/generate-init-file.ts",
     "website:build": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site/dist",
     "website:serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site/dist",
+    "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
     "prepare": "pnpm build"
   },
   "bin": {
@@ -57,6 +59,7 @@
     "writr": "^4.4.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
     "@types/express": "^5.0.3",
     "@types/he": "^1.2.3",
     "@types/js-yaml": "^4.0.9",
@@ -70,8 +73,7 @@
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
-    "webpack": "^5.101.3",
-    "xo": "^1.2.1"
+    "webpack": "^5.101.3"
   },
   "xo": {
     "rules": {
