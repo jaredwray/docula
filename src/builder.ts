@@ -63,7 +63,6 @@ export class DoculaBuilder {
 			this._options = options;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		this._ecto = new Ecto(engineOptions);
 	}
 

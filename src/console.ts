@@ -91,7 +91,6 @@ export class DoculaConsole {
 		for (let i = 0; i < argv.length; i++) {
 			const argument = argv[i];
 
-			// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 			switch (argument) {
 				case "-p":
 				case "--port": {

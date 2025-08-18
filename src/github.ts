@@ -77,9 +77,7 @@ export class Github {
 		if (process.env.GITHUB_TOKEN) {
 			config = {
 				headers: {
-					// eslint-disable-next-line @typescript-eslint/naming-convention
 					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-					// eslint-disable-next-line @typescript-eslint/naming-convention
 					Accept: "application/vnd.github.v3+json",
 				},
 			};
@@ -117,7 +115,6 @@ export class Github {
 			const regex = /(?<!]\()(https:\/\/[\w./]+)(?!\))/g;
 
 			release.body = release.body.replaceAll(regex, "[$1]($1)");
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			return release;
 		});
 	}
