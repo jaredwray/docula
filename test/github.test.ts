@@ -59,6 +59,26 @@ describe("Github", () => {
 		const result = await github.getContributors();
 		expect(result).toBeDefined();
 	});
+	it("should use GITHUB_TOKEN for contributors if present", async () => {
+		process.env.GITHUB_TOKEN = "test-token";
+		const github = new Github(defaultOptions);
+		// @ts-expect-error - mock
+		axios.get.mockResolvedValue({ data: githubMockContributors });
+
+		await github.getContributors();
+
+		expect(axios.get).toHaveBeenCalledWith(
+			`${defaultOptions.api}/repos/${defaultOptions.author}/${defaultOptions.repo}/contributors`,
+			{
+				headers: {
+					Authorization: "Bearer test-token",
+					Accept: "application/vnd.github.v3+json",
+				},
+			},
+		);
+
+		delete process.env.GITHUB_TOKEN;
+	});
 	it("should be throw an error on 404", async () => {
 		const github = new Github(defaultOptions);
 		const errorResponse = {
@@ -98,6 +118,34 @@ describe("Github", () => {
 		const result = await github.getReleases();
 
 		expect(result).toBeDefined();
+	});
+	it("should use GITHUB_TOKEN for releases if present", async () => {
+		process.env.GITHUB_TOKEN = "test-token";
+		const github = new Github(defaultOptions);
+		// @ts-expect-error - mock
+		axios.get.mockResolvedValue({ data: githubMockReleases });
+
+		await github.getReleases();
+
+		expect(axios.get).toHaveBeenCalledWith(
+			`${defaultOptions.api}/repos/${defaultOptions.author}/${defaultOptions.repo}/releases`,
+			{
+				headers: {
+					Authorization: "Bearer test-token",
+					Accept: "application/vnd.github.v3+json",
+				},
+			},
+		);
+
+		delete process.env.GITHUB_TOKEN;
+	});
+	it("should return empty array when no releases found", async () => {
+		const github = new Github(defaultOptions);
+		// @ts-expect-error - mock
+		axios.get.mockResolvedValue({ data: [] });
+
+		const result = await github.getReleases();
+		expect(result).toEqual([]);
 	});
 	it("should be throw an error on 404", async () => {
 		const github = new Github(defaultOptions);
