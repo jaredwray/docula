@@ -52,7 +52,7 @@
   "dependencies": {
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
-    "ecto": "^4.4.0",
+    "ecto": "^4.4.2",
     "feed": "^5.1.0",
     "he": "^1.2.0",
     "serve-handler": "^6.1.6",
