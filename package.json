@@ -57,7 +57,7 @@
     "he": "^1.2.0",
     "serve-handler": "^6.1.6",
     "update-notifier": "^7.3.1",
-    "writr": "^4.4.6"
+    "writr": "^4.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
