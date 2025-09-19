@@ -27,6 +27,7 @@
     "generate-init-file": "tsx scripts/generate-init-file.ts",
     "website:build": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site/dist",
     "website:serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site/dist",
+    "website:build:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs build -s ./test/fixtures/mega-page-site",
     "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
     "prepare": "pnpm build"
   },
@@ -52,7 +53,7 @@
   "dependencies": {
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
-    "ecto": "^4.4.3",
+    "ecto": "../ecto",
     "feed": "^5.1.0",
     "he": "^1.2.0",
     "serve-handler": "^6.1.6",
