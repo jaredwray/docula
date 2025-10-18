@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import axios from "axios";
+import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	DoculaBuilder,
@@ -11,7 +11,7 @@ import { DoculaOptions } from "../src/options.js";
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
-vi.mock("axios");
+vi.mock("@cacheable/net");
 
 describe("DoculaBuilder", () => {
 	const doculaData: DoculaData = {
@@ -29,7 +29,7 @@ describe("DoculaBuilder", () => {
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(axios.get as any).mockImplementation(async (url: string) => {
+		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
 			if (url.endsWith("releases")) {
 				return { data: githubMockReleases };
 			}
@@ -147,7 +147,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Get Data", () => {
 		it("should get github data", async () => {
 			const builder = new DoculaBuilder();
-			vi.spyOn(axios, "get").mockResolvedValue({ data: {} });
+			CacheableNet.prototype.get = vi.fn().mockResolvedValue({ data: {} });
 			const githubData = await builder.getGithubData("jaredwray/docula");
 			expect(githubData).toBeTruthy();
 			vi.resetAllMocks();

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import axios from "axios";
+import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Docula, { DoculaHelpers } from "../src/docula.js";
 import { DoculaOptions } from "../src/options.js";
@@ -26,7 +26,7 @@ const defaultOptions: DoculaOptions = new DoculaOptions({
 	siteUrl: "https://custom-url.com",
 });
 
-vi.mock("axios");
+vi.mock("@cacheable/net");
 
 describe("docula", () => {
 	afterEach(() => {
@@ -35,7 +35,7 @@ describe("docula", () => {
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(axios.get as any).mockImplementation(async (url: string) => {
+		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
 			if (url.endsWith("releases")) {
 				return { data: githubMockReleases };
 			}

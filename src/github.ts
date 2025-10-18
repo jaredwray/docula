@@ -1,5 +1,5 @@
 import process from "node:process";
-import axios from "axios";
+import { CacheableNet } from "@cacheable/net";
 
 export type GithubOptions = {
 	api?: string | undefined;
@@ -19,8 +19,11 @@ export class Github {
 		repo: "",
 	};
 
+	private net: CacheableNet;
+
 	constructor(options: GithubOptions) {
 		this.parseOptions(options);
+		this.net = new CacheableNet();
 	}
 
 	async getData(): Promise<GithubData> {
@@ -39,9 +42,9 @@ export class Github {
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	async getReleases(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/releases`;
-		let config = {};
+		let options = {};
 		if (process.env.GITHUB_TOKEN) {
-			config = {
+			options = {
 				headers: {
 					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
 					Accept: "application/vnd.github.v3+json",
@@ -50,7 +53,7 @@ export class Github {
 		}
 
 		try {
-			const result = await axios.get(url, config);
+			const result = await this.net.get(url, options);
 
 			if (result && result.data.length > 0) {
 				// biome-ignore lint/suspicious/noExplicitAny: need to fix
@@ -73,9 +76,9 @@ export class Github {
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	async getContributors(): Promise<any> {
 		const url = `${this.options.api}/repos/${this.options.author}/${this.options.repo}/contributors`;
-		let config = {};
+		let options = {};
 		if (process.env.GITHUB_TOKEN) {
-			config = {
+			options = {
 				headers: {
 					Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
 					Accept: "application/vnd.github.v3+json",
@@ -84,7 +87,7 @@ export class Github {
 		}
 
 		try {
-			const result = await axios.get(url, config);
+			const result = await this.net.get(url, options);
 			if (result && result.data.length > 0) {
 				return result.data;
 			}
