@@ -3,7 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import Docula, { DoculaHelpers } from "../src/docula.js";
+import Docula from "../src/docula.js";
 import { DoculaOptions } from "../src/options.js";
 
 const githubMockContributors = JSON.parse(
@@ -71,16 +71,6 @@ describe("docula", () => {
 		});
 		docula.options = newOptions;
 		expect(docula.options).toEqual(newOptions);
-	});
-	it("should be able to get the helpers", () => {
-		const _docula = new Docula(defaultOptions);
-		const doculaHelpers = new DoculaHelpers();
-		expect(doculaHelpers).toBeDefined();
-	});
-	it("should be able to get the helpers via static", () => {
-		const _docula = new Docula(defaultOptions);
-		const doculaHelpers = new DoculaHelpers();
-		expect(doculaHelpers.createDoc).toBeDefined();
 	});
 	it("is a single page site or not", () => {
 		const docula = new Docula(defaultOptions);
