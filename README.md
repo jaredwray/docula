@@ -14,7 +14,8 @@
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
 - [Using a Github Token](#using-a-github-token)
-- [Helper Functions for Markdown](#helper-functions-for-markdown)
+- [Helpers](#helpers)
+- [Working with Markdown using Writr](#working-with-markdown-using-writr)
 - [Code of Conduct and Contributing](#code-of-conduct-and-contributing)
 - [License - MIT](#license)
 
@@ -91,25 +92,106 @@ order: 2
 
 If you want to use the Github token to access the Github API you can do so by setting the `GITHUB_TOKEN` environment variable. This is useful if you want to access private repositories or if you want to access the Github API without hitting the rate limit. This is optional and you can still use docula without it but could hit rate limits and will not be able to access private repositories.
 
-# Helper Functions for Markdown
+# Helpers
 
-docula comes with some helper functions that you can use in your markdown files.
-* `doculaHelpers.getFrontMatter(fileName)` - Gets the front matter of a markdown file.
-* `doculaHelpers.setFrontMatter(fileName, frontMatter)` - Sets the front matter of a markdown file.
-* `doculaHelpers.createDoc(source, destination, frontMatter?, contentFn[]?)` - Creates a markdown file with the specified front matter and content. The contentFn is a function that is executed on the original content of the file. This is useful if you want to remove content from the original file.
+Docula provides powerful helper utilities through its integration with [Writr](https://writr.org). For all markdown operations including reading files, manipulating content, managing frontmatter, and rendering, you should use the `Writr` class that's exported from Docula.
 
-# Remove html content
+**Instead of custom helper functions, use Writr for:**
+- Loading and saving markdown files
+- Getting and setting frontmatter (metadata)
+- Rendering markdown to HTML
+- Working with markdown content programmatically
 
-In some cases your markdown file will have html content in it such as the logo of your project or a badge. You can use the `doculaHelpers.removeHtmlContent()` helper function to remove that content from the page. Here is an example:
+See the [Working with Markdown using Writr](#working-with-markdown-using-writr) section below for comprehensive examples and usage patterns.
 
-# Get and Set the Front Matter of a Markdown File
+# Working with Markdown using Writr
 
-You can use the `doculaHelpers.getFrontMatter()` and `doculaHelpers.setFrontMatter()` helper functions to get and set the front matter of a markdown file. Here is an example:
+Docula exports [Writr](https://writr.org) for powerful markdown operations including loading files, rendering, and managing frontmatter. Writr provides a simple API for working with markdown content.
+
+## Creating and Loading Markdown
 
 ```js
-const frontMatter = doculaHelpers.getFrontMatter('../readme.md');
-frontMatter.title = 'My Title';
-doculaHelpers.setFrontMatter('../readme.md', frontMatter);
+import { Writr } from 'docula';
+
+// Create a new instance with markdown content
+const writr = new Writr('# Hello World\n\nThis is my content');
+
+// Or load from a file
+const writr = new Writr();
+await writr.loadFromFile('./README.md');
+
+// Synchronous version
+writr.loadFromFileSync('./README.md');
+```
+
+## Getting and Setting Front Matter
+
+Front matter is metadata at the top of markdown files in YAML format. Writr makes it easy to read and modify:
+
+```js
+import { Writr } from 'docula';
+
+const writr = new Writr();
+await writr.loadFromFile('./docs/guide.md');
+
+// Get the entire front matter object
+const frontMatter = writr.frontMatter;
+console.log(frontMatter.title); // 'My Guide'
+
+// Get a specific front matter value
+const title = writr.getFrontMatterValue('title');
+const order = writr.getFrontMatterValue('order');
+
+// Set front matter
+writr.frontMatter = {
+  title: 'Updated Guide',
+  order: 1,
+  author: 'John Doe'
+};
+
+// Save the changes back to the file
+await writr.saveToFile('./docs/guide.md');
+```
+
+## Accessing Markdown Content
+
+```js
+// Get the full content (front matter + markdown)
+const fullContent = writr.content;
+
+// Get just the markdown body (without front matter)
+const markdown = writr.body;
+// or use the alias
+const markdown = writr.markdown;
+
+// Get the raw front matter string (including delimiters)
+const rawFrontMatter = writr.frontMatterRaw;
+
+// Set new content
+writr.content = '---\ntitle: New Title\n---\n# New Content';
+```
+
+## Rendering Markdown to HTML
+
+```js
+// Render to HTML
+const html = await writr.render();
+
+// Synchronous rendering
+const html = writr.renderSync();
+
+// Render with options
+const html = await writr.render({
+  emoji: true,        // Enable emoji support (default: true)
+  toc: true,          // Generate table of contents (default: true)
+  highlight: true,    // Code syntax highlighting (default: true)
+  gfm: true,          // GitHub Flavored Markdown (default: true)
+  math: true,         // Math support (default: true)
+  mdx: true           // MDX support (default: true)
+});
+
+// Render directly to a file
+await writr.renderToFile('./output.html');
 ```
 
 # Code of Conduct and Contributing

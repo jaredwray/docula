@@ -249,4 +249,4 @@ export default class Docula {
 	}
 }
 
-export { DoculaHelpers } from "./helpers.js";
+export { Writr } from "writr";
