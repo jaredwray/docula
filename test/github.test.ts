@@ -1,5 +1,5 @@
 import process from "node:process";
-import axios from "axios";
+import { CacheableNet } from "@cacheable/net";
 import dotenv from "dotenv";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Github, type GithubOptions } from "../src/github.js";
@@ -12,7 +12,7 @@ const defaultOptions: GithubOptions = {
 	repo: "docula",
 };
 
-vi.mock("axios");
+vi.mock("@cacheable/net");
 
 describe("Github", () => {
 	afterEach(() => {
@@ -21,7 +21,7 @@ describe("Github", () => {
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(axios.get as any).mockImplementation(async (url: string) => {
+		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
 			if (url.endsWith("releases")) {
 				return { data: githubMockReleases };
 			}
@@ -52,22 +52,23 @@ describe("Github", () => {
 	});
 	it("should be able to get the contributors", async () => {
 		const github = new Github(defaultOptions);
-		// @ts-expect-error - mock
 
-		axios.get.mockResolvedValue({ data: githubMockContributors });
+		CacheableNet.prototype.get = vi
+			.fn()
+			.mockResolvedValue({ data: githubMockContributors });
 
 		const result = await github.getContributors();
 		expect(result).toBeDefined();
 	});
 	it("should use GITHUB_TOKEN for contributors if present", async () => {
 		process.env.GITHUB_TOKEN = "test-token";
+		const mockGet = vi.fn().mockResolvedValue({ data: githubMockContributors });
+		CacheableNet.prototype.get = mockGet;
 		const github = new Github(defaultOptions);
-		// @ts-expect-error - mock
-		axios.get.mockResolvedValue({ data: githubMockContributors });
 
 		await github.getContributors();
 
-		expect(axios.get).toHaveBeenCalledWith(
+		expect(mockGet).toHaveBeenCalledWith(
 			`${defaultOptions.api}/repos/${defaultOptions.author}/${defaultOptions.repo}/contributors`,
 			{
 				headers: {
@@ -80,40 +81,37 @@ describe("Github", () => {
 		delete process.env.GITHUB_TOKEN;
 	});
 	it("should be throw an error on 404", async () => {
-		const github = new Github(defaultOptions);
 		const errorResponse = {
 			response: {
 				status: 404,
 				data: "Not Found",
 			},
 		};
-		// @ts-expect-error - mock
-
-		axios.get.mockRejectedValue(errorResponse);
+		CacheableNet.prototype.get = vi.fn().mockRejectedValue(errorResponse);
+		const github = new Github(defaultOptions);
 
 		await expect(github.getContributors()).rejects.toThrow(
 			`Repository ${defaultOptions.author}/${defaultOptions.repo} not found.`,
 		);
 	});
 	it("should be throw an error", async () => {
-		const github = new Github(defaultOptions);
 		const errorResponse = {
 			response: {
 				status: 500,
 				data: "Server Error",
 			},
 		};
-		// @ts-expect-error - mock
-
-		axios.get.mockRejectedValue(errorResponse);
+		CacheableNet.prototype.get = vi.fn().mockRejectedValue(errorResponse);
+		const github = new Github(defaultOptions);
 
 		await expect(github.getContributors()).rejects.toThrow();
 	});
 	it("should be able to get the releases", async () => {
 		const github = new Github(defaultOptions);
-		// @ts-expect-error - mock
 
-		axios.get.mockResolvedValue({ data: githubMockReleases });
+		CacheableNet.prototype.get = vi
+			.fn()
+			.mockResolvedValue({ data: githubMockReleases });
 
 		const result = await github.getReleases();
 
@@ -121,13 +119,13 @@ describe("Github", () => {
 	});
 	it("should use GITHUB_TOKEN for releases if present", async () => {
 		process.env.GITHUB_TOKEN = "test-token";
+		const mockGet = vi.fn().mockResolvedValue({ data: githubMockReleases });
+		CacheableNet.prototype.get = mockGet;
 		const github = new Github(defaultOptions);
-		// @ts-expect-error - mock
-		axios.get.mockResolvedValue({ data: githubMockReleases });
 
 		await github.getReleases();
 
-		expect(axios.get).toHaveBeenCalledWith(
+		expect(mockGet).toHaveBeenCalledWith(
 			`${defaultOptions.api}/repos/${defaultOptions.author}/${defaultOptions.repo}/releases`,
 			{
 				headers: {
@@ -140,40 +138,35 @@ describe("Github", () => {
 		delete process.env.GITHUB_TOKEN;
 	});
 	it("should return empty array when no releases found", async () => {
+		CacheableNet.prototype.get = vi.fn().mockResolvedValue({ data: [] });
 		const github = new Github(defaultOptions);
-		// @ts-expect-error - mock
-		axios.get.mockResolvedValue({ data: [] });
 
 		const result = await github.getReleases();
 		expect(result).toEqual([]);
 	});
 	it("should be throw an error on 404", async () => {
-		const github = new Github(defaultOptions);
 		const errorResponse = {
 			response: {
 				status: 404,
 				data: "Not Found",
 			},
 		};
-		// @ts-expect-error - mock
-
-		axios.get.mockRejectedValue(errorResponse);
+		CacheableNet.prototype.get = vi.fn().mockRejectedValue(errorResponse);
+		const github = new Github(defaultOptions);
 
 		await expect(github.getReleases()).rejects.toThrow(
 			`Repository ${defaultOptions.author}/${defaultOptions.repo} not found.`,
 		);
 	});
 	it("should be throw an error", async () => {
-		const github = new Github(defaultOptions);
 		const errorResponse = {
 			response: {
 				status: 500,
 				data: "Server Error",
 			},
 		};
-		// @ts-expect-error - mock
-
-		axios.get.mockRejectedValue(errorResponse);
+		CacheableNet.prototype.get = vi.fn().mockRejectedValue(errorResponse);
+		const github = new Github(defaultOptions);
 
 		await expect(github.getReleases()).rejects.toThrow();
 	});
