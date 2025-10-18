@@ -10,6 +10,7 @@
 
 # Table of Contents
 - [Features](#features)
+- [Open Source Examples](#open-source-examples)
 - [Getting Started](#getting-started)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
@@ -20,14 +21,24 @@
 - [License - MIT](#license)
 
 # Features
-* No configuration requrired. Just setup the folder structure with a logo, favicon, and css file. 
+* No configuration requrired. Just setup the folder structure with a logo, favicon, and css file.
 * Builds a static website that can be hosted anywhere.
-* For more complex projects easily add a `docula.config.mjs` file to customize the build process. With PRE and POST methods. 
+* For more complex projects easily add a `docula.config.mjs` file to customize the build process. With PRE and POST methods.
 * Support for single page with readme or multiple markdown pages in a docs folder.
 * Will generate a sitemap.xml and robots.txt for your site.
 * Uses Github release notes to generate a changelog / releases page.
 * Uses Github to show contributors and link to their profiles.
-* Simple search is provided by default out of the box. 
+* Simple search is provided by default out of the box.
+
+# Open Source Examples
+
+See Docula in action with these open source projects that use it for their documentation:
+
+* **[Cacheable.org](https://cacheable.org)** - High-performance caching library for Node.js with layered caching support ([Source](https://github.com/jaredwray/cacheable))
+* **[Keyv.org](https://keyv.org)** - Simple key-value storage with support for multiple backends ([Source](https://github.com/jaredwray/keyv))
+* **[Docula.org](https://docula.org)** - Docula's own documentation site, built with Docula ([Source](https://github.com/jaredwray/docula))
+
+These examples showcase different approaches to using Docula, from simple single-page sites to more complex documentation with multiple pages and custom configurations.
 
 # Getting Started 
 
