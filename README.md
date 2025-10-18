@@ -14,6 +14,7 @@
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
 - [Using a Github Token](#using-a-github-token)
+- [Helpers](#helpers)
 - [Working with Markdown using Writr](#working-with-markdown-using-writr)
 - [Code of Conduct and Contributing](#code-of-conduct-and-contributing)
 - [License - MIT](#license)
@@ -90,6 +91,18 @@ order: 2
 # Using a Github Token
 
 If you want to use the Github token to access the Github API you can do so by setting the `GITHUB_TOKEN` environment variable. This is useful if you want to access private repositories or if you want to access the Github API without hitting the rate limit. This is optional and you can still use docula without it but could hit rate limits and will not be able to access private repositories.
+
+# Helpers
+
+Docula provides powerful helper utilities through its integration with [Writr](https://writr.org). For all markdown operations including reading files, manipulating content, managing frontmatter, and rendering, you should use the `Writr` class that's exported from Docula.
+
+**Instead of custom helper functions, use Writr for:**
+- Loading and saving markdown files
+- Getting and setting frontmatter (metadata)
+- Rendering markdown to HTML
+- Working with markdown content programmatically
+
+See the [Working with Markdown using Writr](#working-with-markdown-using-writr) section below for comprehensive examples and usage patterns.
 
 # Working with Markdown using Writr
 
