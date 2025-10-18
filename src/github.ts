@@ -53,7 +53,7 @@ export class Github {
 		}
 
 		try {
-			const result = await this.net.get(url, options);
+			const result = await this.net.get<unknown[]>(url, options);
 
 			if (result && result.data.length > 0) {
 				// biome-ignore lint/suspicious/noExplicitAny: need to fix
@@ -87,7 +87,7 @@ export class Github {
 		}
 
 		try {
-			const result = await this.net.get(url, options);
+			const result = await this.net.get<unknown[]>(url, options);
 			if (result && result.data.length > 0) {
 				return result.data;
 			}
