@@ -549,18 +549,23 @@ export class DoculaBuilder {
 		const matterData = writr.frontMatter;
 		let markdownContent = writr.body;
 		markdownContent = markdownContent.replace(/^# .*\n/, "");
+
+		// Detect file extension to determine if it's MDX or MD
+		const isMdx = documentPath.endsWith(".mdx");
+		const fileExtension = isMdx ? ".mdx" : ".md";
+
 		const documentsFolderIndex = documentPath.lastIndexOf("/docs/");
 		let urlPath = documentPath
 			.slice(documentsFolderIndex)
-			.replace(".md", "/index.html");
+			.replace(fileExtension, "/index.html");
 		let isRoot = urlPath.split("/").length === 3;
 		if (!documentPath.slice(documentsFolderIndex + 6).includes("/")) {
 			isRoot = true;
 			const filePath = documentPath.slice(documentsFolderIndex + 6);
-			if (filePath === "index.md") {
+			if (filePath === "index.md" || filePath === "index.mdx") {
 				urlPath = documentPath
 					.slice(documentsFolderIndex)
-					.replace(".md", ".html");
+					.replace(fileExtension, ".html");
 			}
 		}
 
@@ -578,17 +583,20 @@ export class DoculaBuilder {
 			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,
-			generatedHtml: new Writr(markdownContent).renderSync({ mdx: false }),
-			tableOfContents: this.getTableOfContents(markdownContent),
+			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
+			tableOfContents: this.getTableOfContents(markdownContent, isMdx),
 			documentPath,
 			urlPath,
 			isRoot,
 		};
 	}
 
-	private getTableOfContents(markdown: string): string | undefined {
+	private getTableOfContents(
+		markdown: string,
+		isMdx = false,
+	): string | undefined {
 		markdown = `## Table of Contents\n\n${markdown}`;
-		const html = new Writr(markdown).renderSync();
+		const html = new Writr(markdown).renderSync({ mdx: isMdx });
 		const $ = cheerio.load(html);
 		const tocTitle = $("h2").first();
 		const tocContent = tocTitle.next("ul").toString();
