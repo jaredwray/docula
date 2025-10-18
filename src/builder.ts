@@ -348,11 +348,7 @@ export class DoculaBuilder {
 				`${data.sitePath}/README.md`,
 				"utf8",
 			);
-			htmlReadme = await this._ecto.render(
-				readmeContent,
-				undefined,
-				"markdown",
-			);
+			htmlReadme = await new Writr(readmeContent).render();
 		}
 
 		return htmlReadme;
@@ -582,11 +578,7 @@ export class DoculaBuilder {
 			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,
-			generatedHtml: this._ecto.renderSync(
-				markdownContent,
-				undefined,
-				"markdown",
-			),
+			generatedHtml: new Writr(markdownContent).renderSync({ mdx: false }),
 			tableOfContents: this.getTableOfContents(markdownContent),
 			documentPath,
 			urlPath,
@@ -596,7 +588,7 @@ export class DoculaBuilder {
 
 	private getTableOfContents(markdown: string): string | undefined {
 		markdown = `## Table of Contents\n\n${markdown}`;
-		const html = this._ecto.renderSync(markdown, undefined, "markdown");
+		const html = new Writr(markdown).renderSync();
 		const $ = cheerio.load(html);
 		const tocTitle = $("h2").first();
 		const tocContent = tocTitle.next("ul").toString();
