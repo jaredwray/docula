@@ -109,7 +109,7 @@ describe("DoculaBuilder", () => {
 				options.githubPath = "";
 				builder.validateOptions(options);
 			} catch (error) {
-				expect(error.message).toBe("No github options provided");
+				expect((error as Error).message).toBe("No github options provided");
 			}
 		});
 		it("should validate siteDescription options", async () => {
@@ -119,7 +119,9 @@ describe("DoculaBuilder", () => {
 				options.siteDescription = "";
 				builder.validateOptions(options);
 			} catch (error) {
-				expect(error.message).toBe("No site description options provided");
+				expect((error as Error).message).toBe(
+					"No site description options provided",
+				);
 			}
 		});
 		it("should validate site title options", async () => {
@@ -129,7 +131,7 @@ describe("DoculaBuilder", () => {
 				options.siteTitle = "";
 				builder.validateOptions(options);
 			} catch (error) {
-				expect(error.message).toBe("No site title options provided");
+				expect((error as Error).message).toBe("No site title options provided");
 			}
 		});
 		it("should validate site url options", async () => {
@@ -139,7 +141,7 @@ describe("DoculaBuilder", () => {
 				options.siteUrl = "";
 				builder.validateOptions(options);
 			} catch (error) {
-				expect(error.message).toBe("No site url options provided");
+				expect((error as Error).message).toBe("No site url options provided");
 			}
 		});
 	});
@@ -185,7 +187,7 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.getTemplates(options, false);
 			} catch (error) {
-				expect(error.message).toContain("No template path found");
+				expect((error as Error).message).toContain("No template path found");
 			}
 		});
 	});
@@ -299,7 +301,7 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.buildIndexPage(data);
 			} catch (error) {
-				expect(error.message).toBe("No templates found");
+				expect((error as Error).message).toBe("No templates found");
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
 					await fs.promises.rm(data.outputPath, { recursive: true });
@@ -362,7 +364,7 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.buildReleasePage(data);
 			} catch (error) {
-				expect(error.message).toBe("No github data found");
+				expect((error as Error).message).toBe("No github data found");
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
 					await fs.promises.rm(data.outputPath, { recursive: true });
@@ -435,7 +437,7 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.buildDocsPages(data);
 			} catch (error) {
-				expect(error.message).toBe("No templates found");
+				expect((error as Error).message).toBe("No templates found");
 			}
 		});
 		it("should get top level documents from mega fixtures", () => {
