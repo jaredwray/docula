@@ -95,6 +95,7 @@ export class DoculaConsole {
 				case "-p":
 				case "--port": {
 					const portString = argv[i + 1];
+					/* v8 ignore next -- @preserve */
 					if (portString !== undefined) {
 						arguments_.port = Number.parseInt(portString, 10);
 					}

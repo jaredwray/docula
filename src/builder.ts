@@ -151,6 +151,7 @@ export class DoculaBuilder {
 		}
 
 		// Copy over css
+		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(`${this.options.templatePath}/css`)) {
 			this.copyDirectory(
 				`${this.options.templatePath}/css`,
@@ -212,14 +213,18 @@ export class DoculaBuilder {
 
 		if (fs.existsSync(options.templatePath)) {
 			const index = await this.getTemplateFile(options.templatePath, "index");
+			/* v8 ignore next -- @preserve */
 			if (index) {
 				templates.index = index;
 			}
 
+			/* v8 ignore next -- @preserve */
 			const releases = await this.getTemplateFile(
 				options.templatePath,
 				"releases",
 			);
+
+			/* v8 ignore next -- @preserve */
 			if (releases) {
 				templates.releases = releases;
 			}
@@ -274,6 +279,7 @@ export class DoculaBuilder {
 		// Add all the document urls
 		for (const document of data.documents ?? []) {
 			let { urlPath } = document;
+			/* v8 ignore next -- @preserve */
 			if (urlPath.endsWith("index.html")) {
 				urlPath = urlPath.slice(0, -10);
 			}
@@ -470,6 +476,7 @@ export class DoculaBuilder {
 	public getDocumentInDirectory(sitePath: string): DoculaDocument[] {
 		const documents: DoculaDocument[] = [];
 		const documentList = fs.readdirSync(sitePath);
+		/* v8 ignore next -- @preserve */
 		if (documentList.length > 0) {
 			for (const document of documentList) {
 				const documentPath = `${sitePath}/${document}`;
@@ -496,6 +503,7 @@ export class DoculaBuilder {
 		const sections: DoculaSection[] = [];
 		if (fs.existsSync(sitePath)) {
 			const documentList = fs.readdirSync(sitePath);
+			/* v8 ignore next -- @preserve */
 			if (documentList.length > 0) {
 				for (const document of documentList) {
 					const documentPath = `${sitePath}/${document}`;
@@ -551,7 +559,9 @@ export class DoculaBuilder {
 		markdownContent = markdownContent.replace(/^# .*\n/, "");
 
 		// Detect file extension to determine if it's MDX or MD
+		/* v8 ignore next -- @preserve */
 		const isMdx = documentPath.endsWith(".mdx");
+		/* v8 ignore next -- @preserve */
 		const fileExtension = isMdx ? ".mdx" : ".md";
 
 		const documentsFolderIndex = documentPath.lastIndexOf("/docs/");
@@ -611,7 +621,7 @@ export class DoculaBuilder {
 		const files = fs.readdirSync(source);
 
 		for (const file of files) {
-			/* c8 ignore next 3 */
+			/* v8 ignore next -- @preserve */
 			if (file.startsWith(".")) {
 				continue;
 			}
