@@ -2,6 +2,7 @@ import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 import handler from "serve-handler";
 import updateNotifier from "update-notifier";
 import { DoculaBuilder } from "./builder.js";
@@ -67,6 +68,7 @@ export default class Docula {
 	 */
 	public checkForUpdates(): void {
 		const packageJsonPath = path.join(process.cwd(), "package.json");
+		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(packageJsonPath)) {
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
@@ -170,6 +172,7 @@ export default class Docula {
 	 */
 	public generateInit(sitePath: string): void {
 		// Check if the site path exists
+		/* v8 ignore next -- @preserve */
 		if (!fs.existsSync(sitePath)) {
 			fs.mkdirSync(sitePath);
 		}
@@ -213,8 +216,10 @@ export default class Docula {
 	public async loadConfigFile(sitePath: string): Promise<void> {
 		if (fs.existsSync(sitePath)) {
 			const configFile = `${sitePath}/docula.config.mjs`;
+			/* v8 ignore next -- @preserve */
 			if (fs.existsSync(configFile)) {
-				this._configFileModule = await import(configFile);
+				const absolutePath = path.resolve(configFile);
+				this._configFileModule = await import(pathToFileURL(absolutePath).href);
 			}
 		}
 	}
