@@ -242,7 +242,7 @@ export default class Docula {
 		};
 
 		this._server = http.createServer(async (request, response) =>
-			/* c8 ignore next */
+			/* v8 ignore next -- @preserve */
 			handler(request, response, config),
 		);
 

@@ -621,7 +621,7 @@ export class DoculaBuilder {
 		const files = fs.readdirSync(source);
 
 		for (const file of files) {
-			/* c8 ignore next 3 */
+			/* v8 ignore next -- @preserve */
 			if (file.startsWith(".")) {
 				continue;
 			}
