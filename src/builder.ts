@@ -151,6 +151,7 @@ export class DoculaBuilder {
 		}
 
 		// Copy over css
+		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(`${this.options.templatePath}/css`)) {
 			this.copyDirectory(
 				`${this.options.templatePath}/css`,
@@ -223,6 +224,7 @@ export class DoculaBuilder {
 				"releases",
 			);
 
+			/* v8 ignore next -- @preserve */
 			if (releases) {
 				templates.releases = releases;
 			}

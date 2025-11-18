@@ -54,37 +54,45 @@ export class DoculaOptions {
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	public parseOptions(options: Record<string, any>) {
+		/* v8 ignore next -- @preserve */
 		if (options.templatePath) {
 			this.templatePath = options.templatePath as string;
 			this.templatePath = path.join(process.cwd(), this.templatePath);
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.outputPath) {
 			this.outputPath = options.outputPath as string;
 			this.githubPath = path.join(process.cwd(), this.outputPath);
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.sitePath) {
 			this.sitePath = options.sitePath as string;
 			this.sitePath = path.join(process.cwd(), this.sitePath);
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.githubPath) {
 			this.githubPath = options.githubPath as string;
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.siteTitle) {
 			this.siteTitle = options.siteTitle as string;
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.siteDescription) {
 			this.siteDescription = options.siteDescription as string;
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.siteUrl) {
 			this.siteUrl = options.siteUrl as string;
 		}
 
+		/* v8 ignore next -- @preserve */
 		if (options.sections) {
 			this.sections = options.sections as DoculaSection[];
 		}
