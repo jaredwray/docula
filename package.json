@@ -53,7 +53,7 @@
   "dependencies": {
     "@cacheable/net": "^2.0.3",
     "cheerio": "^1.1.2",
-    "ecto": "^4.7.0",
+    "ecto": "^4.7.1",
     "feed": "^5.1.0",
     "he": "^1.2.0",
     "serve-handler": "^6.1.6",
