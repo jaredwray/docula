@@ -671,4 +671,175 @@ describe("DoculaBuilder", () => {
 			expect(result).toBeTruthy();
 		});
 	});
+
+	describe("Docula Builder - OpenAPI API Documentation", () => {
+		it("should build the API page when openApiUrl is configured", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "template",
+				outputPath: "test/temp-api-test",
+				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					api: "api.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildApiPage(data);
+				const apiPage = await fs.promises.readFile(
+					`${data.outputPath}/api/index.html`,
+					"utf8",
+				);
+				expect(apiPage).toContain("docutopia");
+				expect(apiPage).toContain(
+					"https://petstore.swagger.io/v2/swagger.json",
+				);
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should not build API page when openApiUrl is not configured", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "template",
+				outputPath: "test/temp-api-test-no-url",
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildApiPage(data);
+				expect(fs.existsSync(`${data.outputPath}/api/index.html`)).toBe(false);
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should not build API page when api template is not configured", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "template",
+				outputPath: "test/temp-api-test-no-template",
+				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildApiPage(data);
+				expect(fs.existsSync(`${data.outputPath}/api/index.html`)).toBe(false);
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should include /api in sitemap when openApiUrl is configured", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "template",
+				outputPath: "test/temp-sitemap-api-test",
+				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.outputPath}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/api</loc>");
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should get api template when openApiUrl is configured", async () => {
+			const builder = new DoculaBuilder();
+			const options = new DoculaOptions();
+			options.templatePath = "template";
+			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
+			const templateData = await builder.getTemplates(options, false);
+			expect(templateData.api).toBe("api.hbs");
+		});
+
+		it("should not get api template when openApiUrl is not configured", async () => {
+			const builder = new DoculaBuilder();
+			const options = new DoculaOptions();
+			options.templatePath = "template";
+			const templateData = await builder.getTemplates(options, false);
+			expect(templateData.api).toBeUndefined();
+		});
+
+		it("should build with openApiUrl configured", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-build-api-test";
+			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			let consoleMessage = "";
+			console.log = (message) => {
+				consoleMessage = message as string;
+			};
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.outputPath}/api/index.html`)).toBe(
+					true,
+				);
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+			}
+
+			expect(consoleMessage).toContain("Build");
+
+			console.log = consoleLog;
+		});
+	});
 });
