@@ -605,6 +605,10 @@ export class DoculaBuilder {
 		markdown: string,
 		isMdx = false,
 	): string | undefined {
+		if (this.hasTableOfContents(markdown)) {
+			return undefined;
+		}
+
 		markdown = `## Table of Contents\n\n${markdown}`;
 		const html = new Writr(markdown).renderSync({ mdx: isMdx });
 		const $ = cheerio.load(html);
@@ -615,6 +619,19 @@ export class DoculaBuilder {
 		}
 
 		return undefined;
+	}
+
+	private hasTableOfContents(markdown: string): boolean {
+		const normalized = markdown.replace(/\r\n/g, "\n");
+		const atxHeading = /^#{1,6}\s*(table of contents|toc)\s*$/im;
+		const setextHeading = /^(table of contents|toc)\s*\n[-=]{2,}\s*$/im;
+		const htmlHeading = /<h[1-6][^>]*>\s*(table of contents|toc)\s*<\/h[1-6]>/i;
+
+		return (
+			atxHeading.test(normalized) ||
+			setextHeading.test(normalized) ||
+			htmlHeading.test(normalized)
+		);
 	}
 
 	private copyDirectory(source: string, target: string): void {
