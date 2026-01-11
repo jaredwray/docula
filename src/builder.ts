@@ -605,7 +605,7 @@ export class DoculaBuilder {
 		markdown: string,
 		isMdx = false,
 	): string | undefined {
-		if (this.hasTableOfContents(markdown, isMdx)) {
+		if (this.hasTableOfContents(markdown)) {
 			return undefined;
 		}
 
@@ -621,21 +621,17 @@ export class DoculaBuilder {
 		return undefined;
 	}
 
-	private hasTableOfContents(markdown: string, isMdx = false): boolean {
-		const html = new Writr(markdown).renderSync({ mdx: isMdx });
-		const $ = cheerio.load(html);
-		const headings = $("h1,h2,h3,h4,h5,h6");
-		const tocHeading = headings.filter((_, heading) => {
-			const title = $(heading).text().trim().toLowerCase();
-			return title === "table of contents" || title === "toc";
-		});
+	private hasTableOfContents(markdown: string): boolean {
+		const normalized = markdown.replace(/\r\n/g, "\n");
+		const atxHeading = /^#{1,6}\s*(table of contents|toc)\s*$/im;
+		const setextHeading = /^(table of contents|toc)\s*\n[-=]{2,}\s*$/im;
+		const htmlHeading = /<h[1-6][^>]*>\s*(table of contents|toc)\s*<\/h[1-6]>/i;
 
-		if (!tocHeading.length) {
-			return false;
-		}
-
-		const nextList = tocHeading.first().nextAll("ul,ol").first();
-		return nextList.length > 0;
+		return (
+			atxHeading.test(normalized) ||
+			setextHeading.test(normalized) ||
+			htmlHeading.test(normalized)
+		);
 	}
 
 	private copyDirectory(source: string, target: string): void {
