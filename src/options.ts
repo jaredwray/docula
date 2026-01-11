@@ -45,6 +45,12 @@ export class DoculaOptions {
 	 * Sections
 	 */
 	public sections?: DoculaSection[];
+	/**
+	 * OpenAPI specification URL for API documentation.
+	 * When provided, creates a dedicated /api page
+	 * Supports both external URLs (https://...) and relative paths (/openapi.json)
+	 */
+	public openApiUrl?: string;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -106,6 +112,11 @@ export class DoculaOptions {
 			typeof options.singlePage === "boolean"
 		) {
 			this.singlePage = options.singlePage;
+		}
+
+		/* v8 ignore next -- @preserve */
+		if (options.openApiUrl) {
+			this.openApiUrl = options.openApiUrl as string;
 		}
 	}
 }

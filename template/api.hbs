@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {{> header }}
+  <title>API Documentation - {{ siteTitle }}</title>
+  <meta name="description" content="API Documentation for {{ siteTitle }}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docutopia/react/dist/browser/docutopia.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="docs" style="height: 100vh;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@docutopia/react/dist/browser/docutopia.js"></script>
+  <script>
+    Docutopia.render('docs', {
+      specUrl: '{{ specUrl }}',
+    });
+  </script>
+</body>
+
+</html>
