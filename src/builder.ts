@@ -605,6 +605,10 @@ export class DoculaBuilder {
 		markdown: string,
 		isMdx = false,
 	): string | undefined {
+		if (this.hasTableOfContents(markdown, isMdx)) {
+			return undefined;
+		}
+
 		markdown = `## Table of Contents\n\n${markdown}`;
 		const html = new Writr(markdown).renderSync({ mdx: isMdx });
 		const $ = cheerio.load(html);
@@ -615,6 +619,23 @@ export class DoculaBuilder {
 		}
 
 		return undefined;
+	}
+
+	private hasTableOfContents(markdown: string, isMdx = false): boolean {
+		const html = new Writr(markdown).renderSync({ mdx: isMdx });
+		const $ = cheerio.load(html);
+		const headings = $("h1,h2,h3,h4,h5,h6");
+		const tocHeading = headings.filter((_, heading) => {
+			const title = $(heading).text().trim().toLowerCase();
+			return title === "table of contents" || title === "toc";
+		});
+
+		if (!tocHeading.length) {
+			return false;
+		}
+
+		const nextList = tocHeading.first().nextAll("ul,ol").first();
+		return nextList.length > 0;
 	}
 
 	private copyDirectory(source: string, target: string): void {
