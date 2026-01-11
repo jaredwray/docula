@@ -658,6 +658,14 @@ describe("DoculaBuilder", () => {
 			const parsedDocument = builder.parseDocumentData(documentsPath);
 			expect(parsedDocument.tableOfContents).toBeUndefined();
 		});
+
+		it("should return tableOfContents undefined when markdown already has a table of contents", async () => {
+			const builder = new DoculaBuilder();
+
+			const documentsPath = "test/fixtures/has-toc.md";
+			const parsedDocument = builder.parseDocumentData(documentsPath);
+			expect(parsedDocument.tableOfContents).toBeUndefined();
+		});
 	});
 
 	describe("Build Readme Section", async () => {
