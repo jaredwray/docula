@@ -3,11 +3,18 @@ import http from "node:http";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
+import { createJiti } from "jiti";
 import handler from "serve-handler";
 import updateNotifier from "update-notifier";
 import { DoculaBuilder } from "./builder.js";
 import { DoculaConsole } from "./console.js";
-import { doculaconfigmjs, faviconico, logopng, variablescss } from "./init.js";
+import {
+	doculaconfigmjs,
+	doculaconfigts,
+	faviconico,
+	logopng,
+	variablescss,
+} from "./init.js";
 import { DoculaOptions } from "./options.js";
 
 export default class Docula {
@@ -54,7 +61,7 @@ export default class Docula {
 	}
 
 	/**
-	 * The config file module. This is the module that is loaded from the docula.config.mjs file
+	 * The config file module. This is the module that is loaded from the docula.config.ts or docula.config.mjs file
 	 * @returns {any}
 	 */
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
@@ -121,7 +128,10 @@ export default class Docula {
 
 		switch (consoleProcess.command) {
 			case "init": {
-				this.generateInit(this.options.sitePath);
+				this.generateInit(
+					this.options.sitePath,
+					consoleProcess.args.typescript,
+				);
 				break;
 			}
 
@@ -168,9 +178,10 @@ export default class Docula {
 	/**
 	 * Generate the init files
 	 * @param {string} sitePath
+	 * @param {boolean} typescript - If true, generates docula.config.ts instead of docula.config.mjs
 	 * @returns {void}
 	 */
-	public generateInit(sitePath: string): void {
+	public generateInit(sitePath: string, typescript = false): void {
 		// Check if the site path exists
 		/* v8 ignore next -- @preserve */
 		if (!fs.existsSync(sitePath)) {
@@ -178,8 +189,12 @@ export default class Docula {
 		}
 
 		// Add the docula.config file based on js or ts
-		const doculaConfigFile = `${sitePath}/docula.config.mjs`;
-		const doculaConfigFileBuffer = Buffer.from(doculaconfigmjs, "base64");
+		const configExtension = typescript ? "ts" : "mjs";
+		const doculaConfigFile = `${sitePath}/docula.config.${configExtension}`;
+		const doculaConfigFileBuffer = Buffer.from(
+			typescript ? doculaconfigts : doculaconfigmjs,
+			"base64",
+		);
 		fs.writeFileSync(doculaConfigFile, doculaConfigFileBuffer);
 
 		// Add in the image and favicon
@@ -209,18 +224,35 @@ export default class Docula {
 	}
 
 	/**
-	 * Load the config file
+	 * Load the config file. Supports both .mjs and .ts config files.
+	 * Priority: docula.config.ts > docula.config.mjs
 	 * @param {string} sitePath
 	 * @returns {Promise<void>}
 	 */
 	public async loadConfigFile(sitePath: string): Promise<void> {
-		if (fs.existsSync(sitePath)) {
-			const configFile = `${sitePath}/docula.config.mjs`;
-			/* v8 ignore next -- @preserve */
-			if (fs.existsSync(configFile)) {
-				const absolutePath = path.resolve(configFile);
-				this._configFileModule = await import(pathToFileURL(absolutePath).href);
-			}
+		if (!fs.existsSync(sitePath)) {
+			return;
+		}
+
+		const tsConfigFile = `${sitePath}/docula.config.ts`;
+		const mjsConfigFile = `${sitePath}/docula.config.mjs`;
+
+		// Check for TypeScript config first
+		/* v8 ignore next -- @preserve */
+		if (fs.existsSync(tsConfigFile)) {
+			const absolutePath = path.resolve(tsConfigFile);
+			const jiti = createJiti(import.meta.url, {
+				interopDefault: true,
+			});
+			this._configFileModule = await jiti.import(absolutePath);
+			return;
+		}
+
+		// Fall back to .mjs config
+		/* v8 ignore next -- @preserve */
+		if (fs.existsSync(mjsConfigFile)) {
+			const absolutePath = path.resolve(mjsConfigFile);
+			this._configFileModule = await import(pathToFileURL(absolutePath).href);
 		}
 	}
 

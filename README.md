@@ -12,6 +12,7 @@
 - [Features](#features)
 - [Open Source Examples](#open-source-examples)
 - [Getting Started](#getting-started)
+- [TypeScript Configuration](#typescript-configuration)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
 - [Alert, Info, Warn Styling](#alert-info-warn-styling)
@@ -22,9 +23,10 @@
 - [License - MIT](#license)
 
 # Features
-* No configuration requrired. Just setup the folder structure with a logo, favicon, and css file.
+* No configuration required. Just setup the folder structure with a logo, favicon, and css file.
 * Builds a static website that can be hosted anywhere.
-* For more complex projects easily add a `docula.config.mjs` file to customize the build process. With PRE and POST methods.
+* For more complex projects easily add a `docula.config.ts` (TypeScript) or `docula.config.mjs` (JavaScript) file to customize the build process with lifecycle hooks.
+* Full TypeScript support with typed configuration and IDE autocompletion.
 * Support for single page with readme or multiple markdown pages in a docs folder.
 * Will generate a sitemap.xml and robots.txt for your site.
 * Uses Github release notes to generate a changelog / releases page.
@@ -67,6 +69,73 @@ Simply replace the logo, favicon, and css file with your own. The readme is your
 > npx docula
 
 This will build your site and place it in the `dist` folder. You can then host it anywhere you like.
+
+# TypeScript Configuration
+
+Docula supports TypeScript configuration files (`docula.config.ts`) in addition to JavaScript (`docula.config.mjs`). TypeScript configs provide type safety and better IDE support.
+
+## Initializing with TypeScript
+
+To create a new project with a TypeScript config file:
+
+```bash
+npx docula init --typescript
+```
+
+This creates a `docula.config.ts` file with full type support:
+
+```typescript
+import type { DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  templatePath: './template',
+  outputPath: './dist',
+  sitePath: './site',
+  githubPath: 'your-username/your-repo',
+  siteTitle: 'My Project',
+  siteDescription: 'Project description',
+  siteUrl: 'https://your-site.com',
+};
+```
+
+## Using Lifecycle Hooks with TypeScript
+
+You can add typed lifecycle hooks to your config:
+
+```typescript
+import type { DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  siteTitle: 'My Project',
+  // ... other options
+};
+
+export const onPrepare = async (config: DoculaOptions): Promise<void> => {
+  // Runs before the build process
+  console.log(`Building ${config.siteTitle}...`);
+};
+```
+
+## Config File Priority
+
+When both config files exist, Docula loads them in this order (first found wins):
+1. `docula.config.ts` (TypeScript - takes priority)
+2. `docula.config.mjs` (JavaScript)
+
+## Available Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `templatePath` | `string` | `'./template'` | Path to custom template directory |
+| `outputPath` | `string` | `'./dist'` | Output directory for built site |
+| `sitePath` | `string` | `'./site'` | Directory containing site content |
+| `githubPath` | `string` | - | GitHub repository path (e.g., `'user/repo'`) |
+| `siteTitle` | `string` | `'docula'` | Website title |
+| `siteDescription` | `string` | - | Website description |
+| `siteUrl` | `string` | - | Website URL |
+| `port` | `number` | `3000` | Port for local development server |
+| `singlePage` | `boolean` | `true` | Single page or multi-page site |
+| `sections` | `DoculaSection[]` | - | Documentation sections |
 
 # Using Your own Template
 
