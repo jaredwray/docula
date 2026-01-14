@@ -167,6 +167,9 @@ export class DoculaBuilder {
 			);
 		}
 
+		// Copy over public folder contents
+		this.copyPublicFolder(siteRelativePath, this.options.outputPath);
+
 		const endTime = Date.now();
 
 		const executionTime = endTime - startTime;
@@ -654,6 +657,48 @@ export class DoculaBuilder {
 			} else {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
+			}
+		}
+	}
+
+	private copyPublicFolder(sitePath: string, outputPath: string): void {
+		const publicPath = `${sitePath}/public`;
+
+		if (!fs.existsSync(publicPath)) {
+			return;
+		}
+
+		this._console.log("Public folder found, copying contents to dist...");
+
+		this.copyPublicDirectory(publicPath, outputPath, publicPath);
+	}
+
+	private copyPublicDirectory(
+		source: string,
+		target: string,
+		basePath: string,
+	): void {
+		const files = fs.readdirSync(source);
+
+		for (const file of files) {
+			/* v8 ignore next -- @preserve */
+			if (file.startsWith(".")) {
+				continue;
+			}
+
+			const sourcePath = `${source}/${file}`;
+			const targetPath = `${target}/${file}`;
+			const relativePath = sourcePath.replace(`${basePath}/`, "");
+
+			const stat = fs.lstatSync(sourcePath);
+
+			if (stat.isDirectory()) {
+				fs.mkdirSync(targetPath, { recursive: true });
+				this.copyPublicDirectory(sourcePath, targetPath, basePath);
+			} else {
+				fs.mkdirSync(target, { recursive: true });
+				fs.copyFileSync(sourcePath, targetPath);
+				this._console.log(`  Copied: ${relativePath}`);
 			}
 		}
 	}

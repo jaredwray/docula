@@ -679,4 +679,73 @@ describe("DoculaBuilder", () => {
 			expect(result).toBeTruthy();
 		});
 	});
+
+	describe("Docula Builder - Public Folder", () => {
+		it("should copy public folder contents to dist", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-public-folder-test";
+			options.sitePath = "test/fixtures/single-page-site";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			const consoleMessages: string[] = [];
+			console.log = (message) => {
+				consoleMessages.push(message as string);
+			};
+
+			try {
+				await builder.build();
+
+				// Verify public folder message was logged
+				expect(
+					consoleMessages.some((msg) => msg.includes("Public folder found")),
+				).toBe(true);
+
+				// Verify files were copied
+				expect(fs.existsSync(`${options.outputPath}/images/test.png`)).toBe(
+					true,
+				);
+				expect(fs.existsSync(`${options.outputPath}/sample.pdf`)).toBe(true);
+
+				// Verify copied file contents
+				const testPngContent = await fs.promises.readFile(
+					`${options.outputPath}/images/test.png`,
+					"utf8",
+				);
+				expect(testPngContent).toBe("test image content\n");
+
+				const samplePdfContent = await fs.promises.readFile(
+					`${options.outputPath}/sample.pdf`,
+					"utf8",
+				);
+				expect(samplePdfContent).toBe("test pdf content\n");
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				console.log = consoleLog;
+			}
+		});
+
+		it("should not log anything when public folder does not exist", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-no-public-folder-test";
+			options.sitePath = "test/fixtures/multi-page-site";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			const consoleMessages: string[] = [];
+			console.log = (message) => {
+				consoleMessages.push(message as string);
+			};
+
+			try {
+				await builder.build();
+
+				// Verify public folder message was NOT logged
+				expect(
+					consoleMessages.some((msg) => msg.includes("Public folder found")),
+				).toBe(false);
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				console.log = consoleLog;
+			}
+		});
+	});
 });

@@ -15,6 +15,7 @@
 - [TypeScript Configuration](#typescript-configuration)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
+- [Public Folder](#public-folder)
 - [Alert, Info, Warn Styling](#alert-info-warn-styling)
 - [Using a Github Token](#using-a-github-token)
 - [Helpers](#helpers)
@@ -168,6 +169,62 @@ The `readme.md` file will be the root page and the rest will be added to the tab
 title: Getting Started
 order: 2
 ```
+
+# Public Folder
+
+If you have static assets like images, fonts, or other files that need to be copied directly to your built site, you can use a `public` folder. Any files placed in the `public` folder within your site directory will be automatically copied to the root of your `dist` output folder during the build process.
+
+## Usage
+
+Create a `public` folder inside your site directory:
+
+```
+site
+├───public
+│   ├───images
+│   │   ├───screenshot.png
+│   │   └───banner.jpg
+│   ├───fonts
+│   │   └───custom-font.woff2
+│   └───downloads
+│       └───example.pdf
+├───docs
+├───logo.svg
+├───favicon.ico
+└───docula.config.mjs
+```
+
+When you run the build command, all contents of the `public` folder will be copied to the `dist` folder:
+
+```
+dist
+├───images
+│   ├───screenshot.png
+│   └───banner.jpg
+├───fonts
+│   └───custom-font.woff2
+├───downloads
+│   └───example.pdf
+├───index.html
+└───...
+```
+
+The build output will show each file being copied:
+
+```
+Public folder found, copying contents to dist...
+  Copied: images/screenshot.png
+  Copied: images/banner.jpg
+  Copied: fonts/custom-font.woff2
+  Copied: downloads/example.pdf
+Build completed in 1234ms
+```
+
+This is useful for:
+- Images referenced in your documentation
+- Downloadable files (PDFs, zip archives, etc.)
+- Custom fonts
+- Any other static assets that need to be served from your site
 
 # Alert, Info, Warn Styling
 
