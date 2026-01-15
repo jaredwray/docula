@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import * as cheerio from "cheerio";
 import { Ecto } from "ecto";
 import he from "he";
@@ -670,13 +671,20 @@ export class DoculaBuilder {
 
 		this._console.log("Public folder found, copying contents to dist...");
 
-		this.copyPublicDirectory(publicPath, outputPath, publicPath);
+		const resolvedOutputPath = path.resolve(outputPath);
+		this.copyPublicDirectory(
+			publicPath,
+			outputPath,
+			publicPath,
+			resolvedOutputPath,
+		);
 	}
 
 	private copyPublicDirectory(
 		source: string,
 		target: string,
 		basePath: string,
+		outputPath: string,
 	): void {
 		const files = fs.readdirSync(source);
 
@@ -685,11 +693,20 @@ export class DoculaBuilder {
 			const targetPath = `${target}/${file}`;
 			const relativePath = sourcePath.replace(`${basePath}/`, "");
 
+			// Skip if source path is inside or equals the output path to prevent recursive copying
+			const resolvedSourcePath = path.resolve(sourcePath);
+			if (
+				resolvedSourcePath === outputPath ||
+				resolvedSourcePath.startsWith(`${outputPath}${path.sep}`)
+			) {
+				continue;
+			}
+
 			const stat = fs.lstatSync(sourcePath);
 
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
-				this.copyPublicDirectory(sourcePath, targetPath, basePath);
+				this.copyPublicDirectory(sourcePath, targetPath, basePath, outputPath);
 			} else {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
