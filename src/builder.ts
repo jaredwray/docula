@@ -22,6 +22,7 @@ export type DoculaData = {
 	sections?: DoculaSection[];
 	documents?: DoculaDocument[];
 	sidebarItems?: DoculaSection[];
+	announcement?: string;
 };
 
 export type DoculaTemplates = {
@@ -321,9 +322,11 @@ export class DoculaBuilder {
 				content = await this.buildReadmeSection(data);
 			}
 
+			const announcement = await this.buildAnnouncementSection(data);
+
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
-				{ ...data, content },
+				{ ...data, content, announcement },
 				data.templatePath,
 			);
 			await fs.promises.writeFile(indexPath, indexContent, "utf8");
@@ -362,6 +365,18 @@ export class DoculaBuilder {
 		}
 
 		return htmlReadme;
+	}
+
+	public async buildAnnouncementSection(
+		data: DoculaData,
+	): Promise<string | undefined> {
+		const announcementPath = `${data.sitePath}/announcement.md`;
+		if (fs.existsSync(announcementPath)) {
+			const announcementContent = fs.readFileSync(announcementPath, "utf8");
+			return new Writr(announcementContent).render();
+		}
+
+		return undefined;
 	}
 
 	public async buildDocsPages(data: DoculaData): Promise<void> {

@@ -680,6 +680,41 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Build Announcement Section", async () => {
+		it("should return undefined when announcement.md does not exist", async () => {
+			const builder = new DoculaBuilder();
+			const data = doculaData;
+			data.sitePath = "test/fixtures/single-page-site";
+
+			const result = await builder.buildAnnouncementSection(data);
+
+			expect(result).toBeUndefined();
+		});
+
+		it("should build the announcement section when announcement.md exists", async () => {
+			const builder = new DoculaBuilder();
+			const data = doculaData;
+			data.sitePath = "test/fixtures/announcement-site";
+
+			// Create temporary announcement site
+			await fs.promises.mkdir(data.sitePath, { recursive: true });
+			await fs.promises.writeFile(
+				`${data.sitePath}/announcement.md`,
+				"**Important:** This is an announcement!",
+			);
+
+			try {
+				const result = await builder.buildAnnouncementSection(data);
+
+				expect(result).toBeTruthy();
+				expect(result).toContain("<strong>Important:</strong>");
+				expect(result).toContain("This is an announcement!");
+			} finally {
+				await fs.promises.rm(data.sitePath, { recursive: true });
+			}
+		});
+	});
+
 	describe("Docula Builder - Public Folder", () => {
 		it("should copy public folder contents to dist", async () => {
 			const options = new DoculaOptions();

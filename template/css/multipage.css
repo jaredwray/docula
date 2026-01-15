@@ -25,6 +25,30 @@
   font-weight: 600;
 }
 
+/* Announcement */
+.announcement {
+  max-width: 90%;
+  margin: 0 auto 2rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--sidebar-background);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  text-align: left;
+}
+
+.announcement p {
+  margin: 0;
+}
+
+.announcement a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.announcement a:hover {
+  color: var(--color-secondary-dark);
+}
+
 /* Docs */
 .nav {
   padding-left: 1rem;
