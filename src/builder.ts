@@ -681,11 +681,6 @@ export class DoculaBuilder {
 		const files = fs.readdirSync(source);
 
 		for (const file of files) {
-			/* v8 ignore next -- @preserve */
-			if (file.startsWith(".")) {
-				continue;
-			}
-
 			const sourcePath = `${source}/${file}`;
 			const targetPath = `${target}/${file}`;
 			const relativePath = sourcePath.replace(`${basePath}/`, "");

@@ -718,6 +718,12 @@ describe("DoculaBuilder", () => {
 					"utf8",
 				);
 				expect(samplePdfContent).toBe("test pdf content\n");
+
+				// Verify dotfiles are also copied
+				expect(fs.existsSync(`${options.outputPath}/.nojekyll`)).toBe(true);
+				expect(
+					fs.existsSync(`${options.outputPath}/.well-known/security.txt`),
+				).toBe(true);
 			} finally {
 				await fs.promises.rm(builder.options.outputPath, { recursive: true });
 				console.log = consoleLog;
