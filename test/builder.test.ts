@@ -935,7 +935,7 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
-		it("should include /api in sitemap when openApiUrl is configured", async () => {
+		it("should include /api in sitemap when openApiUrl and api template are configured", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -945,6 +945,11 @@ describe("DoculaBuilder", () => {
 				templatePath: "template",
 				outputPath: "test/temp-sitemap-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					api: "api.hbs",
+				},
 			};
 
 			if (fs.existsSync(data.outputPath)) {
@@ -958,6 +963,40 @@ describe("DoculaBuilder", () => {
 					"utf8",
 				);
 				expect(sitemap).toContain("<loc>http://foo.com/api</loc>");
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should not include /api in sitemap when openApiUrl is configured but api template is missing", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "template",
+				outputPath: "test/temp-sitemap-no-api-test",
+				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.outputPath}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).not.toContain("<loc>http://foo.com/api</loc>");
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
 					await fs.promises.rm(data.outputPath, { recursive: true });
