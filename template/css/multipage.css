@@ -25,6 +25,48 @@
   font-weight: 600;
 }
 
+/* Announcement */
+.announcement {
+  max-width: 90%;
+  margin: 0 auto 2rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--sidebar-background);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--color-secondary);
+  border-radius: 0.5rem;
+  text-align: left;
+}
+
+.announcement p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.announcement p + p {
+  margin-top: 0.5rem;
+}
+
+.announcement a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.announcement a:hover {
+  color: var(--color-secondary-dark);
+}
+
+.announcement strong {
+  color: var(--color-secondary-dark);
+}
+
+.announcement code {
+  background-color: var(--code);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
 /* Docs */
 .nav {
   padding-left: 1rem;

@@ -680,6 +680,163 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Build Announcement Section", async () => {
+		it("should return undefined when announcement.md does not exist", async () => {
+			const builder = new DoculaBuilder();
+			const data = doculaData;
+			data.sitePath = "test/fixtures/single-page-site";
+
+			const result = await builder.buildAnnouncementSection(data);
+
+			expect(result).toBeUndefined();
+		});
+
+		it("should build the announcement section when announcement.md exists", async () => {
+			const builder = new DoculaBuilder();
+			const data = doculaData;
+			data.sitePath = "test/fixtures/announcement-site";
+
+			// Create temporary announcement site
+			await fs.promises.mkdir(data.sitePath, { recursive: true });
+			await fs.promises.writeFile(
+				`${data.sitePath}/announcement.md`,
+				"**Important:** This is an announcement!",
+			);
+
+			try {
+				const result = await builder.buildAnnouncementSection(data);
+
+				expect(result).toBeTruthy();
+				expect(result).toContain("<strong>Important:</strong>");
+				expect(result).toContain("This is an announcement!");
+			} finally {
+				await fs.promises.rm(data.sitePath, { recursive: true });
+			}
+		});
+	});
+
+	describe("Docula Builder - Public Folder", () => {
+		it("should copy public folder contents to dist", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-public-folder-test";
+			options.sitePath = "test/fixtures/single-page-site";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			const consoleMessages: string[] = [];
+			console.log = (message) => {
+				consoleMessages.push(message as string);
+			};
+
+			try {
+				await builder.build();
+
+				// Verify public folder message was logged
+				expect(
+					consoleMessages.some((msg) => msg.includes("Public folder found")),
+				).toBe(true);
+
+				// Verify files were copied
+				expect(fs.existsSync(`${options.outputPath}/images/test.png`)).toBe(
+					true,
+				);
+				expect(fs.existsSync(`${options.outputPath}/sample.pdf`)).toBe(true);
+
+				// Verify copied file contents
+				const testPngContent = await fs.promises.readFile(
+					`${options.outputPath}/images/test.png`,
+					"utf8",
+				);
+				expect(testPngContent).toBe("test image content\n");
+
+				const samplePdfContent = await fs.promises.readFile(
+					`${options.outputPath}/sample.pdf`,
+					"utf8",
+				);
+				expect(samplePdfContent).toBe("test pdf content\n");
+
+				// Verify dotfiles are also copied
+				expect(fs.existsSync(`${options.outputPath}/.nojekyll`)).toBe(true);
+				expect(
+					fs.existsSync(`${options.outputPath}/.well-known/security.txt`),
+				).toBe(true);
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				console.log = consoleLog;
+			}
+		});
+
+		it("should not log anything when public folder does not exist", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-no-public-folder-test";
+			options.sitePath = "test/fixtures/multi-page-site";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			const consoleMessages: string[] = [];
+			console.log = (message) => {
+				consoleMessages.push(message as string);
+			};
+
+			try {
+				await builder.build();
+
+				// Verify public folder message was NOT logged
+				expect(
+					consoleMessages.some((msg) => msg.includes("Public folder found")),
+				).toBe(false);
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				console.log = consoleLog;
+			}
+		});
+
+		it("should skip outputPath when it is inside public folder to prevent recursive copy", async () => {
+			// Create a temporary site with public folder where outputPath is inside public
+			const tempSitePath = "test/temp-recursive-site";
+			const publicPath = `${tempSitePath}/public`;
+			const outputPath = `${publicPath}/dist`;
+
+			// Setup temporary site structure
+			await fs.promises.mkdir(`${publicPath}/assets`, { recursive: true });
+			await fs.promises.writeFile(`${publicPath}/test.txt`, "test content");
+			await fs.promises.writeFile(
+				`${publicPath}/assets/image.png`,
+				"image content",
+			);
+
+			// Create minimal required site files
+			await fs.promises.writeFile(`${tempSitePath}/README.md`, "# Test");
+
+			const options = new DoculaOptions();
+			options.outputPath = outputPath;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			const consoleMessages: string[] = [];
+			console.log = (message) => {
+				consoleMessages.push(message as string);
+			};
+
+			try {
+				await builder.build();
+
+				// Verify build completed (didn't hang from infinite recursion)
+				expect(
+					consoleMessages.some((msg) => msg.includes("Build completed")),
+				).toBe(true);
+
+				// Verify files were copied but dist folder itself was skipped
+				expect(fs.existsSync(`${outputPath}/test.txt`)).toBe(true);
+				expect(fs.existsSync(`${outputPath}/assets/image.png`)).toBe(true);
+
+				// Verify no recursive dist/dist folder was created
+				expect(fs.existsSync(`${outputPath}/dist`)).toBe(false);
+			} finally {
+				await fs.promises.rm(tempSitePath, { recursive: true });
+				console.log = consoleLog;
+			}
+		});
+	});
+
 	describe("Docula Builder - OpenAPI API Documentation", () => {
 		it("should build the API page when openApiUrl is configured", async () => {
 			const builder = new DoculaBuilder();

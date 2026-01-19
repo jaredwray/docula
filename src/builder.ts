@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import * as cheerio from "cheerio";
 import { Ecto } from "ecto";
 import he from "he";
@@ -21,6 +22,7 @@ export type DoculaData = {
 	sections?: DoculaSection[];
 	documents?: DoculaDocument[];
 	sidebarItems?: DoculaSection[];
+	announcement?: string;
 	openApiUrl?: string;
 };
 
@@ -174,6 +176,9 @@ export class DoculaBuilder {
 				`${this.options.outputPath}/css/variables.css`,
 			);
 		}
+
+		// Copy over public folder contents
+		this.copyPublicFolder(siteRelativePath, this.options.outputPath);
 
 		const endTime = Date.now();
 
@@ -337,9 +342,11 @@ export class DoculaBuilder {
 				content = await this.buildReadmeSection(data);
 			}
 
+			const announcement = await this.buildAnnouncementSection(data);
+
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
-				{ ...data, content },
+				{ ...data, content, announcement },
 				data.templatePath,
 			);
 			await fs.promises.writeFile(indexPath, indexContent, "utf8");
@@ -378,6 +385,18 @@ export class DoculaBuilder {
 		}
 
 		return htmlReadme;
+	}
+
+	public async buildAnnouncementSection(
+		data: DoculaData,
+	): Promise<string | undefined> {
+		const announcementPath = `${data.sitePath}/announcement.md`;
+		if (fs.existsSync(announcementPath)) {
+			const announcementContent = fs.readFileSync(announcementPath, "utf8");
+			return new Writr(announcementContent).render();
+		}
+
+		return undefined;
 	}
 
 	public async buildDocsPages(data: DoculaData): Promise<void> {
@@ -693,6 +712,59 @@ export class DoculaBuilder {
 			} else {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
+			}
+		}
+	}
+
+	private copyPublicFolder(sitePath: string, outputPath: string): void {
+		const publicPath = `${sitePath}/public`;
+
+		if (!fs.existsSync(publicPath)) {
+			return;
+		}
+
+		this._console.log("Public folder found, copying contents to dist...");
+
+		const resolvedOutputPath = path.resolve(outputPath);
+		this.copyPublicDirectory(
+			publicPath,
+			outputPath,
+			publicPath,
+			resolvedOutputPath,
+		);
+	}
+
+	private copyPublicDirectory(
+		source: string,
+		target: string,
+		basePath: string,
+		outputPath: string,
+	): void {
+		const files = fs.readdirSync(source);
+
+		for (const file of files) {
+			const sourcePath = `${source}/${file}`;
+			const targetPath = `${target}/${file}`;
+			const relativePath = sourcePath.replace(`${basePath}/`, "");
+
+			// Skip if source path is inside or equals the output path to prevent recursive copying
+			const resolvedSourcePath = path.resolve(sourcePath);
+			if (
+				resolvedSourcePath === outputPath ||
+				resolvedSourcePath.startsWith(`${outputPath}${path.sep}`)
+			) {
+				continue;
+			}
+
+			const stat = fs.lstatSync(sourcePath);
+
+			if (stat.isDirectory()) {
+				fs.mkdirSync(targetPath, { recursive: true });
+				this.copyPublicDirectory(sourcePath, targetPath, basePath, outputPath);
+			} else {
+				fs.mkdirSync(target, { recursive: true });
+				fs.copyFileSync(sourcePath, targetPath);
+				this._console.log(`  Copied: ${relativePath}`);
 			}
 		}
 	}

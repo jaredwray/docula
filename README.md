@@ -12,8 +12,11 @@
 - [Features](#features)
 - [Open Source Examples](#open-source-examples)
 - [Getting Started](#getting-started)
+- [TypeScript Configuration](#typescript-configuration)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
+- [Public Folder](#public-folder)
+- [Announcements](#announcements)
 - [Alert, Info, Warn Styling](#alert-info-warn-styling)
 - [Using a Github Token](#using-a-github-token)
 - [Helpers](#helpers)
@@ -22,9 +25,10 @@
 - [License - MIT](#license)
 
 # Features
-* No configuration requrired. Just setup the folder structure with a logo, favicon, and css file.
+* No configuration required. Just setup the folder structure with a logo, favicon, and css file.
 * Builds a static website that can be hosted anywhere.
-* For more complex projects easily add a `docula.config.mjs` file to customize the build process. With PRE and POST methods.
+* For more complex projects easily add a `docula.config.ts` (TypeScript) or `docula.config.mjs` (JavaScript) file to customize the build process with lifecycle hooks.
+* Full TypeScript support with typed configuration and IDE autocompletion.
 * Support for single page with readme or multiple markdown pages in a docs folder.
 * Will generate a sitemap.xml and robots.txt for your site.
 * Uses Github release notes to generate a changelog / releases page.
@@ -68,6 +72,73 @@ Simply replace the logo, favicon, and css file with your own. The readme is your
 
 This will build your site and place it in the `dist` folder. You can then host it anywhere you like.
 
+# TypeScript Configuration
+
+Docula supports TypeScript configuration files (`docula.config.ts`) in addition to JavaScript (`docula.config.mjs`). TypeScript configs provide type safety and better IDE support.
+
+## Initializing with TypeScript
+
+To create a new project with a TypeScript config file:
+
+```bash
+npx docula init --typescript
+```
+
+This creates a `docula.config.ts` file with full type support:
+
+```typescript
+import type { DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  templatePath: './template',
+  outputPath: './dist',
+  sitePath: './site',
+  githubPath: 'your-username/your-repo',
+  siteTitle: 'My Project',
+  siteDescription: 'Project description',
+  siteUrl: 'https://your-site.com',
+};
+```
+
+## Using Lifecycle Hooks with TypeScript
+
+You can add typed lifecycle hooks to your config:
+
+```typescript
+import type { DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  siteTitle: 'My Project',
+  // ... other options
+};
+
+export const onPrepare = async (config: DoculaOptions): Promise<void> => {
+  // Runs before the build process
+  console.log(`Building ${config.siteTitle}...`);
+};
+```
+
+## Config File Priority
+
+When both config files exist, Docula loads them in this order (first found wins):
+1. `docula.config.ts` (TypeScript - takes priority)
+2. `docula.config.mjs` (JavaScript)
+
+## Available Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `templatePath` | `string` | `'./template'` | Path to custom template directory |
+| `outputPath` | `string` | `'./dist'` | Output directory for built site |
+| `sitePath` | `string` | `'./site'` | Directory containing site content |
+| `githubPath` | `string` | - | GitHub repository path (e.g., `'user/repo'`) |
+| `siteTitle` | `string` | `'docula'` | Website title |
+| `siteDescription` | `string` | - | Website description |
+| `siteUrl` | `string` | - | Website URL |
+| `port` | `number` | `3000` | Port for local development server |
+| `singlePage` | `boolean` | `true` | Single page or multi-page site |
+| `sections` | `DoculaSection[]` | - | Documentation sections |
+
 # Using Your own Template
 
 If you want to use your own template you can do so by adding a `docula.config.ts` file to the root of your project. This file will be used to configure the build process.
@@ -99,6 +170,107 @@ The `readme.md` file will be the root page and the rest will be added to the tab
 title: Getting Started
 order: 2
 ```
+
+# Public Folder
+
+If you have static assets like images, fonts, or other files that need to be copied directly to your built site, you can use a `public` folder. Any files placed in the `public` folder within your site directory will be automatically copied to the root of your `dist` output folder during the build process.
+
+## Usage
+
+Create a `public` folder inside your site directory:
+
+```
+site
+├───public
+│   ├───images
+│   │   ├───screenshot.png
+│   │   └───banner.jpg
+│   ├───fonts
+│   │   └───custom-font.woff2
+│   └───downloads
+│       └───example.pdf
+├───docs
+├───logo.svg
+├───favicon.ico
+└───docula.config.mjs
+```
+
+When you run the build command, all contents of the `public` folder will be copied to the `dist` folder:
+
+```
+dist
+├───images
+│   ├───screenshot.png
+│   └───banner.jpg
+├───fonts
+│   └───custom-font.woff2
+├───downloads
+│   └───example.pdf
+├───index.html
+└───...
+```
+
+The build output will show each file being copied:
+
+```
+Public folder found, copying contents to dist...
+  Copied: images/screenshot.png
+  Copied: images/banner.jpg
+  Copied: fonts/custom-font.woff2
+  Copied: downloads/example.pdf
+Build completed in 1234ms
+```
+
+This is useful for:
+- Images referenced in your documentation
+- Downloadable files (PDFs, zip archives, etc.)
+- Custom fonts
+- Any other static assets that need to be served from your site
+
+# Announcements
+
+You can display an announcement banner on your home page by creating an `announcement.md` file in your site directory. This is useful for highlighting important updates, new releases, or any time-sensitive information.
+
+## Usage
+
+Create an `announcement.md` file in your site folder:
+
+```
+site
+├───announcement.md
+├───docs
+├───logo.svg
+├───favicon.ico
+└───docula.config.mjs
+```
+
+Add your announcement content using markdown:
+
+```md
+**New Release:** Version 2.0 is now available! Check out the [release notes](/releases) for details.
+```
+
+The announcement will automatically appear on the home page above the "Documentation" button, styled as an alert box with a colored left border.
+
+## Styling
+
+The announcement uses your theme's CSS variables and displays with:
+- A subtle background using `--sidebar-background`
+- A prominent left border using `--color-secondary`
+- Links styled with `--color-primary`
+
+You can customize the appearance by overriding the `.announcement` class in your `variables.css`:
+
+```css
+.announcement {
+  background-color: #fff3cd;
+  border-left-color: #ffc107;
+}
+```
+
+## Removing the Announcement
+
+Simply delete the `announcement.md` file when you no longer need the announcement. The home page will automatically return to its normal layout.
 
 # Alert, Info, Warn Styling
 

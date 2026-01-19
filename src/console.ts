@@ -26,7 +26,15 @@ export class DoculaConsole {
 		console.log("     help           Print this help");
 		console.log("     version        Print the version");
 		console.log();
-		console.log("   Arguments Build:");
+		console.log("   Arguments init:");
+		console.log(
+			"     --typescript       Generate TypeScript config file (docula.config.ts)",
+		);
+		console.log(
+			"     -s, --site         Set the path where site files are located",
+		);
+		console.log();
+		console.log("   Arguments build:");
 		console.log("     -w, --watch            watch for changes and rebuild");
 		console.log(
 			"     -s, --site             Set the path where site files are located",
@@ -87,6 +95,7 @@ export class DoculaConsole {
 			output: "",
 			watch: false,
 			port: 3000,
+			typescript: false,
 		};
 		for (let i = 0; i < argv.length; i++) {
 			const argument = argv[i];
@@ -132,6 +141,11 @@ export class DoculaConsole {
 					);
 					break;
 				}
+
+				case "--typescript": {
+					arguments_.typescript = true;
+					break;
+				}
 			}
 		}
 
@@ -151,4 +165,5 @@ type DoculaConsoleArguments = {
 	output: string | undefined;
 	watch: boolean;
 	port: number;
+	typescript: boolean;
 };
