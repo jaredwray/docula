@@ -297,7 +297,7 @@ export class DoculaBuilder {
 		const sitemapPath = `${data.outputPath}/sitemap.xml`;
 		const urls = [{ url: data.siteUrl }, { url: `${data.siteUrl}/releases` }];
 
-		if (data.openApiUrl) {
+		if (data.openApiUrl && data.templates?.api) {
 			urls.push({ url: `${data.siteUrl}/api` });
 		}
 
