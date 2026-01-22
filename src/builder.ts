@@ -23,12 +23,14 @@ export type DoculaData = {
 	documents?: DoculaDocument[];
 	sidebarItems?: DoculaSection[];
 	announcement?: string;
+	openApiUrl?: string;
 };
 
 export type DoculaTemplates = {
 	index: string;
 	releases: string;
 	docPage?: string;
+	api?: string;
 };
 
 export type DoculaSection = {
@@ -87,6 +89,7 @@ export class DoculaBuilder {
 			outputPath: this.options.outputPath,
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
+			openApiUrl: this.options.openApiUrl,
 		};
 
 		// Get data from github
@@ -124,6 +127,11 @@ export class DoculaBuilder {
 
 		if (doculaData.hasDocuments) {
 			await this.buildDocsPages(doculaData);
+		}
+
+		// Build the API documentation page (/api/index.html)
+		if (doculaData.openApiUrl) {
+			await this.buildApiPage(doculaData);
 		}
 
 		const siteRelativePath = this.options.sitePath;
@@ -241,6 +249,14 @@ export class DoculaBuilder {
 			if (documentPage) {
 				templates.docPage = documentPage;
 			}
+
+			const apiPage = options.openApiUrl
+				? await this.getTemplateFile(options.templatePath, "api")
+				: undefined;
+
+			if (apiPage) {
+				templates.api = apiPage;
+			}
 		} else {
 			throw new Error(`No template path found at ${options.templatePath}`);
 		}
@@ -280,6 +296,10 @@ export class DoculaBuilder {
 	public async buildSiteMapPage(data: DoculaData): Promise<void> {
 		const sitemapPath = `${data.outputPath}/sitemap.xml`;
 		const urls = [{ url: data.siteUrl }, { url: `${data.siteUrl}/releases` }];
+
+		if (data.openApiUrl && data.templates?.api) {
+			urls.push({ url: `${data.siteUrl}/api` });
+		}
 
 		// Add all the document urls
 		for (const document of data.documents ?? []) {
@@ -404,6 +424,25 @@ export class DoculaBuilder {
 		} else {
 			throw new Error("No templates found");
 		}
+	}
+
+	public async buildApiPage(data: DoculaData): Promise<void> {
+		if (!data.openApiUrl || !data.templates?.api) {
+			return;
+		}
+
+		const apiPath = `${data.outputPath}/api/index.html`;
+		const apiOutputPath = `${data.outputPath}/api`;
+
+		await fs.promises.mkdir(apiOutputPath, { recursive: true });
+
+		const apiTemplate = `${data.templatePath}/${data.templates.api}`;
+		const apiContent = await this._ecto.renderFromFile(
+			apiTemplate,
+			{ ...data, specUrl: data.openApiUrl },
+			data.templatePath,
+		);
+		await fs.promises.writeFile(apiPath, apiContent, "utf8");
 	}
 
 	public generateSidebarItems(data: DoculaData): DoculaSection[] {
