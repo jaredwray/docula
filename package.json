@@ -59,7 +59,7 @@
     "jiti": "^2.6.1",
     "serve-handler": "^6.1.6",
     "update-notifier": "^7.3.1",
-    "writr": "^5.0.1"
+    "writr": "^5.0.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.9",
