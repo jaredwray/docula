@@ -74,7 +74,6 @@ dist
 site/README.md
 test/fixtures/mega-page-site/dist
 site/dist
-pnpm-lock.yaml
 package-lock.json
 
 # AI
