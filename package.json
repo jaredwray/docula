@@ -53,13 +53,13 @@
   "dependencies": {
     "@cacheable/net": "^2.0.4",
     "cheerio": "^1.1.2",
-    "ecto": "^4.7.1",
+    "ecto": "^4.8.2",
     "feed": "^5.2.0",
     "he": "^1.2.0",
     "jiti": "^2.6.1",
     "serve-handler": "^6.1.6",
     "update-notifier": "^7.3.1",
-    "writr": "^5.0.1"
+    "writr": "^5.0.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.9",
