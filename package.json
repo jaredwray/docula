@@ -52,7 +52,6 @@
   },
   "dependencies": {
     "@cacheable/net": "^2.0.4",
-    "cheerio": "^1.2.0",
     "ecto": "^4.8.2",
     "feed": "^5.2.0",
     "he": "^1.2.0",

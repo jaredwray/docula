@@ -651,20 +651,22 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - Document Parser", () => {
-		it("should return tableOfContents undefined if markdown does not have data", async () => {
+		it("should include TOC heading in generatedHtml for empty markdown", async () => {
 			const builder = new DoculaBuilder();
 
 			const documentsPath = "test/fixtures/empty.md";
 			const parsedDocument = builder.parseDocumentData(documentsPath);
-			expect(parsedDocument.tableOfContents).toBeUndefined();
+			expect(parsedDocument.generatedHtml).toContain("table-of-contents");
 		});
 
-		it("should return tableOfContents undefined when markdown already has a table of contents", async () => {
+		it("should render inline TOC when markdown already has a table of contents", async () => {
 			const builder = new DoculaBuilder();
 
 			const documentsPath = "test/fixtures/has-toc.md";
 			const parsedDocument = builder.parseDocumentData(documentsPath);
-			expect(parsedDocument.tableOfContents).toBeUndefined();
+			expect(parsedDocument.generatedHtml).toContain("table-of-contents");
+			expect(parsedDocument.generatedHtml).toContain("#overview");
+			expect(parsedDocument.generatedHtml).toContain("#details");
 		});
 	});
 

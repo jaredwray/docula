@@ -2,16 +2,22 @@
   <div class="main-content">
     <article class="content">
       <h1>{{title}}</h1>
-      <div class="toc main-toc">
-{{tableOfContents}}
-      </div>
 {{generatedHtml}}
     </article>
     <div class="fixed-toc-container">
       <div class="toc fixed-toc" id="fixed-toc">
-        {{tableOfContents}}
       </div>
     </div>
     </div>
 
 </div>
+<script>
+  const tocHeading = document.getElementById('table-of-contents');
+  if (tocHeading) {
+    const tocList = tocHeading.nextElementSibling;
+    const fixedToc = document.getElementById('fixed-toc');
+    if (tocList && tocList.tagName === 'UL' && fixedToc) {
+      fixedToc.innerHTML = tocList.outerHTML;
+    }
+  }
+</script>

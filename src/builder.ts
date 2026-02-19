@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import * as cheerio from "cheerio";
 import { Ecto } from "ecto";
 import he from "he";
 import { Writr } from "writr";
@@ -50,7 +49,6 @@ export type DoculaDocument = {
 	content: string;
 	markdown: string;
 	generatedHtml: string;
-	tableOfContents?: string;
 	documentPath: string;
 	urlPath: string;
 	isRoot: boolean;
@@ -637,6 +635,11 @@ export class DoculaBuilder {
 			}
 		}
 
+		// Prepend a TOC heading if none exists so Writr's remark-toc populates it inline
+		if (!this.hasTableOfContents(markdownContent)) {
+			markdownContent = `## Table of Contents\n\n${markdownContent}`;
+		}
+
 		return {
 			title: matterData.title,
 
@@ -651,32 +654,14 @@ export class DoculaBuilder {
 			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,
-			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
-			tableOfContents: this.getTableOfContents(markdownContent, isMdx),
+			generatedHtml: new Writr(markdownContent).renderSync({
+				toc: true,
+				mdx: isMdx,
+			}),
 			documentPath,
 			urlPath,
 			isRoot,
 		};
-	}
-
-	private getTableOfContents(
-		markdown: string,
-		isMdx = false,
-	): string | undefined {
-		if (this.hasTableOfContents(markdown)) {
-			return undefined;
-		}
-
-		markdown = `## Table of Contents\n\n${markdown}`;
-		const html = new Writr(markdown).renderSync({ mdx: isMdx });
-		const $ = cheerio.load(html);
-		const tocTitle = $("h2").first();
-		const tocContent = tocTitle.next("ul").toString();
-		if (tocContent) {
-			return tocTitle.toString() + tocContent;
-		}
-
-		return undefined;
 	}
 
 	private hasTableOfContents(markdown: string): boolean {
