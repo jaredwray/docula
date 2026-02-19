@@ -51,7 +51,7 @@
     "docula": "./bin/docula.mjs"
   },
   "dependencies": {
-    "@cacheable/net": "^2.0.4",
+    "@cacheable/net": "^2.0.5",
     "ecto": "^4.8.2",
     "feed": "^5.2.0",
     "he": "^1.2.0",
