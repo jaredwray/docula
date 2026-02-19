@@ -241,10 +241,6 @@ details > summary {
   margin-right: 2rem
 }
 
-.main-toc {
-  padding-bottom: 1.5rem;
-}
-
 .toc {
   font-size: 0.875rem;
 }
@@ -285,18 +281,6 @@ details > summary {
 .toc ul > li:hover > a {
   transform: translateX(0.25rem);
   text-decoration: none;
-}
-
-.main-toc ul > li > a::after {
-  position: absolute;
-  right: 0;
-  content: '';
-  display: inline-block;
-  width: 0.25rem;
-  height: 0.25rem;
-  border-right: 1px solid var(--color-primary);
-  border-bottom: 1px solid var(--color-primary);
-  transform: rotate(-45deg);
 }
 
 .fixed-toc {
