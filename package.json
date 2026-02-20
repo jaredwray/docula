@@ -29,6 +29,8 @@
     "website:serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site/dist",
     "website:build:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs build -s ./test/fixtures/mega-page-site",
     "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
+    "website:build:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.mjs build -s ./test/fixtures/changelog-site",
+    "website:serve:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.mjs serve -s ./test/fixtures/changelog-site",
     "prepare": "pnpm build"
   },
   "keywords": [

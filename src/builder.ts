@@ -7,6 +7,18 @@ import { DoculaConsole } from "./console.js";
 import { Github, type GithubData, type GithubOptions } from "./github.js";
 import { DoculaOptions } from "./options.js";
 
+export type DoculaChangelogEntry = {
+	title: string;
+	date: string;
+	formattedDate: string;
+	tag?: string;
+	tagClass?: string;
+	slug: string;
+	content: string;
+	generatedHtml: string;
+	urlPath: string;
+};
+
 export type DoculaData = {
 	siteUrl: string;
 	siteTitle: string;
@@ -18,11 +30,13 @@ export type DoculaData = {
 	github?: GithubData;
 	templates?: DoculaTemplates;
 	hasDocuments?: boolean;
+	hasChangelog?: boolean;
 	sections?: DoculaSection[];
 	documents?: DoculaDocument[];
 	sidebarItems?: DoculaSection[];
 	announcement?: string;
 	openApiUrl?: string;
+	changelogEntries?: DoculaChangelogEntry[];
 };
 
 export type DoculaTemplates = {
@@ -30,6 +44,8 @@ export type DoculaTemplates = {
 	releases: string;
 	docPage?: string;
 	api?: string;
+	changelog?: string;
+	changelogEntry?: string;
 };
 
 export type DoculaSection = {
@@ -105,10 +121,16 @@ export class DoculaBuilder {
 
 		doculaData.hasDocuments = doculaData.documents?.length > 0;
 
+		// Get changelog entries
+		const changelogPath = `${doculaData.sitePath}/changelog`;
+		doculaData.changelogEntries = this.getChangelogEntries(changelogPath);
+		doculaData.hasChangelog = doculaData.changelogEntries.length > 0;
+
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(
 			this.options,
 			doculaData.hasDocuments,
+			doculaData.hasChangelog,
 		);
 
 		// Build the home page (index.html)
@@ -130,6 +152,12 @@ export class DoculaBuilder {
 		// Build the API documentation page (/api/index.html)
 		if (doculaData.openApiUrl) {
 			await this.buildApiPage(doculaData);
+		}
+
+		// Build changelog pages (/changelog/index.html and /changelog/{slug}/index.html)
+		if (doculaData.hasChangelog) {
+			await this.buildChangelogPage(doculaData);
+			await this.buildChangelogEntryPages(doculaData);
 		}
 
 		const siteRelativePath = this.options.sitePath;
@@ -216,6 +244,7 @@ export class DoculaBuilder {
 	public async getTemplates(
 		options: DoculaOptions,
 		hasDocuments: boolean,
+		hasChangelog = false,
 	): Promise<DoculaTemplates> {
 		const templates: DoculaTemplates = {
 			index: "",
@@ -254,6 +283,22 @@ export class DoculaBuilder {
 
 			if (apiPage) {
 				templates.api = apiPage;
+			}
+
+			const changelogPage = hasChangelog
+				? await this.getTemplateFile(options.templatePath, "changelog")
+				: undefined;
+
+			if (changelogPage) {
+				templates.changelog = changelogPage;
+			}
+
+			const changelogEntryPage = hasChangelog
+				? await this.getTemplateFile(options.templatePath, "changelog-entry")
+				: undefined;
+
+			if (changelogEntryPage) {
+				templates.changelogEntry = changelogEntryPage;
 			}
 		} else {
 			throw new Error(`No template path found at ${options.templatePath}`);
@@ -297,6 +342,15 @@ export class DoculaBuilder {
 
 		if (data.openApiUrl && data.templates?.api) {
 			urls.push({ url: `${data.siteUrl}/api` });
+		}
+
+		if (data.hasChangelog && data.templates?.changelog) {
+			urls.push({ url: `${data.siteUrl}/changelog` });
+			for (const entry of data.changelogEntries ?? []) {
+				urls.push({
+					url: `${data.siteUrl}/changelog/${entry.slug}`,
+				});
+			}
 		}
 
 		// Add all the document urls
@@ -441,6 +495,139 @@ export class DoculaBuilder {
 			data.templatePath,
 		);
 		await fs.promises.writeFile(apiPath, apiContent, "utf8");
+	}
+
+	public getChangelogEntries(changelogPath: string): DoculaChangelogEntry[] {
+		const entries: DoculaChangelogEntry[] = [];
+		if (!fs.existsSync(changelogPath)) {
+			return entries;
+		}
+
+		const files = fs.readdirSync(changelogPath);
+		for (const file of files) {
+			const filePath = `${changelogPath}/${file}`;
+			const stats = fs.statSync(filePath);
+			if (stats.isFile() && (file.endsWith(".md") || file.endsWith(".mdx"))) {
+				const entry = this.parseChangelogEntry(filePath);
+				entries.push(entry);
+			}
+		}
+
+		// Sort by date descending (newest first), invalid dates go to the end
+		entries.sort((a, b) => {
+			const dateA = new Date(a.date).getTime();
+			const dateB = new Date(b.date).getTime();
+			if (Number.isNaN(dateA) && Number.isNaN(dateB)) {
+				return 0;
+			}
+
+			if (Number.isNaN(dateA)) {
+				return 1;
+			}
+
+			if (Number.isNaN(dateB)) {
+				return -1;
+			}
+
+			return dateB - dateA;
+		});
+
+		return entries;
+	}
+
+	public parseChangelogEntry(filePath: string): DoculaChangelogEntry {
+		const fileContent = fs.readFileSync(filePath, "utf8");
+		const writr = new Writr(fileContent);
+		const matterData = writr.frontMatter;
+		const markdownContent = writr.body;
+
+		const fileName = path.basename(filePath, path.extname(filePath));
+		// Remove leading date prefix pattern (YYYY-MM-DD-) if present
+		const slug = fileName.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+
+		const isMdx = filePath.endsWith(".mdx");
+
+		const tag = matterData.tag as string | undefined;
+		const tagClass = tag ? tag.toLowerCase().replace(/\s+/g, "-") : undefined;
+
+		// Handle date as Date object or string
+		let dateString = "";
+		if (matterData.date instanceof Date) {
+			dateString = matterData.date.toISOString().split("T")[0];
+		} else if (matterData.date) {
+			dateString = String(matterData.date);
+		}
+
+		// Format date for display; fall back to raw string for unparseable dates
+		let formattedDate = dateString;
+		const parsedDate = new Date(dateString);
+		if (!Number.isNaN(parsedDate.getTime())) {
+			formattedDate = parsedDate.toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			});
+		}
+
+		return {
+			title: matterData.title ?? fileName,
+			date: dateString,
+			formattedDate,
+			tag,
+			tagClass,
+			slug,
+			content: markdownContent,
+			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
+			urlPath: `/changelog/${slug}/index.html`,
+		};
+	}
+
+	public async buildChangelogPage(data: DoculaData): Promise<void> {
+		if (!data.hasChangelog || !data.templates?.changelog) {
+			return;
+		}
+
+		const changelogOutputPath = `${data.outputPath}/changelog`;
+		const changelogIndexPath = `${changelogOutputPath}/index.html`;
+
+		await fs.promises.mkdir(changelogOutputPath, { recursive: true });
+
+		const changelogTemplate = `${data.templatePath}/${data.templates.changelog}`;
+		const changelogContent = await this._ecto.renderFromFile(
+			changelogTemplate,
+			{ ...data, entries: data.changelogEntries },
+			data.templatePath,
+		);
+		await fs.promises.writeFile(changelogIndexPath, changelogContent, "utf8");
+	}
+
+	public async buildChangelogEntryPages(data: DoculaData): Promise<void> {
+		if (
+			!data.hasChangelog ||
+			!data.templates?.changelogEntry ||
+			!data.changelogEntries?.length
+		) {
+			return;
+		}
+
+		const entryTemplate = `${data.templatePath}/${data.templates.changelogEntry}`;
+
+		const promises = data.changelogEntries.map(async (entry) => {
+			const entryOutputPath = `${data.outputPath}/changelog/${entry.slug}`;
+			await fs.promises.mkdir(entryOutputPath, { recursive: true });
+
+			let entryContent = await this._ecto.renderFromFile(
+				entryTemplate,
+				{ ...data, ...entry, entries: data.changelogEntries },
+				data.templatePath,
+			);
+			entryContent = he.decode(entryContent);
+
+			const entryFilePath = `${entryOutputPath}/index.html`;
+			return fs.promises.writeFile(entryFilePath, entryContent, "utf8");
+		});
+
+		await Promise.all(promises);
 	}
 
 	public generateSidebarItems(data: DoculaData): DoculaSection[] {

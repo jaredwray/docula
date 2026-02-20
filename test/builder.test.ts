@@ -1048,4 +1048,353 @@ describe("DoculaBuilder", () => {
 			console.log = consoleLog;
 		});
 	});
+
+	describe("Docula Builder - Changelog", () => {
+		it("should return empty array when changelog directory does not exist", () => {
+			const builder = new DoculaBuilder();
+			const entries = builder.getChangelogEntries(
+				"test/fixtures/single-page-site/changelog",
+			);
+			expect(entries).toStrictEqual([]);
+		});
+
+		it("should get changelog entries from changelog directory", () => {
+			const builder = new DoculaBuilder();
+			const entries = builder.getChangelogEntries(
+				"test/fixtures/changelog-site/changelog",
+			);
+			expect(entries.length).toBe(5);
+			// Should be sorted by date descending, invalid dates last
+			expect(entries[0].title).toBe("Critical Bug Fix");
+			expect(entries[0].date).toBe("2025-02-01");
+			expect(entries[0].tag).toBe("Fixed");
+			expect(entries[0].slug).toBe("bug-fix");
+			expect(entries[1].title).toBe("New Feature Released");
+			expect(entries[2].title).toBe("Performance Improvements");
+			// Invalid dates should be at the end
+			const lastTwo = entries.slice(3).map((e) => e.title);
+			expect(lastTwo).toContain("String Date Entry");
+			expect(lastTwo).toContain("No Date Entry");
+		});
+
+		it("should parse a changelog entry correctly", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.title).toBe("New Feature Released");
+			expect(entry.date).toBe("2025-01-15");
+			expect(entry.tag).toBe("Added");
+			expect(entry.tagClass).toBe("added");
+			expect(entry.slug).toBe("new-feature");
+			expect(entry.urlPath).toBe("/changelog/new-feature/index.html");
+			expect(entry.generatedHtml).toContain("Feature A");
+		});
+
+		it("should handle string dates in changelog entries", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2024-11-01-string-date.md",
+			);
+			expect(entry.title).toBe("String Date Entry");
+			expect(entry.date).toBe("Q1 2025");
+			expect(entry.slug).toBe("string-date");
+		});
+
+		it("should build changelog listing page", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-changelog-test",
+				hasChangelog: true,
+				changelogEntries: [
+					{
+						title: "Test Entry",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						tag: "Added",
+						tagClass: "added",
+						slug: "test-entry",
+						content: "Test content",
+						generatedHtml: "<p>Test content</p>",
+						urlPath: "/changelog/test-entry/index.html",
+					},
+				],
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					changelog: "changelog.hbs",
+					changelogEntry: "changelog-entry.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildChangelogPage(data);
+				const changelog = await fs.promises.readFile(
+					`${data.outputPath}/changelog/index.html`,
+					"utf8",
+				);
+				expect(changelog).toContain("<title>docula Changelog</title>");
+				expect(changelog).toContain("Test Entry");
+				expect(changelog).toContain("Added");
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should build changelog entry pages", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-changelog-entry-test",
+				hasChangelog: true,
+				changelogEntries: [
+					{
+						title: "Test Entry",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						tag: "Added",
+						tagClass: "added",
+						slug: "test-entry",
+						content: "Test content",
+						generatedHtml: "<p>Test content</p>",
+						urlPath: "/changelog/test-entry/index.html",
+					},
+				],
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					changelog: "changelog.hbs",
+					changelogEntry: "changelog-entry.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildChangelogEntryPages(data);
+				expect(
+					fs.existsSync(`${data.outputPath}/changelog/test-entry/index.html`),
+				).toBe(true);
+				const entryPage = await fs.promises.readFile(
+					`${data.outputPath}/changelog/test-entry/index.html`,
+					"utf8",
+				);
+				expect(entryPage).toContain("<title>docula - Test Entry</title>");
+				expect(entryPage).toContain("Test content");
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should not build changelog page when hasChangelog is false", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-no-changelog-test",
+				hasChangelog: false,
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildChangelogPage(data);
+				expect(fs.existsSync(`${data.outputPath}/changelog/index.html`)).toBe(
+					false,
+				);
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should not build changelog entry pages when no entries exist", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-no-changelog-entries-test",
+				hasChangelog: false,
+				changelogEntries: [],
+			};
+
+			try {
+				await builder.buildChangelogEntryPages(data);
+				expect(fs.existsSync(`${data.outputPath}/changelog`)).toBe(false);
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should include /changelog in sitemap when changelog exists", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-sitemap-changelog-test",
+				hasChangelog: true,
+				changelogEntries: [
+					{
+						title: "Test Entry",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						slug: "test-entry",
+						content: "",
+						generatedHtml: "",
+						urlPath: "/changelog/test-entry/index.html",
+					},
+				],
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					changelog: "changelog.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.outputPath}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/changelog</loc>");
+				expect(sitemap).toContain(
+					"<loc>http://foo.com/changelog/test-entry</loc>",
+				);
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should not include /changelog in sitemap when changelog does not exist", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-sitemap-no-changelog-test",
+				hasChangelog: false,
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.outputPath}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).not.toContain("<loc>http://foo.com/changelog</loc>");
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
+		it("should get changelog template when hasChangelog is true", async () => {
+			const builder = new DoculaBuilder();
+			const options = new DoculaOptions();
+			options.templatePath = "test/fixtures/template-example/";
+			const templateData = await builder.getTemplates(options, false, true);
+			expect(templateData.changelog).toBe("changelog.hbs");
+			expect(templateData.changelogEntry).toBe("changelog-entry.hbs");
+		});
+
+		it("should not get changelog template when hasChangelog is false", async () => {
+			const builder = new DoculaBuilder();
+			const options = new DoculaOptions();
+			options.templatePath = "test/fixtures/template-example/";
+			const templateData = await builder.getTemplates(options, false, false);
+			expect(templateData.changelog).toBeUndefined();
+			expect(templateData.changelogEntry).toBeUndefined();
+		});
+
+		it("should build with changelog", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-build-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			let consoleMessage = "";
+			console.log = (message) => {
+				consoleMessage = message as string;
+			};
+
+			try {
+				await builder.build();
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/index.html`),
+				).toBe(true);
+				expect(
+					fs.existsSync(
+						`${options.outputPath}/changelog/new-feature/index.html`,
+					),
+				).toBe(true);
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/bug-fix/index.html`),
+				).toBe(true);
+				expect(
+					fs.existsSync(
+						`${options.outputPath}/changelog/improvements/index.html`,
+					),
+				).toBe(true);
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, {
+					recursive: true,
+				});
+			}
+
+			expect(consoleMessage).toContain("Build");
+
+			console.log = consoleLog;
+		});
+	});
 });

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {{> header }}
+  <title>{{siteTitle}} - {{title}}</title>
+</head>
+<body>
+  <main>
+    <a href="/changelog/">Back to Changelog</a>
+    <h1>{{title}}</h1>
+    {{#if tag}}
+    <span class="changelog-tag">{{tag}}</span>
+    {{/if}}
+    <div>{{{generatedHtml}}}</div>
+  </main>
+  {{> footer}}
+  {{> scripts }}
+</body>
+</html>
