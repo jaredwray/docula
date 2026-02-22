@@ -1548,6 +1548,14 @@ describe("DoculaBuilder", () => {
 				expect(content.length).toBeGreaterThan(0);
 				// Non-ASCII section should be present
 				expect(content).toContain("Non-ASCII");
+				// HTML entities from the markdown (&eacute;, &uuml;, etc.) should
+				// be rendered as their Unicode characters by Writr
+				expect(content).toContain("caf\u00E9");
+				expect(content).toContain("na\u00EFve");
+				expect(content).toContain("r\u00E9sum\u00E9");
+				expect(content).toContain("\u00FCber");
+				expect(content).toContain("stra\u00DFe");
+				expect(content).toContain("\u00A9 2025");
 			} finally {
 				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 			}
