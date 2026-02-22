@@ -1397,4 +1397,168 @@ describe("DoculaBuilder", () => {
 			console.log = consoleLog;
 		});
 	});
+
+	describe("Docula Builder - HTML Entity Handling in Code Blocks", () => {
+		it("should produce correct HTML entities in generatedHtml for code blocks with generics", () => {
+			const builder = new DoculaBuilder();
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/generics-doc.md",
+			);
+			// Writr escapes left angle brackets in code blocks using hex entities (&#x3C; for <)
+			// Syntax highlighting may insert <span> tags between identifiers and entities
+			expect(doc.generatedHtml).toContain("&#x3C;T>");
+			expect(doc.generatedHtml).toContain("&#x3C;");
+			// The raw < should not appear unescaped in code content for generics
+			expect(doc.generatedHtml).not.toMatch(/identity<T>/);
+		});
+
+		it("should build docs pages with generics in code blocks without he.decode", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-generics-test",
+				hasDocuments: true,
+				sections: [],
+				documents: builder.getDocumentInDirectory(
+					"test/fixtures/multi-page-site/docs",
+				),
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					docPage: "docs.hbs",
+				},
+			};
+
+			data.sidebarItems = builder.generateSidebarItems(data);
+
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildDocsPages(data);
+				const genericsDoc = data.documents?.find(
+					(d) => d.title === "Generics Guide",
+				);
+				expect(genericsDoc).toBeDefined();
+
+				const outputFile = `${data.outputPath}${genericsDoc?.urlPath}`;
+				const content = await fs.promises.readFile(outputFile, "utf8");
+
+				// The docs page should render successfully
+				expect(content).toContain("Generics Guide");
+				expect(content).toContain("<code");
+				// Verify the page contains the code block content
+				expect(content).toContain("identity");
+				expect(content).toContain("Map");
+			} finally {
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should build changelog entry pages without he.decode", async () => {
+			const builder = new DoculaBuilder();
+			const generatedHtml =
+				"<pre><code>function identity&lt;T&gt;(arg: T): T { return arg; }</code></pre>";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-changelog-generics-test",
+				hasChangelog: true,
+				changelogEntries: [
+					{
+						title: "Generics Support",
+						date: "2025-03-01",
+						formattedDate: "March 1, 2025",
+						tag: "Added",
+						tagClass: "added",
+						slug: "generics-support",
+						content:
+							"```ts\nfunction identity<T>(arg: T): T { return arg; }\n```",
+						generatedHtml,
+						urlPath: "/changelog/generics-support/index.html",
+					},
+				],
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					changelog: "changelog.hbs",
+					changelogEntry: "changelog-entry.hbs",
+				},
+			};
+
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildChangelogEntryPages(data);
+				const entryPage = await fs.promises.readFile(
+					`${data.outputPath}/changelog/generics-support/index.html`,
+					"utf8",
+				);
+				// The page should render and contain the code block content
+				expect(entryPage).toContain("Generics Support");
+				expect(entryPage).toContain("identity");
+			} finally {
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle non-ASCII characters without he.decode", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-nonascii-test",
+				hasDocuments: true,
+				sections: [],
+				documents: builder.getDocumentInDirectory(
+					"test/fixtures/multi-page-site/docs",
+				),
+				templates: {
+					index: "index.hbs",
+					releases: "releases.hbs",
+					docPage: "docs.hbs",
+				},
+			};
+
+			data.sidebarItems = builder.generateSidebarItems(data);
+
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildDocsPages(data);
+				const genericsDoc = data.documents?.find(
+					(d) => d.title === "Generics Guide",
+				);
+				expect(genericsDoc).toBeDefined();
+
+				const outputFile = `${data.outputPath}${genericsDoc?.urlPath}`;
+				const content = await fs.promises.readFile(outputFile, "utf8");
+
+				// Page should render with non-ASCII content intact
+				expect(content).toBeTruthy();
+				expect(content.length).toBeGreaterThan(0);
+				// Non-ASCII section should be present
+				expect(content).toContain("Non-ASCII");
+				// HTML entities from the markdown (&eacute;, &uuml;, etc.) should
+				// be rendered as their Unicode characters by Writr
+				expect(content).toContain("caf\u00E9");
+				expect(content).toContain("na\u00EFve");
+				expect(content).toContain("r\u00E9sum\u00E9");
+				expect(content).toContain("\u00FCber");
+				expect(content).toContain("stra\u00DFe");
+				expect(content).toContain("\u00A9 2025");
+			} finally {
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			}
+		});
+	});
 });
