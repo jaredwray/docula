@@ -17,9 +17,6 @@ importers:
       feed:
         specifier: ^5.2.0
         version: 5.2.0
-      he:
-        specifier: ^1.2.0
-        version: 1.2.0
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
@@ -39,9 +36,6 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
-      '@types/he':
-        specifier: ^1.2.3
-        version: 1.2.3
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -982,9 +976,6 @@ packages:
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
-  '@types/he@1.2.3':
-    resolution: {integrity: sha512-q67/qwlxblDzEDvzHhVkwc1gzVWxaNxeyHUBF4xElrvjL11O+Ytze+1fGpBHlr/H9myiBUaUXNnNPmBHxxfAcA==}
-
   '@types/http-errors@2.0.5':
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
 
@@ -1595,10 +1586,6 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
-
-  he@1.2.0:
-    resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
-    hasBin: true
 
   highlight.js@11.11.1:
     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
@@ -3273,8 +3260,6 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/he@1.2.3': {}
-
   '@types/http-errors@2.0.5': {}
 
   '@types/js-yaml@4.0.9': {}
@@ -3992,8 +3977,6 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
-
-  he@1.2.0: {}
 
   highlight.js@11.11.1: {}
 

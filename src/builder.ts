@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Ecto } from "ecto";
-import he from "he";
 import { Writr } from "writr";
 import { DoculaConsole } from "./console.js";
 import { Github, type GithubData, type GithubOptions } from "./github.js";
@@ -463,13 +462,11 @@ export class DoculaBuilder {
 					recursive: true,
 				});
 				const slug = `${data.outputPath}${document.urlPath}`;
-				let documentContent = await this._ecto.renderFromFile(
+				const documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
 					{ ...data, ...document },
 					data.templatePath,
 				);
-				documentContent = he.decode(documentContent);
-
 				return fs.promises.writeFile(slug, documentContent, "utf8");
 			});
 			await Promise.all(promises);
@@ -616,12 +613,11 @@ export class DoculaBuilder {
 			const entryOutputPath = `${data.outputPath}/changelog/${entry.slug}`;
 			await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
-			let entryContent = await this._ecto.renderFromFile(
+			const entryContent = await this._ecto.renderFromFile(
 				entryTemplate,
 				{ ...data, ...entry, entries: data.changelogEntries },
 				data.templatePath,
 			);
-			entryContent = he.decode(entryContent);
 
 			const entryFilePath = `${entryOutputPath}/index.html`;
 			return fs.promises.writeFile(entryFilePath, entryContent, "utf8");
