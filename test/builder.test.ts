@@ -1435,9 +1435,7 @@ describe("DoculaBuilder", () => {
 
 			data.sidebarItems = builder.generateSidebarItems(data);
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 
 			try {
 				await builder.buildDocsPages(data);
@@ -1456,9 +1454,7 @@ describe("DoculaBuilder", () => {
 				expect(content).toContain("identity");
 				expect(content).toContain("Map");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 			}
 		});
 
@@ -1496,9 +1492,7 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 
 			try {
 				await builder.buildChangelogEntryPages(data);
@@ -1510,9 +1504,7 @@ describe("DoculaBuilder", () => {
 				expect(entryPage).toContain("Generics Support");
 				expect(entryPage).toContain("identity");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 			}
 		});
 
@@ -1539,9 +1531,7 @@ describe("DoculaBuilder", () => {
 
 			data.sidebarItems = builder.generateSidebarItems(data);
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 
 			try {
 				await builder.buildDocsPages(data);
@@ -1559,9 +1549,7 @@ describe("DoculaBuilder", () => {
 				// Non-ASCII section should be present
 				expect(content).toContain("Non-ASCII");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 			}
 		});
 	});
