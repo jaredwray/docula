@@ -18,24 +18,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+        
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 24
 
     - name: Install Dependencies
-      run: npm install pnpm -g && pnpm install
+      run: pnpm install
 
-    - name: Build    
+    - name: Build
       run: pnpm build
 
-    - name: Testing    
+    - name: Testing
       run: pnpm test:ci
 
     - name: Publish
-      run: |
-        npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-        npm publish --ignore-scripts
+      run: pnpm publish --no-git-checks
       env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NPM_CONFIG_//registry.npmjs.org/:_authToken: ${{ secrets.NPM_TOKEN }}
 
