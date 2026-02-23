@@ -11,7 +11,10 @@
       "import": "./dist/docula.js"
     }
   },
-  "repository": "https://github.com/jaredwray/docula.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaredwray/docula.git"
+  },
   "author": "Jared Wray <me@jaredwray.com>",
   "engines": {
     "node": ">=20"
@@ -25,12 +28,12 @@
     "test": "pnpm lint && vitest run --coverage",
     "test:ci": "pnpm lint:ci && vitest run --coverage",
     "generate-init-file": "tsx scripts/generate-init-file.ts",
-    "website:build": "rimraf ./site/README.md && node bin/docula.mjs build -s ./site -o ./site/dist",
-    "website:serve": "rimraf ./site/README.md && node bin/docula.mjs serve -s ./site -o ./site/dist",
-    "website:build:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs build -s ./test/fixtures/mega-page-site",
-    "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.mjs serve -s ./test/fixtures/mega-page-site",
-    "website:build:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.mjs build -s ./test/fixtures/changelog-site",
-    "website:serve:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.mjs serve -s ./test/fixtures/changelog-site",
+    "website:build": "rimraf ./site/README.md && node bin/docula.js build -s ./site -o ./site/dist",
+    "website:serve": "rimraf ./site/README.md && node bin/docula.js serve -s ./site -o ./site/dist",
+    "website:build:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.js build -s ./test/fixtures/mega-page-site",
+    "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.js serve -s ./test/fixtures/mega-page-site",
+    "website:build:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.js build -s ./test/fixtures/changelog-site",
+    "website:serve:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.js serve -s ./test/fixtures/changelog-site",
     "prepare": "pnpm build"
   },
   "keywords": [
@@ -50,7 +53,7 @@
     "handlebars"
   ],
   "bin": {
-    "docula": "./bin/docula.mjs"
+    "docula": "./bin/docula.js"
   },
   "dependencies": {
     "@cacheable/net": "^2.0.5",
