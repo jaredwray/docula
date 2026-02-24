@@ -4,3 +4,10 @@
 <link rel="stylesheet" href="/css/styles.css">
 <link rel="stylesheet" href="/css/highlight/styles/base16/docula.css">
 <link rel="icon" href="/favicon.ico">
+<script>
+  (function(){
+    var t = localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  })();
+</script>

@@ -34,9 +34,10 @@
       }
     }
 
-    applyTheme(getTheme());
-
     document.addEventListener('DOMContentLoaded', function() {
+      // Sync toggle icons with the theme already applied by the <head> script
+      applyTheme(getTheme());
+
       var toggle = document.getElementById('theme-toggle');
       if (toggle) {
         toggle.addEventListener('click', function() {
