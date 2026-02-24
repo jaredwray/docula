@@ -3,6 +3,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('pre code').forEach(el => { el.textContent = el.textContent.trimEnd(); });
     hljs.highlightAll();
+    var kbd = document.querySelector('.search-button__shortcut');
+    if (kbd) kbd.textContent = navigator.platform.indexOf('Mac') > -1 ? '⌘K' : 'Ctrl K';
   });
 </script>
 <script>
