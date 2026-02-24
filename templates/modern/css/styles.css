@@ -1,3 +1,13 @@
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 * {
   padding: 0;
   margin: 0;
@@ -265,6 +275,7 @@ body {
   width: 280px;
   min-width: 280px;
   padding: 30px 20px 30px 40px;
+  font-size: 13px;
 }
 
 .content-aside__list {
@@ -277,7 +288,19 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   padding-left: 23px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
+}
+
+.content-aside__list li {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.content-aside__list a {
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 4px 5px 4px 23px;
+  display: block;
 }
 
 .content-aside__item {
