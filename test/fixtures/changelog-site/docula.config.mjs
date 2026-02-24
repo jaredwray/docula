@@ -1,5 +1,5 @@
 export const options = {
-	templatePath: "./template",
+	template: 'default',
 	outputPath: "./test/fixtures/changelog-site/dist",
 	sitePath: "./test/fixtures/changelog-site",
 	githubPath: "jaredwray/docula",

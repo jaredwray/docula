@@ -1,5 +1,5 @@
 export const options = {
-	templatePath: "./template",
+	template: 'default',
 	outputPath: "./test/fixtures/mega-page-site/dist",
 	sitePath: "./test/fixtures/mega-page-site",
 	githubPath: "jaredwray/docula",

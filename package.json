@@ -81,7 +81,7 @@
   },
   "files": [
     "dist",
-    "template",
+    "templates",
     "bin"
   ]
 }

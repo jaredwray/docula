@@ -1,0 +1,22 @@
+{{#forEach sidebarItems}}
+  {{#if children}}
+    <section class="nav-sidebar__section">
+      <h2 class="nav-sidebar__title">{{name}}</h2>
+      <ul class="nav-sidebar__list">
+        {{#forEach children}}
+        <li>
+          <a href="{{path}}" class="nav-sidebar__item">{{name}}</a>
+        </li>
+        {{/forEach}}
+      </ul>
+    </section>
+  {{else}}
+    <section class="nav-sidebar__section">
+      <ul class="nav-sidebar__list">
+        <li>
+          <a href="{{path}}" class="nav-sidebar__item">{{name}}</a>
+        </li>
+      </ul>
+    </section>
+  {{/if}}
+{{/forEach}}

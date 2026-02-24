@@ -5,6 +5,7 @@ import { Writr } from "writr";
 import { DoculaConsole } from "./console.js";
 import { Github, type GithubData, type GithubOptions } from "./github.js";
 import { DoculaOptions } from "./options.js";
+import { resolveTemplatePath } from "./template-resolver.js";
 
 export type DoculaChangelogEntry = {
 	title: string;
@@ -92,13 +93,20 @@ export class DoculaBuilder {
 
 		// Validate the options
 		this.validateOptions(this.options);
+
+		// Resolve the template path from options
+		const resolvedTemplatePath = resolveTemplatePath(
+			this.options.templatePath,
+			this.options.template,
+		);
+
 		// Set the site options
 		const doculaData: DoculaData = {
 			siteUrl: this.options.siteUrl,
 			siteTitle: this.options.siteTitle,
 			siteDescription: this.options.siteDescription,
 			sitePath: this.options.sitePath,
-			templatePath: this.options.templatePath,
+			templatePath: resolvedTemplatePath,
 			outputPath: this.options.outputPath,
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
@@ -127,7 +135,7 @@ export class DoculaBuilder {
 
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(
-			this.options,
+			resolvedTemplatePath,
 			doculaData.hasDocuments,
 			doculaData.hasChangelog,
 		);
@@ -187,9 +195,9 @@ export class DoculaBuilder {
 
 		// Copy over css
 		/* v8 ignore next -- @preserve */
-		if (fs.existsSync(`${this.options.templatePath}/css`)) {
+		if (fs.existsSync(`${resolvedTemplatePath}/css`)) {
 			this.copyDirectory(
-				`${this.options.templatePath}/css`,
+				`${resolvedTemplatePath}/css`,
 				`${this.options.outputPath}/css`,
 			);
 		}
@@ -241,7 +249,7 @@ export class DoculaBuilder {
 	}
 
 	public async getTemplates(
-		options: DoculaOptions,
+		templatePath: string,
 		hasDocuments: boolean,
 		hasChangelog = false,
 	): Promise<DoculaTemplates> {
@@ -250,18 +258,15 @@ export class DoculaBuilder {
 			releases: "",
 		};
 
-		if (fs.existsSync(options.templatePath)) {
-			const index = await this.getTemplateFile(options.templatePath, "index");
+		if (fs.existsSync(templatePath)) {
+			const index = await this.getTemplateFile(templatePath, "index");
 			/* v8 ignore next -- @preserve */
 			if (index) {
 				templates.index = index;
 			}
 
 			/* v8 ignore next -- @preserve */
-			const releases = await this.getTemplateFile(
-				options.templatePath,
-				"releases",
-			);
+			const releases = await this.getTemplateFile(templatePath, "releases");
 
 			/* v8 ignore next -- @preserve */
 			if (releases) {
@@ -269,23 +274,21 @@ export class DoculaBuilder {
 			}
 
 			const documentPage = hasDocuments
-				? await this.getTemplateFile(options.templatePath, "docs")
+				? await this.getTemplateFile(templatePath, "docs")
 				: undefined;
 
 			if (documentPage) {
 				templates.docPage = documentPage;
 			}
 
-			const apiPage = options.openApiUrl
-				? await this.getTemplateFile(options.templatePath, "api")
-				: undefined;
+			const apiPage = await this.getTemplateFile(templatePath, "api");
 
 			if (apiPage) {
 				templates.api = apiPage;
 			}
 
 			const changelogPage = hasChangelog
-				? await this.getTemplateFile(options.templatePath, "changelog")
+				? await this.getTemplateFile(templatePath, "changelog")
 				: undefined;
 
 			if (changelogPage) {
@@ -293,14 +296,14 @@ export class DoculaBuilder {
 			}
 
 			const changelogEntryPage = hasChangelog
-				? await this.getTemplateFile(options.templatePath, "changelog-entry")
+				? await this.getTemplateFile(templatePath, "changelog-entry")
 				: undefined;
 
 			if (changelogEntryPage) {
 				templates.changelogEntry = changelogEntryPage;
 			}
 		} else {
-			throw new Error(`No template path found at ${options.templatePath}`);
+			throw new Error(`No template path found at ${templatePath}`);
 		}
 
 		return templates;

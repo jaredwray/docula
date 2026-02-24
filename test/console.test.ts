@@ -41,7 +41,7 @@ describe("DoculaConsole", () => {
 
 		const c = new DoculaConsole();
 		c.printHelp();
-		expect(messages.length).toEqual(23);
+		expect(messages.length).toEqual(24);
 
 		console.log = consoleLog;
 	});
@@ -107,5 +107,29 @@ describe("DoculaConsole", () => {
 		const result = c.parseProcessArgv(["node", "docula", "init"]);
 		expect(result.command).toEqual("init");
 		expect(result.args.typescript).toEqual(false);
+	});
+	it("should parse -T flag for template name", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"build",
+			"-T",
+			"modern",
+		]);
+		expect(result.command).toEqual("build");
+		expect(result.args.template).toEqual("modern");
+	});
+	it("should parse --template flag for template name", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"build",
+			"--template",
+			"modern",
+		]);
+		expect(result.command).toEqual("build");
+		expect(result.args.template).toEqual("modern");
 	});
 });

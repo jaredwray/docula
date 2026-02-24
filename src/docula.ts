@@ -122,6 +122,11 @@ export default class Docula {
 			}
 		}
 
+		/* v8 ignore next -- @preserve */
+		if (consoleProcess.args.template) {
+			this.options.template = consoleProcess.args.template;
+		}
+
 		if (consoleProcess.args.output) {
 			this.options.outputPath = consoleProcess.args.output;
 		}

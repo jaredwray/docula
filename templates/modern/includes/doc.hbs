@@ -1,0 +1,18 @@
+<article class="article">
+  <header class="article__header">
+    <h1 class="article__title">{{title}}</h1>
+    {{#if description}}
+    <p class="article__description">{{description}}</p>
+    {{/if}}
+  </header>
+  <div class="article__body">
+    <main class="article__main">
+      {{{generatedHtml}}}
+    </main>
+    <aside class="content-aside">
+      <h2 class="content-aside__title">TABLE OF CONTENTS</h2>
+      <ul class="content-aside__list" id="toc-list">
+      </ul>
+    </aside>
+  </div>
+</article>

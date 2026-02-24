@@ -1,7 +1,7 @@
 import type { DoculaOptions } from "../../../src/options.js";
 
 export const options: Partial<DoculaOptions> = {
-	templatePath: "./template",
+	template: "default",
 	githubPath: "jaredwray/docula",
 	sitePath: "../single-page-site-ts-onprepare",
 	outputPath: "../single-page-site-ts-onprepare/dist",

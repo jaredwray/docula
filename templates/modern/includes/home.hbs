@@ -1,0 +1,46 @@
+<div class="home-content">
+  {{#if github}}
+  {{#if github.contributors}}
+  <section>
+    <h2 class="home-title">Contributors</h2>
+    <div class="facepile">
+      {{#each github.contributors}}
+      <a href="{{html_url}}" target="_blank" title="{{login}}" rel="noopener noreferrer">
+        <img src="{{avatar_url}}" alt="{{login}}">
+      </a>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if github.releases}}
+  <section>
+    <h2 class="home-title">Latest Releases</h2>
+    {{#each github.releases as |release|}}
+    {{#if (lt @index 3)}}
+    <div class="release">
+      <div class="release-header">
+        <a class="release-title" href="{{release.html_url}}" target="_blank" rel="noopener noreferrer">{{release.name}}</a>
+        <span class="release-date">{{#moment release.published_at "MMMM DD, YYYY"}}{{/moment}}</span>
+      </div>
+      <div class="release-body">
+        {{#if release.body}}
+        {{#markdown}}{{release.body}}{{/markdown}}
+        {{/if}}
+      </div>
+    </div>
+    {{/if}}
+    {{/each}}
+
+    {{#if (gt github.releases.length 6)}}
+    <div>
+      <a class="release-btn" href="/releases">
+        All Releases
+        <span>&rarr;</span>
+      </a>
+    </div>
+    {{/if}}
+  </section>
+  {{/if}}
+  {{/if}}
+</div>

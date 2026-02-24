@@ -1,0 +1,39 @@
+<script src="/css/highlight/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => { hljs.highlightAll() });
+</script>
+<script defer>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Active sidebar link highlighting
+    const sidebarLinks = document.querySelectorAll('.nav-sidebar__item');
+    const currentPath = window.location.pathname;
+    sidebarLinks.forEach((link) => {
+      if (link.getAttribute('href') === currentPath || link.getAttribute('href') === currentPath.replace(/\/$/, '')) {
+        link.classList.add('nav-sidebar__item--active');
+      }
+    });
+
+    // Active header nav link highlighting
+    const navLinks = document.querySelectorAll('.header-bottom__item');
+    navLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href === '/' && (currentPath === '/' || currentPath.startsWith('/docs'))) {
+        link.classList.add('header-bottom__item--active');
+      } else if (href !== '/' && currentPath.startsWith(href)) {
+        link.classList.add('header-bottom__item--active');
+      }
+    });
+
+    // TOC extraction: move the inline TOC into the right sidebar and hide the original
+    const tocHeading = document.getElementById('table-of-contents');
+    if (tocHeading) {
+      const tocList = tocHeading.nextElementSibling;
+      const tocTarget = document.getElementById('toc-list');
+      if (tocList && tocList.tagName === 'UL' && tocTarget) {
+        tocTarget.innerHTML = tocList.innerHTML;
+        tocHeading.style.display = 'none';
+        tocList.style.display = 'none';
+      }
+    }
+  });
+</script>
