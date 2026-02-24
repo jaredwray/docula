@@ -1,3 +1,35 @@
+:root {
+  --bg: #121212;
+  --fg: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --border-hover: rgba(255, 255, 255, 0.4);
+  --surface: #262626;
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --muted: #c5cdd3;
+  --muted-fg: rgba(255, 255, 255, 0.65);
+  --code-bg: rgba(255, 255, 255, 0.075);
+  --pre-bg: rgba(255, 255, 255, 0.05);
+  --link: #6ea8fe;
+  --scrollbar: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --border-hover: rgba(0, 0, 0, 0.3);
+  --surface: #f0f0f0;
+  --surface-hover: rgba(0, 0, 0, 0.06);
+  --muted: #6b7280;
+  --muted-fg: rgba(0, 0, 0, 0.5);
+  --code-bg: rgba(0, 0, 0, 0.05);
+  --pre-bg: rgba(0, 0, 0, 0.03);
+  --link: #0969da;
+  --scrollbar: rgba(0, 0, 0, 0.2);
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -33,30 +65,25 @@ button {
 code {
   font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 0.9em;
-  background-color: rgba(255, 255, 255, 0.075);
+  background-color: var(--code-bg);
   padding: 2px 5px;
   border-radius: 3px;
 }
 
-:root {
-  --background-color: #121212;
-  --foreground-color: #ffffff;
-}
-
 :where(*) {
-    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0);
+    scrollbar-color: var(--scrollbar) transparent;
     scrollbar-width: thin;
 }
 
 body {
-  background-color: var(--background-color);
-  color: var(--foreground-color);
+  background-color: var(--bg);
+  color: var(--fg);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-size: 16px;
 }
 
 .header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border);
 }
 
 .header-top__content {
@@ -84,8 +111,12 @@ body {
   align-items: center;
 
   &:hover {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
   }
+}
+
+.theme-button__icon--hidden {
+  display: none;
 }
 
 .header_space {
@@ -121,16 +152,16 @@ body {
   gap: 6px;
 
   &:hover {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
   }
 }
 
 .header-bottom__item--active {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--surface-hover);
 }
 
 .search-button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0px 5px;
   height: 30px;
@@ -138,7 +169,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--muted-fg);
 }
 
 .search-button__text {
@@ -177,7 +208,7 @@ body {
   text-transform: uppercase;
   line-height: 16px;
   margin-block: 8px;
-  color: #c5cdd3;
+  color: var(--muted);
   padding: 0 0 0 10px;
   letter-spacing: 0.24px;
 }
@@ -197,12 +228,12 @@ body {
   margin-top: 1px;
 
   &:hover {
-    background-color: #262626;
+    background-color: var(--surface);
   }
 }
 
 .nav-sidebar__item--active {
-  background-color: #262626;
+  background-color: var(--surface);
 }
 
 .article {
@@ -211,7 +242,7 @@ body {
 }
 
 .article__header{
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 30px;
 }
 
@@ -247,14 +278,14 @@ body {
 .article__main ul, .article__main ol { margin-bottom: 15px; padding-left: 24px; }
 .article__main li { margin-bottom: 6px; list-style: disc; }
 .article__main ol li { list-style: decimal; }
-.article__main a { color: #6ea8fe; text-decoration: underline; }
-.article__main pre { background: rgba(255,255,255,0.05); border-radius: 6px; padding: 16px; margin-bottom: 15px; overflow-x: auto; }
-.article__main pre code { background: none; padding: 0; font-size: 14px; }
-.article__main blockquote { border-left: 3px solid rgba(255,255,255,0.2); padding: 10px 16px; margin-bottom: 15px; color: #c5cdd3; }
+.article__main a { color: var(--link); text-decoration: underline; }
+.article__main pre { background: var(--pre-bg); border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; overflow-x: auto; }
+.article__main pre code { background: none; padding: 0; font-size: 13.5px; line-height: 1.5; }
+.article__main blockquote { border-left: 3px solid var(--border-strong); padding: 10px 16px; margin-bottom: 15px; color: var(--muted); }
 .article__main img { max-width: 100%; border-radius: 6px; }
 .article__main table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-.article__main th, .article__main td { border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; text-align: left; }
-.article__main th { font-weight: 600; background: rgba(255,255,255,0.05); }
+.article__main th, .article__main td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+.article__main th { font-weight: 600; background: var(--pre-bg); }
 
 .article__section {
   & * {
@@ -342,7 +373,7 @@ body {
 }
 
 .home-content .release {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
 
@@ -360,7 +391,7 @@ body {
 
 .home-content .release-date {
   font-size: 13px;
-  color: #c5cdd3;
+  color: var(--muted);
 }
 
 .home-content .release-body {
@@ -374,14 +405,14 @@ body {
   gap: 6px;
   margin-top: 20px;
   padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border-strong);
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
 }
 
 .home-content .release-btn:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--border-hover);
 }
 
 /* Changelog styles */
@@ -399,7 +430,7 @@ body {
 }
 
 .changelog-entry {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
 
@@ -417,7 +448,7 @@ body {
 
 .changelog-entry-date {
   font-size: 13px;
-  color: #c5cdd3;
+  color: var(--muted);
 }
 
 .changelog-entry-body {
@@ -432,11 +463,11 @@ body {
 
 .changelog-entry-nav a {
   font-size: 14px;
-  color: #c5cdd3;
+  color: var(--muted);
 }
 
 .changelog-entry-nav a:hover {
-  color: #fff;
+  color: var(--fg);
 }
 
 .changelog-tag {
@@ -445,20 +476,20 @@ body {
   padding: 2px 8px;
   border-radius: 4px;
   text-transform: uppercase;
-  background-color: #262626;
+  background-color: var(--surface);
 }
 
 /* Footer */
 .footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border);
   padding: 20px 32px;
   text-align: center;
   font-size: 13px;
-  color: #c5cdd3;
+  color: var(--muted);
 }
 
 .footer a {
-  color: #fff;
+  color: var(--fg);
 }
 
 .footer img {

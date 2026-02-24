@@ -1,6 +1,51 @@
 <script src="/css/highlight/highlight.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => { hljs.highlightAll() });
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => { el.textContent = el.textContent.trimEnd(); });
+    hljs.highlightAll();
+  });
+</script>
+<script>
+  (function() {
+    function getTheme() {
+      var saved = localStorage.getItem('theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      var sunIcon = document.querySelector('.theme-button__icon--sun');
+      var moonIcon = document.querySelector('.theme-button__icon--moon');
+      if (sunIcon && moonIcon) {
+        if (theme === 'light') {
+          moonIcon.classList.add('theme-button__icon--hidden');
+          sunIcon.classList.remove('theme-button__icon--hidden');
+        } else {
+          moonIcon.classList.remove('theme-button__icon--hidden');
+          sunIcon.classList.add('theme-button__icon--hidden');
+        }
+      }
+    }
+
+    applyTheme(getTheme());
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function() {
+          var current = document.documentElement.hasAttribute('data-theme') ? 'light' : 'dark';
+          var next = current === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', next);
+          applyTheme(next);
+        });
+      }
+    });
+  })();
 </script>
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {
