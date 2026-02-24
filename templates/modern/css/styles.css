@@ -122,6 +122,15 @@ body {
   display: none;
 }
 
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+}
+
 .header_space {
   height: 52px;
 }
@@ -348,6 +357,53 @@ body {
   width: 100%;
   display: block;
   line-height: 1.5;
+}
+
+/* Responsive: hide TOC aside on smaller screens */
+@media (max-width: 1100px) {
+  .content-aside { display: none; }
+  .article__main { width: 100%; }
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+}
+
+.sidebar-backdrop--visible {
+  display: block;
+}
+
+/* Responsive: mobile layout */
+@media (max-width: 768px) {
+  .mobile-menu-toggle { display: flex; }
+  .header-bottom { display: none; }
+  .header-top__content { padding: 0 16px; }
+
+  .nav-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    background: var(--bg);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    border-right: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  .nav-sidebar--open {
+    transform: translateX(0);
+  }
+
+  .article {
+    width: 100%;
+    padding: 20px 16px;
+  }
 }
 
 /* Home page styles */

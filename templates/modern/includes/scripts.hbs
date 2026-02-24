@@ -51,6 +51,22 @@
 </script>
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.getElementById('nav-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (menuToggle && sidebar) {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('nav-sidebar--open');
+        if (backdrop) backdrop.classList.toggle('sidebar-backdrop--visible');
+      });
+      if (backdrop) {
+        backdrop.addEventListener('click', () => {
+          sidebar.classList.remove('nav-sidebar--open');
+          backdrop.classList.remove('sidebar-backdrop--visible');
+        });
+      }
+    }
+
     // Active sidebar link highlighting
     const sidebarLinks = document.querySelectorAll('.nav-sidebar__item');
     const currentPath = window.location.pathname;
