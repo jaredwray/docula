@@ -175,6 +175,7 @@ body {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  line-height: 16px;
   margin-block: 8px;
   color: #c5cdd3;
   padding: 0 0 0 10px;
@@ -190,8 +191,10 @@ body {
   padding: 4px 8px 4px 12px;
   border-radius: 4px;
   width: 100%;
-  display: block;
+  display: flex;
+  align-items: center;
   line-height: 1.4;
+  margin-top: 1px;
 
   &:hover {
     background-color: #262626;
