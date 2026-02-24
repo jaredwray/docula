@@ -8,11 +8,19 @@
 
 <body>
   {{> header-bar }}
+  <div class="page-dropdown" id="page-dropdown">
+    <button class="page-dropdown__toggle" id="page-dropdown-toggle">
+      <span class="page-dropdown__title">{{title}}</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+    </button>
+    <div class="page-dropdown__list" id="page-dropdown-list">
+      {{> sidebar }}
+    </div>
+  </div>
   <div class="content">
     <aside class="nav-sidebar" id="nav-sidebar">
       {{> sidebar }}
     </aside>
-    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
     {{> doc }}
   </div>
   {{> scripts }}

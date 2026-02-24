@@ -370,7 +370,8 @@ body {
   .article__main { width: 100%; }
 }
 
-.mobile-nav {
+/* Global mobile sidebar */
+.mobile-sidebar {
   display: none;
 }
 
@@ -386,6 +387,11 @@ body {
   display: block;
 }
 
+/* Page dropdown (docs mobile only) */
+.page-dropdown {
+  display: none;
+}
+
 /* Responsive: mobile layout */
 @media (max-width: 768px) {
   .mobile-menu-toggle { display: flex; }
@@ -393,42 +399,92 @@ body {
   .header-top__content { padding: 0 16px; }
 
   .nav-sidebar {
+    display: none;
+  }
+
+  .mobile-sidebar {
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
+    width: 260px;
     height: 100vh;
     z-index: 100;
     background: var(--bg);
     transform: translateX(-100%);
     transition: transform 0.25s ease;
     border-right: 1px solid var(--border);
-    padding-top: 16px;
+    padding: 20px 0;
+    overflow-y: auto;
   }
 
-  .nav-sidebar--open {
+  .mobile-sidebar--open {
     transform: translateX(0);
   }
 
   .mobile-nav {
     display: flex;
-    gap: 4px;
-    padding: 0 8px 12px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 12px;
+    flex-direction: column;
+    padding: 0 10px;
+    gap: 2px;
   }
 
   .mobile-nav__item {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    padding: 6px 10px;
-    border-radius: 4px;
+    padding: 12px 14px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
+    width: 100%;
   }
 
   .mobile-nav__item:hover {
+    background-color: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  .mobile-nav__item--active {
     background-color: var(--surface);
+  }
+
+  .page-dropdown {
+    display: block;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-dropdown__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  .page-dropdown__title {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .page-dropdown__list {
+    display: none;
+    padding: 8px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .page-dropdown__list--open {
+    display: block;
   }
 
   .article {
