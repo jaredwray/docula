@@ -80,9 +80,7 @@
     const navLinks = document.querySelectorAll('.header-bottom__item');
     navLinks.forEach((link) => {
       const href = link.getAttribute('href');
-      if (href === '/' && (currentPath === '/' || currentPath.startsWith('/docs'))) {
-        link.classList.add('header-bottom__item--active');
-      } else if (href !== '/' && currentPath.startsWith(href)) {
+      if (currentPath.startsWith(href)) {
         link.classList.add('header-bottom__item--active');
       }
     });

@@ -540,19 +540,3 @@ body {
   background-color: var(--surface);
 }
 
-/* Footer */
-.footer {
-  border-top: 1px solid var(--border);
-  padding: 20px 32px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.footer a {
-  color: var(--fg);
-}
-
-.footer img {
-  vertical-align: middle;
-}
