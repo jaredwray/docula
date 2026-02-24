@@ -20,6 +20,14 @@ button {
   color: inherit;
 }
 
+code {
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 0.9em;
+  background-color: rgba(255, 255, 255, 0.075);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
 :root {
   --background-color: #121212;
   --foreground-color: #ffffff;
@@ -33,7 +41,8 @@ button {
 body {
   background-color: var(--background-color);
   color: var(--foreground-color);
-  font-family: 'system-ui', sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 16px;
 }
 
 .header {
@@ -76,7 +85,7 @@ body {
 .header-bottom {
   width: 100%;
   max-width: 1440px;
-  height: 50px;
+  height: 40px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
@@ -107,7 +116,7 @@ body {
 }
 
 .header-bottom__item--active {
-  background-color: #262626;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .search-button {
@@ -115,6 +124,7 @@ body {
   border-radius: 4px;
   padding: 0px 5px;
   height: 30px;
+  width: 150px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -157,7 +167,8 @@ body {
   text-transform: uppercase;
   margin-block: 8px;
   color: #c5cdd3;
-  padding: 0 10px;
+  padding: 0 0 0 10px;
+  letter-spacing: 0.24px;
 }
 
 .nav-sidebar__list {
@@ -170,6 +181,7 @@ body {
   border-radius: 4px;
   width: 100%;
   display: block;
+  line-height: 1.4;
 
   &:hover {
     background-color: #262626;
@@ -199,6 +211,7 @@ body {
 .article__description {
   font-size: 18px;
   margin-top: 15px;
+  line-height: 1.5;
 }
 
 .article__body {
@@ -210,7 +223,25 @@ body {
   margin-top: 30px;
   width: calc(100% - 280px);
   max-width: 100%;
+  font-size: 15px;
+  line-height: 1.5;
 }
+
+.article__main h1 { font-size: 1.65em; font-weight: 600; line-height: 1.25; margin: 25px 0 15px; }
+.article__main h2 { font-size: 1.4em; font-weight: 600; line-height: 1.3; margin: 20px 0 12px; }
+.article__main h3 { font-size: 1.15em; font-weight: 600; line-height: 1.4; margin: 18px 0 10px; }
+.article__main p { margin-bottom: 15px; }
+.article__main ul, .article__main ol { margin-bottom: 15px; padding-left: 24px; }
+.article__main li { margin-bottom: 6px; list-style: disc; }
+.article__main ol li { list-style: decimal; }
+.article__main a { color: #6ea8fe; text-decoration: underline; }
+.article__main pre { background: rgba(255,255,255,0.05); border-radius: 6px; padding: 16px; margin-bottom: 15px; overflow-x: auto; }
+.article__main pre code { background: none; padding: 0; font-size: 14px; }
+.article__main blockquote { border-left: 3px solid rgba(255,255,255,0.2); padding: 10px 16px; margin-bottom: 15px; color: #c5cdd3; }
+.article__main img { max-width: 100%; border-radius: 6px; }
+.article__main table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+.article__main th, .article__main td { border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; text-align: left; }
+.article__main th { font-weight: 600; background: rgba(255,255,255,0.05); }
 
 .article__section {
   & * {
@@ -220,11 +251,13 @@ body {
   & h1 {
     font-size: 1.65em;
     font-weight: 600;
+    line-height: 1.25;
   }
 
   & p {
-    font-size: 16px;
+    font-size: 15px;
     margin-top: 15px;
+    line-height: 1.5;
   }
 }
 
@@ -240,18 +273,19 @@ body {
 }
 
 .content-aside__title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   padding-left: 23px;
   margin-bottom: 20px;
 }
 
 .content-aside__item {
-  font-size: 14px;
+  font-size: 13px;
   padding: 4px 8px 4px 23px;
   width: 100%;
   display: block;
+  line-height: 1.5;
 }
 
 /* Home page styles */
