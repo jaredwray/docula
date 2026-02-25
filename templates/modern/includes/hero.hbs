@@ -1,0 +1,12 @@
+<section class="home-hero">
+  <img src="/logo.svg" alt="logo"/>
+  <div class="hero-container">
+    <h1>{{ siteDescription }}</h1>
+  </div>
+  {{#if announcement}}
+  <div class="announcement">
+    {{{announcement}}}
+  </div>
+  {{/if}}
+  <a href="/docs" class="home-docs-button">Documentation</a>
+</section>
