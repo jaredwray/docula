@@ -4,9 +4,9 @@ import type { DoculaSection } from "./builder.js";
 
 export class DoculaOptions {
 	/**
-	 * Name of the built-in template to use (e.g., "default", "modern")
+	 * Name of the built-in template to use (e.g., "modern", "classic")
 	 */
-	public template = "default";
+	public template = "modern";
 	/**
 	 * Path to the template directory. When set, overrides the `template` option.
 	 */

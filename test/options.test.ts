@@ -5,7 +5,7 @@ describe("DoculaOptions", () => {
 	describe("constructor", () => {
 		it("should create an instance of DoculaOptions with default values", () => {
 			const options = new DoculaOptions();
-			expect(options.template).toEqual("default");
+			expect(options.template).toEqual("modern");
 			expect(options.templatePath).toEqual("");
 			expect(options.outputPath).toContain("/dist");
 			expect(options.sitePath).toContain("/site");

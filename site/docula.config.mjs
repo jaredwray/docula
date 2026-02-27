@@ -3,7 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 export const options = {
-	template: 'default',
+	template: 'modern',
 	githubPath: 'jaredwray/docula',
 	outputPath: './site/dist',
 	siteTitle: 'docula',

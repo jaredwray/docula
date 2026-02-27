@@ -30,8 +30,8 @@ export function listBuiltInTemplates(): string[] {
  *
  * Resolution priority:
  * 1. Explicit `templatePath` (custom path) — highest priority, backward compatible
- * 2. Built-in template name via `templateName` (e.g., "default", "modern")
- * 3. Falls back to "default"
+ * 2. Built-in template name via `templateName` (e.g., "modern", "classic")
+ * 3. Falls back to "modern"
  */
 export function resolveTemplatePath(
 	templatePath: string,

@@ -44,7 +44,7 @@ export class DoculaConsole {
 		);
 		console.log("     -t, --templatePath     Set the custom template to use");
 		console.log(
-			"     -T, --template         Set the built-in template name (e.g., default, modern)",
+			"     -T, --template         Set the built-in template name (e.g., modern, classic)",
 		);
 		console.log();
 		console.log("   Arguments serve:");

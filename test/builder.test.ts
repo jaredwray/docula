@@ -318,7 +318,7 @@ describe("DoculaBuilder", () => {
 				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
-			data.templatePath = "templates/default";
+			data.templatePath = "templates/classic";
 			data.outputPath = "test/temp-release-test";
 
 			data.github = {
@@ -351,7 +351,7 @@ describe("DoculaBuilder", () => {
 				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
-			data.templatePath = "templates/default";
+			data.templatePath = "templates/classic";
 			data.outputPath = "test/temp-release-test";
 
 			data.github = undefined;
@@ -846,7 +846,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "templates/default",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -884,7 +884,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "templates/default",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test-no-url",
 				templates: {
 					index: "index.hbs",
@@ -913,7 +913,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "templates/default",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test-no-template",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -943,7 +943,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "templates/default",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-sitemap-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -978,7 +978,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "templates/default",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-sitemap-no-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -1008,7 +1008,7 @@ describe("DoculaBuilder", () => {
 		it("should get api template when template directory has api.hbs", async () => {
 			const builder = new DoculaBuilder();
 			const templateData = await builder.getTemplates(
-				"templates/default",
+				"templates/classic",
 				false,
 			);
 			expect(templateData.api).toBe("api.hbs");

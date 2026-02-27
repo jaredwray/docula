@@ -14,22 +14,22 @@ describe("template-resolver", () => {
 	});
 
 	describe("listBuiltInTemplates", () => {
-		it("should return an array containing 'default' and 'modern'", () => {
+		it("should return an array containing 'classic' and 'modern'", () => {
 			const templates = listBuiltInTemplates();
-			expect(templates).toContain("default");
+			expect(templates).toContain("classic");
 			expect(templates).toContain("modern");
 		});
 	});
 
 	describe("resolveTemplatePath", () => {
 		it("should return the explicit templatePath when provided", () => {
-			const result = resolveTemplatePath("/custom/path", "default");
+			const result = resolveTemplatePath("/custom/path", "classic");
 			expect(result).toBe("/custom/path");
 		});
 
-		it("should resolve to the built-in default template when templatePath is empty", () => {
-			const result = resolveTemplatePath("", "default");
-			expect(result).toContain("templates/default");
+		it("should resolve to the built-in classic template when templatePath is empty", () => {
+			const result = resolveTemplatePath("", "classic");
+			expect(result).toContain("templates/classic");
 		});
 
 		it("should resolve to the built-in modern template", () => {
@@ -44,7 +44,7 @@ describe("template-resolver", () => {
 		});
 
 		it("should list available templates in the error message", () => {
-			expect(() => resolveTemplatePath("", "nonexistent")).toThrow("default");
+			expect(() => resolveTemplatePath("", "nonexistent")).toThrow("classic");
 		});
 	});
 });
