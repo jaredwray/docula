@@ -4,11 +4,13 @@ import type { DoculaSection } from "./builder.js";
 
 export class DoculaOptions {
 	/**
-	 * Path to the template directory
+	 * Name of the built-in template to use (e.g., "modern", "classic")
 	 */
-	public templatePath = path
-		.join(import.meta.url, "../../template")
-		.replace("file:", "");
+	public template = "modern";
+	/**
+	 * Path to the template directory. When set, overrides the `template` option.
+	 */
+	public templatePath = "";
 	/**
 	 * Path to the output directory
 	 */
@@ -60,6 +62,11 @@ export class DoculaOptions {
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	public parseOptions(options: Record<string, any>) {
+		/* v8 ignore next -- @preserve */
+		if (options.template) {
+			this.template = options.template as string;
+		}
+
 		/* v8 ignore next -- @preserve */
 		if (options.templatePath) {
 			this.templatePath = options.templatePath as string;

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {{> header }}
+  <title>{{siteTitle}} Changelog</title>
+</head>
+
+<body>
+  {{> header-bar }}
+  <div class="content">
+    <main class="versions-container">
+      <div class="versions-content">
+        <h2 class="home-title">Changelog</h2>
+        {{#if entries}}
+        {{#each entries as |entry|}}
+        <div class="changelog-entry">
+          <div class="changelog-entry-header">
+            <a class="changelog-entry-title" href="/changelog/{{entry.slug}}/">{{entry.title}}</a>
+            {{#if entry.tag}}
+            <span class="changelog-tag changelog-tag-{{entry.tagClass}}">{{entry.tag}}</span>
+            {{/if}}
+          </div>
+          <span class="changelog-entry-date">{{entry.formattedDate}}</span>
+          <div class="changelog-entry-body">
+            {{{entry.generatedHtml}}}
+          </div>
+        </div>
+        {{/each}}
+        {{/if}}
+      </div>
+    </main>
+  </div>
+  {{> scripts }}
+</body>
+
+</html>

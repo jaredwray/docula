@@ -1,0 +1,119 @@
+<script src="/css/highlight/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach(el => { el.textContent = el.textContent.trimEnd(); });
+    hljs.highlightAll();
+    var kbd = document.querySelector('.search-button__shortcut');
+    if (kbd) kbd.textContent = navigator.platform.indexOf('Mac') > -1 ? '⌘K' : 'Ctrl K';
+  });
+</script>
+<script>
+  (function() {
+    function getTheme() {
+      var saved = localStorage.getItem('theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      var sunIcon = document.querySelector('.theme-button__icon--sun');
+      var moonIcon = document.querySelector('.theme-button__icon--moon');
+      if (sunIcon && moonIcon) {
+        if (theme === 'light') {
+          moonIcon.classList.add('theme-button__icon--hidden');
+          sunIcon.classList.remove('theme-button__icon--hidden');
+        } else {
+          moonIcon.classList.remove('theme-button__icon--hidden');
+          sunIcon.classList.add('theme-button__icon--hidden');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Sync toggle icons with the theme already applied by the <head> script
+      applyTheme(getTheme());
+
+      var toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function() {
+          var current = document.documentElement.hasAttribute('data-theme') ? 'light' : 'dark';
+          var next = current === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', next);
+          applyTheme(next);
+        });
+      }
+    });
+  })();
+</script>
+<script defer>
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileSidebar = document.getElementById('mobile-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (menuToggle && mobileSidebar) {
+      menuToggle.addEventListener('click', () => {
+        mobileSidebar.classList.toggle('mobile-sidebar--open');
+        if (backdrop) backdrop.classList.toggle('sidebar-backdrop--visible');
+      });
+      if (backdrop) {
+        backdrop.addEventListener('click', () => {
+          mobileSidebar.classList.remove('mobile-sidebar--open');
+          backdrop.classList.remove('sidebar-backdrop--visible');
+        });
+      }
+    }
+
+    // Page dropdown toggle (docs pages)
+    const dropdownToggle = document.getElementById('page-dropdown-toggle');
+    const dropdownList = document.getElementById('page-dropdown-list');
+    if (dropdownToggle && dropdownList) {
+      dropdownToggle.addEventListener('click', () => {
+        dropdownList.classList.toggle('page-dropdown__list--open');
+      });
+    }
+
+    // Active sidebar link highlighting
+    const sidebarLinks = document.querySelectorAll('.nav-sidebar__item');
+    const currentPath = window.location.pathname;
+    sidebarLinks.forEach((link) => {
+      if (link.getAttribute('href') === currentPath || link.getAttribute('href') === currentPath.replace(/\/$/, '')) {
+        link.classList.add('nav-sidebar__item--active');
+      }
+    });
+
+    // Active header nav link highlighting
+    const navLinks = document.querySelectorAll('.header-bottom__item');
+    navLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (currentPath.startsWith(href)) {
+        link.classList.add('header-bottom__item--active');
+      }
+    });
+
+    // Active mobile nav link highlighting
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav__item');
+    mobileNavLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (currentPath.startsWith(href)) {
+        link.classList.add('mobile-nav__item--active');
+      }
+    });
+
+    // TOC extraction: move the inline TOC into the right sidebar and hide the original
+    const tocHeading = document.getElementById('table-of-contents');
+    if (tocHeading) {
+      const tocList = tocHeading.nextElementSibling;
+      const tocTarget = document.getElementById('toc-list');
+      if (tocList && tocList.tagName === 'UL' && tocTarget) {
+        tocTarget.innerHTML = tocList.innerHTML;
+        tocHeading.style.display = 'none';
+        tocList.style.display = 'none';
+      }
+    }
+  });
+</script>

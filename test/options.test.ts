@@ -5,7 +5,8 @@ describe("DoculaOptions", () => {
 	describe("constructor", () => {
 		it("should create an instance of DoculaOptions with default values", () => {
 			const options = new DoculaOptions();
-			expect(options.templatePath).toContain("/template");
+			expect(options.template).toEqual("modern");
+			expect(options.templatePath).toEqual("");
 			expect(options.outputPath).toContain("/dist");
 			expect(options.sitePath).toContain("/site");
 			expect(options.githubPath).toEqual("jaredwray/docula");
@@ -112,6 +113,11 @@ describe("DoculaOptions", () => {
 			expect(options.siteDescription).toEqual("Custom Description");
 			expect(options.siteUrl).toEqual("https://custom-url.com");
 			expect(options.port).toEqual(8080);
+		});
+
+		it("should parse the template option", () => {
+			options.parseOptions({ template: "modern" });
+			expect(options.template).toEqual("modern");
 		});
 	});
 });

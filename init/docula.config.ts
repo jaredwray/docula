@@ -1,7 +1,7 @@
 import type { DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
-	templatePath: './template',
+	template: 'modern',
 	outputPath: './dist',
 	sitePath: './site',
 	githubPath: 'jaredwray/docula',

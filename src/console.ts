@@ -43,6 +43,9 @@ export class DoculaConsole {
 			"     -o, --outputPath       Set the output directory. Default is ./site/dist",
 		);
 		console.log("     -t, --templatePath     Set the custom template to use");
+		console.log(
+			"     -T, --template         Set the built-in template name (e.g., modern, classic)",
+		);
 		console.log();
 		console.log("   Arguments serve:");
 		console.log("     -p, --port         Set the port number used with serve");
@@ -92,6 +95,7 @@ export class DoculaConsole {
 		const arguments_ = {
 			sitePath: "",
 			templatePath: "",
+			template: "",
 			output: "",
 			watch: false,
 			port: 3000,
@@ -142,6 +146,12 @@ export class DoculaConsole {
 					break;
 				}
 
+				case "-T":
+				case "--template": {
+					arguments_.template = argv[i + 1];
+					break;
+				}
+
 				case "--typescript": {
 					arguments_.typescript = true;
 					break;
@@ -162,6 +172,7 @@ type DoculaConsoleProcess = {
 type DoculaConsoleArguments = {
 	sitePath: string | undefined;
 	templatePath: string | undefined;
+	template: string | undefined;
 	output: string | undefined;
 	watch: boolean;
 	port: number;

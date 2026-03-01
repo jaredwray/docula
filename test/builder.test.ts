@@ -175,17 +175,16 @@ describe("DoculaBuilder", () => {
 		});
 		it("should get the template data", async () => {
 			const builder = new DoculaBuilder();
-			const options = new DoculaOptions();
-			options.templatePath = "test/fixtures/template-example/";
-			const templateData = await builder.getTemplates(options, false);
+			const templateData = await builder.getTemplates(
+				"test/fixtures/template-example/",
+				false,
+			);
 			expect(templateData.releases).toBe("releases.hbs");
 		});
 		it("should throw error when template path doesnt exist", async () => {
 			const builder = new DoculaBuilder();
-			const options = new DoculaOptions();
-			options.templatePath = "test/fixtures/template-example1/";
 			try {
-				await builder.getTemplates(options, false);
+				await builder.getTemplates("test/fixtures/template-example1/", false);
 			} catch (error) {
 				expect((error as Error).message).toContain("No template path found");
 			}
@@ -319,7 +318,7 @@ describe("DoculaBuilder", () => {
 				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
-			data.templatePath = "template";
+			data.templatePath = "templates/classic";
 			data.outputPath = "test/temp-release-test";
 
 			data.github = {
@@ -352,7 +351,7 @@ describe("DoculaBuilder", () => {
 				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
-			data.templatePath = "template";
+			data.templatePath = "templates/classic";
 			data.outputPath = "test/temp-release-test";
 
 			data.github = undefined;
@@ -847,7 +846,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "template",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -885,7 +884,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "template",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test-no-url",
 				templates: {
 					index: "index.hbs",
@@ -914,7 +913,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "template",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test-no-template",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -944,7 +943,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "template",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-sitemap-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -979,7 +978,7 @@ describe("DoculaBuilder", () => {
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
-				templatePath: "template",
+				templatePath: "templates/classic",
 				outputPath: "test/temp-sitemap-no-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
@@ -1006,20 +1005,21 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
-		it("should get api template when openApiUrl is configured", async () => {
+		it("should get api template when template directory has api.hbs", async () => {
 			const builder = new DoculaBuilder();
-			const options = new DoculaOptions();
-			options.templatePath = "template";
-			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
-			const templateData = await builder.getTemplates(options, false);
+			const templateData = await builder.getTemplates(
+				"templates/classic",
+				false,
+			);
 			expect(templateData.api).toBe("api.hbs");
 		});
 
-		it("should not get api template when openApiUrl is not configured", async () => {
+		it("should not get api template when template directory lacks api.hbs", async () => {
 			const builder = new DoculaBuilder();
-			const options = new DoculaOptions();
-			options.templatePath = "template";
-			const templateData = await builder.getTemplates(options, false);
+			const templateData = await builder.getTemplates(
+				"test/fixtures/template-example/",
+				false,
+			);
 			expect(templateData.api).toBeUndefined();
 		});
 
@@ -1341,18 +1341,22 @@ describe("DoculaBuilder", () => {
 
 		it("should get changelog template when hasChangelog is true", async () => {
 			const builder = new DoculaBuilder();
-			const options = new DoculaOptions();
-			options.templatePath = "test/fixtures/template-example/";
-			const templateData = await builder.getTemplates(options, false, true);
+			const templateData = await builder.getTemplates(
+				"test/fixtures/template-example/",
+				false,
+				true,
+			);
 			expect(templateData.changelog).toBe("changelog.hbs");
 			expect(templateData.changelogEntry).toBe("changelog-entry.hbs");
 		});
 
 		it("should not get changelog template when hasChangelog is false", async () => {
 			const builder = new DoculaBuilder();
-			const options = new DoculaOptions();
-			options.templatePath = "test/fixtures/template-example/";
-			const templateData = await builder.getTemplates(options, false, false);
+			const templateData = await builder.getTemplates(
+				"test/fixtures/template-example/",
+				false,
+				false,
+			);
 			expect(templateData.changelog).toBeUndefined();
 			expect(templateData.changelogEntry).toBeUndefined();
 		});
