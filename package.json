@@ -30,6 +30,7 @@
     "generate-init-file": "tsx scripts/generate-init-file.ts",
     "website:build": "rimraf ./site/README.md && node bin/docula.js build -s ./site -o ./site/dist",
     "website:serve": "rimraf ./site/README.md && node bin/docula.js serve -s ./site -o ./site/dist",
+    "website:mega": "pnpm website:build:mega && pnpm website:serve:mega",
     "website:build:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.js build -s ./test/fixtures/mega-page-site",
     "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.js serve -s ./test/fixtures/mega-page-site",
     "website:build:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.js build -s ./test/fixtures/changelog-site",

@@ -118,6 +118,19 @@ body {
   }
 }
 
+.theme-button--fixed {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  height: auto;
+  margin-left: 0;
+}
+
 .theme-button__icon--hidden {
   display: none;
 }
