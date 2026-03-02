@@ -128,10 +128,53 @@ export class DoculaBuilder {
 
 		doculaData.hasDocuments = doculaData.documents?.length > 0;
 
-		// Get changelog entries
+		// Get file-based changelog entries
 		const changelogPath = `${doculaData.sitePath}/changelog`;
-		doculaData.changelogEntries = this.getChangelogEntries(changelogPath);
-		doculaData.hasChangelog = doculaData.changelogEntries.length > 0;
+		const fileChangelogEntries = this.getChangelogEntries(changelogPath);
+
+		// Check if a changelog template exists
+		const hasChangelogTemplate =
+			(await this.getTemplateFile(resolvedTemplatePath, "changelog")) !==
+			undefined;
+
+		// Merge release-based changelog entries if enabled
+		let allChangelogEntries = [...fileChangelogEntries];
+		if (
+			this._options.enableReleaseChangelog &&
+			hasChangelogTemplate &&
+			doculaData.github?.releases &&
+			Array.isArray(doculaData.github.releases) &&
+			doculaData.github.releases.length > 0
+		) {
+			const releaseEntries = this.getReleasesAsChangelogEntries(
+				// biome-ignore lint/suspicious/noExplicitAny: GitHub release objects
+				doculaData.github.releases as any[],
+			);
+			allChangelogEntries = [...allChangelogEntries, ...releaseEntries];
+		}
+
+		// Sort merged entries by date descending (newest first), invalid dates go to the end
+		allChangelogEntries.sort((a, b) => {
+			const dateA = new Date(a.date).getTime();
+			const dateB = new Date(b.date).getTime();
+			if (Number.isNaN(dateA) && Number.isNaN(dateB)) {
+				return 0;
+			}
+
+			if (Number.isNaN(dateA)) {
+				return 1;
+			}
+
+			if (Number.isNaN(dateB)) {
+				return -1;
+			}
+
+			return dateB - dateA;
+		});
+
+		doculaData.changelogEntries = allChangelogEntries;
+		doculaData.hasChangelog =
+			allChangelogEntries.length > 0 && hasChangelogTemplate;
 
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(
@@ -580,6 +623,63 @@ export class DoculaBuilder {
 			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
 			urlPath: `/changelog/${slug}/index.html`,
 		};
+	}
+
+	public convertReleaseToChangelogEntry(
+		// biome-ignore lint/suspicious/noExplicitAny: GitHub release object
+		release: Record<string, any>,
+	): DoculaChangelogEntry {
+		const tagName = (release.tag_name as string) ?? "";
+		const slug = tagName.replace(/\./g, "-");
+		const name = (release.name as string) || tagName;
+		const body = (release.body as string) ?? "";
+		const publishedAt = (release.published_at as string) ?? "";
+		const prerelease = (release.prerelease as boolean) ?? false;
+
+		let dateString = "";
+		let formattedDate = "";
+		if (publishedAt) {
+			const parsedDate = new Date(publishedAt);
+			if (!Number.isNaN(parsedDate.getTime())) {
+				dateString = parsedDate.toISOString().split("T")[0];
+				formattedDate = parsedDate.toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				});
+			}
+		}
+
+		const tag = prerelease ? "Pre-release" : "Release";
+		const tagClass = tag.toLowerCase().replace(/\s+/g, "-");
+
+		return {
+			title: name,
+			date: dateString,
+			formattedDate,
+			tag,
+			tagClass,
+			slug,
+			content: body,
+			generatedHtml: new Writr(body).renderSync(),
+			urlPath: `/changelog/${slug}/index.html`,
+		};
+	}
+
+	public getReleasesAsChangelogEntries(
+		// biome-ignore lint/suspicious/noExplicitAny: GitHub release objects
+		releases: any[],
+	): DoculaChangelogEntry[] {
+		const entries: DoculaChangelogEntry[] = [];
+		for (const release of releases) {
+			if (release.draft) {
+				continue;
+			}
+
+			entries.push(this.convertReleaseToChangelogEntry(release));
+		}
+
+		return entries;
 	}
 
 	public async buildChangelogPage(data: DoculaData): Promise<void> {

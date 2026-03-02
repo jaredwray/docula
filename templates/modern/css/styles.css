@@ -698,3 +698,13 @@ body {
   background-color: var(--surface);
 }
 
+.changelog-tag-release {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.changelog-tag-pre-release {
+  background-color: rgba(251, 191, 36, 0.15);
+  color: #92400e;
+}
+
