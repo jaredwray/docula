@@ -507,7 +507,7 @@ describe("docula config file", () => {
 		process.argv = ["node", "docula", "version"];
 		await docula.execute(process);
 		expect(docula.options.outputPath).toEqual(
-			docula.configFileModule.options.outputPath,
+			path.resolve(process.cwd(), docula.configFileModule.options.outputPath),
 		);
 		console.log = consoleLog;
 	});
