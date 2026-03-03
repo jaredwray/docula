@@ -15,7 +15,7 @@
 
   {{#if github.releases}}
   <section>
-    <h2 class="home-title">Latest Releases</h2>
+    <h2 class="home-title">Changelog</h2>
     {{#each github.releases as |release|}}
     {{#if (lt @index 3)}}
     <div class="release">
@@ -34,8 +34,8 @@
 
     {{#if (gt github.releases.length 6)}}
     <div>
-      <a class="release-btn" href="/releases">
-        All Releases
+      <a class="release-btn" href="/changelog">
+        Full Changelog
         <span>&rarr;</span>
       </a>
     </div>

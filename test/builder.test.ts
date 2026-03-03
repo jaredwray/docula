@@ -179,7 +179,7 @@ describe("DoculaBuilder", () => {
 				"test/fixtures/template-example/",
 				false,
 			);
-			expect(templateData.releases).toBe("releases.hbs");
+			expect(templateData).not.toHaveProperty("releases");
 		});
 		it("should throw error when template path doesnt exist", async () => {
 			const builder = new DoculaBuilder();
@@ -267,7 +267,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -309,76 +308,13 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
-	describe("Docula Builder - Build Release", () => {
-		it("should build release page (/releases/index.html)", async () => {
-			const builder = new DoculaBuilder();
-			const data = doculaData;
-			data.templates = {
-				index: "index.hbs",
-				releases: "releases.hbs",
-			};
-			data.sitePath = "site";
-			data.templatePath = "templates/classic";
-			data.outputPath = "test/temp-release-test";
-
-			data.github = {
-				releases: {},
-				contributors: {},
-			};
-
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
-
-			try {
-				await builder.buildReleasePage(data);
-				const index = await fs.promises.readFile(
-					`${data.outputPath}/releases/index.html`,
-					"utf8",
-				);
-				expect(index).toContain("<title>docula Releases</title>");
-			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
-			}
-		});
-		it("should error on build release page (/releases/index.html)", async () => {
-			const builder = new DoculaBuilder();
-			const data = doculaData;
-			data.templates = {
-				index: "index.hbs",
-				releases: "releases.hbs",
-			};
-			data.sitePath = "site";
-			data.templatePath = "templates/classic";
-			data.outputPath = "test/temp-release-test";
-
-			data.github = undefined;
-
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
-
-			try {
-				await builder.buildReleasePage(data);
-			} catch (error) {
-				expect((error as Error).message).toBe("No github data found");
-			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
-			}
-		});
-	});
-
 	describe("Docula Builder - Build Docs", () => {
 		it("should build the docs pages", async () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
+
 				docPage: "docs.hbs",
 			};
 			data.sitePath = "site";
@@ -502,7 +438,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -524,7 +459,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -586,7 +520,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -629,7 +562,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -851,7 +783,7 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					api: "api.hbs",
 				},
 			};
@@ -888,7 +820,6 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-api-test-no-url",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -918,7 +849,6 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -948,7 +878,7 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					api: "api.hbs",
 				},
 			};
@@ -983,7 +913,6 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -1150,7 +1079,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
 				},
@@ -1201,7 +1130,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
 				},
@@ -1303,7 +1232,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 				},
 			};
@@ -1341,7 +1270,6 @@ describe("DoculaBuilder", () => {
 				hasChangelog: false,
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -1637,7 +1565,7 @@ describe("DoculaBuilder", () => {
 				),
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					docPage: "docs.hbs",
 				},
 			};
@@ -1695,7 +1623,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
 				},
@@ -1733,7 +1661,7 @@ describe("DoculaBuilder", () => {
 				),
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					docPage: "docs.hbs",
 				},
 			};

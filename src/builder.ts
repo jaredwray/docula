@@ -41,7 +41,6 @@ export type DoculaData = {
 
 export type DoculaTemplates = {
 	index: string;
-	releases: string;
 	docPage?: string;
 	api?: string;
 	changelog?: string;
@@ -194,9 +193,6 @@ export class DoculaBuilder {
 		// Build the home page (index.html)
 		await this.buildIndexPage(doculaData);
 
-		// Build the releases page (/releases/index.html)
-		await this.buildReleasePage(doculaData);
-
 		// Build the sitemap (/sitemap.xml)
 		await this.buildSiteMapPage(doculaData);
 
@@ -306,7 +302,6 @@ export class DoculaBuilder {
 	): Promise<DoculaTemplates> {
 		const templates: DoculaTemplates = {
 			index: "",
-			releases: "",
 		};
 
 		if (fs.existsSync(templatePath)) {
@@ -314,14 +309,6 @@ export class DoculaBuilder {
 			/* v8 ignore next -- @preserve */
 			if (index) {
 				templates.index = index;
-			}
-
-			/* v8 ignore next -- @preserve */
-			const releases = await this.getTemplateFile(templatePath, "releases");
-
-			/* v8 ignore next -- @preserve */
-			if (releases) {
-				templates.releases = releases;
 			}
 
 			const documentPage = hasDocuments
@@ -391,7 +378,7 @@ export class DoculaBuilder {
 
 	public async buildSiteMapPage(data: DoculaData): Promise<void> {
 		const sitemapPath = `${data.outputPath}/sitemap.xml`;
-		const urls = [{ url: data.siteUrl }, { url: `${data.siteUrl}/releases` }];
+		const urls = [{ url: data.siteUrl }];
 
 		if (data.openApiUrl && data.templates?.api) {
 			urls.push({ url: `${data.siteUrl}/api` });
@@ -460,25 +447,6 @@ export class DoculaBuilder {
 		}
 	}
 
-	public async buildReleasePage(data: DoculaData): Promise<void> {
-		if (data.github && data.templates) {
-			const releasesPath = `${data.outputPath}/releases/index.html`;
-			const releaseOutputPath = `${data.outputPath}/releases`;
-
-			await fs.promises.mkdir(releaseOutputPath, { recursive: true });
-
-			const releasesTemplate = `${data.templatePath}/${data.templates.releases}`;
-			const releasesContent = await this._ecto.renderFromFile(
-				releasesTemplate,
-				data,
-				data.templatePath,
-			);
-			await fs.promises.writeFile(releasesPath, releasesContent, "utf8");
-		} else {
-			throw new Error("No github data found");
-		}
-	}
-
 	public async buildReadmeSection(data: DoculaData): Promise<string> {
 		let htmlReadme = "";
 		if (fs.existsSync(`${data.sitePath}/README.md`)) {
@@ -538,6 +506,15 @@ export class DoculaBuilder {
 		const apiOutputPath = `${data.outputPath}/api`;
 
 		await fs.promises.mkdir(apiOutputPath, { recursive: true });
+
+		// Copy swagger.json to output if it exists in the site directory
+		const swaggerSource = `${data.sitePath}/api/swagger.json`;
+		if (fs.existsSync(swaggerSource)) {
+			await fs.promises.copyFile(
+				swaggerSource,
+				`${apiOutputPath}/swagger.json`,
+			);
+		}
 
 		const apiTemplate = `${data.templatePath}/${data.templates.api}`;
 		const apiContent = await this._ecto.renderFromFile(

@@ -588,37 +588,6 @@ body {
   border-color: var(--border-hover);
 }
 
-.release {
-  border-bottom: 1px solid var(--border);
-  padding: 1.5rem 0;
-}
-
-.release:last-of-type {
-  border-bottom: none;
-}
-
-.release-header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.release-title {
-  font-size: 1.1em;
-  font-weight: 600;
-}
-
-.release-date {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.release-body {
-  font-size: 15px;
-  line-height: 1.6;
-}
-
 @media (min-width: 992px) {
   .home-content .home-title {
     font-size: 3rem;
