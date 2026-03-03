@@ -59,10 +59,10 @@ export class DoculaOptions {
 	 */
 	public enableReleaseChangelog = true;
 	/**
-	 * When true, the first document becomes the home page (index.html)
+	 * When false, the first document becomes the home page (index.html)
 	 * and the home.hbs template is not rendered.
 	 */
-	public homePage = false;
+	public homePage = true;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {

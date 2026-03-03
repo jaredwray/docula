@@ -471,6 +471,31 @@ describe("docula config file", () => {
 		);
 		console.log = consoleLog;
 	});
+	it("should build docs at root when config sets homePage to false", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
+		options.homePage = true;
+		const docula = new Docula(options);
+		const outputPath = "test/temp-build-mega-no-home-test";
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			process.argv = ["node", "docula", "-o", outputPath];
+			await docula.execute(process);
+
+			expect(docula.configFileModule.options.homePage).toEqual(false);
+			expect(docula.options.homePage).toEqual(false);
+			const indexHtml = await fs.promises.readFile(
+				`${outputPath}/index.html`,
+				"utf8",
+			);
+			expect(indexHtml).toContain("<title>docula -");
+		} finally {
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
 	it("should load the config and test the onPrepare", async () => {
 		const docula = new Docula(defaultOptions);
 		const sitePath = "test/fixtures/single-page-site-onprepare";
