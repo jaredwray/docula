@@ -113,6 +113,14 @@ export class DoculaBuilder {
 			openApiUrl: this.options.openApiUrl,
 		};
 
+		// Auto-detect swagger.json if openApiUrl is not set
+		if (
+			!doculaData.openApiUrl &&
+			fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)
+		) {
+			doculaData.openApiUrl = "/api/swagger.json";
+		}
+
 		// Get data from github
 		doculaData.github = await this.getGithubData(this.options.githubPath);
 		// Get the documents

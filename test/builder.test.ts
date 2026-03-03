@@ -1047,6 +1047,30 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
+
+		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/mega-page-site";
+			options.outputPath = "test/temp-build-api-autodetect";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.outputPath}/api/index.html`)).toBe(
+					true,
+				);
+				const apiPage = await fs.promises.readFile(
+					`${options.outputPath}/api/index.html`,
+					"utf8",
+				);
+				expect(apiPage).toContain("/api/swagger.json");
+			} finally {
+				await fs.promises.rm(options.outputPath, { recursive: true });
+				console.log = consoleLog;
+			}
+		});
 	});
 
 	describe("Docula Builder - Changelog", () => {

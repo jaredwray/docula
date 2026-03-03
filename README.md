@@ -16,6 +16,7 @@
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
 - [Public Folder](#public-folder)
+- [API Reference](#api-reference)
 - [Announcements](#announcements)
 - [Changelog](#changelog)
 - [Alert, Info, Warn Styling](#alert-info-warn-styling)
@@ -139,6 +140,8 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `port` | `number` | `3000` | Port for local development server |
 | `singlePage` | `boolean` | `true` | Single page or multi-page site |
 | `sections` | `DoculaSection[]` | - | Documentation sections |
+| `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
+| `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 
 # Using Your own Template
 
@@ -227,6 +230,53 @@ This is useful for:
 - Downloadable files (PDFs, zip archives, etc.)
 - Custom fonts
 - Any other static assets that need to be served from your site
+
+# API Reference
+
+Docula can generate an API Reference page from an OpenAPI (Swagger) specification. The page is rendered using [Docutopia](https://www.npmjs.com/package/@docutopia/react) and is available at `/api`.
+
+## Auto-Detection
+
+If your site directory contains an `api/swagger.json` file, Docula will automatically detect it and generate the API Reference page — no configuration needed:
+
+```
+site
+├───api
+│   └───swagger.json
+├───docs
+├───logo.svg
+├───favicon.ico
+└───docula.config.mjs
+```
+
+## Explicit Configuration
+
+You can also set the `openApiUrl` option in your config to point to any OpenAPI spec, either a local path or a remote URL:
+
+```js
+export const options = {
+  openApiUrl: '/api/swagger.json',
+  // or a remote URL:
+  // openApiUrl: 'https://petstore.swagger.io/v2/swagger.json',
+};
+```
+
+When `openApiUrl` is set explicitly, it takes priority over auto-detection.
+
+## Spec Requirements
+
+The file must be a valid OpenAPI 3.x or Swagger 2.0 JSON specification. A minimal example:
+
+```json
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "My API",
+    "version": "1.0.0"
+  },
+  "paths": {}
+}
+```
 
 # Announcements
 
