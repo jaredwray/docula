@@ -1918,7 +1918,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
-				"No doc template or documents found for homePage",
+				"No docPage template found for homePage",
 			);
 		});
 
@@ -1941,7 +1941,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
-				"No doc template or documents found for homePage",
+				"No documents found for homePage",
 			);
 		});
 

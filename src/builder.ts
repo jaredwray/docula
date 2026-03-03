@@ -454,8 +454,12 @@ export class DoculaBuilder {
 	}
 
 	public async buildDocsHomePage(data: DoculaData): Promise<void> {
-		if (!data.templates?.docPage || !data.documents?.length) {
-			throw new Error("No doc template or documents found for homePage");
+		if (!data.templates?.docPage) {
+			throw new Error("No docPage template found for homePage");
+		}
+
+		if (!data.documents?.length) {
+			throw new Error("No documents found for homePage");
 		}
 
 		const indexPath = `${data.outputPath}/index.html`;
