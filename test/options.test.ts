@@ -16,6 +16,7 @@ describe("DoculaOptions", () => {
 			);
 			expect(options.siteUrl).toEqual("https://docula.org");
 			expect(options.singlePage).toEqual(true);
+			expect(options.enableReleaseChangelog).toEqual(true);
 		});
 
 		it("should create an instance of DoculaOptions with custom values", () => {
@@ -118,6 +119,16 @@ describe("DoculaOptions", () => {
 		it("should parse the template option", () => {
 			options.parseOptions({ template: "modern" });
 			expect(options.template).toEqual("modern");
+		});
+
+		it("should parse enableReleaseChangelog set to false", () => {
+			options.parseOptions({ enableReleaseChangelog: false });
+			expect(options.enableReleaseChangelog).toEqual(false);
+		});
+
+		it("should not update enableReleaseChangelog for non-boolean values", () => {
+			options.parseOptions({ enableReleaseChangelog: "yes" });
+			expect(options.enableReleaseChangelog).toEqual(true);
 		});
 	});
 });

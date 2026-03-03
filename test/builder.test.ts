@@ -179,7 +179,7 @@ describe("DoculaBuilder", () => {
 				"test/fixtures/template-example/",
 				false,
 			);
-			expect(templateData.releases).toBe("releases.hbs");
+			expect(templateData).not.toHaveProperty("releases");
 		});
 		it("should throw error when template path doesnt exist", async () => {
 			const builder = new DoculaBuilder();
@@ -267,7 +267,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -309,76 +308,13 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
-	describe("Docula Builder - Build Release", () => {
-		it("should build release page (/releases/index.html)", async () => {
-			const builder = new DoculaBuilder();
-			const data = doculaData;
-			data.templates = {
-				index: "index.hbs",
-				releases: "releases.hbs",
-			};
-			data.sitePath = "site";
-			data.templatePath = "templates/classic";
-			data.outputPath = "test/temp-release-test";
-
-			data.github = {
-				releases: {},
-				contributors: {},
-			};
-
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
-
-			try {
-				await builder.buildReleasePage(data);
-				const index = await fs.promises.readFile(
-					`${data.outputPath}/releases/index.html`,
-					"utf8",
-				);
-				expect(index).toContain("<title>docula Releases</title>");
-			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
-			}
-		});
-		it("should error on build release page (/releases/index.html)", async () => {
-			const builder = new DoculaBuilder();
-			const data = doculaData;
-			data.templates = {
-				index: "index.hbs",
-				releases: "releases.hbs",
-			};
-			data.sitePath = "site";
-			data.templatePath = "templates/classic";
-			data.outputPath = "test/temp-release-test";
-
-			data.github = undefined;
-
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
-			}
-
-			try {
-				await builder.buildReleasePage(data);
-			} catch (error) {
-				expect((error as Error).message).toBe("No github data found");
-			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
-				}
-			}
-		});
-	});
-
 	describe("Docula Builder - Build Docs", () => {
 		it("should build the docs pages", async () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
+
 				docPage: "docs.hbs",
 			};
 			data.sitePath = "site";
@@ -502,7 +438,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -524,7 +459,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -586,7 +520,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -629,7 +562,6 @@ describe("DoculaBuilder", () => {
 			const data = doculaData;
 			data.templates = {
 				index: "index.hbs",
-				releases: "releases.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -851,7 +783,7 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					api: "api.hbs",
 				},
 			};
@@ -888,7 +820,6 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-api-test-no-url",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -918,7 +849,6 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -948,7 +878,7 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					api: "api.hbs",
 				},
 			};
@@ -983,7 +913,6 @@ describe("DoculaBuilder", () => {
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -1046,6 +975,30 @@ describe("DoculaBuilder", () => {
 			expect(consoleMessage).toContain("Build");
 
 			console.log = consoleLog;
+		});
+
+		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/mega-page-site";
+			options.outputPath = "test/temp-build-api-autodetect";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.outputPath}/api/index.html`)).toBe(
+					true,
+				);
+				const apiPage = await fs.promises.readFile(
+					`${options.outputPath}/api/index.html`,
+					"utf8",
+				);
+				expect(apiPage).toContain("/api/swagger.json");
+			} finally {
+				await fs.promises.rm(options.outputPath, { recursive: true });
+				console.log = consoleLog;
+			}
 		});
 	});
 
@@ -1126,7 +1079,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
 				},
@@ -1177,7 +1130,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
 				},
@@ -1279,7 +1232,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 				},
 			};
@@ -1317,7 +1270,6 @@ describe("DoculaBuilder", () => {
 				hasChangelog: false,
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
 				},
 			};
 
@@ -1402,6 +1354,187 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Docula Builder - Release to Changelog Conversion", () => {
+		it("should convert a GitHub release to a DoculaChangelogEntry", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.9.10",
+				name: "v1.9.10",
+				published_at: "2023-07-02T21:06:40Z",
+				body: "## What's Changed\n* upgrading packages",
+				draft: false,
+				prerelease: false,
+			};
+			const entry = builder.convertReleaseToChangelogEntry(release);
+			expect(entry.title).toBe("v1.9.10");
+			expect(entry.slug).toBe("v1-9-10");
+			expect(entry.date).toBe("2023-07-02");
+			expect(entry.formattedDate).toContain("2023");
+			expect(entry.tag).toBe("Release");
+			expect(entry.tagClass).toBe("release");
+			expect(entry.urlPath).toBe("/changelog/v1-9-10/index.html");
+			expect(entry.generatedHtml).toContain("What");
+		});
+
+		it("should mark prerelease entries with Pre-release tag", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v2.0.0-beta.1",
+				name: "v2.0.0 Beta 1",
+				published_at: "2024-01-15T10:00:00Z",
+				body: "Beta release",
+				draft: false,
+				prerelease: true,
+			};
+			const entry = builder.convertReleaseToChangelogEntry(release);
+			expect(entry.tag).toBe("Pre-release");
+			expect(entry.tagClass).toBe("pre-release");
+			expect(entry.title).toBe("v2.0.0 Beta 1");
+		});
+
+		it("should use tag_name as title when name is empty", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.0.0",
+				name: "",
+				published_at: "2023-01-01T00:00:00Z",
+				body: "",
+				draft: false,
+				prerelease: false,
+			};
+			const entry = builder.convertReleaseToChangelogEntry(release);
+			expect(entry.title).toBe("v1.0.0");
+		});
+
+		it("should handle release with empty body", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.0.0",
+				name: "v1.0.0",
+				published_at: "2023-01-01T00:00:00Z",
+				body: "",
+				draft: false,
+				prerelease: false,
+			};
+			const entry = builder.convertReleaseToChangelogEntry(release);
+			expect(entry.content).toBe("");
+		});
+
+		it("should handle release with missing published_at", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.0.0",
+				name: "v1.0.0",
+				body: "Some content",
+				draft: false,
+				prerelease: false,
+			};
+			const entry = builder.convertReleaseToChangelogEntry(release);
+			expect(entry.date).toBe("");
+			expect(entry.formattedDate).toBe("");
+		});
+
+		it("should filter out draft releases in getReleasesAsChangelogEntries", () => {
+			const builder = new DoculaBuilder();
+			const releases = [
+				{
+					tag_name: "v1.0.0",
+					name: "v1.0.0",
+					published_at: "2023-01-01T00:00:00Z",
+					body: "First",
+					draft: false,
+					prerelease: false,
+				},
+				{
+					tag_name: "v1.1.0",
+					name: "v1.1.0",
+					published_at: "2023-02-01T00:00:00Z",
+					body: "Draft",
+					draft: true,
+					prerelease: false,
+				},
+				{
+					tag_name: "v1.2.0",
+					name: "v1.2.0",
+					published_at: "2023-03-01T00:00:00Z",
+					body: "Third",
+					draft: false,
+					prerelease: false,
+				},
+			];
+			const entries = builder.getReleasesAsChangelogEntries(releases);
+			expect(entries.length).toBe(2);
+			expect(entries[0].title).toBe("v1.0.0");
+			expect(entries[1].title).toBe("v1.2.0");
+		});
+
+		it("should return empty array for empty releases", () => {
+			const builder = new DoculaBuilder();
+			const entries = builder.getReleasesAsChangelogEntries([]);
+			expect(entries).toStrictEqual([]);
+		});
+
+		it("should build with enableReleaseChangelog enabled and merge release entries with file entries", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-build-release-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/index.html`),
+				).toBe(true);
+				// File-based entries should exist
+				expect(
+					fs.existsSync(
+						`${options.outputPath}/changelog/new-feature/index.html`,
+					),
+				).toBe(true);
+				// Release-based entries should also exist (from mock data)
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/v1-9-10/index.html`),
+				).toBe(true);
+			} finally {
+				await fs.promises.rm(options.outputPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not include release entries when enableReleaseChangelog is false", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-build-no-release-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.enableReleaseChangelog = false;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/index.html`),
+				).toBe(true);
+				// File-based entries should still exist
+				expect(
+					fs.existsSync(
+						`${options.outputPath}/changelog/new-feature/index.html`,
+					),
+				).toBe(true);
+				// Release-based entries should NOT exist
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/v1-9-10/index.html`),
+				).toBe(false);
+			} finally {
+				await fs.promises.rm(options.outputPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+	});
+
 	describe("Docula Builder - HTML Entity Handling in Code Blocks", () => {
 		it("should produce correct HTML entities in generatedHtml for code blocks with generics", () => {
 			const builder = new DoculaBuilder();
@@ -1432,7 +1565,7 @@ describe("DoculaBuilder", () => {
 				),
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					docPage: "docs.hbs",
 				},
 			};
@@ -1490,7 +1623,7 @@ describe("DoculaBuilder", () => {
 				],
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
 				},
@@ -1528,7 +1661,7 @@ describe("DoculaBuilder", () => {
 				),
 				templates: {
 					index: "index.hbs",
-					releases: "releases.hbs",
+
 					docPage: "docs.hbs",
 				},
 			};

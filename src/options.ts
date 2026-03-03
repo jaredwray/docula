@@ -53,6 +53,11 @@ export class DoculaOptions {
 	 * Supports both external URLs (https://...) and relative paths (/openapi.json)
 	 */
 	public openApiUrl?: string;
+	/**
+	 * When true, GitHub releases are converted to changelog entries and merged
+	 * with file-based changelog entries. Requires a changelog template to exist.
+	 */
+	public enableReleaseChangelog = true;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -124,6 +129,13 @@ export class DoculaOptions {
 		/* v8 ignore next -- @preserve */
 		if (options.openApiUrl) {
 			this.openApiUrl = options.openApiUrl as string;
+		}
+
+		if (
+			options.enableReleaseChangelog !== undefined &&
+			typeof options.enableReleaseChangelog === "boolean"
+		) {
+			this.enableReleaseChangelog = options.enableReleaseChangelog;
 		}
 	}
 }

@@ -6,8 +6,10 @@
 <link rel="icon" href="/favicon.ico">
 <script>
   (function(){
-    var t = localStorage.getItem('theme') ||
-      (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    var mode = localStorage.getItem('theme') || 'auto';
+    var resolved = mode === 'auto'
+      ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+      : mode;
+    if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');
   })();
 </script>

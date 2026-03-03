@@ -41,7 +41,6 @@ export type DoculaData = {
 
 export type DoculaTemplates = {
 	index: string;
-	releases: string;
 	docPage?: string;
 	api?: string;
 	changelog?: string;
@@ -113,6 +112,14 @@ export class DoculaBuilder {
 			openApiUrl: this.options.openApiUrl,
 		};
 
+		// Auto-detect swagger.json if openApiUrl is not set
+		if (
+			!doculaData.openApiUrl &&
+			fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)
+		) {
+			doculaData.openApiUrl = "/api/swagger.json";
+		}
+
 		// Get data from github
 		doculaData.github = await this.getGithubData(this.options.githubPath);
 		// Get the documents
@@ -128,10 +135,53 @@ export class DoculaBuilder {
 
 		doculaData.hasDocuments = doculaData.documents?.length > 0;
 
-		// Get changelog entries
+		// Get file-based changelog entries
 		const changelogPath = `${doculaData.sitePath}/changelog`;
-		doculaData.changelogEntries = this.getChangelogEntries(changelogPath);
-		doculaData.hasChangelog = doculaData.changelogEntries.length > 0;
+		const fileChangelogEntries = this.getChangelogEntries(changelogPath);
+
+		// Check if a changelog template exists
+		const hasChangelogTemplate =
+			(await this.getTemplateFile(resolvedTemplatePath, "changelog")) !==
+			undefined;
+
+		// Merge release-based changelog entries if enabled
+		let allChangelogEntries = [...fileChangelogEntries];
+		if (
+			this._options.enableReleaseChangelog &&
+			hasChangelogTemplate &&
+			doculaData.github?.releases &&
+			Array.isArray(doculaData.github.releases) &&
+			doculaData.github.releases.length > 0
+		) {
+			const releaseEntries = this.getReleasesAsChangelogEntries(
+				// biome-ignore lint/suspicious/noExplicitAny: GitHub release objects
+				doculaData.github.releases as any[],
+			);
+			allChangelogEntries = [...allChangelogEntries, ...releaseEntries];
+		}
+
+		// Sort merged entries by date descending (newest first), invalid dates go to the end
+		allChangelogEntries.sort((a, b) => {
+			const dateA = new Date(a.date).getTime();
+			const dateB = new Date(b.date).getTime();
+			if (Number.isNaN(dateA) && Number.isNaN(dateB)) {
+				return 0;
+			}
+
+			if (Number.isNaN(dateA)) {
+				return 1;
+			}
+
+			if (Number.isNaN(dateB)) {
+				return -1;
+			}
+
+			return dateB - dateA;
+		});
+
+		doculaData.changelogEntries = allChangelogEntries;
+		doculaData.hasChangelog =
+			allChangelogEntries.length > 0 && hasChangelogTemplate;
 
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(
@@ -142,9 +192,6 @@ export class DoculaBuilder {
 
 		// Build the home page (index.html)
 		await this.buildIndexPage(doculaData);
-
-		// Build the releases page (/releases/index.html)
-		await this.buildReleasePage(doculaData);
 
 		// Build the sitemap (/sitemap.xml)
 		await this.buildSiteMapPage(doculaData);
@@ -255,7 +302,6 @@ export class DoculaBuilder {
 	): Promise<DoculaTemplates> {
 		const templates: DoculaTemplates = {
 			index: "",
-			releases: "",
 		};
 
 		if (fs.existsSync(templatePath)) {
@@ -263,14 +309,6 @@ export class DoculaBuilder {
 			/* v8 ignore next -- @preserve */
 			if (index) {
 				templates.index = index;
-			}
-
-			/* v8 ignore next -- @preserve */
-			const releases = await this.getTemplateFile(templatePath, "releases");
-
-			/* v8 ignore next -- @preserve */
-			if (releases) {
-				templates.releases = releases;
 			}
 
 			const documentPage = hasDocuments
@@ -340,7 +378,7 @@ export class DoculaBuilder {
 
 	public async buildSiteMapPage(data: DoculaData): Promise<void> {
 		const sitemapPath = `${data.outputPath}/sitemap.xml`;
-		const urls = [{ url: data.siteUrl }, { url: `${data.siteUrl}/releases` }];
+		const urls = [{ url: data.siteUrl }];
 
 		if (data.openApiUrl && data.templates?.api) {
 			urls.push({ url: `${data.siteUrl}/api` });
@@ -409,25 +447,6 @@ export class DoculaBuilder {
 		}
 	}
 
-	public async buildReleasePage(data: DoculaData): Promise<void> {
-		if (data.github && data.templates) {
-			const releasesPath = `${data.outputPath}/releases/index.html`;
-			const releaseOutputPath = `${data.outputPath}/releases`;
-
-			await fs.promises.mkdir(releaseOutputPath, { recursive: true });
-
-			const releasesTemplate = `${data.templatePath}/${data.templates.releases}`;
-			const releasesContent = await this._ecto.renderFromFile(
-				releasesTemplate,
-				data,
-				data.templatePath,
-			);
-			await fs.promises.writeFile(releasesPath, releasesContent, "utf8");
-		} else {
-			throw new Error("No github data found");
-		}
-	}
-
 	public async buildReadmeSection(data: DoculaData): Promise<string> {
 		let htmlReadme = "";
 		if (fs.existsSync(`${data.sitePath}/README.md`)) {
@@ -487,6 +506,15 @@ export class DoculaBuilder {
 		const apiOutputPath = `${data.outputPath}/api`;
 
 		await fs.promises.mkdir(apiOutputPath, { recursive: true });
+
+		// Copy swagger.json to output if it exists in the site directory
+		const swaggerSource = `${data.sitePath}/api/swagger.json`;
+		if (fs.existsSync(swaggerSource)) {
+			await fs.promises.copyFile(
+				swaggerSource,
+				`${apiOutputPath}/swagger.json`,
+			);
+		}
 
 		const apiTemplate = `${data.templatePath}/${data.templates.api}`;
 		const apiContent = await this._ecto.renderFromFile(
@@ -580,6 +608,63 @@ export class DoculaBuilder {
 			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
 			urlPath: `/changelog/${slug}/index.html`,
 		};
+	}
+
+	public convertReleaseToChangelogEntry(
+		// biome-ignore lint/suspicious/noExplicitAny: GitHub release object
+		release: Record<string, any>,
+	): DoculaChangelogEntry {
+		const tagName = (release.tag_name as string) ?? "";
+		const slug = tagName.replace(/\./g, "-");
+		const name = (release.name as string) || tagName;
+		const body = (release.body as string) ?? "";
+		const publishedAt = (release.published_at as string) ?? "";
+		const prerelease = (release.prerelease as boolean) ?? false;
+
+		let dateString = "";
+		let formattedDate = "";
+		if (publishedAt) {
+			const parsedDate = new Date(publishedAt);
+			if (!Number.isNaN(parsedDate.getTime())) {
+				dateString = parsedDate.toISOString().split("T")[0];
+				formattedDate = parsedDate.toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				});
+			}
+		}
+
+		const tag = prerelease ? "Pre-release" : "Release";
+		const tagClass = tag.toLowerCase().replace(/\s+/g, "-");
+
+		return {
+			title: name,
+			date: dateString,
+			formattedDate,
+			tag,
+			tagClass,
+			slug,
+			content: body,
+			generatedHtml: new Writr(body).renderSync(),
+			urlPath: `/changelog/${slug}/index.html`,
+		};
+	}
+
+	public getReleasesAsChangelogEntries(
+		// biome-ignore lint/suspicious/noExplicitAny: GitHub release objects
+		releases: any[],
+	): DoculaChangelogEntry[] {
+		const entries: DoculaChangelogEntry[] = [];
+		for (const release of releases) {
+			if (release.draft) {
+				continue;
+			}
+
+			entries.push(this.convertReleaseToChangelogEntry(release));
+		}
+
+		return entries;
 	}
 
 	public async buildChangelogPage(data: DoculaData): Promise<void> {
