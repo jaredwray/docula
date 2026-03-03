@@ -245,7 +245,7 @@ This is useful for:
 
 # API Reference
 
-Docula can generate an API Reference page from an OpenAPI (Swagger) specification. The page is rendered using [Docutopia](https://www.npmjs.com/package/@docutopia/react) and is available at `/api`.
+Docula can generate an API Reference page from an OpenAPI (Swagger) specification. The spec is parsed at build time and rendered as a native, interactive API reference (inspired by [Scalar](https://github.com/scalar/scalar)) with grouped endpoints, method badges, schema tables, code examples, and search — all with no external dependencies. The page is available at `/api`.
 
 ## Auto-Detection
 

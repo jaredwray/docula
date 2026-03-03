@@ -825,10 +825,8 @@ describe("DoculaBuilder", () => {
 					`${data.outputPath}/api/index.html`,
 					"utf8",
 				);
-				expect(apiPage).toContain("docutopia");
-				expect(apiPage).toContain(
-					"https://petstore.swagger.io/v2/swagger.json",
-				);
+				expect(apiPage).toContain("API Reference");
+				expect(apiPage).toContain("docula");
 			} finally {
 				if (fs.existsSync(data.outputPath)) {
 					await fs.promises.rm(data.outputPath, { recursive: true });
@@ -1075,7 +1073,8 @@ describe("DoculaBuilder", () => {
 					`${options.outputPath}/api/index.html`,
 					"utf8",
 				);
-				expect(apiPage).toContain("/api/swagger.json");
+				expect(apiPage).toContain("api-reference");
+				expect(apiPage).toContain("Mock HTTP API");
 			} finally {
 				await fs.promises.rm(options.outputPath, { recursive: true });
 				console.log = consoleLog;

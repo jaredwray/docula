@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Ecto } from "ecto";
 import { Writr } from "writr";
+import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { DoculaConsole } from "./console.js";
 import { Github, type GithubData, type GithubOptions } from "./github.js";
 import { DoculaOptions } from "./options.js";
@@ -37,6 +38,7 @@ export type DoculaData = {
 	announcement?: string;
 	openApiUrl?: string;
 	hasApi?: boolean;
+	apiSpec?: ApiSpecData;
 	changelogEntries?: DoculaChangelogEntry[];
 	homePage?: boolean;
 };
@@ -906,10 +908,38 @@ export class DoculaBuilder {
 			);
 		}
 
+		// Parse the OpenAPI spec for native rendering
+		let apiSpec: ApiSpecData | undefined;
+		const localSpec = await this.getSafeLocalOpenApiSpec(data);
+		if (localSpec) {
+			apiSpec = parseOpenApiSpec(localSpec.content);
+		} else if (data.openApiUrl && this.isRemoteUrl(data.openApiUrl)) {
+			try {
+				const response = await fetch(data.openApiUrl);
+				const specContent = await response.text();
+				apiSpec = parseOpenApiSpec(specContent);
+			} catch {
+				// If remote fetch fails, render page without parsed spec
+			}
+		}
+
+		// Render Markdown descriptions to HTML
+		if (apiSpec) {
+			apiSpec.info.description = new Writr(
+				apiSpec.info.description,
+			).renderSync();
+			for (const group of apiSpec.groups) {
+				group.description = new Writr(group.description).renderSync();
+				for (const op of group.operations) {
+					op.description = new Writr(op.description).renderSync();
+				}
+			}
+		}
+
 		const apiTemplate = `${data.templatePath}/${data.templates.api}`;
 		const apiContent = await this._ecto.renderFromFile(
 			apiTemplate,
-			{ ...data, specUrl: data.openApiUrl },
+			{ ...data, specUrl: data.openApiUrl, apiSpec },
 			data.templatePath,
 		);
 		await fs.promises.writeFile(apiPath, apiContent, "utf8");

@@ -3,28 +3,317 @@
 
 <head>
   {{> header }}
-  <title>API Documentation - {{ siteTitle }}</title>
-  <meta name="description" content="API Documentation for {{ siteTitle }}" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docutopia/react/dist/browser/docutopia.css" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/api.css">
+  <title>API Reference - {{ siteTitle }}</title>
+  <meta name="description" content="API Reference for {{ siteTitle }}" />
 </head>
 
 <body>
-  <div id="docs" style="height: 100vh;"></div>
+  {{> header-bar }}
 
-  <script src="https://cdn.jsdelivr.net/npm/@docutopia/react/dist/browser/docutopia.js"></script>
-  <script>
-    Docutopia.render('docs', {
-      specUrl: '{{ specUrl }}',
-      basename: '/api',
-    });
-  </script>
+  {{#if apiSpec}}
+  <div class="api-mobile-toggle">
+    <button id="api-sidebar-toggle">
+      <span>API Navigation</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+    </button>
+  </div>
+
+  <div class="api-reference">
+    <aside class="api-sidebar" id="api-sidebar">
+      <input type="text" class="api-search" id="api-search" placeholder="Search endpoints..." />
+
+      {{#each apiSpec.groups}}
+      <div class="api-sidebar__group" data-group="{{this.id}}">
+        <button class="api-sidebar__group-toggle">
+          <span>{{this.name}}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="api-sidebar__group-items">
+          {{#each this.operations}}
+          <a href="#{{this.id}}" class="api-sidebar__item" data-method="{{this.method}}" data-path="{{this.path}}">
+            <span class="method-badge method-badge--{{this.method}}">{{this.methodUpper}}</span>
+            <span class="api-sidebar__item-path">{{this.path}}</span>
+          </a>
+          {{/each}}
+        </div>
+      </div>
+      {{/each}}
+    </aside>
+
+    <main class="api-content">
+      <section class="api-info">
+        <h1 class="api-info__title">{{apiSpec.info.title}}</h1>
+        {{#if apiSpec.info.version}}
+        <span class="api-info__version">v{{apiSpec.info.version}}</span>
+        {{/if}}
+        {{#if apiSpec.info.description}}
+        <div class="api-info__description">{{{apiSpec.info.description}}}</div>
+        {{/if}}
+        {{#if apiSpec.servers}}
+        <div class="api-info__servers">
+          <div class="api-info__server-label">Server</div>
+          {{#each apiSpec.servers}}
+          <code class="api-info__server-url">{{this.url}}</code>
+          {{/each}}
+        </div>
+        {{/if}}
+      </section>
+
+      {{#each apiSpec.groups}}
+      <div class="api-group" id="group-{{this.id}}">
+        <div class="api-group__header">
+          <h2 class="api-group__title">{{this.name}}</h2>
+          {{#if this.description}}
+          <div class="api-group__description">{{{this.description}}}</div>
+          {{/if}}
+        </div>
+
+        {{#each this.operations}}
+        <div class="api-operation api-operation--collapsed" id="{{this.id}}">
+          <div class="api-operation__header" data-toggle="operation">
+            <span class="method-badge method-badge--{{this.method}}">{{this.methodUpper}}</span>
+            <span class="api-operation__path">{{this.path}}</span>
+            {{#if this.summary}}
+            <span class="api-operation__summary">{{this.summary}}</span>
+            {{/if}}
+            <svg class="api-operation__toggle-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="api-operation__body">
+            {{#if this.description}}
+            <div class="api-operation__description">{{{this.description}}}</div>
+            {{/if}}
+
+            {{#if this.parameters.length}}
+            <div class="api-section-title">Parameters</div>
+            <table class="api-params-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>In</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each this.parameters}}
+                <tr>
+                  <td>
+                    <span class="api-param-name">{{this.name}}</span>
+                    {{#if this.required}}<span class="api-param-required">*</span>{{/if}}
+                  </td>
+                  <td><span class="api-param-type">{{this.type}}</span></td>
+                  <td><span class="api-param-in">{{this.in}}</span></td>
+                  <td><span class="api-param-desc">{{this.description}}</span></td>
+                </tr>
+                {{/each}}
+              </tbody>
+            </table>
+            {{/if}}
+
+            {{#if this.requestBody}}
+            <div class="api-section-title">Request Body <span class="api-param-type">{{this.requestBody.contentType}}</span></div>
+            {{#if this.requestBody.schemaProperties.length}}
+            <div class="api-schema">
+              <div class="api-schema-props">
+                {{#each this.requestBody.schemaProperties}}
+                <div class="api-schema-prop">
+                  <span class="api-schema-prop-name">{{this.name}}{{#if this.required}}<span class="api-param-required">*</span>{{/if}}</span>
+                  <span class="api-schema-prop-type">{{this.type}}</span>
+                  <span class="api-schema-prop-desc">{{this.description}}</span>
+                </div>
+                {{/each}}
+              </div>
+            </div>
+            {{/if}}
+            {{#if this.requestBody.example}}
+            <div class="api-response__example">
+              <pre><code>{{this.requestBody.example}}</code></pre>
+            </div>
+            {{/if}}
+            {{/if}}
+
+            {{#if this.responses.length}}
+            <div class="api-section-title">Responses</div>
+            {{#each this.responses}}
+            <div class="api-response">
+              <div class="api-response__status">
+                <span class="api-status-code api-status-code--{{this.statusClass}}">{{this.statusCode}}</span>
+                <span class="api-response__desc">{{this.description}}</span>
+              </div>
+              {{#if this.schemaProperties.length}}
+              <div class="api-schema">
+                <div class="api-schema-props">
+                  {{#each this.schemaProperties}}
+                  <div class="api-schema-prop">
+                    <span class="api-schema-prop-name">{{this.name}}</span>
+                    <span class="api-schema-prop-type">{{this.type}}</span>
+                    <span class="api-schema-prop-desc">{{this.description}}</span>
+                  </div>
+                  {{/each}}
+                </div>
+              </div>
+              {{/if}}
+              {{#if this.example}}
+              <div class="api-response__example">
+                <pre><code>{{this.example}}</code></pre>
+              </div>
+              {{/if}}
+            </div>
+            {{/each}}
+            {{/if}}
+
+            <div class="api-code-examples">
+              <div class="api-code-tabs">
+                <button class="api-code-tab api-code-tab--active" data-tab="curl">cURL</button>
+                <button class="api-code-tab" data-tab="javascript">JavaScript</button>
+                <button class="api-code-tab" data-tab="python">Python</button>
+              </div>
+              <div class="api-code-panel api-code-panel--active" data-panel="curl">
+                <button class="api-copy-btn" data-copy>Copy</button>
+                <pre><code>{{this.codeExamples.curl}}</code></pre>
+              </div>
+              <div class="api-code-panel" data-panel="javascript">
+                <button class="api-copy-btn" data-copy>Copy</button>
+                <pre><code>{{this.codeExamples.javascript}}</code></pre>
+              </div>
+              <div class="api-code-panel" data-panel="python">
+                <button class="api-copy-btn" data-copy>Copy</button>
+                <pre><code>{{this.codeExamples.python}}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+      {{/each}}
+    </main>
+  </div>
+  {{/if}}
+
+  {{> footer }}
   {{> scripts }}
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle operations
+    document.querySelectorAll('[data-toggle="operation"]').forEach(function(header) {
+      header.addEventListener('click', function() {
+        this.closest('.api-operation').classList.toggle('api-operation--collapsed');
+      });
+    });
+
+    // Toggle sidebar groups
+    document.querySelectorAll('.api-sidebar__group-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        this.closest('.api-sidebar__group').classList.toggle('api-sidebar__group--collapsed');
+      });
+    });
+
+    // Code example tabs
+    document.querySelectorAll('.api-code-tabs').forEach(function(tabs) {
+      var container = tabs.closest('.api-code-examples');
+      tabs.querySelectorAll('.api-code-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var target = this.getAttribute('data-tab');
+          container.querySelectorAll('.api-code-tab').forEach(function(t) { t.classList.remove('api-code-tab--active'); });
+          container.querySelectorAll('.api-code-panel').forEach(function(p) { p.classList.remove('api-code-panel--active'); });
+          this.classList.add('api-code-tab--active');
+          var panel = container.querySelector('[data-panel="' + target + '"]');
+          if (panel) panel.classList.add('api-code-panel--active');
+        });
+      });
+    });
+
+    // Copy to clipboard
+    document.querySelectorAll('[data-copy]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var code = this.closest('.api-code-panel').querySelector('code');
+        if (code) {
+          navigator.clipboard.writeText(code.textContent).then(function() {
+            btn.textContent = 'Copied!';
+            setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+          });
+        }
+      });
+    });
+
+    // Search
+    var searchInput = document.getElementById('api-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        var query = this.value.toLowerCase();
+        document.querySelectorAll('.api-sidebar__item').forEach(function(item) {
+          var path = (item.getAttribute('data-path') || '').toLowerCase();
+          var method = (item.getAttribute('data-method') || '').toLowerCase();
+          var text = item.textContent.toLowerCase();
+          var match = !query || path.indexOf(query) !== -1 || method.indexOf(query) !== -1 || text.indexOf(query) !== -1;
+          item.style.display = match ? '' : 'none';
+        });
+        document.querySelectorAll('.api-operation').forEach(function(op) {
+          var path = (op.querySelector('.api-operation__path') || {}).textContent || '';
+          var summary = (op.querySelector('.api-operation__summary') || {}).textContent || '';
+          var method = (op.querySelector('.method-badge') || {}).textContent || '';
+          var match = !query || path.toLowerCase().indexOf(query) !== -1 || summary.toLowerCase().indexOf(query) !== -1 || method.toLowerCase().indexOf(query) !== -1;
+          op.style.display = match ? '' : 'none';
+        });
+        document.querySelectorAll('.api-group').forEach(function(group) {
+          var visible = group.querySelectorAll('.api-operation:not([style*="display: none"])');
+          group.style.display = visible.length > 0 || !query ? '' : 'none';
+        });
+      });
+    }
+
+    // Scroll spy
+    var sidebarLinks = document.querySelectorAll('.api-sidebar__item');
+    if (sidebarLinks.length > 0) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            sidebarLinks.forEach(function(l) { l.classList.remove('api-sidebar__item--active'); });
+            var link = document.querySelector('.api-sidebar__item[href="#' + entry.target.id + '"]');
+            if (link) link.classList.add('api-sidebar__item--active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+
+      document.querySelectorAll('.api-operation').forEach(function(op) {
+        observer.observe(op);
+      });
+    }
+
+    // Mobile sidebar toggle
+    var sidebarToggle = document.getElementById('api-sidebar-toggle');
+    var sidebar = document.getElementById('api-sidebar');
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('api-sidebar--mobile-open');
+      });
+      sidebar.querySelectorAll('.api-sidebar__item').forEach(function(link) {
+        link.addEventListener('click', function() {
+          sidebar.classList.remove('api-sidebar--mobile-open');
+        });
+      });
+    }
+
+    // Expand operation via hash
+    if (window.location.hash) {
+      var target = document.querySelector(window.location.hash);
+      if (target && target.classList.contains('api-operation')) {
+        target.classList.remove('api-operation--collapsed');
+      }
+    }
+
+    window.addEventListener('hashchange', function() {
+      if (window.location.hash) {
+        var target = document.querySelector(window.location.hash);
+        if (target && target.classList.contains('api-operation')) {
+          target.classList.remove('api-operation--collapsed');
+        }
+      }
+    });
+  });
+  </script>
 </body>
 
 </html>
