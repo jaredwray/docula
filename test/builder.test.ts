@@ -78,11 +78,11 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
-		it("should build multi page with homePage enabled", async () => {
+		it("should build multi page with homePage disabled", async () => {
 			const options = new DoculaOptions();
 			options.outputPath = "test/temp-build-test";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.homePage = true;
+			options.homePage = false;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -96,7 +96,7 @@ describe("DoculaBuilder", () => {
 					`${options.outputPath}/index.html`,
 					"utf8",
 				);
-				expect(indexHtml).toBeTruthy();
+				expect(indexHtml).toContain("<title>docula -");
 			} finally {
 				await fs.promises.rm(builder.options.outputPath, { recursive: true });
 			}
@@ -1860,7 +1860,7 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - buildDocsHomePage", () => {
-		it("should render first document as index.html when homePage is true", async () => {
+		it("should render first document as index.html when homePage is false", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -1869,7 +1869,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-test",
-				homePage: true,
+				homePage: false,
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
@@ -1909,7 +1909,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-error-test",
-				homePage: true,
+				homePage: false,
 				hasDocuments: true,
 				documents: [],
 				templates: {
@@ -1931,7 +1931,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-empty-test",
-				homePage: true,
+				homePage: false,
 				hasDocuments: true,
 				documents: [],
 				templates: {
@@ -1954,7 +1954,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-precomputed-sidebar",
-				homePage: true,
+				homePage: false,
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {

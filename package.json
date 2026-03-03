@@ -33,6 +33,9 @@
     "website:mega": "pnpm website:build:mega && pnpm website:serve:mega",
     "website:build:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.js build -s ./test/fixtures/mega-page-site",
     "website:serve:mega": "rimraf ./test/fixtures/mega-page-site/dist && node bin/docula.js serve -s ./test/fixtures/mega-page-site",
+    "website:mega:nohome": "pnpm website:build:mega:nohome && pnpm website:serve:mega:nohome",
+    "website:build:mega:nohome": "rimraf ./test/fixtures/mega-page-site-no-home-page/dist && node bin/docula.js build -s ./test/fixtures/mega-page-site-no-home-page",
+    "website:serve:mega:nohome": "rimraf ./test/fixtures/mega-page-site-no-home-page/dist && node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page",
     "website:build:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.js build -s ./test/fixtures/changelog-site",
     "website:serve:changelog": "rimraf ./test/fixtures/changelog-site/dist && node bin/docula.js serve -s ./test/fixtures/changelog-site",
     "prepare": "pnpm build"
