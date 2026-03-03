@@ -78,6 +78,33 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
+		it("should build multi page with homePage enabled", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-build-test";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.homePage = true;
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			let consoleMessage = "";
+			console.log = (message) => {
+				consoleMessage = message as string;
+			};
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.outputPath}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toBeTruthy();
+			} finally {
+				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+			}
+
+			expect(consoleMessage).toContain("Build");
+
+			console.log = consoleLog;
+		});
 		it("should build multi page", async () => {
 			const options = new DoculaOptions();
 			options.outputPath = "test/temp-build-test";
@@ -161,9 +188,9 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const file = await builder.getTemplateFile(
 				"test/fixtures/template-example/",
-				"index",
+				"home",
 			);
-			expect(file).toBe("index.hbs");
+			expect(file).toBe("home.hbs");
 		});
 		it("should not get the file without extension", async () => {
 			const builder = new DoculaBuilder();
@@ -266,7 +293,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.templates = {
-				index: "index.hbs",
+				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -313,7 +340,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.templates = {
-				index: "index.hbs",
+				home: "home.hbs",
 
 				docPage: "docs.hbs",
 			};
@@ -437,7 +464,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.templates = {
-				index: "index.hbs",
+				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -458,7 +485,7 @@ describe("DoculaBuilder", () => {
 
 			const data = doculaData;
 			data.templates = {
-				index: "index.hbs",
+				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -519,7 +546,7 @@ describe("DoculaBuilder", () => {
 
 			const data = doculaData;
 			data.templates = {
-				index: "index.hbs",
+				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -561,7 +588,7 @@ describe("DoculaBuilder", () => {
 
 			const data = doculaData;
 			data.templates = {
-				index: "index.hbs",
+				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
@@ -782,7 +809,7 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					api: "api.hbs",
 				},
@@ -819,7 +846,7 @@ describe("DoculaBuilder", () => {
 				templatePath: "templates/classic",
 				outputPath: "test/temp-api-test-no-url",
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 				},
 			};
 
@@ -848,7 +875,7 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-api-test-no-template",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 				},
 			};
 
@@ -877,7 +904,7 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-sitemap-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					api: "api.hbs",
 				},
@@ -912,7 +939,7 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-sitemap-no-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 				},
 			};
 
@@ -1030,6 +1057,47 @@ describe("DoculaBuilder", () => {
 			expect(lastTwo).toContain("No Date Entry");
 		});
 
+		it("should include mdx changelog files and ignore non-markdown files", async () => {
+			const builder = new DoculaBuilder();
+			const changelogPath = "test/temp-changelog-mixed-files";
+			await fs.promises.rm(changelogPath, { recursive: true, force: true });
+			await fs.promises.mkdir(`${changelogPath}/nested`, { recursive: true });
+			await fs.promises.writeFile(
+				`${changelogPath}/2026-03-02-mdx-entry.mdx`,
+				[
+					"---",
+					"title: MDX Entry",
+					"date: 2026-03-02",
+					"---",
+					"",
+					"Hello from MDX.",
+				].join("\n"),
+				"utf8",
+			);
+			await fs.promises.writeFile(
+				`${changelogPath}/notes.txt`,
+				"not a changelog entry",
+				"utf8",
+			);
+			await fs.promises.writeFile(
+				`${changelogPath}/nested/ignore.md`,
+				"---\ntitle: nested\n---\n",
+				"utf8",
+			);
+
+			try {
+				const entries = builder.getChangelogEntries(changelogPath);
+				expect(entries.length).toBe(1);
+				expect(entries[0].title).toBe("MDX Entry");
+				expect(entries[0].slug).toBe("mdx-entry");
+			} finally {
+				await fs.promises.rm(changelogPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
 		it("should parse a changelog entry correctly", () => {
 			const builder = new DoculaBuilder();
 			const entry = builder.parseChangelogEntry(
@@ -1052,6 +1120,29 @@ describe("DoculaBuilder", () => {
 			expect(entry.title).toBe("String Date Entry");
 			expect(entry.date).toBe("Q1 2025");
 			expect(entry.slug).toBe("string-date");
+		});
+
+		it("should fall back to filename title when changelog entry has no front matter", async () => {
+			const builder = new DoculaBuilder();
+			const changelogPath = "test/temp-changelog-missing-frontmatter";
+			const filePath = `${changelogPath}/2026-03-02-missing-fields.md`;
+			await fs.promises.rm(changelogPath, { recursive: true, force: true });
+			await fs.promises.mkdir(changelogPath, { recursive: true });
+			await fs.promises.writeFile(filePath, "No front matter here.", "utf8");
+
+			try {
+				const entry = builder.parseChangelogEntry(filePath);
+				expect(entry.title).toBe("2026-03-02-missing-fields");
+				expect(entry.date).toBe("");
+				expect(entry.formattedDate).toBe("");
+				expect(entry.slug).toBe("missing-fields");
+				expect(entry.urlPath).toBe("/changelog/missing-fields/index.html");
+			} finally {
+				await fs.promises.rm(changelogPath, {
+					recursive: true,
+					force: true,
+				});
+			}
 		});
 
 		it("should build changelog listing page", async () => {
@@ -1078,7 +1169,7 @@ describe("DoculaBuilder", () => {
 					},
 				],
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
@@ -1129,7 +1220,7 @@ describe("DoculaBuilder", () => {
 					},
 				],
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
@@ -1231,7 +1322,7 @@ describe("DoculaBuilder", () => {
 					},
 				],
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					changelog: "changelog.hbs",
 				},
@@ -1258,6 +1349,40 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should include /changelog in sitemap with no changelog entry list", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-sitemap-changelog-no-entries-test",
+				hasChangelog: true,
+				templates: {
+					home: "home.hbs",
+					changelog: "changelog.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.outputPath)) {
+				await fs.promises.rm(data.outputPath, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.outputPath}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/changelog</loc>");
+			} finally {
+				if (fs.existsSync(data.outputPath)) {
+					await fs.promises.rm(data.outputPath, { recursive: true });
+				}
+			}
+		});
+
 		it("should not include /changelog in sitemap when changelog does not exist", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
@@ -1269,7 +1394,7 @@ describe("DoculaBuilder", () => {
 				outputPath: "test/temp-sitemap-no-changelog-test",
 				hasChangelog: false,
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 				},
 			};
 
@@ -1434,6 +1559,21 @@ describe("DoculaBuilder", () => {
 			expect(entry.formattedDate).toBe("");
 		});
 
+		it("should default missing release fields and ignore invalid published_at", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				published_at: "not-a-date",
+				draft: false,
+			};
+			const entry = builder.convertReleaseToChangelogEntry(release);
+			expect(entry.title).toBe("");
+			expect(entry.slug).toBe("");
+			expect(entry.content).toBe("");
+			expect(entry.tag).toBe("Release");
+			expect(entry.date).toBe("");
+			expect(entry.formattedDate).toBe("");
+		});
+
 		it("should filter out draft releases in getReleasesAsChangelogEntries", () => {
 			const builder = new DoculaBuilder();
 			const releases = [
@@ -1533,6 +1673,26 @@ describe("DoculaBuilder", () => {
 				});
 			}
 		});
+
+		it("should skip changelog pages when no changelog entries exist", async () => {
+			const options = new DoculaOptions();
+			options.outputPath = "test/temp-build-no-changelog-pages-test";
+			options.sitePath = "test/fixtures/single-page-site";
+			options.enableReleaseChangelog = false;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				expect(
+					fs.existsSync(`${options.outputPath}/changelog/index.html`),
+				).toBe(false);
+			} finally {
+				await fs.promises.rm(options.outputPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
 	});
 
 	describe("Docula Builder - HTML Entity Handling in Code Blocks", () => {
@@ -1564,7 +1724,7 @@ describe("DoculaBuilder", () => {
 					"test/fixtures/multi-page-site/docs",
 				),
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					docPage: "docs.hbs",
 				},
@@ -1622,7 +1782,7 @@ describe("DoculaBuilder", () => {
 					},
 				],
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					changelog: "changelog.hbs",
 					changelogEntry: "changelog-entry.hbs",
@@ -1660,7 +1820,7 @@ describe("DoculaBuilder", () => {
 					"test/fixtures/multi-page-site/docs",
 				),
 				templates: {
-					index: "index.hbs",
+					home: "home.hbs",
 
 					docPage: "docs.hbs",
 				},
@@ -1693,6 +1853,129 @@ describe("DoculaBuilder", () => {
 				expect(content).toContain("\u00FCber");
 				expect(content).toContain("stra\u00DFe");
 				expect(content).toContain("\u00A9 2025");
+			} finally {
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			}
+		});
+	});
+
+	describe("Docula Builder - buildDocsHomePage", () => {
+		it("should render first document as index.html when homePage is true", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-docs-home-test",
+				homePage: true,
+				hasDocuments: true,
+				sections: [{ name: "getting-started", path: "getting-started" }],
+				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
+					siteUrl: "http://foo.com",
+					siteTitle: "docula",
+					siteDescription: "Beautiful Website for Your Projects",
+					sitePath: "test/fixtures/multi-page-site",
+					templatePath: "test/fixtures/template-example",
+					outputPath: "test/temp-docs-home-test",
+				}),
+				templates: {
+					home: "home.hbs",
+					docPage: "docs.hbs",
+				},
+			};
+
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			try {
+				await builder.buildDocsHomePage(data);
+				const indexHtml = await fs.promises.readFile(
+					`${data.outputPath}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toBeTruthy();
+				expect(indexHtml.length).toBeGreaterThan(0);
+			} finally {
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should throw error when no docPage template is provided", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-docs-home-error-test",
+				homePage: true,
+				hasDocuments: true,
+				documents: [],
+				templates: {
+					home: "home.hbs",
+				},
+			};
+
+			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
+				"No docPage template found for homePage",
+			);
+		});
+
+		it("should throw error when documents array is empty", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-docs-home-empty-test",
+				homePage: true,
+				hasDocuments: true,
+				documents: [],
+				templates: {
+					home: "home.hbs",
+					docPage: "docs.hbs",
+				},
+			};
+
+			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
+				"No documents found for homePage",
+			);
+		});
+
+		it("should render docs home page when sidebarItems are precomputed", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath: "test/temp-docs-home-precomputed-sidebar",
+				homePage: true,
+				hasDocuments: true,
+				sections: [{ name: "getting-started", path: "getting-started" }],
+				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
+					siteUrl: "http://foo.com",
+					siteTitle: "docula",
+					siteDescription: "Beautiful Website for Your Projects",
+					sitePath: "test/fixtures/multi-page-site",
+					templatePath: "test/fixtures/template-example",
+					outputPath: "test/temp-docs-home-precomputed-sidebar",
+				}),
+				sidebarItems: [],
+				templates: {
+					home: "home.hbs",
+					docPage: "docs.hbs",
+				},
+			};
+
+			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			try {
+				await builder.buildDocsHomePage(data);
+				expect(fs.existsSync(`${data.outputPath}/index.html`)).toBe(true);
 			} finally {
 				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
 			}

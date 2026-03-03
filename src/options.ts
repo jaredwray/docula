@@ -58,6 +58,11 @@ export class DoculaOptions {
 	 * with file-based changelog entries. Requires a changelog template to exist.
 	 */
 	public enableReleaseChangelog = true;
+	/**
+	 * When true, the first document becomes the home page (index.html)
+	 * and the home.hbs template is not rendered.
+	 */
+	public homePage = false;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -136,6 +141,13 @@ export class DoculaOptions {
 			typeof options.enableReleaseChangelog === "boolean"
 		) {
 			this.enableReleaseChangelog = options.enableReleaseChangelog;
+		}
+
+		if (
+			options.homePage !== undefined &&
+			typeof options.homePage === "boolean"
+		) {
+			this.homePage = options.homePage;
 		}
 	}
 }
