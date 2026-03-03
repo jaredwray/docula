@@ -36,6 +36,7 @@ export type DoculaData = {
 	sidebarItems?: DoculaSection[];
 	announcement?: string;
 	openApiUrl?: string;
+	hasApi?: boolean;
 	changelogEntries?: DoculaChangelogEntry[];
 	homePage?: boolean;
 };
@@ -191,6 +192,9 @@ export class DoculaBuilder {
 			doculaData.hasDocuments,
 			doculaData.hasChangelog,
 		);
+		doculaData.hasApi = Boolean(
+			doculaData.openApiUrl && doculaData.templates?.api,
+		);
 
 		// Build the home page (index.html)
 		if (!this.options.homePage && doculaData.hasDocuments) {
@@ -210,7 +214,7 @@ export class DoculaBuilder {
 		}
 
 		// Build the API documentation page (/api/index.html)
-		if (doculaData.openApiUrl) {
+		if (doculaData.hasApi) {
 			await this.buildApiPage(doculaData);
 		}
 

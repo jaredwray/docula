@@ -25,6 +25,13 @@
   font-weight: 600;
 }
 
+.home-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 /* Announcement */
 .announcement {
   max-width: 90%;
