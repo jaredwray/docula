@@ -75,6 +75,7 @@ body {
   color: var(--fg);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-size: 16px;
+  overflow-x: hidden;
 }
 
 .header {
@@ -207,10 +208,6 @@ body {
   padding: 26px 32px 24px 32px;
   width: 288px;
   min-width: 288px;
-  height: calc(100vh - 100px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar) transparent;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -393,7 +390,7 @@ body {
 }
 
 /* Responsive: mobile layout */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .mobile-menu-toggle { display: flex; }
   .header-bottom__nav { display: none; }
   .header-top__content { padding: 0 16px; }
