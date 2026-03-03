@@ -139,6 +139,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `siteUrl` | `string` | - | Website URL |
 | `port` | `number` | `3000` | Port for local development server |
 | `singlePage` | `boolean` | `true` | Single page or multi-page site |
+| `homePage` | `boolean` | `true` | When `false`, Docula uses the first docs page as `/index.html` instead of rendering `home.hbs` |
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
@@ -173,6 +174,14 @@ The `readme.md` file will be the root page and the rest will be added to the tab
 ```md
 title: Getting Started
 order: 2
+```
+
+If you want your docs to be the root home page (`/`) instead of rendering the template home page, set `homePage: false`:
+
+```js
+export const options = {
+  homePage: false,
+};
 ```
 
 # Public Folder
