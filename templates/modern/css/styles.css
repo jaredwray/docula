@@ -705,3 +705,24 @@ body {
   color: #92400e;
 }
 
+/* Footer */
+footer {
+  height: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+footer img {
+  margin-left: 0.5rem;
+  height: 1.5rem;
+  width: auto;
+}
+
+@media (min-width: 992px) {
+  footer { height: 4.75rem; }
+  footer img { height: 1.75rem; }
+}
+
