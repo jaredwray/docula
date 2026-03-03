@@ -18,6 +18,7 @@ describe("DoculaOptions", () => {
 			expect(options.singlePage).toEqual(true);
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.homePage).toEqual(true);
+			expect(options.enableLlmsTxt).toEqual(true);
 		});
 
 		it("should create an instance of DoculaOptions with custom values", () => {
@@ -117,6 +118,14 @@ describe("DoculaOptions", () => {
 			expect(options.port).toEqual(8080);
 		});
 
+		it("should not overwrite githubPath when only outputPath is provided", () => {
+			const defaultGithubPath = options.githubPath;
+			options.parseOptions({ outputPath: "./custom-dist-only" });
+
+			expect(options.outputPath).toContain("/custom-dist-only");
+			expect(options.githubPath).toEqual(defaultGithubPath);
+		});
+
 		it("should parse the template option", () => {
 			options.parseOptions({ template: "modern" });
 			expect(options.template).toEqual("modern");
@@ -140,6 +149,16 @@ describe("DoculaOptions", () => {
 		it("should not update homePage for non-boolean values", () => {
 			options.parseOptions({ homePage: "yes" });
 			expect(options.homePage).toEqual(true);
+		});
+
+		it("should parse enableLlmsTxt set to false", () => {
+			options.parseOptions({ enableLlmsTxt: false });
+			expect(options.enableLlmsTxt).toEqual(false);
+		});
+
+		it("should not update enableLlmsTxt for non-boolean values", () => {
+			options.parseOptions({ enableLlmsTxt: "yes" });
+			expect(options.enableLlmsTxt).toEqual(true);
 		});
 	});
 });

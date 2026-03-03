@@ -236,6 +236,46 @@ describe("docula execute", () => {
 		await fs.promises.rm(realOutputPath, { recursive: true });
 		console.log = consoleLog;
 	});
+	it("should generate llms files during build for docs/api/changelog sites", async () => {
+		const sourcePath = "test/fixtures/mega-page-site-no-home-page";
+		const sitePath = "test/temp-llms-integration-site";
+		const outputPath = `${sitePath}/dist`;
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = sitePath;
+		buildOptions.outputPath = outputPath;
+		buildOptions.template = "modern";
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		fs.rmSync(sitePath, { recursive: true, force: true });
+		fs.cpSync(sourcePath, sitePath, { recursive: true });
+		fs.rmSync(`${sitePath}/docula.config.mjs`, { force: true });
+		fs.rmSync(outputPath, { recursive: true, force: true });
+
+		try {
+			process.argv = ["node", "docula"];
+			await docula.execute(process);
+
+			expect(fs.existsSync(`${outputPath}/llms.txt`)).toBe(true);
+			expect(fs.existsSync(`${outputPath}/llms-full.txt`)).toBe(true);
+
+			const llms = await fs.promises.readFile(`${outputPath}/llms.txt`, "utf8");
+			const llmsFull = await fs.promises.readFile(
+				`${outputPath}/llms-full.txt`,
+				"utf8",
+			);
+
+			expect(llms).toContain("## Documentation");
+			expect(llms).toContain("## API Reference");
+			expect(llms).toContain("## Changelog");
+			expect(llmsFull).toContain("## API Reference");
+			expect(llmsFull).toContain('"openapi": "3.0.3"');
+		} finally {
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
 	it("should init based on the init command", async () => {
 		const docula = new Docula(defaultOptions);
 		const sitePath = "./custom-site";
@@ -467,7 +507,7 @@ describe("docula config file", () => {
 		process.argv = ["node", "docula", "version"];
 		await docula.execute(process);
 		expect(docula.options.outputPath).toEqual(
-			docula.configFileModule.options.outputPath,
+			path.resolve(process.cwd(), docula.configFileModule.options.outputPath),
 		);
 		console.log = consoleLog;
 	});
