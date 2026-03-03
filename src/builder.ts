@@ -37,10 +37,11 @@ export type DoculaData = {
 	announcement?: string;
 	openApiUrl?: string;
 	changelogEntries?: DoculaChangelogEntry[];
+	docsHomePage?: boolean;
 };
 
 export type DoculaTemplates = {
-	index: string;
+	home: string;
 	docPage?: string;
 	api?: string;
 	changelog?: string;
@@ -110,6 +111,7 @@ export class DoculaBuilder {
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
 			openApiUrl: this.options.openApiUrl,
+			docsHomePage: this.options.docsHomePage,
 		};
 
 		// Auto-detect swagger.json if openApiUrl is not set
@@ -191,7 +193,15 @@ export class DoculaBuilder {
 		);
 
 		// Build the home page (index.html)
-		await this.buildIndexPage(doculaData);
+		if (
+			this.options.docsHomePage &&
+			doculaData.hasDocuments &&
+			doculaData.documents?.length
+		) {
+			await this.buildDocsHomePage(doculaData);
+		} else {
+			await this.buildIndexPage(doculaData);
+		}
 
 		// Build the sitemap (/sitemap.xml)
 		await this.buildSiteMapPage(doculaData);
@@ -301,14 +311,14 @@ export class DoculaBuilder {
 		hasChangelog = false,
 	): Promise<DoculaTemplates> {
 		const templates: DoculaTemplates = {
-			index: "",
+			home: "",
 		};
 
 		if (fs.existsSync(templatePath)) {
-			const index = await this.getTemplateFile(templatePath, "index");
+			const home = await this.getTemplateFile(templatePath, "home");
 			/* v8 ignore next -- @preserve */
-			if (index) {
-				templates.index = index;
+			if (home) {
+				templates.home = home;
 			}
 
 			const documentPage = hasDocuments
@@ -426,7 +436,7 @@ export class DoculaBuilder {
 
 			await fs.promises.mkdir(data.outputPath, { recursive: true });
 
-			const indexTemplate = `${data.templatePath}/${data.templates.index}`;
+			const indexTemplate = `${data.templatePath}/${data.templates.home}`;
 
 			let content: string | undefined;
 
@@ -445,6 +455,29 @@ export class DoculaBuilder {
 		} else {
 			throw new Error("No templates found");
 		}
+	}
+
+	public async buildDocsHomePage(data: DoculaData): Promise<void> {
+		if (!data.templates?.docPage || !data.documents?.length) {
+			throw new Error("No doc template or documents found for docsHomePage");
+		}
+
+		const indexPath = `${data.outputPath}/index.html`;
+		await fs.promises.mkdir(data.outputPath, { recursive: true });
+
+		const documentsTemplate = `${data.templatePath}/${data.templates.docPage}`;
+		const firstDocument = data.documents[0];
+
+		if (!data.sidebarItems) {
+			data.sidebarItems = this.generateSidebarItems(data);
+		}
+
+		const documentContent = await this._ecto.renderFromFile(
+			documentsTemplate,
+			{ ...data, ...firstDocument },
+			data.templatePath,
+		);
+		await fs.promises.writeFile(indexPath, documentContent, "utf8");
 	}
 
 	public async buildReadmeSection(data: DoculaData): Promise<string> {
