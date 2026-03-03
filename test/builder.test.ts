@@ -1913,6 +1913,422 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Docula Builder - LLM Files", () => {
+		it("should generate llms.txt and llms-full.txt for docs-only sites", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-docs-only";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+			};
+
+			data.documents = builder.getDocuments(
+				"test/fixtures/multi-page-site/docs",
+				data,
+			);
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				expect(fs.existsSync(`${outputPath}/llms.txt`)).toBe(true);
+				expect(fs.existsSync(`${outputPath}/llms-full.txt`)).toBe(true);
+
+				const llms = await fs.promises.readFile(
+					`${outputPath}/llms.txt`,
+					"utf8",
+				);
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+
+				expect(llms).toContain(
+					"[Full LLM Content](http://foo.com/llms-full.txt)",
+				);
+				expect(llms).toContain("## Documentation");
+				expect(llms).toContain("(http://foo.com/docs/");
+				expect(llmsFull).toContain("## Documentation");
+				expect(llmsFull).toContain("## API Reference");
+				expect(llmsFull).toContain("## Changelog");
+				expect(llmsFull).toContain("## Beautiful Website for Your Projects");
+				expect(llmsFull).toContain(
+					"### docula\nURL: http://foo.com/docs/front-matter/\nDescription: Beautiful Website for Your Projects\n\n## Beautiful Website for Your Projects",
+				);
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should include API link and local OpenAPI spec text in llms-full.txt", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-api-local-spec";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/mega-page-site-no-home-page",
+				templatePath: "templates/modern",
+				outputPath,
+				openApiUrl: "/api/swagger.json",
+				hasApi: true,
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+
+				expect(llmsFull).toContain("## API Reference");
+				expect(llmsFull).toContain("URL: http://foo.com/api");
+				expect(llmsFull).toContain('"openapi": "3.0.3"');
+				expect(llmsFull).toContain("Mock HTTP API");
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should fall back to OpenAPI URL and preserve non-index doc URLs", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-openapi-fallback";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com/",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				openApiUrl: "openapi.json?raw=1",
+				hasApi: true,
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "Guide page",
+						keywords: [],
+						content: "# Guide",
+						markdown: "# Guide",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/single-page-site/docs/guide.md",
+						urlPath: "/guide.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llms = await fs.promises.readFile(
+					`${outputPath}/llms.txt`,
+					"utf8",
+				);
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+
+				expect(llms).toContain("[Guide](http://foo.com/guide.html)");
+				expect(llmsFull).toContain(
+					"OpenAPI Spec URL: http://foo.com/openapi.json?raw=1",
+				);
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle API section without openApiUrl", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-api-no-openapi";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				hasApi: true,
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+				expect(llmsFull).toContain("## API Reference");
+				expect(llmsFull).toContain("URL: http://foo.com/api");
+				expect(llmsFull).not.toContain("OpenAPI Spec URL:");
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle openApiUrl with query-only path", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-openapi-query-only";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				openApiUrl: "?raw=1",
+				hasApi: true,
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+				expect(llmsFull).toContain("OpenAPI Spec URL: http://foo.com/?raw=1");
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should include changelog landing and only latest 20 entries in llms.txt", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-changelog-index";
+			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
+				title: `Entry ${index + 1}`,
+				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
+				formattedDate: `January ${index + 1}, 2025`,
+				slug: `entry-${index + 1}`,
+				content: `Content ${index + 1}`,
+				generatedHtml: `<p>Content ${index + 1}</p>`,
+				urlPath: `/changelog/entry-${index + 1}/index.html`,
+			}));
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				hasChangelog: true,
+				changelogEntries,
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llms = await fs.promises.readFile(
+					`${outputPath}/llms.txt`,
+					"utf8",
+				);
+				const changelogLines = llms
+					.split("\n")
+					.filter((line) => line.includes("http://foo.com/changelog/entry-"));
+
+				expect(llms).toContain("- [Changelog](http://foo.com/changelog)");
+				expect(changelogLines).toHaveLength(20);
+				expect(llms).toContain("Entry 1");
+				expect(llms).toContain("Entry 20");
+				expect(llms).not.toContain("Entry 21");
+				expect(llms).not.toContain("Entry 25");
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should include all changelog entries in llms-full.txt", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-llms-full-changelog";
+			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
+				title: `Entry ${index + 1}`,
+				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
+				formattedDate: `January ${index + 1}, 2025`,
+				slug: `entry-${index + 1}`,
+				content: `Content ${index + 1}`,
+				generatedHtml: `<p>Content ${index + 1}</p>`,
+				urlPath: `/changelog/entry-${index + 1}/index.html`,
+			}));
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				hasChangelog: true,
+				changelogEntries,
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+				const entryHeadings = llmsFull
+					.split("\n")
+					.filter((line) => line.startsWith("### Entry "));
+
+				expect(entryHeadings).toHaveLength(25);
+				expect(llmsFull).toContain("Content 25");
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should copy custom llms files when they exist in site path", async () => {
+			const builder = new DoculaBuilder();
+			const sitePath = "test/temp-custom-llms-site";
+			const outputPath = "test/temp-custom-llms-output";
+			const customLlms = "# Custom llms.txt";
+			const customLlmsFull = "# Custom llms-full.txt";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+			};
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.mkdir(sitePath, { recursive: true });
+			await fs.promises.writeFile(`${sitePath}/llms.txt`, customLlms, "utf8");
+			await fs.promises.writeFile(
+				`${sitePath}/llms-full.txt`,
+				customLlmsFull,
+				"utf8",
+			);
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llms = await fs.promises.readFile(
+					`${outputPath}/llms.txt`,
+					"utf8",
+				);
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+
+				expect(llms).toBe(customLlms);
+				expect(llmsFull).toBe(customLlmsFull);
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should skip llms generation when enableLlmsTxt is false", async () => {
+			const options = new DoculaOptions();
+			options.enableLlmsTxt = false;
+			const builder = new DoculaBuilder(options);
+			const outputPath = "test/temp-llms-disabled";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+				expect(fs.existsSync(`${outputPath}/llms.txt`)).toBe(false);
+				expect(fs.existsSync(`${outputPath}/llms-full.txt`)).toBe(false);
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
+		it("should not include llms files in sitemap.xml", async () => {
+			const builder = new DoculaBuilder();
+			const outputPath = "test/temp-sitemap-no-llms";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				openApiUrl: "/api/swagger.json",
+				hasApi: true,
+				hasChangelog: true,
+				changelogEntries: [
+					{
+						title: "Test Entry",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						slug: "test-entry",
+						content: "",
+						generatedHtml: "",
+						urlPath: "/changelog/test-entry/index.html",
+					},
+				],
+				documents: [
+					{
+						title: "Doc",
+						navTitle: "Doc",
+						description: "",
+						keywords: [],
+						content: "# Doc",
+						markdown: "# Doc",
+						generatedHtml: "<h1>Doc</h1>",
+						documentPath: "test/fixtures/changelog-site/docs/doc.md",
+						urlPath: "/docs/doc/index.html",
+						isRoot: true,
+					},
+				],
+				templates: {
+					home: "home.hbs",
+					api: "api.hbs",
+					changelog: "changelog.hbs",
+				},
+			};
+
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${outputPath}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).not.toContain("llms.txt");
+				expect(sitemap).not.toContain("llms-full.txt");
+			} finally {
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+	});
+
 	describe("Docula Builder - buildDocsHomePage", () => {
 		it("should render first document as index.html when homePage is false", async () => {
 			const builder = new DoculaBuilder();

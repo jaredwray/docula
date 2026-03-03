@@ -63,6 +63,10 @@ export class DoculaOptions {
 	 * and the home.hbs template is not rendered.
 	 */
 	public homePage = true;
+	/**
+	 * When true, generates llms.txt and llms-full.txt files for the built site.
+	 */
+	public enableLlmsTxt = true;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -148,6 +152,13 @@ export class DoculaOptions {
 			typeof options.homePage === "boolean"
 		) {
 			this.homePage = options.homePage;
+		}
+
+		if (
+			options.enableLlmsTxt !== undefined &&
+			typeof options.enableLlmsTxt === "boolean"
+		) {
+			this.enableLlmsTxt = options.enableLlmsTxt;
 		}
 	}
 }

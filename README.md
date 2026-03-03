@@ -17,6 +17,7 @@
 - [Building Multiple Pages](#building-multiple-pages)
 - [Public Folder](#public-folder)
 - [API Reference](#api-reference)
+- [LLM Files](#llm-files)
 - [Announcements](#announcements)
 - [Changelog](#changelog)
 - [Alert, Info, Warn Styling](#alert-info-warn-styling)
@@ -33,6 +34,7 @@
 * Full TypeScript support with typed configuration and IDE autocompletion.
 * Support for single page with readme or multiple markdown pages in a docs folder.
 * Will generate a sitemap.xml and robots.txt for your site.
+* Will generate `llms.txt` and `llms-full.txt` for LLM-friendly indexing.
 * Uses Github release notes to generate a changelog / releases page.
 * Uses Github to show contributors and link to their profiles.
 * Simple search is provided by default out of the box.
@@ -143,6 +145,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
+| `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
 
 # Using Your own Template
 
@@ -286,6 +289,30 @@ The file must be a valid OpenAPI 3.x or Swagger 2.0 JSON specification. A minima
   "paths": {}
 }
 ```
+
+# LLM Files
+
+Docula generates two LLM-focused files in the output directory by default:
+
+- `/llms.txt` - a compact index of your docs, API reference, and changelog URLs.
+- `/llms-full.txt` - expanded content including markdown bodies for docs/changelog and local OpenAPI spec text.
+
+If `openApiUrl` points to a remote URL, `/llms-full.txt` includes the URL reference instead of fetching content over the network.
+
+To disable generation:
+
+```js
+export const options = {
+  enableLlmsTxt: false,
+};
+```
+
+You can override generated output by providing custom files in your site directory:
+
+- `site/llms.txt`
+- `site/llms-full.txt`
+
+If present, Docula copies these files to output as-is.
 
 # Announcements
 

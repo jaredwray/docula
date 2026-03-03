@@ -18,6 +18,7 @@ describe("DoculaOptions", () => {
 			expect(options.singlePage).toEqual(true);
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.homePage).toEqual(true);
+			expect(options.enableLlmsTxt).toEqual(true);
 		});
 
 		it("should create an instance of DoculaOptions with custom values", () => {
@@ -140,6 +141,16 @@ describe("DoculaOptions", () => {
 		it("should not update homePage for non-boolean values", () => {
 			options.parseOptions({ homePage: "yes" });
 			expect(options.homePage).toEqual(true);
+		});
+
+		it("should parse enableLlmsTxt set to false", () => {
+			options.parseOptions({ enableLlmsTxt: false });
+			expect(options.enableLlmsTxt).toEqual(false);
+		});
+
+		it("should not update enableLlmsTxt for non-boolean values", () => {
+			options.parseOptions({ enableLlmsTxt: "yes" });
+			expect(options.enableLlmsTxt).toEqual(true);
 		});
 	});
 });

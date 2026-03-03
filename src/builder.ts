@@ -270,6 +270,9 @@ export class DoculaBuilder {
 		// Copy over public folder contents
 		this.copyPublicFolder(siteRelativePath, this.options.outputPath);
 
+		// Build LLM index/content files after static assets are in place
+		await this.buildLlmsFiles(doculaData);
+
 		const endTime = Date.now();
 
 		const executionTime = endTime - startTime;
@@ -428,6 +431,242 @@ export class DoculaBuilder {
 		await fs.promises.mkdir(data.outputPath, { recursive: true });
 
 		await fs.promises.writeFile(sitemapPath, xml, "utf8");
+	}
+
+	public async buildLlmsFiles(data: DoculaData): Promise<void> {
+		if (!this.options.enableLlmsTxt) {
+			return;
+		}
+
+		await fs.promises.mkdir(data.outputPath, { recursive: true });
+
+		const llmsOutputPath = `${data.outputPath}/llms.txt`;
+		const llmsFullOutputPath = `${data.outputPath}/llms-full.txt`;
+		const llmsSourcePath = `${data.sitePath}/llms.txt`;
+		const llmsFullSourcePath = `${data.sitePath}/llms-full.txt`;
+
+		if (fs.existsSync(llmsSourcePath)) {
+			await fs.promises.copyFile(llmsSourcePath, llmsOutputPath);
+		} else {
+			const llmsContent = this.generateLlmsIndexContent(data);
+			await fs.promises.writeFile(llmsOutputPath, llmsContent, "utf8");
+		}
+
+		if (fs.existsSync(llmsFullSourcePath)) {
+			await fs.promises.copyFile(llmsFullSourcePath, llmsFullOutputPath);
+		} else {
+			const llmsFullContent = await this.generateLlmsFullContent(data);
+			await fs.promises.writeFile(llmsFullOutputPath, llmsFullContent, "utf8");
+		}
+	}
+
+	private generateLlmsIndexContent(data: DoculaData): string {
+		const lines: string[] = [];
+		const documents = data.documents ?? [];
+		const changelogEntries = data.changelogEntries ?? [];
+
+		lines.push(`# ${data.siteTitle}`);
+		lines.push("");
+		lines.push(data.siteDescription);
+		lines.push("");
+		lines.push(
+			`- [Full LLM Content](${this.buildAbsoluteSiteUrl(data.siteUrl, "/llms-full.txt")})`,
+		);
+		lines.push("");
+		lines.push("## Documentation");
+
+		if (documents.length > 0) {
+			for (const document of documents) {
+				const documentUrl = this.buildAbsoluteSiteUrl(
+					data.siteUrl,
+					this.normalizePathForUrl(document.urlPath),
+				);
+				const description = document.description
+					? ` - ${document.description}`
+					: "";
+				lines.push(`- [${document.navTitle}](${documentUrl})${description}`);
+			}
+		} else {
+			lines.push("- Not available.");
+		}
+
+		lines.push("");
+		lines.push("## API Reference");
+		if (data.hasApi) {
+			lines.push(
+				`- [API Documentation](${this.buildAbsoluteSiteUrl(data.siteUrl, "/api")})`,
+			);
+		} else {
+			lines.push("- Not available.");
+		}
+
+		lines.push("");
+		lines.push("## Changelog");
+		if (data.hasChangelog) {
+			lines.push(
+				`- [Changelog](${this.buildAbsoluteSiteUrl(data.siteUrl, "/changelog")})`,
+			);
+			for (const entry of changelogEntries.slice(0, 20)) {
+				const date = entry.formattedDate || entry.date || "No date";
+				lines.push(
+					`- [${entry.title}](${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}) (${date})`,
+				);
+			}
+		} else {
+			lines.push("- Not available.");
+		}
+
+		lines.push("");
+
+		return lines.join("\n");
+	}
+
+	private async generateLlmsFullContent(data: DoculaData): Promise<string> {
+		const lines: string[] = [];
+		const documents = data.documents ?? [];
+		const changelogEntries = data.changelogEntries ?? [];
+
+		lines.push(`# ${data.siteTitle}`);
+		lines.push("");
+		lines.push(data.siteDescription);
+		lines.push("");
+		lines.push(
+			`Source Index: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/llms.txt")}`,
+		);
+		lines.push("");
+		lines.push("## Documentation");
+
+		if (documents.length > 0) {
+			for (const document of documents) {
+				const documentUrl = this.buildAbsoluteSiteUrl(
+					data.siteUrl,
+					this.normalizePathForUrl(document.urlPath),
+				);
+				const markdownBody = new Writr(document.content).body.trim();
+
+				lines.push("");
+				lines.push(`### ${document.navTitle}`);
+				lines.push(`URL: ${documentUrl}`);
+				if (document.description) {
+					lines.push(`Description: ${document.description}`);
+				}
+				lines.push("");
+				lines.push(markdownBody || "_No content_");
+			}
+		} else {
+			lines.push("- Not available.");
+		}
+
+		lines.push("");
+		lines.push("## API Reference");
+		if (data.hasApi) {
+			lines.push(`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/api")}`);
+			lines.push("");
+
+			const localOpenApiPath = this.resolveLocalOpenApiPath(data);
+			if (localOpenApiPath && fs.existsSync(localOpenApiPath)) {
+				const localOpenApiContent = fs
+					.readFileSync(localOpenApiPath, "utf8")
+					.trim();
+				lines.push(
+					`OpenAPI Spec Source: ${this.toPosixPath(localOpenApiPath)}`,
+				);
+				lines.push("");
+				lines.push(localOpenApiContent || "_No content_");
+			} else {
+				const openApiSpecUrl = this.resolveOpenApiSpecUrl(data);
+				if (openApiSpecUrl) {
+					lines.push(`OpenAPI Spec URL: ${openApiSpecUrl}`);
+				}
+			}
+		} else {
+			lines.push("- Not available.");
+		}
+
+		lines.push("");
+		lines.push("## Changelog");
+		if (data.hasChangelog && changelogEntries.length > 0) {
+			lines.push(
+				`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/changelog")}`,
+			);
+
+			for (const entry of changelogEntries) {
+				lines.push("");
+				lines.push(`### ${entry.title}`);
+				lines.push(
+					`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}`,
+				);
+				if (entry.formattedDate || entry.date) {
+					lines.push(`Date: ${entry.formattedDate || entry.date}`);
+				}
+				if (entry.tag) {
+					lines.push(`Tag: ${entry.tag}`);
+				}
+				lines.push("");
+				lines.push(entry.content.trim() || "_No content_");
+			}
+		} else {
+			lines.push("- Not available.");
+		}
+
+		lines.push("");
+
+		return lines.join("\n");
+	}
+
+	private buildAbsoluteSiteUrl(siteUrl: string, urlPath: string): string {
+		const normalizedSiteUrl = siteUrl.endsWith("/")
+			? siteUrl.slice(0, -1)
+			: siteUrl;
+		const normalizedPath = urlPath.startsWith("/") ? urlPath : `/${urlPath}`;
+		return `${normalizedSiteUrl}${normalizedPath}`;
+	}
+
+	private normalizePathForUrl(urlPath: string): string {
+		if (urlPath.endsWith("index.html")) {
+			return urlPath.slice(0, -10);
+		}
+
+		return urlPath;
+	}
+
+	private isRemoteUrl(url: string): boolean {
+		return /^https?:\/\//i.test(url);
+	}
+
+	private resolveOpenApiSpecUrl(data: DoculaData): string | undefined {
+		if (!data.openApiUrl) {
+			return undefined;
+		}
+
+		if (this.isRemoteUrl(data.openApiUrl)) {
+			return data.openApiUrl;
+		}
+
+		const normalizedPath = data.openApiUrl.startsWith("/")
+			? data.openApiUrl
+			: `/${data.openApiUrl}`;
+		return this.buildAbsoluteSiteUrl(data.siteUrl, normalizedPath);
+	}
+
+	private resolveLocalOpenApiPath(data: DoculaData): string | undefined {
+		if (!data.openApiUrl || this.isRemoteUrl(data.openApiUrl)) {
+			return undefined;
+		}
+
+		const openApiPathWithoutQuery = data.openApiUrl.split(/[?#]/)[0];
+		if (!openApiPathWithoutQuery) {
+			return undefined;
+		}
+
+		const normalizedPath = openApiPathWithoutQuery.startsWith("/")
+			? openApiPathWithoutQuery.slice(1)
+			: openApiPathWithoutQuery;
+		return path.join(data.sitePath, normalizedPath);
+	}
+
+	private toPosixPath(filePath: string): string {
+		return filePath.replaceAll(path.sep, path.posix.sep);
 	}
 
 	public async buildIndexPage(data: DoculaData): Promise<void> {
