@@ -62,7 +62,7 @@ export class DoculaOptions {
 	 * When true, the first document becomes the home page (index.html)
 	 * and the home.hbs template is not rendered.
 	 */
-	public docsHomePage = false;
+	public homePage = false;
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -144,10 +144,10 @@ export class DoculaOptions {
 		}
 
 		if (
-			options.docsHomePage !== undefined &&
-			typeof options.docsHomePage === "boolean"
+			options.homePage !== undefined &&
+			typeof options.homePage === "boolean"
 		) {
-			this.docsHomePage = options.docsHomePage;
+			this.homePage = options.homePage;
 		}
 	}
 }

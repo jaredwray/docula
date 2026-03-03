@@ -78,11 +78,11 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
-		it("should build multi page with docsHomePage enabled", async () => {
+		it("should build multi page with homePage enabled", async () => {
 			const options = new DoculaOptions();
 			options.outputPath = "test/temp-build-test";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.docsHomePage = true;
+			options.homePage = true;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -1727,7 +1727,7 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - buildDocsHomePage", () => {
-		it("should render first document as index.html when docsHomePage is true", async () => {
+		it("should render first document as index.html when homePage is true", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -1736,7 +1736,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-test",
-				docsHomePage: true,
+				homePage: true,
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
@@ -1776,7 +1776,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-error-test",
-				docsHomePage: true,
+				homePage: true,
 				hasDocuments: true,
 				documents: [],
 				templates: {
@@ -1785,7 +1785,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
-				"No doc template or documents found for docsHomePage",
+				"No doc template or documents found for homePage",
 			);
 		});
 
@@ -1798,7 +1798,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				outputPath: "test/temp-docs-home-empty-test",
-				docsHomePage: true,
+				homePage: true,
 				hasDocuments: true,
 				documents: [],
 				templates: {
@@ -1808,7 +1808,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
-				"No doc template or documents found for docsHomePage",
+				"No doc template or documents found for homePage",
 			);
 		});
 	});

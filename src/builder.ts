@@ -37,7 +37,7 @@ export type DoculaData = {
 	announcement?: string;
 	openApiUrl?: string;
 	changelogEntries?: DoculaChangelogEntry[];
-	docsHomePage?: boolean;
+	homePage?: boolean;
 };
 
 export type DoculaTemplates = {
@@ -111,7 +111,7 @@ export class DoculaBuilder {
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
 			openApiUrl: this.options.openApiUrl,
-			docsHomePage: this.options.docsHomePage,
+			homePage: this.options.homePage,
 		};
 
 		// Auto-detect swagger.json if openApiUrl is not set
@@ -194,7 +194,7 @@ export class DoculaBuilder {
 
 		// Build the home page (index.html)
 		if (
-			this.options.docsHomePage &&
+			this.options.homePage &&
 			doculaData.hasDocuments &&
 			doculaData.documents?.length
 		) {
@@ -459,7 +459,7 @@ export class DoculaBuilder {
 
 	public async buildDocsHomePage(data: DoculaData): Promise<void> {
 		if (!data.templates?.docPage || !data.documents?.length) {
-			throw new Error("No doc template or documents found for docsHomePage");
+			throw new Error("No doc template or documents found for homePage");
 		}
 
 		const indexPath = `${data.outputPath}/index.html`;
