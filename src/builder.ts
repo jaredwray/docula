@@ -193,11 +193,7 @@ export class DoculaBuilder {
 		);
 
 		// Build the home page (index.html)
-		if (
-			this.options.homePage &&
-			doculaData.hasDocuments &&
-			doculaData.documents?.length
-		) {
+		if (this.options.homePage && doculaData.hasDocuments) {
 			await this.buildDocsHomePage(doculaData);
 		} else {
 			await this.buildIndexPage(doculaData);
