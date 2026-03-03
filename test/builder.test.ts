@@ -2345,6 +2345,72 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should ignore symbolic linked llms override files", async () => {
+			const builder = new DoculaBuilder();
+			const sitePath = "test/temp-custom-llms-symlink-site";
+			const outputPath = "test/temp-custom-llms-symlink-output";
+			const externalLlmsPath = "test/temp-custom-llms-symlink-source.txt";
+			const externalLlmsFullPath =
+				"test/temp-custom-llms-symlink-source-full.txt";
+			const externalMarker = "symlink-override-should-not-be-read";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+			};
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(externalLlmsPath, { recursive: true, force: true });
+			await fs.promises.rm(externalLlmsFullPath, {
+				recursive: true,
+				force: true,
+			});
+			await fs.promises.mkdir(sitePath, { recursive: true });
+			await fs.promises.writeFile(externalLlmsPath, externalMarker, "utf8");
+			await fs.promises.writeFile(externalLlmsFullPath, externalMarker, "utf8");
+			await fs.promises.symlink(
+				"../temp-custom-llms-symlink-source.txt",
+				`${sitePath}/llms.txt`,
+			);
+			await fs.promises.symlink(
+				"../temp-custom-llms-symlink-source-full.txt",
+				`${sitePath}/llms-full.txt`,
+			);
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llms = await fs.promises.readFile(
+					`${outputPath}/llms.txt`,
+					"utf8",
+				);
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+
+				expect(llms).toContain("# docula");
+				expect(llmsFull).toContain("# docula");
+				expect(llms).not.toContain(externalMarker);
+				expect(llmsFull).not.toContain(externalMarker);
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(externalLlmsPath, {
+					recursive: true,
+					force: true,
+				});
+				await fs.promises.rm(externalLlmsFullPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
 		it("should skip llms generation when enableLlmsTxt is false", async () => {
 			const options = new DoculaOptions();
 			options.enableLlmsTxt = false;

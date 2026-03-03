@@ -442,18 +442,28 @@ export class DoculaBuilder {
 
 		const llmsOutputPath = `${data.outputPath}/llms.txt`;
 		const llmsFullOutputPath = `${data.outputPath}/llms-full.txt`;
-		const llmsSourcePath = `${data.sitePath}/llms.txt`;
-		const llmsFullSourcePath = `${data.sitePath}/llms-full.txt`;
+		const llmsOverrideContent = await this.getSafeSiteOverrideFileContent(
+			data.sitePath,
+			"llms.txt",
+		);
+		const llmsFullOverrideContent = await this.getSafeSiteOverrideFileContent(
+			data.sitePath,
+			"llms-full.txt",
+		);
 
-		if (fs.existsSync(llmsSourcePath)) {
-			await fs.promises.copyFile(llmsSourcePath, llmsOutputPath);
+		if (llmsOverrideContent !== undefined) {
+			await fs.promises.writeFile(llmsOutputPath, llmsOverrideContent, "utf8");
 		} else {
 			const llmsContent = this.generateLlmsIndexContent(data);
 			await fs.promises.writeFile(llmsOutputPath, llmsContent, "utf8");
 		}
 
-		if (fs.existsSync(llmsFullSourcePath)) {
-			await fs.promises.copyFile(llmsFullSourcePath, llmsFullOutputPath);
+		if (llmsFullOverrideContent !== undefined) {
+			await fs.promises.writeFile(
+				llmsFullOutputPath,
+				llmsFullOverrideContent,
+				"utf8",
+			);
 		} else {
 			const llmsFullContent = await this.generateLlmsFullContent(data);
 			await fs.promises.writeFile(llmsFullOutputPath, llmsFullContent, "utf8");
@@ -660,6 +670,45 @@ export class DoculaBuilder {
 			? openApiPathWithoutQuery.slice(1)
 			: openApiPathWithoutQuery;
 		return path.join(data.sitePath, normalizedPath);
+	}
+
+	private async getSafeSiteOverrideFileContent(
+		sitePath: string,
+		fileName: "llms.txt" | "llms-full.txt",
+	): Promise<string | undefined> {
+		const resolvedSitePath = path.resolve(sitePath);
+		const candidatePath = path.resolve(sitePath, fileName);
+
+		if (!this.isPathWithinBasePath(candidatePath, resolvedSitePath)) {
+			return undefined;
+		}
+
+		let candidateStats: fs.Stats;
+		try {
+			candidateStats = await fs.promises.lstat(candidatePath);
+		} catch {
+			return undefined;
+		}
+
+		// Do not follow symbolic links for site-level llms override files.
+		if (!candidateStats.isFile() || candidateStats.isSymbolicLink()) {
+			return undefined;
+		}
+
+		let realSitePath: string;
+		let realCandidatePath: string;
+		try {
+			realSitePath = await fs.promises.realpath(resolvedSitePath);
+			realCandidatePath = await fs.promises.realpath(candidatePath);
+		} catch {
+			return undefined;
+		}
+
+		if (!this.isPathWithinBasePath(realCandidatePath, realSitePath)) {
+			return undefined;
+		}
+
+		return fs.promises.readFile(realCandidatePath, "utf8");
 	}
 
 	private async getSafeLocalOpenApiSpec(
