@@ -1,0 +1,3446 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "Mock HTTP API",
+		"description": "\nA simple HTTP server that can be used to mock HTTP responses for testing purposes. Inspired by [httpbin](https://httpbin.org/) and built using `nodejs` and `fastify` with the idea of running it via https://mockhttp.org, via docker `jaredwray/mockhttp`, or nodejs `npm install jaredwray/mockhttp`.\n\n* [GitHub Repository](https://github.com/jaredwray/mockhttp)\n* [Docker Image](https://hub.docker.com/r/jaredwray/mockhttp)\n* [NPM Package](https://www.npmjs.com/package/jaredwray/mockhttp)\n\n# About mockhttp.org \n\n[mockhttp.org](https://mockhttp.org) is a free service that runs this codebase and allows you to use it for testing purposes. It is a simple way to mock HTTP responses for testing purposes. Ran via [Cloudflare](https://cloudflare.com) and [Google Cloud Run](https://cloud.google.com/run/) across 7 regions globally and can do millions of requests per second.\n",
+		"version": "1.4.0"
+	},
+	"components": {
+		"schemas": {}
+	},
+	"paths": {
+		"/get": {
+			"get": {
+				"tags": [
+					"HTTP Methods"
+				],
+				"description": "Returns request information for GET requests",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"method": {
+											"type": "string"
+										},
+										"headers": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										},
+										"queryParams": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										}
+									},
+									"required": [
+										"method",
+										"headers",
+										"queryParams"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/post": {
+			"post": {
+				"tags": [
+					"HTTP Methods"
+				],
+				"description": "Handles a POST request and returns request information",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"additionalProperties": true,
+								"description": "The body of the POST request"
+							}
+						}
+					},
+					"description": "The body of the POST request"
+				},
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"method": {
+											"type": "string"
+										},
+										"headers": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										},
+										"body": {
+											"type": "object",
+											"additionalProperties": true
+										}
+									},
+									"required": [
+										"method",
+										"headers",
+										"body"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/delete": {
+			"delete": {
+				"tags": [
+					"HTTP Methods"
+				],
+				"description": "Handles a DELETE request and returns request information",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"method": {
+											"type": "string"
+										},
+										"headers": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										},
+										"body": {
+											"oneOf": [
+												{
+													"type": "object",
+													"additionalProperties": true
+												},
+												{
+													"type": "string"
+												},
+												{
+													"type": "null"
+												}
+											]
+										}
+									},
+									"required": [
+										"method",
+										"headers"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/put": {
+			"put": {
+				"tags": [
+					"HTTP Methods"
+				],
+				"description": "Handles a PUT request and returns request information",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"additionalProperties": true,
+								"description": "The body of the PUT request"
+							}
+						}
+					},
+					"description": "The body of the PUT request"
+				},
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"method": {
+											"type": "string"
+										},
+										"headers": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										},
+										"body": {
+											"type": "object",
+											"additionalProperties": true
+										}
+									},
+									"required": [
+										"method",
+										"headers",
+										"body"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/patch": {
+			"patch": {
+				"tags": [
+					"HTTP Methods"
+				],
+				"description": "Handles a PATCH request and returns request information",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"additionalProperties": true,
+								"description": "The body of the PATCH request"
+							}
+						}
+					},
+					"description": "The body of the PATCH request"
+				},
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"method": {
+											"type": "string"
+										},
+										"headers": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										},
+										"body": {
+											"type": "object",
+											"additionalProperties": true
+										}
+									},
+									"required": [
+										"method",
+										"headers",
+										"body"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/status/{code}?": {
+			"get": {
+				"tags": [
+					"Status Codes"
+				],
+				"description": "Return status code or random status code if more than one are given ",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "code",
+						"required": true,
+						"description": "HTTP status code to be returned"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Status Codes"
+				],
+				"description": "Return status code or random status code if more than one are given ",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "code",
+						"required": true,
+						"description": "HTTP status code to be returned"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Status Codes"
+				],
+				"description": "Return status code or random status code if more than one are given ",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "code",
+						"required": true,
+						"description": "HTTP status code to be returned"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Status Codes"
+				],
+				"description": "Return status code or random status code if more than one are given ",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "code",
+						"required": true,
+						"description": "HTTP status code to be returned"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Status Codes"
+				],
+				"description": "Return status code or random status code if more than one are given ",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "code",
+						"required": true,
+						"description": "HTTP status code to be returned"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/ip": {
+			"get": {
+				"tags": [
+					"Request Inspection"
+				],
+				"description": "Returns the IP address of the client",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ip": {
+											"type": "string",
+											"description": "The IP address of the client"
+										}
+									},
+									"required": [
+										"ip"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/headers": {
+			"get": {
+				"tags": [
+					"Request Inspection"
+				],
+				"description": "Returns all headers of the client request",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"headers": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											},
+											"description": "All headers of the client request"
+										}
+									},
+									"required": [
+										"headers"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user-agent": {
+			"get": {
+				"tags": [
+					"Request Inspection"
+				],
+				"description": "Returns the User-Agent header of the client request",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"userAgent": {
+											"type": "string",
+											"description": "The User-Agent header of the client request"
+										}
+									},
+									"required": [
+										"userAgent"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/cache": {
+			"get": {
+				"tags": [
+					"Response Inspection"
+				],
+				"description": "Handles cache validation and retrieval.",
+				"responses": {
+					"200": {
+						"description": "The cached content or resource.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "The cached content or resource."
+								}
+							}
+						}
+					},
+					"304": {
+						"description": "Indicates the resource has not been modified."
+					}
+				}
+			}
+		},
+		"/cache/{value}": {
+			"get": {
+				"tags": [
+					"Response Inspection"
+				],
+				"description": "Sets a Cache-Control header for n seconds.",
+				"parameters": [
+					{
+						"schema": {
+							"type": "integer"
+						},
+						"in": "path",
+						"name": "value",
+						"required": true,
+						"description": "Number of seconds to cache the resource."
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Confirmation message for setting cache.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Confirmation message for setting cache."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/etag/{etag}": {
+			"get": {
+				"tags": [
+					"Response Inspection"
+				],
+				"description": "Handles ETag-based conditional requests.",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "etag",
+						"required": true,
+						"description": "The ETag value for the resource."
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Resource content for matching ETag.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Resource content for matching ETag."
+								}
+							}
+						}
+					},
+					"304": {
+						"description": "Indicates the resource has not been modified."
+					},
+					"412": {
+						"description": "Indicates a precondition failed due to mismatched ETag."
+					}
+				}
+			}
+		},
+		"/response-headers": {
+			"get": {
+				"tags": [
+					"Response Inspection"
+				],
+				"description": "Returns a set of response headers based on the query string.",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": "Freeform query string parameters to be added as response headers.",
+						"in": "query",
+						"name": "description"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response headers as per query string parameters.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true,
+									"description": "Response headers as per query string parameters."
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Inspection"
+				],
+				"description": "Returns a set of response headers based on the query string.",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": "Freeform query string parameters to be added as response headers.",
+						"in": "query",
+						"name": "description"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response headers as per query string parameters.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true,
+									"description": "Response headers as per query string parameters."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/plain": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random plain text content",
+				"responses": {
+					"200": {
+						"description": "Random plain text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random plain text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random plain text content",
+				"responses": {
+					"200": {
+						"description": "Random plain text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random plain text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random plain text content",
+				"responses": {
+					"200": {
+						"description": "Random plain text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random plain text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random plain text content",
+				"responses": {
+					"200": {
+						"description": "Random plain text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random plain text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random plain text content",
+				"responses": {
+					"200": {
+						"description": "Random plain text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random plain text content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/text": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random text content",
+				"responses": {
+					"200": {
+						"description": "Random text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random text content",
+				"responses": {
+					"200": {
+						"description": "Random text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random text content",
+				"responses": {
+					"200": {
+						"description": "Random text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random text content",
+				"responses": {
+					"200": {
+						"description": "Random text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random text content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random text content",
+				"responses": {
+					"200": {
+						"description": "Random text content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random text content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/html": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random HTML content",
+				"responses": {
+					"200": {
+						"description": "Random HTML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random HTML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random HTML content",
+				"responses": {
+					"200": {
+						"description": "Random HTML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random HTML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random HTML content",
+				"responses": {
+					"200": {
+						"description": "Random HTML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random HTML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random HTML content",
+				"responses": {
+					"200": {
+						"description": "Random HTML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random HTML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random HTML content",
+				"responses": {
+					"200": {
+						"description": "Random HTML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random HTML content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/xml": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random XML content",
+				"responses": {
+					"200": {
+						"description": "Random XML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random XML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random XML content",
+				"responses": {
+					"200": {
+						"description": "Random XML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random XML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random XML content",
+				"responses": {
+					"200": {
+						"description": "Random XML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random XML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random XML content",
+				"responses": {
+					"200": {
+						"description": "Random XML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random XML content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random XML content",
+				"responses": {
+					"200": {
+						"description": "Random XML content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random XML content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/json": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random JSON content",
+				"responses": {
+					"200": {
+						"description": "Random JSON content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Random JSON content",
+									"additionalProperties": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random JSON content",
+				"responses": {
+					"200": {
+						"description": "Random JSON content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Random JSON content",
+									"additionalProperties": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random JSON content",
+				"responses": {
+					"200": {
+						"description": "Random JSON content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Random JSON content",
+									"additionalProperties": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random JSON content",
+				"responses": {
+					"200": {
+						"description": "Random JSON content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Random JSON content",
+									"additionalProperties": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns random JSON content",
+				"responses": {
+					"200": {
+						"description": "Random JSON content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Random JSON content",
+									"additionalProperties": true
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/deny": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns page denied by robots.txt rules",
+				"responses": {
+					"403": {
+						"description": "Page denied by robots.txt rules",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Page denied by robots.txt rules"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns page denied by robots.txt rules",
+				"responses": {
+					"403": {
+						"description": "Page denied by robots.txt rules",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Page denied by robots.txt rules"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns page denied by robots.txt rules",
+				"responses": {
+					"403": {
+						"description": "Page denied by robots.txt rules",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Page denied by robots.txt rules"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns page denied by robots.txt rules",
+				"responses": {
+					"403": {
+						"description": "Page denied by robots.txt rules",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Page denied by robots.txt rules"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns page denied by robots.txt rules",
+				"responses": {
+					"403": {
+						"description": "Page denied by robots.txt rules",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Page denied by robots.txt rules"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/gzip": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns GZip-encoded data",
+				"responses": {
+					"200": {
+						"description": "GZip-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "GZip-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns GZip-encoded data",
+				"responses": {
+					"200": {
+						"description": "GZip-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "GZip-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns GZip-encoded data",
+				"responses": {
+					"200": {
+						"description": "GZip-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "GZip-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns GZip-encoded data",
+				"responses": {
+					"200": {
+						"description": "GZip-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "GZip-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns GZip-encoded data",
+				"responses": {
+					"200": {
+						"description": "GZip-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "GZip-encoded content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/deflate": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Deflate-encoded data",
+				"responses": {
+					"200": {
+						"description": "Deflate-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Deflate-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Deflate-encoded data",
+				"responses": {
+					"200": {
+						"description": "Deflate-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Deflate-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Deflate-encoded data",
+				"responses": {
+					"200": {
+						"description": "Deflate-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Deflate-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Deflate-encoded data",
+				"responses": {
+					"200": {
+						"description": "Deflate-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Deflate-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Deflate-encoded data",
+				"responses": {
+					"200": {
+						"description": "Deflate-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Deflate-encoded content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/brotli": {
+			"get": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Brotli-encoded data",
+				"responses": {
+					"200": {
+						"description": "Brotli-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Brotli-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Brotli-encoded data",
+				"responses": {
+					"200": {
+						"description": "Brotli-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Brotli-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Brotli-encoded data",
+				"responses": {
+					"200": {
+						"description": "Brotli-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Brotli-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Brotli-encoded data",
+				"responses": {
+					"200": {
+						"description": "Brotli-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Brotli-encoded content"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Response Formats"
+				],
+				"description": "Returns Brotli-encoded data",
+				"responses": {
+					"200": {
+						"description": "Brotli-encoded content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Brotli-encoded content"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/absolute-redirect/{value}": {
+			"get": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL using an absolute URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"in": "path",
+						"name": "value",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "header",
+						"name": "host",
+						"required": true
+					}
+				],
+				"responses": {
+					"302": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/relative-redirect/{value}": {
+			"get": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL using an relative URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"in": "path",
+						"name": "value",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "header",
+						"name": "host",
+						"required": true
+					}
+				],
+				"responses": {
+					"302": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/redirect-to": {
+			"get": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uri"
+						},
+						"in": "query",
+						"name": "url",
+						"required": true,
+						"description": "The URL to redirect to"
+					},
+					{
+						"schema": {
+							"type": "string",
+							"pattern": "^[1-5][0-9][0-9]$"
+						},
+						"in": "query",
+						"name": "status_code",
+						"required": false,
+						"description": "The HTTP status code to use for redirection"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uri"
+						},
+						"in": "query",
+						"name": "url",
+						"required": true,
+						"description": "The URL to redirect to"
+					},
+					{
+						"schema": {
+							"type": "string",
+							"pattern": "^[1-5][0-9][0-9]$"
+						},
+						"in": "query",
+						"name": "status_code",
+						"required": false,
+						"description": "The HTTP status code to use for redirection"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uri"
+						},
+						"in": "query",
+						"name": "url",
+						"required": true,
+						"description": "The URL to redirect to"
+					},
+					{
+						"schema": {
+							"type": "string",
+							"pattern": "^[1-5][0-9][0-9]$"
+						},
+						"in": "query",
+						"name": "status_code",
+						"required": false,
+						"description": "The HTTP status code to use for redirection"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uri"
+						},
+						"in": "query",
+						"name": "url",
+						"required": true,
+						"description": "The URL to redirect to"
+					},
+					{
+						"schema": {
+							"type": "string",
+							"pattern": "^[1-5][0-9][0-9]$"
+						},
+						"in": "query",
+						"name": "status_code",
+						"required": false,
+						"description": "The HTTP status code to use for redirection"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Redirects"
+				],
+				"description": "Redirects the request to the target URL",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uri"
+						},
+						"in": "query",
+						"name": "url",
+						"required": true,
+						"description": "The URL to redirect to"
+					},
+					{
+						"schema": {
+							"type": "string",
+							"pattern": "^[1-5][0-9][0-9]$"
+						},
+						"in": "query",
+						"name": "status_code",
+						"required": false,
+						"description": "The HTTP status code to use for redirection"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			}
+		},
+		"/cookies": {
+			"get": {
+				"tags": [
+					"Cookies"
+				],
+				"description": "Return cookies from the request",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"cookies": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										}
+									},
+									"required": [
+										"cookies"
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Cookies"
+				],
+				"description": "Set a cookie",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"value": {
+										"type": "string"
+									},
+									"expires": {
+										"type": "string",
+										"format": "date-time"
+									}
+								},
+								"required": [
+									"name",
+									"value"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"cookies": {
+											"type": "object",
+											"additionalProperties": {
+												"type": "string"
+											}
+										}
+									},
+									"required": [
+										"cookies"
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Cookies"
+				],
+				"description": "Delete a cookie",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "name",
+						"required": true
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Default Response"
+					}
+				}
+			}
+		},
+		"/anything": {
+			"get": {
+				"tags": [
+					"Anything"
+				],
+				"description": "Will return anything that you send it",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object",
+											"description": "Route parameters",
+											"additionalProperties": true
+										},
+										"data": {
+											"type": "object",
+											"description": "Request body data",
+											"additionalProperties": true
+										},
+										"files": {
+											"type": "object",
+											"description": "Uploaded files",
+											"additionalProperties": true
+										},
+										"form": {
+											"type": "object",
+											"description": "Form data",
+											"additionalProperties": true
+										},
+										"headers": {
+											"type": "object",
+											"description": "Request headers",
+											"additionalProperties": true
+										},
+										"json": {
+											"type": "object",
+											"description": "Parsed JSON body",
+											"additionalProperties": true
+										},
+										"method": {
+											"type": "string",
+											"description": "HTTP method used"
+										},
+										"origin": {
+											"type": "string",
+											"description": "Origin of the request"
+										},
+										"url": {
+											"type": "string",
+											"description": "Request URL"
+										}
+									},
+									"additionalProperties": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Anything"
+				],
+				"description": "Will return anything that you send it",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object",
+											"description": "Route parameters",
+											"additionalProperties": true
+										},
+										"data": {
+											"type": "object",
+											"description": "Request body data",
+											"additionalProperties": true
+										},
+										"files": {
+											"type": "object",
+											"description": "Uploaded files",
+											"additionalProperties": true
+										},
+										"form": {
+											"type": "object",
+											"description": "Form data",
+											"additionalProperties": true
+										},
+										"headers": {
+											"type": "object",
+											"description": "Request headers",
+											"additionalProperties": true
+										},
+										"json": {
+											"type": "object",
+											"description": "Parsed JSON body",
+											"additionalProperties": true
+										},
+										"method": {
+											"type": "string",
+											"description": "HTTP method used"
+										},
+										"origin": {
+											"type": "string",
+											"description": "Origin of the request"
+										},
+										"url": {
+											"type": "string",
+											"description": "Request URL"
+										}
+									},
+									"additionalProperties": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Anything"
+				],
+				"description": "Will return anything that you send it",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object",
+											"description": "Route parameters",
+											"additionalProperties": true
+										},
+										"data": {
+											"type": "object",
+											"description": "Request body data",
+											"additionalProperties": true
+										},
+										"files": {
+											"type": "object",
+											"description": "Uploaded files",
+											"additionalProperties": true
+										},
+										"form": {
+											"type": "object",
+											"description": "Form data",
+											"additionalProperties": true
+										},
+										"headers": {
+											"type": "object",
+											"description": "Request headers",
+											"additionalProperties": true
+										},
+										"json": {
+											"type": "object",
+											"description": "Parsed JSON body",
+											"additionalProperties": true
+										},
+										"method": {
+											"type": "string",
+											"description": "HTTP method used"
+										},
+										"origin": {
+											"type": "string",
+											"description": "Origin of the request"
+										},
+										"url": {
+											"type": "string",
+											"description": "Request URL"
+										}
+									},
+									"additionalProperties": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Anything"
+				],
+				"description": "Will return anything that you send it",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object",
+											"description": "Route parameters",
+											"additionalProperties": true
+										},
+										"data": {
+											"type": "object",
+											"description": "Request body data",
+											"additionalProperties": true
+										},
+										"files": {
+											"type": "object",
+											"description": "Uploaded files",
+											"additionalProperties": true
+										},
+										"form": {
+											"type": "object",
+											"description": "Form data",
+											"additionalProperties": true
+										},
+										"headers": {
+											"type": "object",
+											"description": "Request headers",
+											"additionalProperties": true
+										},
+										"json": {
+											"type": "object",
+											"description": "Parsed JSON body",
+											"additionalProperties": true
+										},
+										"method": {
+											"type": "string",
+											"description": "HTTP method used"
+										},
+										"origin": {
+											"type": "string",
+											"description": "Origin of the request"
+										},
+										"url": {
+											"type": "string",
+											"description": "Request URL"
+										}
+									},
+									"additionalProperties": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Anything"
+				],
+				"description": "Will return anything that you send it",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object",
+											"description": "Route parameters",
+											"additionalProperties": true
+										},
+										"data": {
+											"type": "object",
+											"description": "Request body data",
+											"additionalProperties": true
+										},
+										"files": {
+											"type": "object",
+											"description": "Uploaded files",
+											"additionalProperties": true
+										},
+										"form": {
+											"type": "object",
+											"description": "Form data",
+											"additionalProperties": true
+										},
+										"headers": {
+											"type": "object",
+											"description": "Request headers",
+											"additionalProperties": true
+										},
+										"json": {
+											"type": "object",
+											"description": "Parsed JSON body",
+											"additionalProperties": true
+										},
+										"method": {
+											"type": "string",
+											"description": "HTTP method used"
+										},
+										"origin": {
+											"type": "string",
+											"description": "Origin of the request"
+										},
+										"url": {
+											"type": "string",
+											"description": "Request URL"
+										}
+									},
+									"additionalProperties": false
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/basic-auth/{user}/{passwd}": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"description": "HTTP Basic authentication. Succeeds only if the user/pass provided in the path matches the Basic Authorization header.",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "user",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "passwd",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"authenticated": {
+											"type": "boolean"
+										},
+										"user": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"authenticated",
+										"user"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/bearer": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"description": "HTTP Bearer authentication. Succeeds if any Bearer token is present unless ?required=true is provided.",
+				"parameters": [
+					{
+						"schema": {
+							"type": "boolean",
+							"default": true
+						},
+						"in": "query",
+						"name": "required",
+						"required": false
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"authenticated": {
+											"type": "boolean"
+										},
+										"token": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"authenticated",
+										"token"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/digest-auth/{qop}/{user}/{passwd}": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"description": "HTTP Digest authentication. Mirrors httpbin behavior for testing clients.",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "qop",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "user",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "passwd",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "algorithm",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "stale_after",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			}
+		},
+		"/digest-auth/{qop}/{user}/{passwd}/{algorithm}": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"description": "HTTP Digest authentication. Mirrors httpbin behavior for testing clients.",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "qop",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "user",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "passwd",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "algorithm",
+						"required": true
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "stale_after",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response"
+					}
+				}
+			}
+		},
+		"/image": {
+			"get": {
+				"tags": [
+					"Images"
+				],
+				"description": "Returns an image based on Accept header (supports jpeg, png, svg, webp)",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "header",
+						"name": "accept",
+						"required": false,
+						"description": "Accept header for content negotiation"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Image file",
+						"content": {
+							"application/json": {
+								"schema": {
+									"description": "Image file",
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/image/jpeg": {
+			"get": {
+				"tags": [
+					"Images"
+				],
+				"description": "Returns a JPEG image",
+				"responses": {
+					"200": {
+						"description": "JPEG image",
+						"content": {
+							"application/json": {
+								"schema": {
+									"description": "JPEG image",
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/image/png": {
+			"get": {
+				"tags": [
+					"Images"
+				],
+				"description": "Returns a PNG image",
+				"responses": {
+					"200": {
+						"description": "PNG image",
+						"content": {
+							"application/json": {
+								"schema": {
+									"description": "PNG image",
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/image/svg": {
+			"get": {
+				"tags": [
+					"Images"
+				],
+				"description": "Returns an SVG image",
+				"responses": {
+					"200": {
+						"description": "SVG image",
+						"content": {
+							"application/json": {
+								"schema": {
+									"description": "SVG image",
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/image/webp": {
+			"get": {
+				"tags": [
+					"Images"
+				],
+				"description": "Returns a WEBP image",
+				"responses": {
+					"200": {
+						"description": "WEBP image",
+						"content": {
+							"application/json": {
+								"schema": {
+									"description": "WEBP image",
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/uuid": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Return a UUID4",
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"uuid": {
+											"type": "string",
+											"format": "uuid"
+										}
+									},
+									"required": [
+										"uuid"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/bytes/{n}": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Returns n random bytes generated with given seed",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "seed",
+						"required": false,
+						"description": "Seed for random number generation"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "n",
+						"required": true,
+						"description": "Number of bytes to generate"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Random binary data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Random binary data"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/stream-bytes/{n}": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Streams n random bytes generated with given seed, in chunks of chunk_size per packet",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "seed",
+						"required": false,
+						"description": "Seed for random number generation"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "chunk_size",
+						"required": false,
+						"description": "Size of each chunk (default: 10240)"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "n",
+						"required": true,
+						"description": "Number of bytes to stream"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Streamed random binary data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Streamed random binary data"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/delay/{delay}": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Returns a delayed response (max of 10 seconds)",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "delay",
+						"required": true,
+						"description": "Delay in seconds (max 10)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object"
+										},
+										"data": {
+											"type": "string"
+										},
+										"files": {
+											"type": "object"
+										},
+										"form": {
+											"type": "object"
+										},
+										"headers": {
+											"type": "object"
+										},
+										"origin": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Returns a delayed response (max of 10 seconds)",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "delay",
+						"required": true,
+						"description": "Delay in seconds (max 10)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object"
+										},
+										"data": {
+											"type": "string"
+										},
+										"files": {
+											"type": "object"
+										},
+										"form": {
+											"type": "object"
+										},
+										"headers": {
+											"type": "object"
+										},
+										"origin": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Returns a delayed response (max of 10 seconds)",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "delay",
+						"required": true,
+						"description": "Delay in seconds (max 10)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object"
+										},
+										"data": {
+											"type": "string"
+										},
+										"files": {
+											"type": "object"
+										},
+										"form": {
+											"type": "object"
+										},
+										"headers": {
+											"type": "object"
+										},
+										"origin": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Returns a delayed response (max of 10 seconds)",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "delay",
+						"required": true,
+						"description": "Delay in seconds (max 10)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object"
+										},
+										"data": {
+											"type": "string"
+										},
+										"files": {
+											"type": "object"
+										},
+										"form": {
+											"type": "object"
+										},
+										"headers": {
+											"type": "object"
+										},
+										"origin": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Returns a delayed response (max of 10 seconds)",
+				"parameters": [
+					{
+						"schema": "object",
+						"in": "query",
+						"name": "type"
+					},
+					{
+						"schema": true,
+						"in": "query",
+						"name": "additionalProperties"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "delay",
+						"required": true,
+						"description": "Delay in seconds (max 10)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"args": {
+											"type": "object"
+										},
+										"data": {
+											"type": "string"
+										},
+										"files": {
+											"type": "object"
+										},
+										"form": {
+											"type": "object"
+										},
+										"headers": {
+											"type": "object"
+										},
+										"origin": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/base64/{value}": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Decodes base64url-encoded string",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "value",
+						"required": true,
+						"description": "Base64 encoded value to decode"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Decoded value",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Decoded value"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/stream/{n}": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Stream n JSON responses",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "n",
+						"required": true,
+						"description": "Number of JSON responses to stream (max 100)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Newline-delimited JSON responses",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Newline-delimited JSON responses"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/range/{numbytes}": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Streams n random bytes generated, and supports HTTP Range requests",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "duration",
+						"required": false,
+						"description": "Delay before sending response in seconds"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "numbytes",
+						"required": true,
+						"description": "Number of bytes available"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Binary data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Binary data"
+								}
+							}
+						}
+					},
+					"206": {
+						"description": "Partial binary data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Partial binary data"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"416": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/drip": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Drips data over a duration after an optional initial delay, then (optionally) returns with the given status code",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "duration",
+						"required": false,
+						"description": "Duration in seconds over which to drip the data (default: 2)"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "numbytes",
+						"required": false,
+						"description": "Number of bytes to send (default: 10)"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "code",
+						"required": false,
+						"description": "HTTP status code to return (default: 200)"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "query",
+						"name": "delay",
+						"required": false,
+						"description": "Initial delay in seconds before starting (default: 2)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Dripped data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "Dripped data"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/links/{n}/{offset}?": {
+			"get": {
+				"tags": [
+					"Dynamic Data"
+				],
+				"description": "Generate a page containing n links to other pages which do the same",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "n",
+						"required": true,
+						"description": "Number of links to generate"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"in": "path",
+						"name": "offset",
+						"required": true,
+						"description": "Starting offset for pagination (default: 0)"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "HTML page with links",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"description": "HTML page with links"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Default Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
