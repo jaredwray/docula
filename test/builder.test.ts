@@ -2411,6 +2411,223 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should return undefined when override candidate path fails boundary check", async () => {
+			const builder = new DoculaBuilder();
+			const sitePath = "test/temp-override-boundary-check";
+			const unsafeBuilder = builder as unknown as {
+				isPathWithinBasePath: (
+					candidatePath: string,
+					basePath: string,
+				) => boolean;
+			};
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.mkdir(sitePath, { recursive: true });
+			await fs.promises.writeFile(
+				`${sitePath}/llms.txt`,
+				"# marker-should-not-be-used",
+				"utf8",
+			);
+
+			vi.spyOn(unsafeBuilder, "isPathWithinBasePath").mockReturnValue(false);
+
+			try {
+				const data: DoculaData = {
+					siteUrl: "http://foo.com",
+					siteTitle: "docula",
+					siteDescription: "Beautiful Website for Your Projects",
+					sitePath,
+					templatePath: "test/fixtures/template-example",
+					outputPath: "test/temp-override-boundary-check-output",
+				};
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+
+				await builder.buildLlmsFiles(data);
+
+				const llms = await fs.promises.readFile(
+					`${data.outputPath}/llms.txt`,
+					"utf8",
+				);
+				expect(llms).toContain("# docula");
+				expect(llms).not.toContain("marker-should-not-be-used");
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm("test/temp-override-boundary-check-output", {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should return undefined when override realpath lookup fails", async () => {
+			const builder = new DoculaBuilder();
+			const sitePath = "test/temp-override-realpath-fail";
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.mkdir(sitePath, { recursive: true });
+			await fs.promises.writeFile(
+				`${sitePath}/llms.txt`,
+				"# marker-should-not-be-used",
+				"utf8",
+			);
+
+			vi.spyOn(fs.promises, "realpath").mockRejectedValue(
+				new Error("realpath failed"),
+			);
+
+			try {
+				const data: DoculaData = {
+					siteUrl: "http://foo.com",
+					siteTitle: "docula",
+					siteDescription: "Beautiful Website for Your Projects",
+					sitePath,
+					templatePath: "test/fixtures/template-example",
+					outputPath: "test/temp-override-realpath-fail-output",
+				};
+				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+
+				await builder.buildLlmsFiles(data);
+
+				const llms = await fs.promises.readFile(
+					`${data.outputPath}/llms.txt`,
+					"utf8",
+				);
+				expect(llms).toContain("# docula");
+				expect(llms).not.toContain("marker-should-not-be-used");
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm("test/temp-override-realpath-fail-output", {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should return undefined when override realpath escapes base path", async () => {
+			const builder = new DoculaBuilder();
+			const unsafeBuilder = builder as unknown as {
+				getSafeSiteOverrideFileContent: (
+					sitePath: string,
+					fileName: "llms.txt" | "llms-full.txt",
+				) => Promise<string | undefined>;
+				isPathWithinBasePath: (
+					candidatePath: string,
+					basePath: string,
+				) => boolean;
+			};
+			const sitePath = "test/temp-override-realpath-escape";
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.mkdir(sitePath, { recursive: true });
+			await fs.promises.writeFile(`${sitePath}/llms.txt`, "# marker", "utf8");
+
+			vi.spyOn(unsafeBuilder, "isPathWithinBasePath")
+				.mockImplementationOnce(() => true)
+				.mockImplementationOnce(() => false);
+
+			try {
+				const content = await unsafeBuilder.getSafeSiteOverrideFileContent(
+					sitePath,
+					"llms.txt",
+				);
+				expect(content).toBeUndefined();
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should return undefined when OpenAPI realpath lookup fails", async () => {
+			const builder = new DoculaBuilder();
+			const unsafeBuilder = builder as unknown as {
+				getSafeLocalOpenApiSpec: (
+					data: DoculaData,
+				) => Promise<{ sourcePath: string; content: string } | undefined>;
+			};
+			const sitePath = "test/temp-openapi-realpath-fail";
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
+			await fs.promises.writeFile(
+				`${sitePath}/api/swagger.json`,
+				'{"openapi":"3.0.0","info":{"title":"spec"}}',
+				"utf8",
+			);
+
+			vi.spyOn(fs.promises, "realpath").mockRejectedValue(
+				new Error("realpath failed"),
+			);
+
+			try {
+				const data: DoculaData = {
+					siteUrl: "http://foo.com",
+					siteTitle: "docula",
+					siteDescription: "Beautiful Website for Your Projects",
+					sitePath,
+					templatePath: "test/fixtures/template-example",
+					outputPath: "test/temp-openapi-realpath-fail-output",
+					openApiUrl: "/api/swagger.json",
+					hasApi: true,
+				};
+
+				const spec = await unsafeBuilder.getSafeLocalOpenApiSpec(data);
+				expect(spec).toBeUndefined();
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm("test/temp-openapi-realpath-fail-output", {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should return undefined when OpenAPI realpath escapes base path", async () => {
+			const builder = new DoculaBuilder();
+			const unsafeBuilder = builder as unknown as {
+				getSafeLocalOpenApiSpec: (
+					data: DoculaData,
+				) => Promise<{ sourcePath: string; content: string } | undefined>;
+				isPathWithinBasePath: (
+					candidatePath: string,
+					basePath: string,
+				) => boolean;
+			};
+			const sitePath = "test/temp-openapi-realpath-escape";
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
+			await fs.promises.writeFile(
+				`${sitePath}/api/swagger.json`,
+				'{"openapi":"3.0.0","info":{"title":"spec"}}',
+				"utf8",
+			);
+
+			vi.spyOn(unsafeBuilder, "isPathWithinBasePath")
+				.mockImplementationOnce(() => true)
+				.mockImplementationOnce(() => false);
+
+			try {
+				const data: DoculaData = {
+					siteUrl: "http://foo.com",
+					siteTitle: "docula",
+					siteDescription: "Beautiful Website for Your Projects",
+					sitePath,
+					templatePath: "test/fixtures/template-example",
+					outputPath: "test/temp-openapi-realpath-escape-output",
+					openApiUrl: "/api/swagger.json",
+					hasApi: true,
+				};
+
+				const spec = await unsafeBuilder.getSafeLocalOpenApiSpec(data);
+				expect(spec).toBeUndefined();
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm("test/temp-openapi-realpath-escape-output", {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
 		it("should skip llms generation when enableLlmsTxt is false", async () => {
 			const options = new DoculaOptions();
 			options.enableLlmsTxt = false;
