@@ -2142,7 +2142,18 @@ describe("DoculaBuilder", () => {
 				);
 				const changelogLines = llms
 					.split("\n")
-					.filter((line) => line.includes("http://foo.com/changelog/entry-"));
+					.filter((line) => {
+						const urlMatch = line.match(/\((https?:\/\/[^)\s]+)\)/);
+						if (!urlMatch) {
+							return false;
+						}
+
+						const parsedUrl = new URL(urlMatch[1]);
+						return (
+							parsedUrl.host === "foo.com" &&
+							parsedUrl.pathname.startsWith("/changelog/entry-")
+						);
+					});
 
 				expect(llms).toContain("- [Changelog](http://foo.com/changelog)");
 				expect(changelogLines).toHaveLength(20);
