@@ -13,6 +13,12 @@
     {{else}}
       <main class="home">
         {{> multipage/hero }}
+        <div class="home-actions">
+          {{> multipage/documentation }}
+          {{#if hasApi}}
+          {{> multipage/api-reference }}
+          {{/if}}
+        </div>
         {{> multipage/home }}
       </main>
     {{/if}}

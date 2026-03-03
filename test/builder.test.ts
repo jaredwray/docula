@@ -1004,6 +1004,60 @@ describe("DoculaBuilder", () => {
 			console.log = consoleLog;
 		});
 
+		it("should render API Reference button on home page when openApiUrl is configured", async () => {
+			const templates = ["modern", "classic"] as const;
+
+			for (const template of templates) {
+				const options = new DoculaOptions();
+				options.template = template;
+				options.sitePath = "test/fixtures/multi-page-site";
+				options.outputPath = `test/temp-build-api-home-button-${template}`;
+				options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
+				options.homePage = true;
+				const builder = new DoculaBuilder(options);
+
+				try {
+					await builder.build();
+					const indexHtml = await fs.promises.readFile(
+						`${options.outputPath}/index.html`,
+						"utf8",
+					);
+					expect(indexHtml).toContain('href="/api"');
+					expect(indexHtml).toContain("API Reference");
+				} finally {
+					await fs.promises.rm(options.outputPath, {
+						recursive: true,
+						force: true,
+					});
+				}
+			}
+		});
+
+		it("should not render API Reference button on home page when api template is missing", async () => {
+			const options = new DoculaOptions();
+			options.templatePath = "test/fixtures/template-example";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.outputPath = "test/temp-build-api-home-no-template-button";
+			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
+			options.homePage = true;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.outputPath}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).not.toContain("API Reference");
+				expect(indexHtml).not.toContain('href="/api"');
+			} finally {
+				await fs.promises.rm(options.outputPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
 		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/mega-page-site";

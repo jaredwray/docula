@@ -32,6 +32,12 @@
   {{else}}
   <main class="home">
     {{> hero }}
+    <div class="home-actions">
+      {{> documentation }}
+      {{#if hasApi}}
+      {{> api-reference }}
+      {{/if}}
+    </div>
     {{> home }}
   </main>
   {{/if}}
