@@ -90,7 +90,7 @@ export class DoculaOptions {
 		/* v8 ignore next -- @preserve */
 		if (options.outputPath) {
 			this.outputPath = options.outputPath as string;
-			this.githubPath = path.join(process.cwd(), this.outputPath);
+			this.outputPath = path.join(process.cwd(), this.outputPath);
 		}
 
 		/* v8 ignore next -- @preserve */

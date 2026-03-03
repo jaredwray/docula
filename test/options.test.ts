@@ -118,6 +118,14 @@ describe("DoculaOptions", () => {
 			expect(options.port).toEqual(8080);
 		});
 
+		it("should not overwrite githubPath when only outputPath is provided", () => {
+			const defaultGithubPath = options.githubPath;
+			options.parseOptions({ outputPath: "./custom-dist-only" });
+
+			expect(options.outputPath).toContain("/custom-dist-only");
+			expect(options.githubPath).toEqual(defaultGithubPath);
+		});
+
 		it("should parse the template option", () => {
 			options.parseOptions({ template: "modern" });
 			expect(options.template).toEqual("modern");
