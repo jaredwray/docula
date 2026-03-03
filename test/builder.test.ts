@@ -2108,6 +2108,99 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should not read OpenAPI files outside sitePath", async () => {
+			const builder = new DoculaBuilder();
+			const sitePath = "test/temp-llms-safe-openapi-site";
+			const outputPath = "test/temp-llms-safe-openapi-output";
+			const externalSpecPath = "test/temp-llms-safe-openapi-external.json";
+			const externalMarker = "external-openapi-should-not-be-read";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				openApiUrl: "../temp-llms-safe-openapi-external.json",
+				hasApi: true,
+			};
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(externalSpecPath, { recursive: true, force: true });
+			await fs.promises.mkdir(sitePath, { recursive: true });
+			await fs.promises.writeFile(
+				externalSpecPath,
+				`{"openapi":"3.0.0","info":{"title":"${externalMarker}"}}`,
+				"utf8",
+			);
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+				expect(llmsFull).toContain(
+					"OpenAPI Spec URL: http://foo.com/../temp-llms-safe-openapi-external.json",
+				);
+				expect(llmsFull).not.toContain(externalMarker);
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(externalSpecPath, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not read symbolic linked OpenAPI files", async () => {
+			const builder = new DoculaBuilder();
+			const sitePath = "test/temp-llms-openapi-symlink-site";
+			const outputPath = "test/temp-llms-openapi-symlink-output";
+			const targetSpecPath = `${sitePath}/api/real-swagger.json`;
+			const symlinkSpecPath = `${sitePath}/api/swagger-link.json`;
+			const marker = "symlink-openapi-should-not-be-read";
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				outputPath,
+				openApiUrl: "/api/swagger-link.json",
+				hasApi: true,
+			};
+
+			await fs.promises.rm(sitePath, { recursive: true, force: true });
+			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
+			await fs.promises.writeFile(
+				targetSpecPath,
+				`{"openapi":"3.0.0","info":{"title":"${marker}"}}`,
+				"utf8",
+			);
+			await fs.promises.symlink("real-swagger.json", symlinkSpecPath);
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${outputPath}/llms-full.txt`,
+					"utf8",
+				);
+				expect(llmsFull).toContain(
+					"OpenAPI Spec URL: http://foo.com/api/swagger-link.json",
+				);
+				expect(llmsFull).not.toContain(marker);
+			} finally {
+				await fs.promises.rm(sitePath, { recursive: true, force: true });
+				await fs.promises.rm(outputPath, { recursive: true, force: true });
+			}
+		});
+
 		it("should include changelog landing and only latest 20 entries in llms.txt", async () => {
 			const builder = new DoculaBuilder();
 			const outputPath = "test/temp-llms-changelog-index";
@@ -2140,20 +2233,18 @@ describe("DoculaBuilder", () => {
 					`${outputPath}/llms.txt`,
 					"utf8",
 				);
-				const changelogLines = llms
-					.split("\n")
-					.filter((line) => {
-						const urlMatch = line.match(/\((https?:\/\/[^)\s]+)\)/);
-						if (!urlMatch) {
-							return false;
-						}
+				const changelogLines = llms.split("\n").filter((line) => {
+					const urlMatch = line.match(/\((https?:\/\/[^)\s]+)\)/);
+					if (!urlMatch) {
+						return false;
+					}
 
-						const parsedUrl = new URL(urlMatch[1]);
-						return (
-							parsedUrl.host === "foo.com" &&
-							parsedUrl.pathname.startsWith("/changelog/entry-")
-						);
-					});
+					const parsedUrl = new URL(urlMatch[1]);
+					return (
+						parsedUrl.host === "foo.com" &&
+						parsedUrl.pathname.startsWith("/changelog/entry-")
+					);
+				});
 
 				expect(llms).toContain("- [Changelog](http://foo.com/changelog)");
 				expect(changelogLines).toHaveLength(20);

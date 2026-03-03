@@ -563,16 +563,13 @@ export class DoculaBuilder {
 			lines.push(`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/api")}`);
 			lines.push("");
 
-			const localOpenApiPath = this.resolveLocalOpenApiPath(data);
-			if (localOpenApiPath && fs.existsSync(localOpenApiPath)) {
-				const localOpenApiContent = fs
-					.readFileSync(localOpenApiPath, "utf8")
-					.trim();
+			const localOpenApiSpec = await this.getSafeLocalOpenApiSpec(data);
+			if (localOpenApiSpec) {
 				lines.push(
-					`OpenAPI Spec Source: ${this.toPosixPath(localOpenApiPath)}`,
+					`OpenAPI Spec Source: ${this.toPosixPath(localOpenApiSpec.sourcePath)}`,
 				);
 				lines.push("");
-				lines.push(localOpenApiContent || "_No content_");
+				lines.push(localOpenApiSpec.content || "_No content_");
 			} else {
 				const openApiSpecUrl = this.resolveOpenApiSpecUrl(data);
 				if (openApiSpecUrl) {
@@ -663,6 +660,74 @@ export class DoculaBuilder {
 			? openApiPathWithoutQuery.slice(1)
 			: openApiPathWithoutQuery;
 		return path.join(data.sitePath, normalizedPath);
+	}
+
+	private async getSafeLocalOpenApiSpec(
+		data: DoculaData,
+	): Promise<{ sourcePath: string; content: string } | undefined> {
+		const localOpenApiPath = this.resolveLocalOpenApiPath(data);
+		if (!localOpenApiPath) {
+			return undefined;
+		}
+
+		const resolvedSitePath = path.resolve(data.sitePath);
+		const resolvedLocalOpenApiPath = path.resolve(localOpenApiPath);
+
+		if (
+			!this.isPathWithinBasePath(resolvedLocalOpenApiPath, resolvedSitePath)
+		) {
+			return undefined;
+		}
+
+		let localOpenApiStats: fs.Stats;
+		try {
+			localOpenApiStats = await fs.promises.lstat(resolvedLocalOpenApiPath);
+		} catch {
+			return undefined;
+		}
+
+		// Do not follow symbolic links for local OpenAPI spec ingestion.
+		if (!localOpenApiStats.isFile() || localOpenApiStats.isSymbolicLink()) {
+			return undefined;
+		}
+
+		let realSitePath: string;
+		let realLocalOpenApiPath: string;
+		try {
+			realSitePath = await fs.promises.realpath(resolvedSitePath);
+			realLocalOpenApiPath = await fs.promises.realpath(
+				resolvedLocalOpenApiPath,
+			);
+		} catch {
+			return undefined;
+		}
+
+		if (!this.isPathWithinBasePath(realLocalOpenApiPath, realSitePath)) {
+			return undefined;
+		}
+
+		const localOpenApiContent = (
+			await fs.promises.readFile(realLocalOpenApiPath, "utf8")
+		).trim();
+		return {
+			sourcePath: realLocalOpenApiPath,
+			content: localOpenApiContent,
+		};
+	}
+
+	private isPathWithinBasePath(
+		candidatePath: string,
+		basePath: string,
+	): boolean {
+		const relativePath = path.relative(
+			path.resolve(basePath),
+			path.resolve(candidatePath),
+		);
+
+		return (
+			relativePath === "" ||
+			(!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
+		);
 	}
 
 	private toPosixPath(filePath: string): string {
