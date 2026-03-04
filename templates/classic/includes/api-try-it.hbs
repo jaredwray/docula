@@ -1,0 +1,57 @@
+<div class="api-try-it" data-method="{{this.methodUpper}}" data-path="{{this.path}}">
+  <span class="api-try-it__title">Test Request</span>
+
+  <div class="api-try-it__url-bar">
+    <span class="method-badge method-badge--{{this.method}}">{{this.methodUpper}}</span>
+    <div class="api-try-it__url-display">
+      <select class="api-try-it__server-select" data-try-server>
+        {{#each @root.apiSpec.servers}}
+        <option value="{{this.url}}">{{this.url}}</option>
+        {{/each}}
+      </select>
+      <span class="api-try-it__path-display">{{this.path}}</span>
+    </div>
+  </div>
+
+  {{#if this.parameters.length}}
+  <div class="api-try-it__section">
+    <div class="api-try-it__section-label">Parameters</div>
+    {{#each this.parameters}}
+    <div class="api-try-it__param-row" data-param-in="{{this.in}}" data-param-name="{{this.name}}">
+      <div class="api-try-it__param-info">
+        <span class="api-try-it__param-name">{{this.name}}</span>
+        <span class="api-try-it__param-in">{{this.in}}</span>
+        {{#if this.required}}<span class="api-param-required">*</span>{{/if}}
+      </div>
+      <input type="text" class="api-try-it__param-input" placeholder="{{this.type}}" data-try-param />
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if this.requestBody}}
+  <div class="api-try-it__section">
+    <div class="api-try-it__section-label">Body</div>
+    <textarea class="api-try-it__body-editor" data-try-body rows="8">{{this.requestBody.example}}</textarea>
+  </div>
+  {{/if}}
+
+  <button class="api-try-it__send-btn" data-try-send>Send Request</button>
+
+  <div class="api-try-it__response api-try-it__response--hidden" data-try-response>
+    <div class="api-try-it__response-meta">
+      <span class="api-try-it__response-status" data-try-status></span>
+      <span class="api-try-it__response-time" data-try-time></span>
+    </div>
+    <div class="api-try-it__response-tabs">
+      <button class="api-try-it__rtab api-try-it__rtab--active" data-try-rtab="body">Body</button>
+      <button class="api-try-it__rtab" data-try-rtab="headers">Headers</button>
+    </div>
+    <div class="api-try-it__rpanel api-try-it__rpanel--active" data-try-rpanel="body">
+      <pre><code data-try-response-body></code></pre>
+    </div>
+    <div class="api-try-it__rpanel" data-try-rpanel="headers">
+      <pre><code data-try-response-headers></code></pre>
+    </div>
+  </div>
+</div>
