@@ -23,7 +23,11 @@
         <span class="api-try-it__param-in">{{this.in}}</span>
         {{#if this.required}}<span class="api-param-required">*</span>{{/if}}
       </div>
+      {{#if (eq this.in "cookie")}}
+      <input type="text" class="api-try-it__param-input" placeholder="Not supported in browser" disabled data-try-param />
+      {{else}}
       <input type="text" class="api-try-it__param-input" placeholder="{{this.type}}" data-try-param />
+      {{/if}}
     </div>
     {{/each}}
   </div>

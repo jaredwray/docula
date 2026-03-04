@@ -573,6 +573,11 @@
   border-color: var(--links);
 }
 
+.api-try-it__param-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .api-try-it__param-input::placeholder {
   color: var(--color-text-secondary);
 }

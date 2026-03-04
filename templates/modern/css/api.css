@@ -779,6 +779,11 @@
   border-color: var(--border-hover);
 }
 
+.api-try-it__param-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .api-try-it__param-input::placeholder {
   color: var(--muted-fg);
 }

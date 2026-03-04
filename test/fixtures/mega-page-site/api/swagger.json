@@ -21,6 +21,26 @@
 					"HTTP Methods"
 				],
 				"description": "Returns request information for GET requests",
+				"parameters": [
+					{
+						"name": "q",
+						"in": "query",
+						"description": "A sample query parameter",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "session_id",
+						"in": "cookie",
+						"description": "Session identifier cookie",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Default Response",
