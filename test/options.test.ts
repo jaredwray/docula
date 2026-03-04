@@ -7,7 +7,7 @@ describe("DoculaOptions", () => {
 			const options = new DoculaOptions();
 			expect(options.template).toEqual("modern");
 			expect(options.templatePath).toEqual("");
-			expect(options.outputPath).toContain("/dist");
+			expect(options.output).toContain("/dist");
 			expect(options.sitePath).toContain("/site");
 			expect(options.githubPath).toEqual("jaredwray/docula");
 			expect(options.siteTitle).toEqual("docula");
@@ -24,7 +24,7 @@ describe("DoculaOptions", () => {
 		it("should create an instance of DoculaOptions with custom values", () => {
 			const options = new DoculaOptions({
 				templatePath: "./custom-template",
-				outputPath: "./custom-dist",
+				output: "./custom-dist",
 				sitePath: "./custom-site",
 				githubPath: "custom/repo",
 				siteTitle: "Custom Title",
@@ -34,7 +34,7 @@ describe("DoculaOptions", () => {
 				sections: [{ name: "Custom Section", path: "custom-section" }],
 			});
 			expect(options.templatePath).toContain("/custom-template");
-			expect(options.outputPath).toContain("/custom-dist");
+			expect(options.output).toContain("/custom-dist");
 			expect(options.sitePath).toContain("/custom-site");
 			expect(options.githubPath).toEqual("custom/repo");
 			expect(options.siteTitle).toEqual("Custom Title");
@@ -59,9 +59,9 @@ describe("DoculaOptions", () => {
 			expect(options.templatePath).toEqual("./custom-template");
 		});
 
-		it("should set and get the outputPath", () => {
-			options.outputPath = "./custom-dist";
-			expect(options.outputPath).toEqual("./custom-dist");
+		it("should set and get the output", () => {
+			options.output = "./custom-dist";
+			expect(options.output).toEqual("./custom-dist");
 		});
 
 		it("should set and get the sitePath", () => {
@@ -100,7 +100,7 @@ describe("DoculaOptions", () => {
 		it("should parse options and update the instance", () => {
 			options.parseOptions({
 				templatePath: "./custom-template",
-				outputPath: "./custom-dist",
+				output: "./custom-dist",
 				sitePath: "./custom-site",
 				githubPath: "custom/repo",
 				siteTitle: "Custom Title",
@@ -109,7 +109,7 @@ describe("DoculaOptions", () => {
 				port: 8080,
 			});
 			expect(options.templatePath).toContain("/custom-template");
-			expect(options.outputPath).toContain("/custom-dist");
+			expect(options.output).toContain("/custom-dist");
 			expect(options.sitePath).toContain("/custom-site");
 			expect(options.githubPath).toEqual("custom/repo");
 			expect(options.siteTitle).toEqual("Custom Title");
@@ -118,11 +118,11 @@ describe("DoculaOptions", () => {
 			expect(options.port).toEqual(8080);
 		});
 
-		it("should not overwrite githubPath when only outputPath is provided", () => {
+		it("should not overwrite githubPath when only output is provided", () => {
 			const defaultGithubPath = options.githubPath;
-			options.parseOptions({ outputPath: "./custom-dist-only" });
+			options.parseOptions({ output: "./custom-dist-only" });
 
-			expect(options.outputPath).toContain("/custom-dist-only");
+			expect(options.output).toContain("/custom-dist-only");
 			expect(options.githubPath).toEqual(defaultGithubPath);
 		});
 

@@ -128,7 +128,7 @@ export default class Docula {
 		}
 
 		if (consoleProcess.args.output) {
-			this.options.outputPath = consoleProcess.args.output;
+			this.options.output = consoleProcess.args.output;
 		}
 
 		if (consoleProcess.args.port) {
@@ -276,10 +276,10 @@ export default class Docula {
 		}
 
 		const { port } = options;
-		const { outputPath } = options;
+		const { output } = options;
 
 		const config = {
-			public: outputPath,
+			public: output,
 		};
 
 		this._server = http.createServer(async (request, response) =>

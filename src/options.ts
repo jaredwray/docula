@@ -14,7 +14,7 @@ export class DoculaOptions {
 	/**
 	 * Path to the output directory
 	 */
-	public outputPath = path.join(process.cwd(), "./dist");
+	public output = path.join(process.cwd(), "./dist");
 	/**
 	 * Path to the site directory
 	 */
@@ -88,9 +88,9 @@ export class DoculaOptions {
 		}
 
 		/* v8 ignore next -- @preserve */
-		if (options.outputPath) {
-			this.outputPath = options.outputPath as string;
-			this.outputPath = path.join(process.cwd(), this.outputPath);
+		if (options.output) {
+			this.output = options.output as string;
+			this.output = path.join(process.cwd(), this.output);
 		}
 
 		/* v8 ignore next -- @preserve */

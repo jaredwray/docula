@@ -18,7 +18,7 @@ const githubMockReleases = JSON.parse(
 
 const defaultOptions: DoculaOptions = new DoculaOptions({
 	templatePath: "./custom-template",
-	outputPath: "./custom-dist",
+	output: "./custom-dist",
 	sitePath: "./custom-site",
 	githubPath: "custom/repo",
 	siteTitle: "Custom Title",
@@ -62,7 +62,7 @@ describe("docula", () => {
 		expect(docula.options).toEqual(defaultOptions);
 		const newOptions: DoculaOptions = new DoculaOptions({
 			templatePath: "./new-template",
-			outputPath: "./new-dist",
+			output: "./new-dist",
 			sitePath: "./new-site",
 			githubPath: "new/repo",
 			siteTitle: "New Title",
@@ -183,7 +183,7 @@ describe("docula execute", () => {
 	it("should be able to execute with no parameters", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site";
-		buildOptions.outputPath = "test/fixtures/single-page-site/dist";
+		buildOptions.output = "test/fixtures/single-page-site/dist";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
@@ -192,15 +192,15 @@ describe("docula execute", () => {
 		process.argv = ["node", "docula"];
 		await docula.execute(process);
 
-		expect(fs.existsSync(buildOptions.outputPath)).toEqual(true);
+		expect(fs.existsSync(buildOptions.output)).toEqual(true);
 
-		await fs.promises.rm(buildOptions.outputPath, { recursive: true });
+		await fs.promises.rm(buildOptions.output, { recursive: true });
 		console.log = consoleLog;
 	});
 	it("should be able to build with typescript config", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site-ts";
-		buildOptions.outputPath = "test/fixtures/single-page-site-ts/dist";
+		buildOptions.output = "test/fixtures/single-page-site-ts/dist";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
@@ -209,19 +209,19 @@ describe("docula execute", () => {
 		process.argv = ["node", "docula"];
 		await docula.execute(process);
 
-		expect(fs.existsSync(buildOptions.outputPath)).toEqual(true);
+		expect(fs.existsSync(buildOptions.output)).toEqual(true);
 		// Verify the config was loaded from TypeScript file
 		expect(docula.configFileModule.options.siteTitle).toEqual(
 			"Docula TypeScript",
 		);
 
-		await fs.promises.rm(buildOptions.outputPath, { recursive: true });
+		await fs.promises.rm(buildOptions.output, { recursive: true });
 		console.log = consoleLog;
 	});
 	it("should be able to execute with output parameter", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site";
-		buildOptions.outputPath = "test/fixtures/single-page-site/dist-foo";
+		buildOptions.output = "test/fixtures/single-page-site/dist-foo";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const realOutputPath = "test/fixtures/single-page-site/dist1";
 		const docula = new Docula(buildOptions);
@@ -239,10 +239,10 @@ describe("docula execute", () => {
 	it("should generate llms files during build for docs/api/changelog sites", async () => {
 		const sourcePath = "test/fixtures/mega-page-site-no-home-page";
 		const sitePath = "test/temp-llms-integration-site";
-		const outputPath = `${sitePath}/dist`;
+		const output = `${sitePath}/dist`;
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = sitePath;
-		buildOptions.outputPath = outputPath;
+		buildOptions.output = output;
 		buildOptions.template = "modern";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
@@ -251,18 +251,18 @@ describe("docula execute", () => {
 		fs.rmSync(sitePath, { recursive: true, force: true });
 		fs.cpSync(sourcePath, sitePath, { recursive: true });
 		fs.rmSync(`${sitePath}/docula.config.mjs`, { force: true });
-		fs.rmSync(outputPath, { recursive: true, force: true });
+		fs.rmSync(output, { recursive: true, force: true });
 
 		try {
 			process.argv = ["node", "docula"];
 			await docula.execute(process);
 
-			expect(fs.existsSync(`${outputPath}/llms.txt`)).toBe(true);
-			expect(fs.existsSync(`${outputPath}/llms-full.txt`)).toBe(true);
+			expect(fs.existsSync(`${output}/llms.txt`)).toBe(true);
+			expect(fs.existsSync(`${output}/llms-full.txt`)).toBe(true);
 
-			const llms = await fs.promises.readFile(`${outputPath}/llms.txt`, "utf8");
+			const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 			const llmsFull = await fs.promises.readFile(
-				`${outputPath}/llms-full.txt`,
+				`${output}/llms-full.txt`,
 				"utf8",
 			);
 
@@ -351,7 +351,7 @@ describe("docula execute", () => {
 	it("should serve the site", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.outputPath = "test/fixtures/single-page-site/dist3";
+		options.output = "test/fixtures/single-page-site/dist3";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8181"];
@@ -361,7 +361,7 @@ describe("docula execute", () => {
 		try {
 			await docula.execute(process);
 		} finally {
-			await fs.promises.rm(options.outputPath, { recursive: true });
+			await fs.promises.rm(options.output, { recursive: true });
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -375,7 +375,7 @@ describe("docula execute", () => {
 			process.cwd(),
 			"test/fixtures/single-page-site",
 		);
-		options.outputPath = path.join(
+		options.output = path.join(
 			process.cwd(),
 			"test/fixtures/single-page-site/dist3",
 		);
@@ -388,7 +388,7 @@ describe("docula execute", () => {
 			await docula.serve(options);
 			await docula.execute(process);
 		} finally {
-			await fs.promises.rm(options.outputPath, { recursive: true });
+			await fs.promises.rm(options.output, { recursive: true });
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -399,7 +399,7 @@ describe("docula execute", () => {
 	it("should serve the site on a specified port", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.outputPath = "test/fixtures/single-page-site/dist3";
+		options.output = "test/fixtures/single-page-site/dist3";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8183"];
 		const consoleLog = console.log;
@@ -412,7 +412,7 @@ describe("docula execute", () => {
 			const address = docula.server?.address() as { port: number };
 			expect(address.port).toEqual(8183);
 		} finally {
-			await fs.promises.rm(options.outputPath, { recursive: true });
+			await fs.promises.rm(options.output, { recursive: true });
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -423,7 +423,7 @@ describe("docula execute", () => {
 	it("should serve the site on a specified port with --port flag", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.outputPath = "test/fixtures/single-page-site/dist4";
+		options.output = "test/fixtures/single-page-site/dist4";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "--port", "8184"];
 		const consoleLog = console.log;
@@ -436,7 +436,7 @@ describe("docula execute", () => {
 			const address = docula.server?.address() as { port: number };
 			expect(address.port).toEqual(8184);
 		} finally {
-			await fs.promises.rm(options.outputPath, { recursive: true });
+			await fs.promises.rm(options.output, { recursive: true });
 			if (docula.server) {
 				docula.server.close();
 			}
@@ -447,7 +447,7 @@ describe("docula execute", () => {
 	it("should run onPrepare method if exists", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site-onprepare";
-		buildOptions.outputPath = "test/fixtures/single-page-site-onprepare/dist";
+		buildOptions.output = "test/fixtures/single-page-site-onprepare/dist";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 
 		const consoleLog = console.log;
@@ -463,7 +463,7 @@ describe("docula execute", () => {
 
 		expect(consoleMessage).toContain("onPrepare");
 
-		await fs.promises.rm(buildOptions.outputPath, { recursive: true });
+		await fs.promises.rm(buildOptions.output, { recursive: true });
 		console.info = consoleLog;
 	});
 });
@@ -532,8 +532,8 @@ describe("docula config file", () => {
 
 		process.argv = ["node", "docula", "version"];
 		await docula.execute(process);
-		expect(docula.options.outputPath).toEqual(
-			path.resolve(process.cwd(), docula.configFileModule.options.outputPath),
+		expect(docula.options.output).toEqual(
+			path.resolve(process.cwd(), docula.configFileModule.options.output),
 		);
 		console.log = consoleLog;
 	});
@@ -542,23 +542,23 @@ describe("docula config file", () => {
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 		options.homePage = true;
 		const docula = new Docula(options);
-		const outputPath = "test/temp-build-mega-no-home-test";
+		const output = "test/temp-build-mega-no-home-test";
 		const consoleLog = console.log;
 		console.log = (_message) => {};
 
 		try {
-			process.argv = ["node", "docula", "-o", outputPath];
+			process.argv = ["node", "docula", "-o", output];
 			await docula.execute(process);
 
 			expect(docula.configFileModule.options.homePage).toEqual(false);
 			expect(docula.options.homePage).toEqual(false);
 			const indexHtml = await fs.promises.readFile(
-				`${outputPath}/index.html`,
+				`${output}/index.html`,
 				"utf8",
 			);
 			expect(indexHtml).toContain("<title>docula -");
 		} finally {
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 			console.log = consoleLog;
 		}
 	});
