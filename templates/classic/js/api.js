@@ -84,37 +84,33 @@ document.addEventListener('DOMContentLoaded', function() {
     group.classList.add('api-sidebar__group--collapsed');
   });
 
-  // Helper: expand the sidebar group that contains an operation
-  function expandSidebarForOperation(operation) {
-    var contentGroup = operation.closest('.api-group');
-    if (!contentGroup) return;
-    var groupId = contentGroup.id.replace(/^group-/, '');
-    var sidebarGroup = document.querySelector('.api-sidebar__group[data-group="' + groupId + '"]');
-    if (sidebarGroup) sidebarGroup.classList.remove('api-sidebar__group--collapsed');
+  // Helper: expand an operation and its corresponding sidebar group
+  function expandOperationAndGroup(operationEl) {
+    if (!operationEl) return;
+    operationEl.classList.remove('api-operation--collapsed');
+    var contentGroup = operationEl.closest('.api-group');
+    if (contentGroup) {
+      var groupId = contentGroup.id.replace(/^group-/, '');
+      var sidebarGroup = document.querySelector('.api-sidebar__group[data-group="' + groupId + '"]');
+      if (sidebarGroup) sidebarGroup.classList.remove('api-sidebar__group--collapsed');
+    }
   }
 
   // Expand operation via hash, or expand the first operation by default
-  // Also expand the corresponding sidebar group
   if (window.location.hash) {
     var target = document.querySelector(window.location.hash);
     if (target && target.classList.contains('api-operation')) {
-      target.classList.remove('api-operation--collapsed');
-      expandSidebarForOperation(target);
+      expandOperationAndGroup(target);
     }
   } else {
-    var first = document.querySelector('.api-operation');
-    if (first) {
-      first.classList.remove('api-operation--collapsed');
-      expandSidebarForOperation(first);
-    }
+    expandOperationAndGroup(document.querySelector('.api-operation'));
   }
 
   window.addEventListener('hashchange', function() {
     if (window.location.hash) {
       var target = document.querySelector(window.location.hash);
       if (target && target.classList.contains('api-operation')) {
-        target.classList.remove('api-operation--collapsed');
-        expandSidebarForOperation(target);
+        expandOperationAndGroup(target);
       }
     }
   });
