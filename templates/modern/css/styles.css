@@ -79,6 +79,10 @@ body {
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: var(--bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 [data-theme="light"] .header {

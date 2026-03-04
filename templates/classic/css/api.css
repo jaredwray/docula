@@ -736,7 +736,7 @@
 
 @media (max-width: 768px) {
   .api-sidebar { display: none; }
-  .api-mobile-toggle { display: block; }
+  .api-mobile-toggle { display: block; position: sticky; top: 0; z-index: 40; background: var(--background); }
   .api-sidebar--mobile-open { display: block; position: fixed; top: 0; left: 0; width: 260px; height: 100vh; z-index: 100; background: var(--background); border-right: 1px solid var(--border); }
   .api-content { padding: 20px 16px; }
   .api-operation__summary { display: none; }

@@ -963,6 +963,10 @@
 
   .api-mobile-toggle {
     display: block;
+    position: sticky;
+    top: 81px;
+    z-index: 40;
+    background: var(--bg);
   }
 
   .api-sidebar--mobile-open {
