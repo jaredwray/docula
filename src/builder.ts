@@ -261,6 +261,15 @@ export class DoculaBuilder {
 			);
 		}
 
+		// Copy over js
+		/* v8 ignore next -- @preserve */
+		if (fs.existsSync(`${resolvedTemplatePath}/js`)) {
+			this.copyDirectory(
+				`${resolvedTemplatePath}/js`,
+				`${this.options.outputPath}/js`,
+			);
+		}
+
 		// Copy over variables
 		if (fs.existsSync(`${siteRelativePath}/variables.css`)) {
 			await fs.promises.copyFile(
