@@ -131,6 +131,10 @@ export default class Docula {
 			this.options.outputPath = consoleProcess.args.output;
 		}
 
+		if (consoleProcess.args.port) {
+			this.options.port = consoleProcess.args.port;
+		}
+
 		switch (consoleProcess.command) {
 			case "init": {
 				this.generateInit(

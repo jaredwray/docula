@@ -409,6 +409,32 @@ describe("docula execute", () => {
 			await docula.execute(process);
 
 			expect(docula.server).toBeDefined();
+			const address = docula.server?.address() as { port: number };
+			expect(address.port).toEqual(8183);
+		} finally {
+			await fs.promises.rm(options.outputPath, { recursive: true });
+			if (docula.server) {
+				docula.server.close();
+			}
+		}
+
+		console.log = consoleLog;
+	});
+	it("should serve the site on a specified port with --port flag", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.outputPath = "test/fixtures/single-page-site/dist4";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "serve", "--port", "8184"];
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			await docula.execute(process);
+
+			expect(docula.server).toBeDefined();
+			const address = docula.server?.address() as { port: number };
+			expect(address.port).toEqual(8184);
 		} finally {
 			await fs.promises.rm(options.outputPath, { recursive: true });
 			if (docula.server) {
