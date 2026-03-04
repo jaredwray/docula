@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var bodyTextarea = tryIt.querySelector('[data-try-body]');
       var body = bodyTextarea ? bodyTextarea.value.trim() : '';
       if (body && !headers['Content-Type']) {
-        headers['Content-Type'] = 'application/json';
+        headers['Content-Type'] = tryIt.getAttribute('data-content-type') || 'application/json';
       }
 
       var url = baseUrl + path + queryString;

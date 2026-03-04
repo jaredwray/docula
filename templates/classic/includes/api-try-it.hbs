@@ -1,4 +1,4 @@
-<div class="api-try-it" data-method="{{this.methodUpper}}" data-path="{{this.path}}">
+<div class="api-try-it" data-method="{{this.methodUpper}}" data-path="{{this.path}}"{{#if this.requestBody}} data-content-type="{{this.requestBody.contentType}}"{{/if}}>
   <span class="api-try-it__title">Test Request</span>
 
   <div class="api-try-it__url-bar">
