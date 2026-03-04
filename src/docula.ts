@@ -131,7 +131,10 @@ export default class Docula {
 			this.options.output = consoleProcess.args.output;
 		}
 
-		if (consoleProcess.args.port) {
+		if (
+			consoleProcess.args.port !== undefined &&
+			!Number.isNaN(consoleProcess.args.port)
+		) {
 			this.options.port = consoleProcess.args.port;
 		}
 
