@@ -26,7 +26,7 @@ export type DoculaData = {
 	siteDescription: string;
 	sitePath: string;
 	templatePath: string;
-	outputPath: string;
+	output: string;
 	githubPath?: string;
 	github?: GithubData;
 	templates?: DoculaTemplates;
@@ -110,7 +110,7 @@ export class DoculaBuilder {
 			siteDescription: this.options.siteDescription,
 			sitePath: this.options.sitePath,
 			templatePath: resolvedTemplatePath,
-			outputPath: this.options.outputPath,
+			output: this.options.output,
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
 			openApiUrl: this.options.openApiUrl,
@@ -232,7 +232,7 @@ export class DoculaBuilder {
 		if (fs.existsSync(`${siteRelativePath}/favicon.ico`)) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/favicon.ico`,
-				`${this.options.outputPath}/favicon.ico`,
+				`${this.options.output}/favicon.ico`,
 			);
 		}
 
@@ -240,7 +240,7 @@ export class DoculaBuilder {
 		if (fs.existsSync(`${siteRelativePath}/logo.svg`)) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/logo.svg`,
-				`${this.options.outputPath}/logo.svg`,
+				`${this.options.output}/logo.svg`,
 			);
 		}
 
@@ -248,7 +248,7 @@ export class DoculaBuilder {
 		if (fs.existsSync(`${siteRelativePath}/logo_horizontal.png`)) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/logo_horizontal.png`,
-				`${this.options.outputPath}/logo_horizontal.png`,
+				`${this.options.output}/logo_horizontal.png`,
 			);
 		}
 
@@ -257,7 +257,7 @@ export class DoculaBuilder {
 		if (fs.existsSync(`${resolvedTemplatePath}/css`)) {
 			this.copyDirectory(
 				`${resolvedTemplatePath}/css`,
-				`${this.options.outputPath}/css`,
+				`${this.options.output}/css`,
 			);
 		}
 
@@ -266,7 +266,7 @@ export class DoculaBuilder {
 		if (fs.existsSync(`${resolvedTemplatePath}/js`)) {
 			this.copyDirectory(
 				`${resolvedTemplatePath}/js`,
-				`${this.options.outputPath}/js`,
+				`${this.options.output}/js`,
 			);
 		}
 
@@ -274,12 +274,12 @@ export class DoculaBuilder {
 		if (fs.existsSync(`${siteRelativePath}/variables.css`)) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/variables.css`,
-				`${this.options.outputPath}/css/variables.css`,
+				`${this.options.output}/css/variables.css`,
 			);
 		}
 
 		// Copy over public folder contents
-		this.copyPublicFolder(siteRelativePath, this.options.outputPath);
+		this.copyPublicFolder(siteRelativePath, this.options.output);
 
 		// Build LLM index/content files after static assets are in place
 		await this.buildLlmsFiles(doculaData);
@@ -390,10 +390,10 @@ export class DoculaBuilder {
 
 	public async buildRobotsPage(options: DoculaOptions): Promise<void> {
 		const { sitePath } = options;
-		const { outputPath } = options;
-		const robotsPath = `${outputPath}/robots.txt`;
+		const { output } = options;
+		const robotsPath = `${output}/robots.txt`;
 
-		await fs.promises.mkdir(outputPath, { recursive: true });
+		await fs.promises.mkdir(output, { recursive: true });
 
 		await (fs.existsSync(`${sitePath}/robots.txt`)
 			? fs.promises.copyFile(`${sitePath}/robots.txt`, robotsPath)
@@ -401,7 +401,7 @@ export class DoculaBuilder {
 	}
 
 	public async buildSiteMapPage(data: DoculaData): Promise<void> {
-		const sitemapPath = `${data.outputPath}/sitemap.xml`;
+		const sitemapPath = `${data.output}/sitemap.xml`;
 		const urls = [{ url: data.siteUrl }];
 
 		if (data.openApiUrl && data.templates?.api) {
@@ -439,7 +439,7 @@ export class DoculaBuilder {
 
 		xml += "</urlset>";
 
-		await fs.promises.mkdir(data.outputPath, { recursive: true });
+		await fs.promises.mkdir(data.output, { recursive: true });
 
 		await fs.promises.writeFile(sitemapPath, xml, "utf8");
 	}
@@ -449,10 +449,10 @@ export class DoculaBuilder {
 			return;
 		}
 
-		await fs.promises.mkdir(data.outputPath, { recursive: true });
+		await fs.promises.mkdir(data.output, { recursive: true });
 
-		const llmsOutputPath = `${data.outputPath}/llms.txt`;
-		const llmsFullOutputPath = `${data.outputPath}/llms-full.txt`;
+		const llmsOutputPath = `${data.output}/llms.txt`;
+		const llmsFullOutputPath = `${data.output}/llms-full.txt`;
 		const llmsOverrideContent = await this.getSafeSiteOverrideFileContent(
 			data.sitePath,
 			"llms.txt",
@@ -796,9 +796,9 @@ export class DoculaBuilder {
 
 	public async buildIndexPage(data: DoculaData): Promise<void> {
 		if (data.templates) {
-			const indexPath = `${data.outputPath}/index.html`;
+			const indexPath = `${data.output}/index.html`;
 
-			await fs.promises.mkdir(data.outputPath, { recursive: true });
+			await fs.promises.mkdir(data.output, { recursive: true });
 
 			const indexTemplate = `${data.templatePath}/${data.templates.home}`;
 
@@ -830,8 +830,8 @@ export class DoculaBuilder {
 			throw new Error("No documents found for homePage");
 		}
 
-		const indexPath = `${data.outputPath}/index.html`;
-		await fs.promises.mkdir(data.outputPath, { recursive: true });
+		const indexPath = `${data.output}/index.html`;
+		await fs.promises.mkdir(data.output, { recursive: true });
 
 		const documentsTemplate = `${data.templatePath}/${data.templates.docPage}`;
 		const firstDocument = data.documents[0];
@@ -876,15 +876,15 @@ export class DoculaBuilder {
 	public async buildDocsPages(data: DoculaData): Promise<void> {
 		if (data.templates && data.documents?.length) {
 			const documentsTemplate = `${data.templatePath}/${data.templates.docPage}`;
-			await fs.promises.mkdir(`${data.outputPath}/docs`, { recursive: true });
+			await fs.promises.mkdir(`${data.output}/docs`, { recursive: true });
 			data.sidebarItems = this.generateSidebarItems(data);
 
 			const promises = data.documents.map(async (document) => {
 				const folder = document.urlPath.split("/").slice(0, -1).join("/");
-				await fs.promises.mkdir(`${data.outputPath}/${folder}`, {
+				await fs.promises.mkdir(`${data.output}/${folder}`, {
 					recursive: true,
 				});
-				const slug = `${data.outputPath}${document.urlPath}`;
+				const slug = `${data.output}${document.urlPath}`;
 				const documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
 					{ ...data, ...document },
@@ -903,8 +903,8 @@ export class DoculaBuilder {
 			return;
 		}
 
-		const apiPath = `${data.outputPath}/api/index.html`;
-		const apiOutputPath = `${data.outputPath}/api`;
+		const apiPath = `${data.output}/api/index.html`;
+		const apiOutputPath = `${data.output}/api`;
 
 		await fs.promises.mkdir(apiOutputPath, { recursive: true });
 
@@ -1101,7 +1101,7 @@ export class DoculaBuilder {
 			return;
 		}
 
-		const changelogOutputPath = `${data.outputPath}/changelog`;
+		const changelogOutputPath = `${data.output}/changelog`;
 		const changelogIndexPath = `${changelogOutputPath}/index.html`;
 
 		await fs.promises.mkdir(changelogOutputPath, { recursive: true });
@@ -1127,7 +1127,7 @@ export class DoculaBuilder {
 		const entryTemplate = `${data.templatePath}/${data.templates.changelogEntry}`;
 
 		const promises = data.changelogEntries.map(async (entry) => {
-			const entryOutputPath = `${data.outputPath}/changelog/${entry.slug}`;
+			const entryOutputPath = `${data.output}/changelog/${entry.slug}`;
 			await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
 			const entryContent = await this._ecto.renderFromFile(
@@ -1401,7 +1401,7 @@ export class DoculaBuilder {
 		}
 	}
 
-	private copyPublicFolder(sitePath: string, outputPath: string): void {
+	private copyPublicFolder(sitePath: string, output: string): void {
 		const publicPath = `${sitePath}/public`;
 
 		if (!fs.existsSync(publicPath)) {
@@ -1410,20 +1410,15 @@ export class DoculaBuilder {
 
 		this._console.log("Public folder found, copying contents to dist...");
 
-		const resolvedOutputPath = path.resolve(outputPath);
-		this.copyPublicDirectory(
-			publicPath,
-			outputPath,
-			publicPath,
-			resolvedOutputPath,
-		);
+		const resolvedOutput = path.resolve(output);
+		this.copyPublicDirectory(publicPath, output, publicPath, resolvedOutput);
 	}
 
 	private copyPublicDirectory(
 		source: string,
 		target: string,
 		basePath: string,
-		outputPath: string,
+		output: string,
 	): void {
 		const files = fs.readdirSync(source);
 
@@ -1435,8 +1430,8 @@ export class DoculaBuilder {
 			// Skip if source path is inside or equals the output path to prevent recursive copying
 			const resolvedSourcePath = path.resolve(sourcePath);
 			if (
-				resolvedSourcePath === outputPath ||
-				resolvedSourcePath.startsWith(`${outputPath}${path.sep}`)
+				resolvedSourcePath === output ||
+				resolvedSourcePath.startsWith(`${output}${path.sep}`)
 			) {
 				continue;
 			}
@@ -1445,7 +1440,7 @@ export class DoculaBuilder {
 
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
-				this.copyPublicDirectory(sourcePath, targetPath, basePath, outputPath);
+				this.copyPublicDirectory(sourcePath, targetPath, basePath, output);
 			} else {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);

@@ -20,7 +20,7 @@ describe("DoculaBuilder", () => {
 		siteDescription: "Beautiful Website for Your Projects",
 		sitePath: "test/fixtures/single-page-site",
 		templatePath: "test/fixtures/template-example",
-		outputPath: "test/temp-sitemap-test",
+		output: "test/temp-sitemap-test",
 	};
 
 	afterEach(() => {
@@ -60,7 +60,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Build", () => {
 		it("should build single page", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-test";
+			options.output = "test/temp-build-test";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -71,7 +71,7 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				await fs.promises.rm(builder.options.output, { recursive: true });
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -80,7 +80,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should build multi page with homePage disabled", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-test";
+			options.output = "test/temp-build-test";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.homePage = false;
 			const builder = new DoculaBuilder(options);
@@ -93,12 +93,12 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 				const indexHtml = await fs.promises.readFile(
-					`${options.outputPath}/index.html`,
+					`${options.output}/index.html`,
 					"utf8",
 				);
 				expect(indexHtml).toContain("<title>docula -");
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				await fs.promises.rm(builder.options.output, { recursive: true });
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -107,7 +107,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should build multi page", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-test";
+			options.output = "test/temp-build-test";
 			options.sitePath = "test/fixtures/multi-page-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -119,7 +119,7 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				await fs.promises.rm(builder.options.output, { recursive: true });
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -223,22 +223,22 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/single-page-site";
-			options.outputPath = "test/temp-robots-test";
+			options.output = "test/temp-robots-test";
 
-			if (fs.existsSync(options.outputPath)) {
-				await fs.promises.rm(options.outputPath, { recursive: true });
+			if (fs.existsSync(options.output)) {
+				await fs.promises.rm(options.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildRobotsPage(options);
 				const robots = await fs.promises.readFile(
-					`${options.outputPath}/robots.txt`,
+					`${options.output}/robots.txt`,
 					"utf8",
 				);
 				expect(robots).toBe("User-agent: *\nDisallow:");
 			} finally {
-				if (fs.existsSync(options.outputPath)) {
-					await fs.promises.rm(options.outputPath, { recursive: true });
+				if (fs.existsSync(options.output)) {
+					await fs.promises.rm(options.output, { recursive: true });
 				}
 			}
 		});
@@ -246,22 +246,22 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.outputPath = "test/temp-robots-test-copy";
+			options.output = "test/temp-robots-test-copy";
 
-			if (fs.existsSync(options.outputPath)) {
-				await fs.promises.rm(options.outputPath, { recursive: true });
+			if (fs.existsSync(options.output)) {
+				await fs.promises.rm(options.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildRobotsPage(options);
 				const robots = await fs.promises.readFile(
-					`${options.outputPath}/robots.txt`,
+					`${options.output}/robots.txt`,
 					"utf8",
 				);
 				expect(robots).toBe("User-agent: *\nDisallow: /meow");
 			} finally {
-				if (fs.existsSync(options.outputPath)) {
-					await fs.promises.rm(options.outputPath, { recursive: true });
+				if (fs.existsSync(options.output)) {
+					await fs.promises.rm(options.output, { recursive: true });
 				}
 			}
 		});
@@ -269,20 +269,20 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${data.outputPath}/sitemap.xml`,
+					`${data.output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).toContain("<loc>http://foo.com</loc>");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -297,22 +297,22 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildIndexPage(data);
 				const index = await fs.promises.readFile(
-					`${data.outputPath}/index.html`,
+					`${data.output}/index.html`,
 					"utf8",
 				);
 				expect(index).toContain("<title>docula</title>");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -320,7 +320,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.sitePath = "template";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 			data.templates = undefined;
 
 			try {
@@ -328,8 +328,8 @@ describe("DoculaBuilder", () => {
 			} catch (error) {
 				expect((error as Error).message).toBe("No templates found");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -346,7 +346,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 			data.hasDocuments = true;
 			data.sections = [
 				{
@@ -369,18 +369,16 @@ describe("DoculaBuilder", () => {
 				},
 			];
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildDocsPages(data);
-				expect(fs.existsSync(`${data.outputPath}/docs/document.html`)).toBe(
-					true,
-				);
+				expect(fs.existsSync(`${data.output}/docs/document.html`)).toBe(true);
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -390,10 +388,10 @@ describe("DoculaBuilder", () => {
 			data.templates = undefined;
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/no-template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
@@ -416,7 +414,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/mega-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-sitemap-test",
+				output: "test/temp-sitemap-test",
 			};
 			const documentsPath = "test/fixtures/mega-page-site/docs";
 			const documents = builder.getDocuments(documentsPath, doculaData);
@@ -468,7 +466,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 
 			data.sections = undefined;
 			data.documents = undefined;
@@ -489,7 +487,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 
 			data.sections = [
 				{
@@ -550,7 +548,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 
 			data.sections = [
 				{
@@ -592,7 +590,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.outputPath = "test/temp-index-test";
+			data.output = "test/temp-index-test";
 
 			data.sections = [
 				{
@@ -678,7 +676,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Public Folder", () => {
 		it("should copy public folder contents to dist", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-public-folder-test";
+			options.output = "test/temp-public-folder-test";
 			options.sitePath = "test/fixtures/single-page-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -696,38 +694,36 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 
 				// Verify files were copied
-				expect(fs.existsSync(`${options.outputPath}/images/test.png`)).toBe(
-					true,
-				);
-				expect(fs.existsSync(`${options.outputPath}/sample.pdf`)).toBe(true);
+				expect(fs.existsSync(`${options.output}/images/test.png`)).toBe(true);
+				expect(fs.existsSync(`${options.output}/sample.pdf`)).toBe(true);
 
 				// Verify copied file contents
 				const testPngContent = await fs.promises.readFile(
-					`${options.outputPath}/images/test.png`,
+					`${options.output}/images/test.png`,
 					"utf8",
 				);
 				expect(testPngContent).toBe("test image content\n");
 
 				const samplePdfContent = await fs.promises.readFile(
-					`${options.outputPath}/sample.pdf`,
+					`${options.output}/sample.pdf`,
 					"utf8",
 				);
 				expect(samplePdfContent).toBe("test pdf content\n");
 
 				// Verify dotfiles are also copied
-				expect(fs.existsSync(`${options.outputPath}/.nojekyll`)).toBe(true);
+				expect(fs.existsSync(`${options.output}/.nojekyll`)).toBe(true);
 				expect(
-					fs.existsSync(`${options.outputPath}/.well-known/security.txt`),
+					fs.existsSync(`${options.output}/.well-known/security.txt`),
 				).toBe(true);
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				await fs.promises.rm(builder.options.output, { recursive: true });
 				console.log = consoleLog;
 			}
 		});
 
 		it("should not log anything when public folder does not exist", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-no-public-folder-test";
+			options.output = "test/temp-no-public-folder-test";
 			options.sitePath = "test/fixtures/multi-page-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -744,16 +740,16 @@ describe("DoculaBuilder", () => {
 					consoleMessages.some((msg) => msg.includes("Public folder found")),
 				).toBe(false);
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				await fs.promises.rm(builder.options.output, { recursive: true });
 				console.log = consoleLog;
 			}
 		});
 
-		it("should skip outputPath when it is inside public folder to prevent recursive copy", async () => {
-			// Create a temporary site with public folder where outputPath is inside public
+		it("should skip output when it is inside public folder to prevent recursive copy", async () => {
+			// Create a temporary site with public folder where output is inside public
 			const tempSitePath = "test/temp-recursive-site";
 			const publicPath = `${tempSitePath}/public`;
-			const outputPath = `${publicPath}/dist`;
+			const output = `${publicPath}/dist`;
 
 			// Setup temporary site structure
 			await fs.promises.mkdir(`${publicPath}/assets`, { recursive: true });
@@ -767,7 +763,7 @@ describe("DoculaBuilder", () => {
 			await fs.promises.writeFile(`${tempSitePath}/README.md`, "# Test");
 
 			const options = new DoculaOptions();
-			options.outputPath = outputPath;
+			options.output = output;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -785,11 +781,11 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 
 				// Verify files were copied but dist folder itself was skipped
-				expect(fs.existsSync(`${outputPath}/test.txt`)).toBe(true);
-				expect(fs.existsSync(`${outputPath}/assets/image.png`)).toBe(true);
+				expect(fs.existsSync(`${output}/test.txt`)).toBe(true);
+				expect(fs.existsSync(`${output}/assets/image.png`)).toBe(true);
 
 				// Verify no recursive dist/dist folder was created
-				expect(fs.existsSync(`${outputPath}/dist`)).toBe(false);
+				expect(fs.existsSync(`${output}/dist`)).toBe(false);
 			} finally {
 				await fs.promises.rm(tempSitePath, { recursive: true });
 				console.log = consoleLog;
@@ -806,7 +802,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				outputPath: "test/temp-api-test",
+				output: "test/temp-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
@@ -815,21 +811,21 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildApiPage(data);
 				const apiPage = await fs.promises.readFile(
-					`${data.outputPath}/api/index.html`,
+					`${data.output}/api/index.html`,
 					"utf8",
 				);
 				expect(apiPage).toContain("API Reference");
 				expect(apiPage).toContain("docula");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -842,22 +838,22 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				outputPath: "test/temp-api-test-no-url",
+				output: "test/temp-api-test-no-url",
 				templates: {
 					home: "home.hbs",
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildApiPage(data);
-				expect(fs.existsSync(`${data.outputPath}/api/index.html`)).toBe(false);
+				expect(fs.existsSync(`${data.output}/api/index.html`)).toBe(false);
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -870,23 +866,23 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				outputPath: "test/temp-api-test-no-template",
+				output: "test/temp-api-test-no-template",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildApiPage(data);
-				expect(fs.existsSync(`${data.outputPath}/api/index.html`)).toBe(false);
+				expect(fs.existsSync(`${data.output}/api/index.html`)).toBe(false);
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -899,7 +895,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				outputPath: "test/temp-sitemap-api-test",
+				output: "test/temp-sitemap-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
@@ -908,20 +904,20 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${data.outputPath}/sitemap.xml`,
+					`${data.output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).toContain("<loc>http://foo.com/api</loc>");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -934,27 +930,27 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				outputPath: "test/temp-sitemap-no-api-test",
+				output: "test/temp-sitemap-no-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${data.outputPath}/sitemap.xml`,
+					`${data.output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).not.toContain("<loc>http://foo.com/api</loc>");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -979,7 +975,7 @@ describe("DoculaBuilder", () => {
 
 		it("should build with openApiUrl configured", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-api-test";
+			options.output = "test/temp-build-api-test";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -990,11 +986,9 @@ describe("DoculaBuilder", () => {
 
 			try {
 				await builder.build();
-				expect(fs.existsSync(`${options.outputPath}/api/index.html`)).toBe(
-					true,
-				);
+				expect(fs.existsSync(`${options.output}/api/index.html`)).toBe(true);
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, { recursive: true });
+				await fs.promises.rm(builder.options.output, { recursive: true });
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -1009,7 +1003,7 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.template = template;
 				options.sitePath = "test/fixtures/multi-page-site";
-				options.outputPath = `test/temp-build-api-home-button-${template}`;
+				options.output = `test/temp-build-api-home-button-${template}`;
 				options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 				options.homePage = true;
 				const builder = new DoculaBuilder(options);
@@ -1017,13 +1011,13 @@ describe("DoculaBuilder", () => {
 				try {
 					await builder.build();
 					const indexHtml = await fs.promises.readFile(
-						`${options.outputPath}/index.html`,
+						`${options.output}/index.html`,
 						"utf8",
 					);
 					expect(indexHtml).toContain('href="/api"');
 					expect(indexHtml).toContain("API Reference");
 				} finally {
-					await fs.promises.rm(options.outputPath, {
+					await fs.promises.rm(options.output, {
 						recursive: true,
 						force: true,
 					});
@@ -1035,7 +1029,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.templatePath = "test/fixtures/template-example";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.outputPath = "test/temp-build-api-home-no-template-button";
+			options.output = "test/temp-build-api-home-no-template-button";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 			options.homePage = true;
 			const builder = new DoculaBuilder(options);
@@ -1043,13 +1037,13 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 				const indexHtml = await fs.promises.readFile(
-					`${options.outputPath}/index.html`,
+					`${options.output}/index.html`,
 					"utf8",
 				);
 				expect(indexHtml).not.toContain("API Reference");
 				expect(indexHtml).not.toContain('href="/api"');
 			} finally {
-				await fs.promises.rm(options.outputPath, {
+				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
@@ -1059,24 +1053,22 @@ describe("DoculaBuilder", () => {
 		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/mega-page-site";
-			options.outputPath = "test/temp-build-api-autodetect";
+			options.output = "test/temp-build-api-autodetect";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			console.log = () => {};
 
 			try {
 				await builder.build();
-				expect(fs.existsSync(`${options.outputPath}/api/index.html`)).toBe(
-					true,
-				);
+				expect(fs.existsSync(`${options.output}/api/index.html`)).toBe(true);
 				const apiPage = await fs.promises.readFile(
-					`${options.outputPath}/api/index.html`,
+					`${options.output}/api/index.html`,
 					"utf8",
 				);
 				expect(apiPage).toContain("api-reference");
 				expect(apiPage).toContain("Mock HTTP API");
 			} finally {
-				await fs.promises.rm(options.outputPath, { recursive: true });
+				await fs.promises.rm(options.output, { recursive: true });
 				console.log = consoleLog;
 			}
 		});
@@ -1206,7 +1198,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-changelog-test",
+				output: "test/temp-changelog-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -1229,22 +1221,22 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildChangelogPage(data);
 				const changelog = await fs.promises.readFile(
-					`${data.outputPath}/changelog/index.html`,
+					`${data.output}/changelog/index.html`,
 					"utf8",
 				);
 				expect(changelog).toContain("<title>docula Changelog</title>");
 				expect(changelog).toContain("Test Entry");
 				expect(changelog).toContain("Added");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1257,7 +1249,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-changelog-entry-test",
+				output: "test/temp-changelog-entry-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -1280,24 +1272,24 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildChangelogEntryPages(data);
 				expect(
-					fs.existsSync(`${data.outputPath}/changelog/test-entry/index.html`),
+					fs.existsSync(`${data.output}/changelog/test-entry/index.html`),
 				).toBe(true);
 				const entryPage = await fs.promises.readFile(
-					`${data.outputPath}/changelog/test-entry/index.html`,
+					`${data.output}/changelog/test-entry/index.html`,
 					"utf8",
 				);
 				expect(entryPage).toContain("<title>docula - Test Entry</title>");
 				expect(entryPage).toContain("Test content");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1310,22 +1302,22 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-no-changelog-test",
+				output: "test/temp-no-changelog-test",
 				hasChangelog: false,
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildChangelogPage(data);
-				expect(fs.existsSync(`${data.outputPath}/changelog/index.html`)).toBe(
+				expect(fs.existsSync(`${data.output}/changelog/index.html`)).toBe(
 					false,
 				);
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1338,17 +1330,17 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-no-changelog-entries-test",
+				output: "test/temp-no-changelog-entries-test",
 				hasChangelog: false,
 				changelogEntries: [],
 			};
 
 			try {
 				await builder.buildChangelogEntryPages(data);
-				expect(fs.existsSync(`${data.outputPath}/changelog`)).toBe(false);
+				expect(fs.existsSync(`${data.output}/changelog`)).toBe(false);
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1361,7 +1353,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-sitemap-changelog-test",
+				output: "test/temp-sitemap-changelog-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -1381,14 +1373,14 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${data.outputPath}/sitemap.xml`,
+					`${data.output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).toContain("<loc>http://foo.com/changelog</loc>");
@@ -1396,8 +1388,8 @@ describe("DoculaBuilder", () => {
 					"<loc>http://foo.com/changelog/test-entry</loc>",
 				);
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1410,7 +1402,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-sitemap-changelog-no-entries-test",
+				output: "test/temp-sitemap-changelog-no-entries-test",
 				hasChangelog: true,
 				templates: {
 					home: "home.hbs",
@@ -1418,20 +1410,20 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${data.outputPath}/sitemap.xml`,
+					`${data.output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).toContain("<loc>http://foo.com/changelog</loc>");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1444,27 +1436,27 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-sitemap-no-changelog-test",
+				output: "test/temp-sitemap-no-changelog-test",
 				hasChangelog: false,
 				templates: {
 					home: "home.hbs",
 				},
 			};
 
-			if (fs.existsSync(data.outputPath)) {
-				await fs.promises.rm(data.outputPath, { recursive: true });
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
 			}
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${data.outputPath}/sitemap.xml`,
+					`${data.output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).not.toContain("<loc>http://foo.com/changelog</loc>");
 			} finally {
-				if (fs.existsSync(data.outputPath)) {
-					await fs.promises.rm(data.outputPath, { recursive: true });
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
 				}
 			}
 		});
@@ -1493,7 +1485,7 @@ describe("DoculaBuilder", () => {
 
 		it("should build with changelog", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-changelog-test";
+			options.output = "test/temp-build-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -1504,24 +1496,20 @@ describe("DoculaBuilder", () => {
 
 			try {
 				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
 				expect(
-					fs.existsSync(`${options.outputPath}/changelog/index.html`),
+					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
 				).toBe(true);
 				expect(
-					fs.existsSync(
-						`${options.outputPath}/changelog/new-feature/index.html`,
-					),
+					fs.existsSync(`${options.output}/changelog/bug-fix/index.html`),
 				).toBe(true);
 				expect(
-					fs.existsSync(`${options.outputPath}/changelog/bug-fix/index.html`),
-				).toBe(true);
-				expect(
-					fs.existsSync(
-						`${options.outputPath}/changelog/improvements/index.html`,
-					),
+					fs.existsSync(`${options.output}/changelog/improvements/index.html`),
 				).toBe(true);
 			} finally {
-				await fs.promises.rm(builder.options.outputPath, {
+				await fs.promises.rm(builder.options.output, {
 					recursive: true,
 				});
 			}
@@ -1669,28 +1657,26 @@ describe("DoculaBuilder", () => {
 
 		it("should build with enableReleaseChangelog enabled and merge release entries with file entries", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-release-changelog-test";
+			options.output = "test/temp-build-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.enableReleaseChangelog = true;
 			const builder = new DoculaBuilder(options);
 
 			try {
 				await builder.build();
-				expect(
-					fs.existsSync(`${options.outputPath}/changelog/index.html`),
-				).toBe(true);
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
 				// File-based entries should exist
 				expect(
-					fs.existsSync(
-						`${options.outputPath}/changelog/new-feature/index.html`,
-					),
+					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
 				).toBe(true);
 				// Release-based entries should also exist (from mock data)
 				expect(
-					fs.existsSync(`${options.outputPath}/changelog/v1-9-10/index.html`),
+					fs.existsSync(`${options.output}/changelog/v1-9-10/index.html`),
 				).toBe(true);
 			} finally {
-				await fs.promises.rm(options.outputPath, {
+				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
@@ -1699,28 +1685,26 @@ describe("DoculaBuilder", () => {
 
 		it("should not include release entries when enableReleaseChangelog is false", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-no-release-changelog-test";
+			options.output = "test/temp-build-no-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.enableReleaseChangelog = false;
 			const builder = new DoculaBuilder(options);
 
 			try {
 				await builder.build();
-				expect(
-					fs.existsSync(`${options.outputPath}/changelog/index.html`),
-				).toBe(true);
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
 				// File-based entries should still exist
 				expect(
-					fs.existsSync(
-						`${options.outputPath}/changelog/new-feature/index.html`,
-					),
+					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
 				).toBe(true);
 				// Release-based entries should NOT exist
 				expect(
-					fs.existsSync(`${options.outputPath}/changelog/v1-9-10/index.html`),
+					fs.existsSync(`${options.output}/changelog/v1-9-10/index.html`),
 				).toBe(false);
 			} finally {
-				await fs.promises.rm(options.outputPath, {
+				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
@@ -1729,18 +1713,18 @@ describe("DoculaBuilder", () => {
 
 		it("should skip changelog pages when no changelog entries exist", async () => {
 			const options = new DoculaOptions();
-			options.outputPath = "test/temp-build-no-changelog-pages-test";
+			options.output = "test/temp-build-no-changelog-pages-test";
 			options.sitePath = "test/fixtures/single-page-site";
 			options.enableReleaseChangelog = false;
 			const builder = new DoculaBuilder(options);
 
 			try {
 				await builder.build();
-				expect(
-					fs.existsSync(`${options.outputPath}/changelog/index.html`),
-				).toBe(false);
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					false,
+				);
 			} finally {
-				await fs.promises.rm(options.outputPath, {
+				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
@@ -1770,7 +1754,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-generics-test",
+				output: "test/temp-generics-test",
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
@@ -1785,7 +1769,7 @@ describe("DoculaBuilder", () => {
 
 			data.sidebarItems = builder.generateSidebarItems(data);
 
-			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			await fs.promises.rm(data.output, { recursive: true, force: true });
 
 			try {
 				await builder.buildDocsPages(data);
@@ -1794,7 +1778,7 @@ describe("DoculaBuilder", () => {
 				);
 				expect(genericsDoc).toBeDefined();
 
-				const outputFile = `${data.outputPath}${genericsDoc?.urlPath}`;
+				const outputFile = `${data.output}${genericsDoc?.urlPath}`;
 				const content = await fs.promises.readFile(outputFile, "utf8");
 
 				// The docs page should render successfully
@@ -1804,7 +1788,7 @@ describe("DoculaBuilder", () => {
 				expect(content).toContain("identity");
 				expect(content).toContain("Map");
 			} finally {
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 			}
 		});
 
@@ -1818,7 +1802,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-changelog-generics-test",
+				output: "test/temp-changelog-generics-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -1842,19 +1826,19 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			await fs.promises.rm(data.output, { recursive: true, force: true });
 
 			try {
 				await builder.buildChangelogEntryPages(data);
 				const entryPage = await fs.promises.readFile(
-					`${data.outputPath}/changelog/generics-support/index.html`,
+					`${data.output}/changelog/generics-support/index.html`,
 					"utf8",
 				);
 				// The page should render and contain the code block content
 				expect(entryPage).toContain("Generics Support");
 				expect(entryPage).toContain("identity");
 			} finally {
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 			}
 		});
 
@@ -1866,7 +1850,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-nonascii-test",
+				output: "test/temp-nonascii-test",
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
@@ -1881,7 +1865,7 @@ describe("DoculaBuilder", () => {
 
 			data.sidebarItems = builder.generateSidebarItems(data);
 
-			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			await fs.promises.rm(data.output, { recursive: true, force: true });
 
 			try {
 				await builder.buildDocsPages(data);
@@ -1890,7 +1874,7 @@ describe("DoculaBuilder", () => {
 				);
 				expect(genericsDoc).toBeDefined();
 
-				const outputFile = `${data.outputPath}${genericsDoc?.urlPath}`;
+				const outputFile = `${data.output}${genericsDoc?.urlPath}`;
 				const content = await fs.promises.readFile(outputFile, "utf8");
 
 				// Page should render with non-ASCII content intact
@@ -1907,7 +1891,7 @@ describe("DoculaBuilder", () => {
 				expect(content).toContain("stra\u00DFe");
 				expect(content).toContain("\u00A9 2025");
 			} finally {
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 			}
 		});
 	});
@@ -1915,14 +1899,14 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - LLM Files", () => {
 		it("should generate llms.txt and llms-full.txt for docs-only sites", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-docs-only";
+			const output = "test/temp-llms-docs-only";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 			};
 
 			data.documents = builder.getDocuments(
@@ -1930,20 +1914,17 @@ describe("DoculaBuilder", () => {
 				data,
 			);
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
-				expect(fs.existsSync(`${outputPath}/llms.txt`)).toBe(true);
-				expect(fs.existsSync(`${outputPath}/llms-full.txt`)).toBe(true);
+				expect(fs.existsSync(`${output}/llms.txt`)).toBe(true);
+				expect(fs.existsSync(`${output}/llms-full.txt`)).toBe(true);
 
-				const llms = await fs.promises.readFile(
-					`${outputPath}/llms.txt`,
-					"utf8",
-				);
+				const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 
@@ -1960,31 +1941,31 @@ describe("DoculaBuilder", () => {
 					"### docula\nURL: http://foo.com/docs/front-matter/\nDescription: Beautiful Website for Your Projects\n\n## Beautiful Website for Your Projects",
 				);
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should include API link and local OpenAPI spec text in llms-full.txt", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-api-local-spec";
+			const output = "test/temp-llms-api-local-spec";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/mega-page-site-no-home-page",
 				templatePath: "templates/modern",
-				outputPath,
+				output,
 				openApiUrl: "/api/swagger.json",
 				hasApi: true,
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 
@@ -1993,20 +1974,20 @@ describe("DoculaBuilder", () => {
 				expect(llmsFull).toContain('"openapi": "3.0.3"');
 				expect(llmsFull).toContain("Mock HTTP API");
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should fall back to OpenAPI URL and preserve non-index doc URLs", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-openapi-fallback";
+			const output = "test/temp-llms-openapi-fallback";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com/",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				openApiUrl: "openapi.json?raw=1",
 				hasApi: true,
 				documents: [
@@ -2025,17 +2006,14 @@ describe("DoculaBuilder", () => {
 				],
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
-				const llms = await fs.promises.readFile(
-					`${outputPath}/llms.txt`,
-					"utf8",
-				);
+				const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 
@@ -2044,73 +2022,73 @@ describe("DoculaBuilder", () => {
 					"OpenAPI Spec URL: http://foo.com/openapi.json?raw=1",
 				);
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should handle API section without openApiUrl", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-api-no-openapi";
+			const output = "test/temp-llms-api-no-openapi";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				hasApi: true,
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 				expect(llmsFull).toContain("## API Reference");
 				expect(llmsFull).toContain("URL: http://foo.com/api");
 				expect(llmsFull).not.toContain("OpenAPI Spec URL:");
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should handle openApiUrl with query-only path", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-openapi-query-only";
+			const output = "test/temp-llms-openapi-query-only";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				openApiUrl: "?raw=1",
 				hasApi: true,
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 				expect(llmsFull).toContain("OpenAPI Spec URL: http://foo.com/?raw=1");
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should not read OpenAPI files outside sitePath", async () => {
 			const builder = new DoculaBuilder();
 			const sitePath = "test/temp-llms-safe-openapi-site";
-			const outputPath = "test/temp-llms-safe-openapi-output";
+			const output = "test/temp-llms-safe-openapi-output";
 			const externalSpecPath = "test/temp-llms-safe-openapi-external.json";
 			const externalMarker = "external-openapi-should-not-be-read";
 			const data: DoculaData = {
@@ -2119,13 +2097,13 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath,
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				openApiUrl: "../temp-llms-safe-openapi-external.json",
 				hasApi: true,
 			};
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 			await fs.promises.rm(externalSpecPath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
 			await fs.promises.writeFile(
@@ -2138,7 +2116,7 @@ describe("DoculaBuilder", () => {
 				await builder.buildLlmsFiles(data);
 
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 				expect(llmsFull).toContain(
@@ -2147,7 +2125,7 @@ describe("DoculaBuilder", () => {
 				expect(llmsFull).not.toContain(externalMarker);
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 				await fs.promises.rm(externalSpecPath, {
 					recursive: true,
 					force: true,
@@ -2158,7 +2136,7 @@ describe("DoculaBuilder", () => {
 		it("should not read symbolic linked OpenAPI files", async () => {
 			const builder = new DoculaBuilder();
 			const sitePath = "test/temp-llms-openapi-symlink-site";
-			const outputPath = "test/temp-llms-openapi-symlink-output";
+			const output = "test/temp-llms-openapi-symlink-output";
 			const targetSpecPath = `${sitePath}/api/real-swagger.json`;
 			const symlinkSpecPath = `${sitePath}/api/swagger-link.json`;
 			const marker = "symlink-openapi-should-not-be-read";
@@ -2168,13 +2146,13 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath,
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				openApiUrl: "/api/swagger-link.json",
 				hasApi: true,
 			};
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
 			await fs.promises.writeFile(
 				targetSpecPath,
@@ -2187,7 +2165,7 @@ describe("DoculaBuilder", () => {
 				await builder.buildLlmsFiles(data);
 
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 				expect(llmsFull).toContain(
@@ -2196,13 +2174,13 @@ describe("DoculaBuilder", () => {
 				expect(llmsFull).not.toContain(marker);
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should include changelog landing and only latest 20 entries in llms.txt", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-changelog-index";
+			const output = "test/temp-llms-changelog-index";
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
 				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
@@ -2218,20 +2196,17 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				hasChangelog: true,
 				changelogEntries,
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
-				const llms = await fs.promises.readFile(
-					`${outputPath}/llms.txt`,
-					"utf8",
-				);
+				const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 				const changelogLines = llms.split("\n").filter((line) => {
 					const urlMatch = line.match(/\((https?:\/\/[^)\s]+)\)/);
 					if (!urlMatch) {
@@ -2252,13 +2227,13 @@ describe("DoculaBuilder", () => {
 				expect(llms).not.toContain("Entry 21");
 				expect(llms).not.toContain("Entry 25");
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should include all changelog entries in llms-full.txt", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-llms-full-changelog";
+			const output = "test/temp-llms-full-changelog";
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
 				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
@@ -2274,18 +2249,18 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				hasChangelog: true,
 				changelogEntries,
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
 
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 				const entryHeadings = llmsFull
@@ -2295,14 +2270,14 @@ describe("DoculaBuilder", () => {
 				expect(entryHeadings).toHaveLength(25);
 				expect(llmsFull).toContain("Content 25");
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should copy custom llms files when they exist in site path", async () => {
 			const builder = new DoculaBuilder();
 			const sitePath = "test/temp-custom-llms-site";
-			const outputPath = "test/temp-custom-llms-output";
+			const output = "test/temp-custom-llms-output";
 			const customLlms = "# Custom llms.txt";
 			const customLlmsFull = "# Custom llms-full.txt";
 			const data: DoculaData = {
@@ -2311,11 +2286,11 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath,
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 			};
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
 			await fs.promises.writeFile(`${sitePath}/llms.txt`, customLlms, "utf8");
 			await fs.promises.writeFile(
@@ -2327,12 +2302,9 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.buildLlmsFiles(data);
 
-				const llms = await fs.promises.readFile(
-					`${outputPath}/llms.txt`,
-					"utf8",
-				);
+				const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 
@@ -2340,14 +2312,14 @@ describe("DoculaBuilder", () => {
 				expect(llmsFull).toBe(customLlmsFull);
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should ignore symbolic linked llms override files", async () => {
 			const builder = new DoculaBuilder();
 			const sitePath = "test/temp-custom-llms-symlink-site";
-			const outputPath = "test/temp-custom-llms-symlink-output";
+			const output = "test/temp-custom-llms-symlink-output";
 			const externalLlmsPath = "test/temp-custom-llms-symlink-source.txt";
 			const externalLlmsFullPath =
 				"test/temp-custom-llms-symlink-source-full.txt";
@@ -2358,11 +2330,11 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath,
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 			};
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 			await fs.promises.rm(externalLlmsPath, { recursive: true, force: true });
 			await fs.promises.rm(externalLlmsFullPath, {
 				recursive: true,
@@ -2383,12 +2355,9 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.buildLlmsFiles(data);
 
-				const llms = await fs.promises.readFile(
-					`${outputPath}/llms.txt`,
-					"utf8",
-				);
+				const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 				const llmsFull = await fs.promises.readFile(
-					`${outputPath}/llms-full.txt`,
+					`${output}/llms-full.txt`,
 					"utf8",
 				);
 
@@ -2398,7 +2367,7 @@ describe("DoculaBuilder", () => {
 				expect(llmsFull).not.toContain(externalMarker);
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 				await fs.promises.rm(externalLlmsPath, {
 					recursive: true,
 					force: true,
@@ -2437,14 +2406,14 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					outputPath: "test/temp-override-boundary-check-output",
+					output: "test/temp-override-boundary-check-output",
 				};
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 
 				await builder.buildLlmsFiles(data);
 
 				const llms = await fs.promises.readFile(
-					`${data.outputPath}/llms.txt`,
+					`${data.output}/llms.txt`,
 					"utf8",
 				);
 				expect(llms).toContain("# docula");
@@ -2481,14 +2450,14 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					outputPath: "test/temp-override-realpath-fail-output",
+					output: "test/temp-override-realpath-fail-output",
 				};
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 
 				await builder.buildLlmsFiles(data);
 
 				const llms = await fs.promises.readFile(
-					`${data.outputPath}/llms.txt`,
+					`${data.output}/llms.txt`,
 					"utf8",
 				);
 				expect(llms).toContain("# docula");
@@ -2563,7 +2532,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					outputPath: "test/temp-openapi-realpath-fail-output",
+					output: "test/temp-openapi-realpath-fail-output",
 					openApiUrl: "/api/swagger.json",
 					hasApi: true,
 				};
@@ -2611,7 +2580,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					outputPath: "test/temp-openapi-realpath-escape-output",
+					output: "test/temp-openapi-realpath-escape-output",
 					openApiUrl: "/api/swagger.json",
 					hasApi: true,
 				};
@@ -2631,37 +2600,37 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.enableLlmsTxt = false;
 			const builder = new DoculaBuilder(options);
-			const outputPath = "test/temp-llms-disabled";
+			const output = "test/temp-llms-disabled";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildLlmsFiles(data);
-				expect(fs.existsSync(`${outputPath}/llms.txt`)).toBe(false);
-				expect(fs.existsSync(`${outputPath}/llms-full.txt`)).toBe(false);
+				expect(fs.existsSync(`${output}/llms.txt`)).toBe(false);
+				expect(fs.existsSync(`${output}/llms-full.txt`)).toBe(false);
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 
 		it("should not include llms files in sitemap.xml", async () => {
 			const builder = new DoculaBuilder();
-			const outputPath = "test/temp-sitemap-no-llms";
+			const output = "test/temp-sitemap-no-llms";
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath,
+				output,
 				openApiUrl: "/api/swagger.json",
 				hasApi: true,
 				hasChangelog: true,
@@ -2697,18 +2666,18 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			await fs.promises.rm(outputPath, { recursive: true, force: true });
+			await fs.promises.rm(output, { recursive: true, force: true });
 
 			try {
 				await builder.buildSiteMapPage(data);
 				const sitemap = await fs.promises.readFile(
-					`${outputPath}/sitemap.xml`,
+					`${output}/sitemap.xml`,
 					"utf8",
 				);
 				expect(sitemap).not.toContain("llms.txt");
 				expect(sitemap).not.toContain("llms-full.txt");
 			} finally {
-				await fs.promises.rm(outputPath, { recursive: true, force: true });
+				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
 	});
@@ -2722,7 +2691,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-docs-home-test",
+				output: "test/temp-docs-home-test",
 				homePage: false,
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
@@ -2732,7 +2701,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath: "test/fixtures/multi-page-site",
 					templatePath: "test/fixtures/template-example",
-					outputPath: "test/temp-docs-home-test",
+					output: "test/temp-docs-home-test",
 				}),
 				templates: {
 					home: "home.hbs",
@@ -2740,17 +2709,17 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			await fs.promises.rm(data.output, { recursive: true, force: true });
 			try {
 				await builder.buildDocsHomePage(data);
 				const indexHtml = await fs.promises.readFile(
-					`${data.outputPath}/index.html`,
+					`${data.output}/index.html`,
 					"utf8",
 				);
 				expect(indexHtml).toBeTruthy();
 				expect(indexHtml.length).toBeGreaterThan(0);
 			} finally {
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 			}
 		});
 
@@ -2762,7 +2731,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-docs-home-error-test",
+				output: "test/temp-docs-home-error-test",
 				homePage: false,
 				hasDocuments: true,
 				documents: [],
@@ -2784,7 +2753,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-docs-home-empty-test",
+				output: "test/temp-docs-home-empty-test",
 				homePage: false,
 				hasDocuments: true,
 				documents: [],
@@ -2807,7 +2776,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				outputPath: "test/temp-docs-home-precomputed-sidebar",
+				output: "test/temp-docs-home-precomputed-sidebar",
 				homePage: false,
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
@@ -2817,7 +2786,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath: "test/fixtures/multi-page-site",
 					templatePath: "test/fixtures/template-example",
-					outputPath: "test/temp-docs-home-precomputed-sidebar",
+					output: "test/temp-docs-home-precomputed-sidebar",
 				}),
 				sidebarItems: [],
 				templates: {
@@ -2826,12 +2795,12 @@ describe("DoculaBuilder", () => {
 				},
 			};
 
-			await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+			await fs.promises.rm(data.output, { recursive: true, force: true });
 			try {
 				await builder.buildDocsHomePage(data);
-				expect(fs.existsSync(`${data.outputPath}/index.html`)).toBe(true);
+				expect(fs.existsSync(`${data.output}/index.html`)).toBe(true);
 			} finally {
-				await fs.promises.rm(data.outputPath, { recursive: true, force: true });
+				await fs.promises.rm(data.output, { recursive: true, force: true });
 			}
 		});
 	});

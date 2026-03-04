@@ -5,7 +5,7 @@ import process from 'node:process';
 export const options = {
 	template: 'modern',
 	githubPath: 'jaredwray/docula',
-	outputPath: './site/dist',
+	output: './site/dist',
 	siteTitle: 'docula',
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',

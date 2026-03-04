@@ -12,6 +12,7 @@
 - [Features](#features)
 - [Open Source Examples](#open-source-examples)
 - [Getting Started](#getting-started)
+  - [Serve your site locally](#serve-your-site-locally)
 - [TypeScript Configuration](#typescript-configuration)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
@@ -76,6 +77,23 @@ Simply replace the logo, favicon, and css file with your own. The readme is your
 
 This will build your site and place it in the `dist` folder. You can then host it anywhere you like.
 
+## Serve your site locally
+
+> npx docula serve
+
+This will build and serve your site locally at `http://localhost:3000`. You can specify a custom port with the `-p` or `--port` flag:
+
+> npx docula serve -p 8080
+
+### CLI Options for serve
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-p, --port` | Set the port number | `3000` |
+| `-s, --site` | Set the path where site files are located | `./site` |
+| `-o, --output` | Set the output directory | `./site/dist` |
+| `-w, --watch` | Watch for changes and rebuild | `false` |
+
 # TypeScript Configuration
 
 Docula supports TypeScript configuration files (`docula.config.ts`) in addition to JavaScript (`docula.config.mjs`). TypeScript configs provide type safety and better IDE support.
@@ -95,7 +113,7 @@ import type { DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   templatePath: './template',
-  outputPath: './dist',
+  output: './dist',
   sitePath: './site',
   githubPath: 'your-username/your-repo',
   siteTitle: 'My Project',
@@ -133,7 +151,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `templatePath` | `string` | `'./template'` | Path to custom template directory |
-| `outputPath` | `string` | `'./dist'` | Output directory for built site |
+| `output` | `string` | `'./dist'` | Output directory for built site |
 | `sitePath` | `string` | `'./site'` | Directory containing site content |
 | `githubPath` | `string` | - | GitHub repository path (e.g., `'user/repo'`) |
 | `siteTitle` | `string` | `'docula'` | Website title |

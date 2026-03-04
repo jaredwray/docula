@@ -4,7 +4,7 @@ export const options: Partial<DoculaOptions> = {
 	template: "classic",
 	githubPath: "jaredwray/docula",
 	sitePath: "../single-page-site-ts-onprepare",
-	outputPath: "../single-page-site-ts-onprepare/dist",
+	output: "../single-page-site-ts-onprepare/dist",
 	siteTitle: "docula",
 	siteDescription: "Beautiful Website for Your Projects",
 	siteUrl: "https://docula.org",

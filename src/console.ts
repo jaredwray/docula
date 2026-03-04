@@ -40,7 +40,7 @@ export class DoculaConsole {
 			"     -s, --site             Set the path where site files are located",
 		);
 		console.log(
-			"     -o, --outputPath       Set the output directory. Default is ./site/dist",
+			"     -o, --output           Set the output directory. Default is ./site/dist",
 		);
 		console.log("     -t, --templatePath     Set the custom template to use");
 		console.log(
@@ -92,13 +92,13 @@ export class DoculaConsole {
 	}
 
 	public getArguments(argv: string[]): DoculaConsoleArguments {
-		const arguments_ = {
+		const arguments_: DoculaConsoleArguments = {
 			sitePath: "",
 			templatePath: "",
 			template: "",
 			output: "",
 			watch: false,
-			port: 3000,
+			port: undefined,
 			typescript: false,
 		};
 		for (let i = 0; i < argv.length; i++) {
@@ -175,6 +175,6 @@ type DoculaConsoleArguments = {
 	template: string | undefined;
 	output: string | undefined;
 	watch: boolean;
-	port: number;
+	port: number | undefined;
 	typescript: boolean;
 };
