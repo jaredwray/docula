@@ -1410,10 +1410,6 @@ export class DoculaBuilder {
 			if (stat.isFile() && (entry.endsWith(".md") || entry.endsWith(".mdx"))) {
 				return true;
 			}
-
-			if (stat.isDirectory() && this.directoryContainsMarkdown(fullPath)) {
-				return true;
-			}
 		}
 
 		return false;

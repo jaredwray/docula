@@ -247,11 +247,11 @@ dist
 │       └───release-banner.png
 ```
 
-Reference assets from your markdown with relative or absolute paths:
+Reference assets from your markdown using relative paths:
 
 ```md
-![Architecture](/docs/images/architecture.png)
-[Download PDF](/docs/assets/example.pdf)
+![Architecture](images/architecture.png)
+[Download PDF](assets/example.pdf)
 ```
 
 ## Supported Extensions

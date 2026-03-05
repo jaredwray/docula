@@ -465,14 +465,15 @@ describe("DoculaBuilder", () => {
 			expect(sectionPaths).not.toContain("images");
 			expect(sectionPaths).not.toContain("assets");
 		});
-		it("should include directories with nested markdown as sections", () => {
+		it("should not include directories with only nested markdown as sections", () => {
 			const builder = new DoculaBuilder();
 			const sections = builder.getSections(
 				"test/fixtures/multi-page-site/docs",
 				new DoculaOptions(),
 			);
 			const sectionPaths = sections.map((s) => s.path);
-			expect(sectionPaths).toContain("guides");
+			// guides/ only has nested/intro.md, no immediate markdown files
+			expect(sectionPaths).not.toContain("guides");
 		});
 	});
 
