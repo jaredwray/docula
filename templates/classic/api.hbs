@@ -73,6 +73,17 @@
           {{/each}}
         </div>
         {{/if}}
+        <div class="api-auth">
+          <div class="api-auth__label">Authorization</div>
+          <div class="api-auth__controls">
+            <select class="api-auth__type" id="api-auth-type">
+              <option value="none">None</option>
+              <option value="apikey">API Key (x-api-key)</option>
+              <option value="bearer">Bearer Token</option>
+            </select>
+            <input type="password" class="api-auth__value api-auth__value--hidden" id="api-auth-value" placeholder="Enter value..." />
+          </div>
+        </div>
       </section>
 
       {{#each apiSpec.groups}}

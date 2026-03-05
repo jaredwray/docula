@@ -76,5 +76,8 @@ test/fixtures/mega-page-site/dist
 site/dist
 package-lock.json
 
+# Playwright
+test-results/
+
 # AI
 .claude
