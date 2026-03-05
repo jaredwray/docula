@@ -211,6 +211,8 @@ export const options = {
 
 Non-markdown files placed inside the `docs/` or `changelog/` directories are automatically copied to the build output, preserving their relative paths. This lets you keep images and other assets alongside the markdown that references them.
 
+For `docs/`, only assets that are actually referenced in a document's markdown content are copied. If a file exists in the `docs/` directory but is not referenced by any document, it will not be included in the build output. For `changelog/`, all assets are copied regardless of whether they are referenced.
+
 ```
 site
 ├───docs
