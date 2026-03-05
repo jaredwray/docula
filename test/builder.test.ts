@@ -455,6 +455,26 @@ describe("DoculaBuilder", () => {
 			expect(sections[2].name).toBe("Storage Adapters");
 			expect(sections[2].order).toBe(undefined);
 		});
+		it("should not include asset-only directories as sections", () => {
+			const builder = new DoculaBuilder();
+			const sections = builder.getSections(
+				"test/fixtures/multi-page-site/docs",
+				new DoculaOptions(),
+			);
+			const sectionPaths = sections.map((s) => s.path);
+			expect(sectionPaths).not.toContain("images");
+			expect(sectionPaths).not.toContain("assets");
+		});
+		it("should not include directories with only nested markdown as sections", () => {
+			const builder = new DoculaBuilder();
+			const sections = builder.getSections(
+				"test/fixtures/multi-page-site/docs",
+				new DoculaOptions(),
+			);
+			const sectionPaths = sections.map((s) => s.path);
+			// guides/ only has nested/intro.md, no immediate markdown files
+			expect(sectionPaths).not.toContain("guides");
+		});
 	});
 
 	describe("Docula Builder - Generate Sidebar Items", () => {
@@ -2801,6 +2821,308 @@ describe("DoculaBuilder", () => {
 				expect(fs.existsSync(`${data.output}/index.html`)).toBe(true);
 			} finally {
 				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+		});
+	});
+
+	describe("Docula Builder - Content Assets", () => {
+		it("should copy non-markdown files from docs to output docs", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-content-assets-docs";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+
+				// Assets are copied into each document's output subdirectory
+				// so relative paths in markdown resolve correctly
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/front-matter/images/diagram.png`,
+					),
+				).toBe(true);
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/front-matter/assets/sample.pdf`,
+					),
+				).toBe(true);
+
+				// Verify file contents are correct
+				const diagramContent = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/images/diagram.png`,
+					"utf8",
+				);
+				expect(diagramContent).toContain("test diagram content");
+
+				const pdfContent = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/assets/sample.pdf`,
+					"utf8",
+				);
+				expect(pdfContent).toContain("test pdf content");
+
+				// Verify markdown files were NOT copied as raw files
+				expect(fs.existsSync(`${options.output}/docs/front-matter.md`)).toBe(
+					false,
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+		});
+
+		it("should copy non-markdown files from changelog to output changelog", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-content-assets-changelog";
+			options.sitePath = "test/fixtures/mega-page-site";
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+
+				// Verify changelog image was copied
+				expect(
+					fs.existsSync(
+						`${options.output}/changelog/images/release-screenshot.png`,
+					),
+				).toBe(true);
+
+				const screenshotContent = await fs.promises.readFile(
+					`${options.output}/changelog/images/release-screenshot.png`,
+					"utf8",
+				);
+				expect(screenshotContent).toContain("test screenshot content");
+
+				// Verify markdown files were NOT copied as raw files
+				expect(
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature.md`,
+					),
+				).toBe(false);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+		});
+
+		it("should only copy files with allowed asset extensions", async () => {
+			const tempSitePath = "test/temp-content-assets-extensions-site";
+			const docsPath = `${tempSitePath}/docs`;
+
+			await fs.promises.mkdir(docsPath, { recursive: true });
+			await fs.promises.writeFile(
+				`${docsPath}/index.md`,
+				"---\ntitle: Home\ndescription: Test home page\n---\n# Home\n![Photo](photo.jpg)\nContent",
+			);
+			await fs.promises.writeFile(`${docsPath}/photo.jpg`, "jpg content");
+			await fs.promises.writeFile(`${docsPath}/script.sh`, "#!/bin/bash");
+			await fs.promises.writeFile(`${tempSitePath}/README.md`, "# Test");
+
+			const options = new DoculaOptions();
+			options.output = `${tempSitePath}/dist`;
+			options.sitePath = tempSitePath;
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+
+				// .jpg is in the default asset extensions
+				expect(fs.existsSync(`${options.output}/docs/photo.jpg`)).toBe(true);
+				// .sh is NOT in the default asset extensions
+				expect(fs.existsSync(`${options.output}/docs/script.sh`)).toBe(false);
+			} finally {
+				await fs.promises.rm(tempSitePath, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+		});
+
+		it("should respect custom assetExtensions from options", async () => {
+			const tempSitePath = "test/temp-content-assets-custom-ext-site";
+			const docsPath = `${tempSitePath}/docs`;
+
+			await fs.promises.mkdir(docsPath, { recursive: true });
+			await fs.promises.writeFile(
+				`${docsPath}/index.md`,
+				"---\ntitle: Home\ndescription: Test home page\n---\n# Home\n![Custom](custom.xyz)\n![Photo](photo.jpg)\nContent",
+			);
+			await fs.promises.writeFile(`${docsPath}/photo.jpg`, "jpg content");
+			await fs.promises.writeFile(`${docsPath}/custom.xyz`, "custom content");
+			await fs.promises.writeFile(`${tempSitePath}/README.md`, "# Test");
+
+			const options = new DoculaOptions();
+			options.output = `${tempSitePath}/dist`;
+			options.sitePath = tempSitePath;
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			// Only allow .xyz extension
+			options.assetExtensions = [".xyz"];
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+
+				// .xyz is in our custom list
+				expect(fs.existsSync(`${options.output}/docs/custom.xyz`)).toBe(true);
+				// .jpg is NOT in our custom list
+				expect(fs.existsSync(`${options.output}/docs/photo.jpg`)).toBe(false);
+			} finally {
+				await fs.promises.rm(tempSitePath, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+		});
+
+		it("should copy sibling assets into non-index document output directories", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-content-assets-sibling";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+
+				// Assets exist inside each document's output subdirectory
+				// so that relative paths like images/diagram.png resolve correctly
+				// from /docs/front-matter/index.html
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/front-matter/images/diagram.png`,
+					),
+				).toBe(true);
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/front-matter/assets/sample.pdf`,
+					),
+				).toBe(true);
+
+				// readme-example references images/diagram.png so it should be copied
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/readme-example/images/diagram.png`,
+					),
+				).toBe(true);
+
+				// Documents that do NOT reference assets should NOT have them copied
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/no-front-matter/images/diagram.png`,
+					),
+				).toBe(false);
+				expect(
+					fs.existsSync(
+						`${options.output}/docs/generics-doc/images/diagram.png`,
+					),
+				).toBe(false);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+		});
+
+		it("should NOT copy unreferenced assets from docs", async () => {
+			const tempSitePath = "test/temp-content-assets-unreferenced-site";
+			const docsPath = `${tempSitePath}/docs`;
+
+			await fs.promises.mkdir(docsPath, { recursive: true });
+			await fs.promises.writeFile(
+				`${docsPath}/index.md`,
+				"---\ntitle: Home\ndescription: Test home page\n---\n# Home\n![Used](used.png)\nContent",
+			);
+			await fs.promises.writeFile(`${docsPath}/used.png`, "used content");
+			await fs.promises.writeFile(`${docsPath}/unused.png`, "unused content");
+			await fs.promises.writeFile(`${tempSitePath}/README.md`, "# Test");
+
+			const options = new DoculaOptions();
+			options.output = `${tempSitePath}/dist`;
+			options.sitePath = tempSitePath;
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+
+				// Referenced asset should be copied
+				expect(fs.existsSync(`${options.output}/docs/used.png`)).toBe(true);
+				// Unreferenced asset should NOT be copied
+				expect(fs.existsSync(`${options.output}/docs/unused.png`)).toBe(false);
+			} finally {
+				await fs.promises.rm(tempSitePath, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+		});
+
+		it("should handle docs directory with no non-markdown files", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-content-assets-no-assets";
+			options.sitePath = "test/fixtures/single-page-site";
+			options.githubPath = "jaredwray/docula";
+			options.siteTitle = "docula";
+			options.siteDescription = "Beautiful Website for Your Projects";
+			options.siteUrl = "https://docula.org";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				// Build should complete without errors
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
 			}
 		});
 	});

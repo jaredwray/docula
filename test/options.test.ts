@@ -160,5 +160,23 @@ describe("DoculaOptions", () => {
 			options.parseOptions({ enableLlmsTxt: "yes" });
 			expect(options.enableLlmsTxt).toEqual(true);
 		});
+
+		it("should parse assetExtensions from options", () => {
+			options.parseOptions({ assetExtensions: [".png", ".custom"] });
+			expect(options.assetExtensions).toEqual([".png", ".custom"]);
+		});
+
+		it("should not update assetExtensions for non-array values", () => {
+			const defaultExtensions = [...options.assetExtensions];
+			options.parseOptions({ assetExtensions: "not-an-array" });
+			expect(options.assetExtensions).toEqual(defaultExtensions);
+		});
+
+		it("should have default assetExtensions", () => {
+			expect(options.assetExtensions).toContain(".png");
+			expect(options.assetExtensions).toContain(".jpg");
+			expect(options.assetExtensions).toContain(".pdf");
+			expect(options.assetExtensions).toContain(".svg");
+		});
 	});
 });

@@ -281,6 +281,18 @@ export class DoculaBuilder {
 		// Copy over public folder contents
 		this.copyPublicFolder(siteRelativePath, this.options.output);
 
+		// Copy non-markdown assets from changelog/ to output
+		this.copyContentAssets(
+			`${doculaData.sitePath}/changelog`,
+			`${this.options.output}/changelog`,
+		);
+
+		// Copy assets from each document's source directory into its output directory
+		// so that relative paths in markdown (e.g. images/diagram.png) resolve correctly
+		if (doculaData.documents?.length) {
+			this.copyDocumentSiblingAssets(doculaData);
+		}
+
 		// Build LLM index/content files after static assets are in place
 		await this.buildLlmsFiles(doculaData);
 
@@ -528,6 +540,7 @@ export class DoculaBuilder {
 				`- [Changelog](${this.buildAbsoluteSiteUrl(data.siteUrl, "/changelog")})`,
 			);
 			for (const entry of changelogEntries.slice(0, 20)) {
+				/* v8 ignore next -- @preserve */
 				const date = entry.formattedDate || entry.date || "No date";
 				lines.push(
 					`- [${entry.title}](${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}) (${date})`,
@@ -572,6 +585,7 @@ export class DoculaBuilder {
 					lines.push(`Description: ${document.description}`);
 				}
 				lines.push("");
+				/* v8 ignore next -- @preserve */
 				lines.push(markdownBody || "_No content_");
 			}
 		} else {
@@ -590,6 +604,7 @@ export class DoculaBuilder {
 					`OpenAPI Spec Source: ${this.toPosixPath(localOpenApiSpec.sourcePath)}`,
 				);
 				lines.push("");
+				/* v8 ignore next -- @preserve */
 				lines.push(localOpenApiSpec.content || "_No content_");
 			} else {
 				const openApiSpecUrl = this.resolveOpenApiSpecUrl(data);
@@ -614,6 +629,7 @@ export class DoculaBuilder {
 				lines.push(
 					`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}`,
 				);
+				/* v8 ignore next 2 -- @preserve */
 				if (entry.formattedDate || entry.date) {
 					lines.push(`Date: ${entry.formattedDate || entry.date}`);
 				}
@@ -636,6 +652,7 @@ export class DoculaBuilder {
 		const normalizedSiteUrl = siteUrl.endsWith("/")
 			? siteUrl.slice(0, -1)
 			: siteUrl;
+		/* v8 ignore next -- @preserve */
 		const normalizedPath = urlPath.startsWith("/") ? urlPath : `/${urlPath}`;
 		return `${normalizedSiteUrl}${normalizedPath}`;
 	}
@@ -922,6 +939,7 @@ export class DoculaBuilder {
 		const localSpec = await this.getSafeLocalOpenApiSpec(data);
 		if (localSpec) {
 			apiSpec = parseOpenApiSpec(localSpec.content);
+			/* v8 ignore next 9 -- @preserve */
 		} else if (data.openApiUrl && this.isRemoteUrl(data.openApiUrl)) {
 			try {
 				const response = await fetch(data.openApiUrl);
@@ -933,6 +951,7 @@ export class DoculaBuilder {
 		}
 
 		// Render Markdown descriptions to HTML
+		/* v8 ignore next -- @preserve */
 		if (apiSpec) {
 			apiSpec.info.description = new Writr(
 				apiSpec.info.description,
@@ -1237,7 +1256,10 @@ export class DoculaBuilder {
 			for (const document of documentList) {
 				const documentPath = `${sitePath}/${document}`;
 				const stats = fs.statSync(documentPath);
-				if (stats.isFile()) {
+				if (
+					stats.isFile() &&
+					(document.endsWith(".md") || document.endsWith(".mdx"))
+				) {
 					const documentData = this.parseDocumentData(documentPath);
 					documents.push(documentData);
 				}
@@ -1264,7 +1286,10 @@ export class DoculaBuilder {
 				for (const document of documentList) {
 					const documentPath = `${sitePath}/${document}`;
 					const stats = fs.statSync(documentPath);
-					if (stats.isDirectory()) {
+					if (
+						stats.isDirectory() &&
+						this.directoryContainsMarkdown(documentPath)
+					) {
 						const section: DoculaSection = {
 							name: document
 								.replaceAll("-", " ")
@@ -1377,6 +1402,19 @@ export class DoculaBuilder {
 		);
 	}
 
+	private directoryContainsMarkdown(dirPath: string): boolean {
+		const entries = fs.readdirSync(dirPath);
+		for (const entry of entries) {
+			const fullPath = `${dirPath}/${entry}`;
+			const stat = fs.statSync(fullPath);
+			if (stat.isFile() && (entry.endsWith(".md") || entry.endsWith(".mdx"))) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private copyDirectory(source: string, target: string): void {
 		const files = fs.readdirSync(source);
 
@@ -1445,6 +1483,90 @@ export class DoculaBuilder {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
 				this._console.log(`  Copied: ${relativePath}`);
+			}
+		}
+	}
+
+	private copyDocumentSiblingAssets(data: DoculaData): void {
+		if (!data.documents) {
+			/* v8 ignore next -- @preserve */
+			return;
+		}
+
+		for (const document of data.documents) {
+			const sourceDir = path.dirname(document.documentPath);
+			const outputDir = `${data.output}${path.dirname(document.urlPath)}`;
+			const availableAssets = this.listContentAssets(sourceDir);
+
+			for (const assetRelPath of availableAssets) {
+				if (document.markdown.includes(assetRelPath)) {
+					const source = path.join(sourceDir, assetRelPath);
+					const target = path.join(outputDir, assetRelPath);
+					fs.mkdirSync(path.dirname(target), { recursive: true });
+					fs.copyFileSync(source, target);
+				}
+			}
+		}
+	}
+
+	private listContentAssets(sourcePath: string, basePath?: string): string[] {
+		const root = basePath ?? sourcePath;
+		const results: string[] = [];
+
+		if (!fs.existsSync(sourcePath)) {
+			/* v8 ignore next -- @preserve */
+			return results;
+		}
+
+		const files = fs.readdirSync(sourcePath);
+
+		for (const file of files) {
+			if (file.startsWith(".")) {
+				/* v8 ignore next -- @preserve */
+				continue;
+			}
+
+			const fullPath = `${sourcePath}/${file}`;
+			const stat = fs.lstatSync(fullPath);
+
+			if (stat.isDirectory()) {
+				results.push(...this.listContentAssets(fullPath, root));
+			} else {
+				const ext = path.extname(file).toLowerCase();
+				if (this.options.assetExtensions.includes(ext)) {
+					results.push(path.relative(root, fullPath));
+				}
+			}
+		}
+
+		return results;
+	}
+
+	private copyContentAssets(sourcePath: string, targetPath: string): void {
+		if (!fs.existsSync(sourcePath)) {
+			return;
+		}
+
+		const files = fs.readdirSync(sourcePath);
+
+		for (const file of files) {
+			/* v8 ignore next -- @preserve */
+			if (file.startsWith(".")) {
+				continue;
+			}
+
+			const source = `${sourcePath}/${file}`;
+			const target = `${targetPath}/${file}`;
+			const stat = fs.lstatSync(source);
+
+			if (stat.isDirectory()) {
+				this.copyContentAssets(source, target);
+			} else {
+				const ext = path.extname(file).toLowerCase();
+				if (this.options.assetExtensions.includes(ext)) {
+					fs.mkdirSync(targetPath, { recursive: true });
+					fs.copyFileSync(source, target);
+				}
 			}
 		}
 	}

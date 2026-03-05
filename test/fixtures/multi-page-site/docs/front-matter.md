@@ -20,6 +20,10 @@ description: Beautiful Website for Your Projects
 - [What Happened to it Generating a Blog](#what-happened-to-it-generating-a-blog)
 - [License - MIT](#license)
 
+![Diagram](images/diagram.png)
+
+[Download PDF](assets/sample.pdf)
+
 ## Features
 * No configuration requrired. Just setup the folder structure with a logo, favicon, and css file. 
 * Builds a static website that can be hosted anywhere.
