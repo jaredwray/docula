@@ -248,8 +248,8 @@
 .api-auth { margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .api-auth__label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); min-width: 90px; }
 .api-auth__controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-.api-auth__type { padding: 0.35rem 0.6rem; border: 1px solid var(--color-border, #444); border-radius: 6px; font-size: 0.85rem; background: var(--color-bg-secondary, #1e1e2e); color: var(--color-text); cursor: pointer; }
-.api-auth__value { padding: 0.35rem 0.6rem; border: 1px solid var(--color-border, #444); border-radius: 6px; font-size: 0.85rem; min-width: 220px; background: var(--color-bg-secondary, #1e1e2e); color: var(--color-text); }
+.api-auth__type { padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: var(--background); color: var(--color-text); cursor: pointer; }
+.api-auth__value { padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; min-width: 220px; background: var(--background); color: var(--color-text); }
 .api-auth__value--hidden { display: none; }
 
 /* Groups */

@@ -209,12 +209,14 @@ document.addEventListener('DOMContentLoaded', function() {
       // Inject global auth header
       var authType = document.getElementById('api-auth-type');
       var authValue = document.getElementById('api-auth-value');
-      if (authType && authValue && authValue.value.trim()) {
+      if (authType && authValue) {
         var authVal = authValue.value.trim();
-        if (authType.value === 'apikey') {
-          headers['x-api-key'] = authVal;
-        } else if (authType.value === 'bearer') {
-          headers['Authorization'] = 'Bearer ' + authVal;
+        if (authVal) {
+          if (authType.value === 'apikey') {
+            headers['x-api-key'] = authVal;
+          } else if (authType.value === 'bearer') {
+            headers['Authorization'] = 'Bearer ' + authVal;
+          }
         }
       }
 
