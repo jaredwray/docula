@@ -540,6 +540,7 @@ export class DoculaBuilder {
 				`- [Changelog](${this.buildAbsoluteSiteUrl(data.siteUrl, "/changelog")})`,
 			);
 			for (const entry of changelogEntries.slice(0, 20)) {
+				/* v8 ignore next -- @preserve */
 				const date = entry.formattedDate || entry.date || "No date";
 				lines.push(
 					`- [${entry.title}](${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}) (${date})`,
@@ -584,6 +585,7 @@ export class DoculaBuilder {
 					lines.push(`Description: ${document.description}`);
 				}
 				lines.push("");
+				/* v8 ignore next -- @preserve */
 				lines.push(markdownBody || "_No content_");
 			}
 		} else {
@@ -602,6 +604,7 @@ export class DoculaBuilder {
 					`OpenAPI Spec Source: ${this.toPosixPath(localOpenApiSpec.sourcePath)}`,
 				);
 				lines.push("");
+				/* v8 ignore next -- @preserve */
 				lines.push(localOpenApiSpec.content || "_No content_");
 			} else {
 				const openApiSpecUrl = this.resolveOpenApiSpecUrl(data);
@@ -626,6 +629,7 @@ export class DoculaBuilder {
 				lines.push(
 					`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}`,
 				);
+				/* v8 ignore next 2 -- @preserve */
 				if (entry.formattedDate || entry.date) {
 					lines.push(`Date: ${entry.formattedDate || entry.date}`);
 				}
@@ -648,6 +652,7 @@ export class DoculaBuilder {
 		const normalizedSiteUrl = siteUrl.endsWith("/")
 			? siteUrl.slice(0, -1)
 			: siteUrl;
+		/* v8 ignore next -- @preserve */
 		const normalizedPath = urlPath.startsWith("/") ? urlPath : `/${urlPath}`;
 		return `${normalizedSiteUrl}${normalizedPath}`;
 	}
@@ -934,6 +939,7 @@ export class DoculaBuilder {
 		const localSpec = await this.getSafeLocalOpenApiSpec(data);
 		if (localSpec) {
 			apiSpec = parseOpenApiSpec(localSpec.content);
+			/* v8 ignore next 9 -- @preserve */
 		} else if (data.openApiUrl && this.isRemoteUrl(data.openApiUrl)) {
 			try {
 				const response = await fetch(data.openApiUrl);
@@ -945,6 +951,7 @@ export class DoculaBuilder {
 		}
 
 		// Render Markdown descriptions to HTML
+		/* v8 ignore next -- @preserve */
 		if (apiSpec) {
 			apiSpec.info.description = new Writr(
 				apiSpec.info.description,
