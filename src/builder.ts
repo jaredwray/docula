@@ -281,6 +281,16 @@ export class DoculaBuilder {
 		// Copy over public folder contents
 		this.copyPublicFolder(siteRelativePath, this.options.output);
 
+		// Copy non-markdown assets from docs/ and changelog/ to output
+		this.copyContentAssets(
+			`${doculaData.sitePath}/docs`,
+			`${this.options.output}/docs`,
+		);
+		this.copyContentAssets(
+			`${doculaData.sitePath}/changelog`,
+			`${this.options.output}/changelog`,
+		);
+
 		// Build LLM index/content files after static assets are in place
 		await this.buildLlmsFiles(doculaData);
 
@@ -1237,7 +1247,10 @@ export class DoculaBuilder {
 			for (const document of documentList) {
 				const documentPath = `${sitePath}/${document}`;
 				const stats = fs.statSync(documentPath);
-				if (stats.isFile()) {
+				if (
+					stats.isFile() &&
+					(document.endsWith(".md") || document.endsWith(".mdx"))
+				) {
 					const documentData = this.parseDocumentData(documentPath);
 					documents.push(documentData);
 				}
@@ -1445,6 +1458,35 @@ export class DoculaBuilder {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
 				this._console.log(`  Copied: ${relativePath}`);
+			}
+		}
+	}
+
+	private copyContentAssets(sourcePath: string, targetPath: string): void {
+		if (!fs.existsSync(sourcePath)) {
+			return;
+		}
+
+		const files = fs.readdirSync(sourcePath);
+
+		for (const file of files) {
+			/* v8 ignore next -- @preserve */
+			if (file.startsWith(".")) {
+				continue;
+			}
+
+			const source = `${sourcePath}/${file}`;
+			const target = `${targetPath}/${file}`;
+			const stat = fs.lstatSync(source);
+
+			if (stat.isDirectory()) {
+				this.copyContentAssets(source, target);
+			} else {
+				const ext = path.extname(file).toLowerCase();
+				if (this.options.assetExtensions.includes(ext)) {
+					fs.mkdirSync(targetPath, { recursive: true });
+					fs.copyFileSync(source, target);
+				}
 			}
 		}
 	}

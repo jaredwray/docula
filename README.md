@@ -16,6 +16,7 @@
 - [TypeScript Configuration](#typescript-configuration)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
+- [Including Assets in Markdown](#including-images-and-assets-in-markdown)
 - [Public Folder](#public-folder)
 - [API Reference](#api-reference)
 - [LLM Files](#llm-files)
@@ -164,6 +165,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
+| `assetExtensions` | `string[]` | *(see [Including Assets in Markdown](#including-images-and-assets-in-markdown))* | File extensions to copy from `docs/` and `changelog/` to output |
 
 # Using Your own Template
 
@@ -202,6 +204,68 @@ If you want your docs to be the root home page (`/`) instead of rendering the te
 ```js
 export const options = {
   homePage: false,
+};
+```
+
+# Including Assets in Markdown
+
+Non-markdown files placed inside the `docs/` or `changelog/` directories are automatically copied to the build output, preserving their relative paths. This lets you keep images and other assets alongside the markdown that references them.
+
+```
+site
+├───docs
+│   ├───getting-started.md
+│   ├───images
+│   │   ├───architecture.png
+│   │   └───screenshot.jpg
+│   └───assets
+│       └───example.pdf
+├───changelog
+│   ├───2025-01-15-initial-release.md
+│   └───images
+│       └───release-banner.png
+```
+
+After building, these files appear at the same relative paths under `dist/`:
+
+```
+dist
+├───docs
+│   ├───getting-started
+│   │   └───index.html
+│   ├───images
+│   │   ├───architecture.png
+│   │   └───screenshot.jpg
+│   └───assets
+│       └───example.pdf
+├───changelog
+│   ├───initial-release
+│   │   └───index.html
+│   └───images
+│       └───release-banner.png
+```
+
+Reference assets from your markdown with relative or absolute paths:
+
+```md
+![Architecture](/docs/images/architecture.png)
+[Download PDF](/docs/assets/example.pdf)
+```
+
+## Supported Extensions
+
+By default the following file extensions are copied:
+
+**Images:** `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.avif`, `.ico`
+**Documents:** `.pdf`, `.zip`, `.tar`, `.gz`
+**Media:** `.mp4`, `.webm`, `.ogg`, `.mp3`, `.wav`
+**Data:** `.json`, `.xml`, `.csv`, `.txt`
+
+Files with extensions not in this list are ignored. To customize the list, set `assetExtensions` in your config:
+
+```js
+export const options = {
+  assetExtensions: ['.png', '.jpg', '.gif', '.svg', '.pdf', '.custom'],
 };
 ```
 

@@ -67,6 +67,33 @@ export class DoculaOptions {
 	 * When true, generates llms.txt and llms-full.txt files for the built site.
 	 */
 	public enableLlmsTxt = true;
+	/**
+	 * File extensions to copy as assets from docs/ and changelog/ directories.
+	 * Override in docula.config to customize.
+	 */
+	public assetExtensions: string[] = [
+		".png",
+		".jpg",
+		".jpeg",
+		".gif",
+		".svg",
+		".webp",
+		".avif",
+		".ico",
+		".pdf",
+		".zip",
+		".tar",
+		".gz",
+		".mp4",
+		".webm",
+		".ogg",
+		".mp3",
+		".wav",
+		".json",
+		".xml",
+		".csv",
+		".txt",
+	];
 
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
@@ -159,6 +186,10 @@ export class DoculaOptions {
 			typeof options.enableLlmsTxt === "boolean"
 		) {
 			this.enableLlmsTxt = options.enableLlmsTxt;
+		}
+
+		if (options.assetExtensions && Array.isArray(options.assetExtensions)) {
+			this.assetExtensions = options.assetExtensions as string[];
 		}
 	}
 }
