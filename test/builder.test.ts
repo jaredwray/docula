@@ -455,6 +455,25 @@ describe("DoculaBuilder", () => {
 			expect(sections[2].name).toBe("Storage Adapters");
 			expect(sections[2].order).toBe(undefined);
 		});
+		it("should not include asset-only directories as sections", () => {
+			const builder = new DoculaBuilder();
+			const sections = builder.getSections(
+				"test/fixtures/multi-page-site/docs",
+				new DoculaOptions(),
+			);
+			const sectionPaths = sections.map((s) => s.path);
+			expect(sectionPaths).not.toContain("images");
+			expect(sectionPaths).not.toContain("assets");
+		});
+		it("should include directories with nested markdown as sections", () => {
+			const builder = new DoculaBuilder();
+			const sections = builder.getSections(
+				"test/fixtures/multi-page-site/docs",
+				new DoculaOptions(),
+			);
+			const sectionPaths = sections.map((s) => s.path);
+			expect(sectionPaths).toContain("guides");
+		});
 	});
 
 	describe("Docula Builder - Generate Sidebar Items", () => {

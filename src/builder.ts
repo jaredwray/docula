@@ -1277,7 +1277,10 @@ export class DoculaBuilder {
 				for (const document of documentList) {
 					const documentPath = `${sitePath}/${document}`;
 					const stats = fs.statSync(documentPath);
-					if (stats.isDirectory()) {
+					if (
+						stats.isDirectory() &&
+						this.directoryContainsMarkdown(documentPath)
+					) {
 						const section: DoculaSection = {
 							name: document
 								.replaceAll("-", " ")
@@ -1388,6 +1391,23 @@ export class DoculaBuilder {
 			setextHeading.test(normalized) ||
 			htmlHeading.test(normalized)
 		);
+	}
+
+	private directoryContainsMarkdown(dirPath: string): boolean {
+		const entries = fs.readdirSync(dirPath);
+		for (const entry of entries) {
+			const fullPath = `${dirPath}/${entry}`;
+			const stat = fs.statSync(fullPath);
+			if (stat.isFile() && (entry.endsWith(".md") || entry.endsWith(".mdx"))) {
+				return true;
+			}
+
+			if (stat.isDirectory() && this.directoryContainsMarkdown(fullPath)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private copyDirectory(source: string, target: string): void {
