@@ -27,6 +27,7 @@
     "lint:ci": "biome check --error-on-warnings",
     "test": "pnpm lint && vitest run --coverage",
     "test:ci": "pnpm lint:ci && vitest run --coverage",
+    "test:e2e": "pnpm build && playwright test",
     "generate-init-file": "tsx scripts/generate-init-file.ts",
     "website:build": "rimraf ./site/README.md && node bin/docula.js build -s ./site -o ./site/dist",
     "website:serve": "rimraf ./site/README.md && node bin/docula.js serve -s ./site -o ./site/dist",
@@ -70,6 +71,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.2",
+    "@playwright/test": "^1.58.2",
     "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.2.3",

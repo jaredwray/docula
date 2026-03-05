@@ -104,6 +104,21 @@ document.addEventListener('DOMContentLoaded', function() {
     group.classList.add('api-sidebar__group--collapsed');
   });
 
+  // Auth type selector: show/hide value input
+  var authTypeSelect = document.getElementById('api-auth-type');
+  var authValueInput = document.getElementById('api-auth-value');
+  if (authTypeSelect && authValueInput) {
+    authTypeSelect.addEventListener('change', function() {
+      if (this.value === 'none') {
+        authValueInput.classList.add('api-auth__value--hidden');
+        authValueInput.value = '';
+      } else {
+        authValueInput.classList.remove('api-auth__value--hidden');
+        authValueInput.placeholder = this.value === 'apikey' ? 'Enter API key...' : 'Enter token...';
+      }
+    });
+  }
+
   // Helper: expand an operation and its corresponding sidebar group
   function expandOperationAndGroup(operationEl) {
     if (!operationEl) return;
@@ -210,6 +225,18 @@ document.addEventListener('DOMContentLoaded', function() {
         var value = row.querySelector('[data-try-param]').value;
         if (value) headers[name] = value;
       });
+
+      // Inject global auth header
+      var authType = document.getElementById('api-auth-type');
+      var authValue = document.getElementById('api-auth-value');
+      if (authType && authValue && authValue.value.trim()) {
+        var authVal = authValue.value.trim();
+        if (authType.value === 'apikey') {
+          headers['x-api-key'] = authVal;
+        } else if (authType.value === 'bearer') {
+          headers['Authorization'] = 'Bearer ' + authVal;
+        }
+      }
 
       // Body
       var bodyTextarea = tryIt.querySelector('[data-try-body]');
