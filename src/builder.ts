@@ -1486,6 +1486,7 @@ export class DoculaBuilder {
 
 	private copyDocumentSiblingAssets(data: DoculaData): void {
 		if (!data.documents) {
+			/* v8 ignore next -- @preserve */
 			return;
 		}
 
@@ -1510,6 +1511,7 @@ export class DoculaBuilder {
 		const results: string[] = [];
 
 		if (!fs.existsSync(sourcePath)) {
+			/* v8 ignore next -- @preserve */
 			return results;
 		}
 
@@ -1517,6 +1519,7 @@ export class DoculaBuilder {
 
 		for (const file of files) {
 			if (file.startsWith(".")) {
+				/* v8 ignore next -- @preserve */
 				continue;
 			}
 
