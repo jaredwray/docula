@@ -16,7 +16,7 @@
 - [TypeScript Configuration](#typescript-configuration)
 - [Using Your own Template](#using-your-own-template)
 - [Building Multiple Pages](#building-multiple-pages)
-- [Including Assets in Markdown](#including-images-and-assets-in-markdown)
+- [Including Assets in Markdown](#including-assets-in-markdown)
 - [Public Folder](#public-folder)
 - [API Reference](#api-reference)
 - [LLM Files](#llm-files)

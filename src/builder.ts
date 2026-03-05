@@ -281,15 +281,17 @@ export class DoculaBuilder {
 		// Copy over public folder contents
 		this.copyPublicFolder(siteRelativePath, this.options.output);
 
-		// Copy non-markdown assets from docs/ and changelog/ to output
-		this.copyContentAssets(
-			`${doculaData.sitePath}/docs`,
-			`${this.options.output}/docs`,
-		);
+		// Copy non-markdown assets from changelog/ to output
 		this.copyContentAssets(
 			`${doculaData.sitePath}/changelog`,
 			`${this.options.output}/changelog`,
 		);
+
+		// Copy assets from each document's source directory into its output directory
+		// so that relative paths in markdown (e.g. images/diagram.png) resolve correctly
+		if (doculaData.documents?.length) {
+			this.copyDocumentSiblingAssets(doculaData);
+		}
 
 		// Build LLM index/content files after static assets are in place
 		await this.buildLlmsFiles(doculaData);
@@ -1480,6 +1482,58 @@ export class DoculaBuilder {
 				this._console.log(`  Copied: ${relativePath}`);
 			}
 		}
+	}
+
+	private copyDocumentSiblingAssets(data: DoculaData): void {
+		if (!data.documents) {
+			return;
+		}
+
+		for (const document of data.documents) {
+			const sourceDir = path.dirname(document.documentPath);
+			const outputDir = `${data.output}${path.dirname(document.urlPath)}`;
+			const availableAssets = this.listContentAssets(sourceDir);
+
+			for (const assetRelPath of availableAssets) {
+				if (document.markdown.includes(assetRelPath)) {
+					const source = path.join(sourceDir, assetRelPath);
+					const target = path.join(outputDir, assetRelPath);
+					fs.mkdirSync(path.dirname(target), { recursive: true });
+					fs.copyFileSync(source, target);
+				}
+			}
+		}
+	}
+
+	private listContentAssets(sourcePath: string, basePath?: string): string[] {
+		const root = basePath ?? sourcePath;
+		const results: string[] = [];
+
+		if (!fs.existsSync(sourcePath)) {
+			return results;
+		}
+
+		const files = fs.readdirSync(sourcePath);
+
+		for (const file of files) {
+			if (file.startsWith(".")) {
+				continue;
+			}
+
+			const fullPath = `${sourcePath}/${file}`;
+			const stat = fs.lstatSync(fullPath);
+
+			if (stat.isDirectory()) {
+				results.push(...this.listContentAssets(fullPath, root));
+			} else {
+				const ext = path.extname(file).toLowerCase();
+				if (this.options.assetExtensions.includes(ext)) {
+					results.push(path.relative(root, fullPath));
+				}
+			}
+		}
+
+		return results;
 	}
 
 	private copyContentAssets(sourcePath: string, targetPath: string): void {
