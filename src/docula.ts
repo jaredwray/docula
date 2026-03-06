@@ -148,6 +148,7 @@ export default class Docula {
 		}
 
 		if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+			/* v8 ignore next -- @preserve */
 			fs.rmSync(this.options.output, { recursive: true, force: true });
 		}
 
@@ -298,7 +299,26 @@ export default class Docula {
 
 		let debounceTimer: NodeJS.Timeout | undefined;
 		let isBuilding = false;
+		let pendingRebuild = false;
 		const outputRelative = path.relative(options.sitePath, options.output);
+
+		const runBuild = async (filename: string) => {
+			isBuilding = true;
+			this._console.log(`File changed: ${filename}, rebuilding...`);
+			try {
+				await builder.build();
+				this._console.log("Rebuild complete");
+			} catch (error) {
+				this._console.error(`Rebuild failed: ${(error as Error).message}`);
+			} finally {
+				isBuilding = false;
+				/* v8 ignore next 4 -- @preserve */
+				if (pendingRebuild) {
+					pendingRebuild = false;
+					await runBuild("queued changes");
+				}
+			}
+		};
 
 		this._watcher = fs.watch(
 			options.sitePath,
@@ -314,8 +334,9 @@ export default class Docula {
 					return;
 				}
 
-				/* v8 ignore next -- @preserve */
+				/* v8 ignore next 3 -- @preserve */
 				if (isBuilding) {
+					pendingRebuild = true;
 					return;
 				}
 
@@ -325,16 +346,7 @@ export default class Docula {
 				}
 
 				debounceTimer = setTimeout(async () => {
-					isBuilding = true;
-					this._console.log(`File changed: ${String(filename)}, rebuilding...`);
-					try {
-						await builder.build();
-						this._console.log("Rebuild complete");
-					} catch (error) {
-						this._console.error(`Rebuild failed: ${(error as Error).message}`);
-					} finally {
-						isBuilding = false;
-					}
+					await runBuild(String(filename));
 				}, 300);
 			},
 		);
