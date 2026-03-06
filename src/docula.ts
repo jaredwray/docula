@@ -23,6 +23,7 @@ export default class Docula {
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	private _configFileModule: any = {};
 	private _server: http.Server | undefined;
+	private _watcher: fs.FSWatcher | undefined;
 
 	/**
 	 * Initialize the Docula class
@@ -58,6 +59,14 @@ export default class Docula {
 	 */
 	public get server(): http.Server | undefined {
 		return this._server;
+	}
+
+	/**
+	 * The file watcher used in watch mode
+	 * @returns {fs.FSWatcher | undefined}
+	 */
+	public get watcher(): fs.FSWatcher | undefined {
+		return this._watcher;
 	}
 
 	/**
@@ -161,6 +170,10 @@ export default class Docula {
 				const builder = new DoculaBuilder(this.options);
 				await builder.build();
 				await this.serve(this.options);
+				if (consoleProcess.args.watch) {
+					this.watch(this.options, builder);
+				}
+
 				break;
 			}
 
@@ -266,6 +279,64 @@ export default class Docula {
 			const absolutePath = path.resolve(mjsConfigFile);
 			this._configFileModule = await import(pathToFileURL(absolutePath).href);
 		}
+	}
+
+	/**
+	 * Watch the site path for file changes and rebuild on change
+	 * @param {DoculaOptions} options
+	 * @param {DoculaBuilder} builder
+	 * @returns {fs.FSWatcher}
+	 */
+	public watch(options: DoculaOptions, builder: DoculaBuilder): fs.FSWatcher {
+		if (this._watcher) {
+			this._watcher.close();
+		}
+
+		let debounceTimer: NodeJS.Timeout | undefined;
+		let isBuilding = false;
+		const outputRelative = path.relative(options.sitePath, options.output);
+
+		this._watcher = fs.watch(
+			options.sitePath,
+			{ recursive: true },
+			(_eventType, filename) => {
+				// Ignore changes in the output directory
+				if (
+					filename &&
+					outputRelative &&
+					!outputRelative.startsWith("..") &&
+					String(filename).startsWith(outputRelative)
+				) {
+					return;
+				}
+
+				/* v8 ignore next -- @preserve */
+				if (isBuilding) {
+					return;
+				}
+
+				/* v8 ignore next -- @preserve */
+				if (debounceTimer) {
+					clearTimeout(debounceTimer);
+				}
+
+				debounceTimer = setTimeout(async () => {
+					isBuilding = true;
+					this._console.log(`File changed: ${String(filename)}, rebuilding...`);
+					try {
+						await builder.build();
+						this._console.log("Rebuild complete");
+					} catch (error) {
+						this._console.error(`Rebuild failed: ${(error as Error).message}`);
+					} finally {
+						isBuilding = false;
+					}
+				}, 300);
+			},
+		);
+
+		this._console.log("Watching for file changes...");
+		return this._watcher;
 	}
 
 	/**
