@@ -103,9 +103,6 @@ export default class Docula {
 
 		const consoleProcess = this._console.parseProcessArgv(process.argv);
 
-		// Automatic detect singlePage option
-		this.options.singlePage = this.isSinglePageWebsite(this.options.sitePath);
-
 		// Update options
 		if (consoleProcess.args.sitePath) {
 			this.options.sitePath = consoleProcess.args.sitePath;
@@ -188,21 +185,6 @@ export default class Docula {
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Checks if the site is a single page website
-	 * @param {string} sitePath
-	 * @returns {boolean}
-	 */
-	public isSinglePageWebsite(sitePath: string): boolean {
-		const documentationPath = `${sitePath}/docs`;
-		if (!fs.existsSync(documentationPath)) {
-			return true;
-		}
-
-		const files = fs.readdirSync(documentationPath);
-		return files.length === 0;
 	}
 
 	/**

@@ -72,13 +72,6 @@ describe("docula", () => {
 		docula.options = newOptions;
 		expect(docula.options).toEqual(newOptions);
 	});
-	it("is a single page site or not", () => {
-		const docula = new Docula(defaultOptions);
-		const singlePageSite = "test/fixtures/single-page-site";
-		const multiPageSite = "test/fixtures/multi-page-site";
-		expect(docula.isSinglePageWebsite(singlePageSite)).toEqual(true);
-		expect(docula.isSinglePageWebsite(multiPageSite)).toEqual(false);
-	});
 	it("should generate the site init files and folders", () => {
 		const docula = new Docula(defaultOptions);
 		const consoleLog = console.log;

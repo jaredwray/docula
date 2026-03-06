@@ -40,10 +40,6 @@ export class DoculaOptions {
 	 */
 	public port = 3000;
 	/**
-	 * Single page website
-	 */
-	public singlePage = true;
-	/**
 	 * Sections
 	 */
 	public sections?: DoculaSection[];
@@ -159,13 +155,6 @@ export class DoculaOptions {
 
 		if (options.port) {
 			this.port = options.port as number;
-		}
-
-		if (
-			options.singlePage !== undefined &&
-			typeof options.singlePage === "boolean"
-		) {
-			this.singlePage = options.singlePage;
 		}
 
 		/* v8 ignore next -- @preserve */

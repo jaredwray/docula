@@ -175,7 +175,6 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `siteDescription` | `string` | - | Website description |
 | `siteUrl` | `string` | - | Website URL |
 | `port` | `number` | `3000` | Port for local development server |
-| `singlePage` | `boolean` | `true` | Single page or multi-page site |
 | `homePage` | `boolean` | `true` | When `false`, Docula uses the first docs page as `/index.html` instead of rendering `home.hbs` |
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
