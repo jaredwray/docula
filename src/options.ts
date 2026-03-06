@@ -73,7 +73,7 @@ export class DoculaOptions {
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
 	 */
-	public assetExtensions: string[] = [
+	public allowedAssets: string[] = [
 		".png",
 		".jpg",
 		".jpeg",
@@ -190,8 +190,8 @@ export class DoculaOptions {
 			this.themeMode = options.themeMode;
 		}
 
-		if (options.assetExtensions && Array.isArray(options.assetExtensions)) {
-			this.assetExtensions = options.assetExtensions as string[];
+		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {
+			this.allowedAssets = options.allowedAssets as string[];
 		}
 	}
 }

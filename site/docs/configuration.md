@@ -28,6 +28,7 @@ export const options: Partial<DoculaOptions> = {
   siteTitle: 'My Project',
   siteDescription: 'Project description',
   siteUrl: 'https://your-site.com',
+  themeMode: 'light', // or 'dark' — defaults to system preference if omitted
 };
 ```
 
@@ -73,18 +74,4 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
-| `assetExtensions` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |
-
-## Theme Mode
-
-By default, the site follows the user's system color scheme preference. The theme toggle cycles through three modes: **system** (follows OS preference), **light**, and **dark**. The user's choice is persisted in `localStorage`.
-
-To set the initial theme mode, use `themeMode`:
-
-```js
-export const options = {
-  themeMode: 'dark',
-};
-```
-
-When `themeMode` is set, new visitors see the specified theme instead of the system preference. Once a user clicks the theme toggle, their choice takes priority and is remembered across visits.
+| `allowedAssets` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |

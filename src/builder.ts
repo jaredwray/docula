@@ -1535,7 +1535,7 @@ export class DoculaBuilder {
 				results.push(...this.listContentAssets(fullPath, root));
 			} else {
 				const ext = path.extname(file).toLowerCase();
-				if (this.options.assetExtensions.includes(ext)) {
+				if (this.options.allowedAssets.includes(ext)) {
 					results.push(path.relative(root, fullPath));
 				}
 			}
@@ -1565,7 +1565,7 @@ export class DoculaBuilder {
 				this.copyContentAssets(source, target);
 			} else {
 				const ext = path.extname(file).toLowerCase();
-				if (this.options.assetExtensions.includes(ext)) {
+				if (this.options.allowedAssets.includes(ext)) {
 					fs.mkdirSync(targetPath, { recursive: true });
 					fs.copyFileSync(source, target);
 				}

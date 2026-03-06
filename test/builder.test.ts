@@ -2963,7 +2963,7 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
-		it("should respect custom assetExtensions from options", async () => {
+		it("should respect custom allowedAssets from options", async () => {
 			const tempSitePath = "test/temp-content-assets-custom-ext-site";
 			const docsPath = `${tempSitePath}/docs`;
 
@@ -2984,7 +2984,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			// Only allow .xyz extension
-			options.assetExtensions = [".xyz"];
+			options.allowedAssets = [".xyz"];
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			console.log = () => {};

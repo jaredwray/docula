@@ -181,7 +181,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
-| `assetExtensions` | `string[]` | *(see [Including Assets in Markdown](#including-images-and-assets-in-markdown))* | File extensions to copy from `docs/` and `changelog/` to output |
+| `allowedAssets` | `string[]` | *(see [Including Assets in Markdown](#including-images-and-assets-in-markdown))* | File extensions to copy from `docs/` and `changelog/` to output |
 
 ## Theme Mode
 
@@ -293,11 +293,11 @@ By default the following file extensions are copied:
 **Media:** `.mp4`, `.webm`, `.ogg`, `.mp3`, `.wav`
 **Data:** `.json`, `.xml`, `.csv`, `.txt`
 
-Files with extensions not in this list are ignored. To customize the list, set `assetExtensions` in your config:
+Files with extensions not in this list are ignored. To customize the list, set `allowedAssets` in your config:
 
 ```js
 export const options = {
-  assetExtensions: ['.png', '.jpg', '.gif', '.svg', '.pdf', '.custom'],
+  allowedAssets: ['.png', '.jpg', '.gif', '.svg', '.pdf', '.custom'],
 };
 ```
 

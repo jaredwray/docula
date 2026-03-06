@@ -54,16 +54,16 @@ Reference assets from your markdown using relative paths:
 
 By default the following file extensions are copied:
 
-**Images:** `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.avif`, `.ico`
-**Documents:** `.pdf`, `.zip`, `.tar`, `.gz`
-**Media:** `.mp4`, `.webm`, `.ogg`, `.mp3`, `.wav`
-**Data:** `.json`, `.xml`, `.csv`, `.txt`
+- **Images:** `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.avif`, `.ico`
+- **Documents:** `.pdf`, `.zip`, `.tar`, `.gz`
+- **Media:** `.mp4`, `.webm`, `.ogg`, `.mp3`, `.wav`
+- **Data:** `.json`, `.xml`, `.csv`, `.txt`
 
-Files with extensions not in this list are ignored. To customize the list, set `assetExtensions` in your config:
+Files with extensions not in this list are ignored. To customize the list, set `allowedAssets` in your config:
 
 ```js
 export const options = {
-  assetExtensions: ['.png', '.jpg', '.gif', '.svg', '.pdf', '.custom'],
+  allowedAssets: ['.png', '.jpg', '.gif', '.svg', '.pdf', '.custom'],
 };
 ```
 

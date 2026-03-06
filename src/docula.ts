@@ -169,10 +169,10 @@ export default class Docula {
 			}
 
 			case "serve": {
-				const builder = new DoculaBuilder(this.options);
-				await builder.build();
 				await this.serve(this.options);
 				if (consoleProcess.args.watch) {
+					const builder = new DoculaBuilder(this.options);
+					await builder.build();
 					this.watch(this.options, builder);
 				}
 
@@ -350,6 +350,11 @@ export default class Docula {
 
 		const { port } = options;
 		const { output } = options;
+
+		/* v8 ignore next 3 -- @preserve */
+		if (!fs.existsSync(output)) {
+			fs.mkdirSync(output, { recursive: true });
+		}
 
 		const config = {
 			public: output,

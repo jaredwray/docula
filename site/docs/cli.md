@@ -13,7 +13,7 @@ Docula provides a command-line interface for initializing, building, and serving
 |---------|-------------|
 | `init` | Initialize a new Docula project |
 | `build` | Build the site (default if no command is specified) |
-| `serve` | Build and serve the site locally |
+| `serve` | Serve the site locally |
 | `help` | Print help information |
 | `version` | Print the version number |
 
@@ -82,7 +82,7 @@ npx docula build --clean
 
 ## serve
 
-Builds and serves your site locally with a development server. By default it listens on port 3000.
+Starts a local development server for your site. By default it listens on port 3000 and serves the existing output directory without running a build. Use `--watch` to build first and then automatically rebuild on file changes.
 
 ```bash
 npx docula serve
@@ -95,22 +95,22 @@ npx docula serve
 | `-p, --port <number>` | Set the port number | `3000` |
 | `-s, --site <path>` | Set the path where site files are located | `./site` |
 | `-o, --output <path>` | Set the output directory | `./site/dist` |
-| `-w, --watch` | Watch for file changes and rebuild automatically | `false` |
-| `-c, --clean` | Clean the output directory before building | `false` |
+| `-w, --watch` | Build the site, then watch for file changes and rebuild automatically | `false` |
+| `-c, --clean` | Clean the output directory before building (only applies with `--watch`) | `false` |
 
 ### Examples
 
 ```bash
-# Serve on default port 3000
+# Serve the existing build on default port 3000
 npx docula serve
 
 # Serve on a custom port
 npx docula serve -p 8080
 
-# Serve with watch mode enabled
+# Build, serve, and watch for changes
 npx docula serve --watch
 
-# Serve with clean build and watch mode
+# Clean build, serve, and watch for changes
 npx docula serve --clean --watch
 ```
 
