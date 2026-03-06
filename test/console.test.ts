@@ -41,7 +41,7 @@ describe("DoculaConsole", () => {
 
 		const c = new DoculaConsole();
 		c.printHelp();
-		expect(messages.length).toEqual(24);
+		expect(messages.length).toEqual(26);
 
 		console.log = consoleLog;
 	});
@@ -131,5 +131,23 @@ describe("DoculaConsole", () => {
 		]);
 		expect(result.command).toEqual("build");
 		expect(result.args.template).toEqual("modern");
+	});
+	it("should parse -c flag for clean", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv(["node", "docula", "build", "-c"]);
+		expect(result.command).toEqual("build");
+		expect(result.args.clean).toEqual(true);
+	});
+	it("should parse --clean flag for clean", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv(["node", "docula", "build", "--clean"]);
+		expect(result.command).toEqual("build");
+		expect(result.args.clean).toEqual(true);
+	});
+	it("should default clean to false when not provided", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv(["node", "docula", "build"]);
+		expect(result.command).toEqual("build");
+		expect(result.args.clean).toEqual(false);
 	});
 });

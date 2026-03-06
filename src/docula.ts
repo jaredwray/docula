@@ -147,6 +147,10 @@ export default class Docula {
 			this.options.port = consoleProcess.args.port;
 		}
 
+		if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+			fs.rmSync(this.options.output, { recursive: true, force: true });
+		}
+
 		switch (consoleProcess.command) {
 			case "init": {
 				this.generateInit(

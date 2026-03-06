@@ -94,6 +94,7 @@ This will build and serve your site locally at `http://localhost:3000`. You can 
 | `-s, --site` | Set the path where site files are located | `./site` |
 | `-o, --output` | Set the output directory | `./site/dist` |
 | `-w, --watch` | Watch for changes and rebuild | `false` |
+| `-c, --clean` | Clean the output directory before building | `false` |
 
 ### Watch Mode
 

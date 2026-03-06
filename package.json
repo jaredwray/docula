@@ -31,9 +31,9 @@
     "generate-init-file": "tsx scripts/generate-init-file.ts",
     "website:build": "rimraf ./site/README.md && node bin/docula.js build -s ./site -o ./site/dist",
     "website:serve": "rimraf ./site/README.md && node bin/docula.js serve -s ./site -o ./site/dist -w",
-    "website:mega": "node bin/docula.js serve -s ./test/fixtures/mega-page-site --watch",
-    "website:nohome": "node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page --watch",
-    "website:changelog": "node bin/docula.js serve -s ./test/fixtures/changelog-site --watch",
+    "website:mega": "node bin/docula.js serve -s ./test/fixtures/mega-page-site --watch --clean",
+    "website:nohome": "node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page --watch --clean",
+    "website:changelog": "node bin/docula.js serve -s ./test/fixtures/changelog-site --watch --clean",
     "prepare": "pnpm build"
   },
   "keywords": [

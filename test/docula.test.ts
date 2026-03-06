@@ -236,6 +236,40 @@ describe("docula execute", () => {
 		await fs.promises.rm(realOutputPath, { recursive: true });
 		console.log = consoleLog;
 	});
+	it("should clean the output directory when --clean flag is set", async () => {
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = "test/fixtures/single-page-site";
+		buildOptions.output = "test/fixtures/single-page-site/dist-clean";
+		buildOptions.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			// First build without clean
+			process.argv = ["node", "docula"];
+			await docula.execute(process);
+			expect(fs.existsSync(buildOptions.output)).toEqual(true);
+
+			// Add a stale file
+			fs.writeFileSync(`${buildOptions.output}/stale.txt`, "stale");
+			expect(fs.existsSync(`${buildOptions.output}/stale.txt`)).toEqual(true);
+
+			// Build again with --clean
+			process.argv = ["node", "docula", "--clean"];
+			await docula.execute(process);
+
+			// Output should exist (rebuilt) but stale file should be gone
+			expect(fs.existsSync(buildOptions.output)).toEqual(true);
+			expect(fs.existsSync(`${buildOptions.output}/stale.txt`)).toEqual(false);
+		} finally {
+			await fs.promises.rm(buildOptions.output, {
+				recursive: true,
+				force: true,
+			});
+			console.log = consoleLog;
+		}
+	});
 	it("should generate llms files during build for docs/api/changelog sites", async () => {
 		const sourcePath = "test/fixtures/mega-page-site-no-home-page";
 		const sitePath = "test/temp-llms-integration-site";
