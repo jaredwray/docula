@@ -20,7 +20,7 @@ site
 │   ├───code-of-conduct.md
 ```
 
-The `readme.md` file will be the root page and the rest will be added to the table of contents. If you want to control the title or order of the pages you can do so by setting the `title` and `order` properties in the front matter of the markdown file. Here is an example:
+Files in the `docs` directory become documentation pages. An `index.md` file inside `docs` will serve as the main page for the documentation section (e.g., at `/docs/`). The rest of the files will be added to the navigation. If you want to control the title or order of the pages you can do so by setting the `title` and `order` properties in the front matter of each markdown file. Here is an example:
 
 ```md
 title: Getting Started

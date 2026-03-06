@@ -215,6 +215,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  position: sticky;
+  top: 60px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  align-self: flex-start;
 }
 
 .nav-sidebar__title {

@@ -169,13 +169,15 @@ export default class Docula {
 			}
 
 			case "serve": {
-				await this.serve(this.options);
-				if (consoleProcess.args.watch) {
+				if (consoleProcess.args.build || consoleProcess.args.watch) {
 					const builder = new DoculaBuilder(this.options);
 					await builder.build();
-					this.watch(this.options, builder);
+					if (consoleProcess.args.watch) {
+						this.watch(this.options, builder);
+					}
 				}
 
+				await this.serve(this.options);
 				break;
 			}
 
