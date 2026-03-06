@@ -72,7 +72,7 @@ export class DoculaOptions {
 	 * preference. Set to "light" or "dark" to use that theme when no user
 	 * preference is stored in localStorage.
 	 */
-	public themeDefault?: "light" | "dark";
+	public themeMode?: "light" | "dark";
 	/**
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
@@ -195,10 +195,10 @@ export class DoculaOptions {
 		}
 
 		if (
-			options.themeDefault !== undefined &&
-			(options.themeDefault === "light" || options.themeDefault === "dark")
+			options.themeMode !== undefined &&
+			(options.themeMode === "light" || options.themeMode === "dark")
 		) {
-			this.themeDefault = options.themeDefault;
+			this.themeMode = options.themeMode;
 		}
 
 		if (options.assetExtensions && Array.isArray(options.assetExtensions)) {

@@ -10,7 +10,7 @@
 <script>
   (function() {
     function getMode() {
-      return localStorage.getItem('theme') || '{{themeDefault}}' || 'system';
+      return localStorage.getItem('theme') || '{{themeMode}}' || 'system';
     }
 
     function resolveTheme(mode) {
