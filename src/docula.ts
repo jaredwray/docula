@@ -329,7 +329,8 @@ export default class Docula {
 					filename &&
 					outputRelative &&
 					!outputRelative.startsWith("..") &&
-					String(filename).startsWith(outputRelative)
+					(String(filename) === outputRelative ||
+						String(filename).startsWith(`${outputRelative}${path.sep}`))
 				) {
 					return;
 				}
