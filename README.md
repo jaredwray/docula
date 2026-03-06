@@ -95,6 +95,20 @@ This will build and serve your site locally at `http://localhost:3000`. You can 
 | `-o, --output` | Set the output directory | `./site/dist` |
 | `-w, --watch` | Watch for changes and rebuild | `false` |
 
+### Watch Mode
+
+Use the `--watch` flag to automatically rebuild your site when files change:
+
+> npx docula serve --watch
+
+When watch mode is enabled:
+1. An initial build runs at startup
+2. The dev server starts and serves your site
+3. File changes in `sitePath` (e.g., `./site`) are detected and trigger an automatic rebuild
+4. Changes in the output directory are ignored to prevent rebuild loops
+
+This is useful during development when you want to see changes reflected immediately without manually re-running the build.
+
 # TypeScript Configuration
 
 Docula supports TypeScript configuration files (`docula.config.ts`) in addition to JavaScript (`docula.config.mjs`). TypeScript configs provide type safety and better IDE support.
