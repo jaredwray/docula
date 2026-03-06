@@ -1,16 +1,18 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Theme Toggle - Default State", () => {
-	test("defaults to auto mode when localStorage is empty", async ({ page }) => {
+test.describe("Theme Toggle - Default State (system)", () => {
+	test("defaults to system mode when localStorage is empty", async ({
+		page,
+	}) => {
 		await page.emulateMedia({ colorScheme: "dark" });
 		await page.goto("/docs/");
 
 		const toggle = page.locator("#theme-toggle");
 		await expect(toggle).toHaveAttribute(
 			"aria-label",
-			"Theme: auto (following system)",
+			"Theme: system (following system)",
 		);
-		await expect(page.locator(".theme-button__icon--auto")).not.toHaveClass(
+		await expect(page.locator(".theme-button__icon--system")).not.toHaveClass(
 			/theme-button__icon--hidden/,
 		);
 		await expect(page.locator(".theme-button__icon--sun")).toHaveClass(
@@ -24,7 +26,7 @@ test.describe("Theme Toggle - Default State", () => {
 		expect(stored).toBeNull();
 	});
 
-	test("auto mode follows system dark preference", async ({ page }) => {
+	test("system mode follows system dark preference", async ({ page }) => {
 		await page.emulateMedia({ colorScheme: "dark" });
 		await page.goto("/docs/");
 
@@ -34,7 +36,7 @@ test.describe("Theme Toggle - Default State", () => {
 		expect(dataTheme).toBeNull();
 	});
 
-	test("auto mode follows system light preference", async ({ page }) => {
+	test("system mode follows system light preference", async ({ page }) => {
 		await page.emulateMedia({ colorScheme: "light" });
 		await page.goto("/docs/");
 
@@ -46,19 +48,19 @@ test.describe("Theme Toggle - Default State", () => {
 });
 
 test.describe("Theme Toggle - Click Cycle", () => {
-	test("cycles auto -> light -> dark -> auto", async ({ page }) => {
+	test("cycles system -> light -> dark -> system", async ({ page }) => {
 		await page.emulateMedia({ colorScheme: "dark" });
 		await page.goto("/docs/");
 
 		const toggle = page.locator("#theme-toggle");
 
-		// Click 1: auto -> light
+		// Click 1: system -> light
 		await toggle.click();
 		await expect(toggle).toHaveAttribute("aria-label", "Theme: light");
 		await expect(page.locator(".theme-button__icon--sun")).not.toHaveClass(
 			/theme-button__icon--hidden/,
 		);
-		await expect(page.locator(".theme-button__icon--auto")).toHaveClass(
+		await expect(page.locator(".theme-button__icon--system")).toHaveClass(
 			/theme-button__icon--hidden/,
 		);
 		await expect(page.locator(".theme-button__icon--moon")).toHaveClass(
@@ -79,7 +81,7 @@ test.describe("Theme Toggle - Click Cycle", () => {
 		await expect(page.locator(".theme-button__icon--moon")).not.toHaveClass(
 			/theme-button__icon--hidden/,
 		);
-		await expect(page.locator(".theme-button__icon--auto")).toHaveClass(
+		await expect(page.locator(".theme-button__icon--system")).toHaveClass(
 			/theme-button__icon--hidden/,
 		);
 		await expect(page.locator(".theme-button__icon--sun")).toHaveClass(
@@ -94,13 +96,13 @@ test.describe("Theme Toggle - Click Cycle", () => {
 			"dark",
 		);
 
-		// Click 3: dark -> auto
+		// Click 3: dark -> system
 		await toggle.click();
 		await expect(toggle).toHaveAttribute(
 			"aria-label",
-			"Theme: auto (following system)",
+			"Theme: system (following system)",
 		);
-		await expect(page.locator(".theme-button__icon--auto")).not.toHaveClass(
+		await expect(page.locator(".theme-button__icon--system")).not.toHaveClass(
 			/theme-button__icon--hidden/,
 		);
 		await expect(page.locator(".theme-button__icon--sun")).toHaveClass(
@@ -117,7 +119,7 @@ test.describe("Theme Toggle - Persistence", () => {
 	test("persists light mode across reload", async ({ page }) => {
 		await page.emulateMedia({ colorScheme: "dark" });
 		await page.goto("/docs/");
-		await page.locator("#theme-toggle").click(); // auto -> light
+		await page.locator("#theme-toggle").click(); // system -> light
 
 		await page.reload();
 
@@ -137,7 +139,7 @@ test.describe("Theme Toggle - Persistence", () => {
 		await page.emulateMedia({ colorScheme: "light" });
 		await page.goto("/docs/");
 		const toggle = page.locator("#theme-toggle");
-		await toggle.click(); // auto -> light
+		await toggle.click(); // system -> light
 		await toggle.click(); // light -> dark
 
 		await page.reload();
@@ -153,22 +155,22 @@ test.describe("Theme Toggle - Persistence", () => {
 		).toBeNull();
 	});
 
-	test("auto mode clears localStorage and follows system after reload", async ({
+	test("system mode clears localStorage and follows system after reload", async ({
 		page,
 	}) => {
 		await page.emulateMedia({ colorScheme: "light" });
 		await page.goto("/docs/");
 		const toggle = page.locator("#theme-toggle");
-		await toggle.click(); // auto -> light
+		await toggle.click(); // system -> light
 		await toggle.click(); // light -> dark
-		await toggle.click(); // dark -> auto
+		await toggle.click(); // dark -> system
 
 		await page.reload();
 
 		expect(await page.evaluate(() => localStorage.getItem("theme"))).toBeNull();
 		await expect(toggle).toHaveAttribute(
 			"aria-label",
-			"Theme: auto (following system)",
+			"Theme: system (following system)",
 		);
 		expect(
 			await page.evaluate(() =>
@@ -179,7 +181,7 @@ test.describe("Theme Toggle - Persistence", () => {
 });
 
 test.describe("Theme Toggle - System Preference Reactivity", () => {
-	test("responds to system color scheme change in auto mode", async ({
+	test("responds to system color scheme change in system mode", async ({
 		page,
 	}) => {
 		await page.emulateMedia({ colorScheme: "dark" });
@@ -200,7 +202,7 @@ test.describe("Theme Toggle - System Preference Reactivity", () => {
 	}) => {
 		await page.emulateMedia({ colorScheme: "dark" });
 		await page.goto("/docs/");
-		await page.locator("#theme-toggle").click(); // auto -> light
+		await page.locator("#theme-toggle").click(); // system -> light
 
 		expect(
 			await page.evaluate(() =>

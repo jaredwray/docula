@@ -6,8 +6,8 @@
 <link rel="icon" href="/favicon.ico">
 <script>
   (function(){
-    var mode = localStorage.getItem('theme') || 'auto';
-    var resolved = mode === 'auto'
+    var mode = localStorage.getItem('theme') || '{{themeDefault}}' || 'system';
+    var resolved = mode === 'system'
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
       : mode;
     if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');

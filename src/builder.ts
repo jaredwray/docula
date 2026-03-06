@@ -41,6 +41,7 @@ export type DoculaData = {
 	apiSpec?: ApiSpecData;
 	changelogEntries?: DoculaChangelogEntry[];
 	homePage?: boolean;
+	themeDefault?: string;
 };
 
 export type DoculaTemplates = {
@@ -115,6 +116,7 @@ export class DoculaBuilder {
 			sections: this.options.sections,
 			openApiUrl: this.options.openApiUrl,
 			homePage: this.options.homePage,
+			themeDefault: this.options.themeDefault,
 		};
 
 		// Auto-detect swagger.json if openApiUrl is not set

@@ -10,11 +10,11 @@
 <script>
   (function() {
     function getMode() {
-      return localStorage.getItem('theme') || 'auto';
+      return localStorage.getItem('theme') || '{{themeDefault}}' || 'system';
     }
 
     function resolveTheme(mode) {
-      if (mode === 'auto') {
+      if (mode === 'system') {
         return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       }
       return mode;
@@ -24,7 +24,7 @@
     function getThemeEls() {
       if (!cachedEls) {
         cachedEls = {
-          autoIcon: document.querySelector('.theme-button__icon--auto'),
+          systemIcon: document.querySelector('.theme-button__icon--system'),
           sunIcon: document.querySelector('.theme-button__icon--sun'),
           moonIcon: document.querySelector('.theme-button__icon--moon'),
           toggle: document.getElementById('theme-toggle')
@@ -42,12 +42,12 @@
       }
 
       var els = getThemeEls();
-      if (els.autoIcon && els.sunIcon && els.moonIcon) {
-        els.autoIcon.classList.add('theme-button__icon--hidden');
+      if (els.systemIcon && els.sunIcon && els.moonIcon) {
+        els.systemIcon.classList.add('theme-button__icon--hidden');
         els.sunIcon.classList.add('theme-button__icon--hidden');
         els.moonIcon.classList.add('theme-button__icon--hidden');
-        if (mode === 'auto') {
-          els.autoIcon.classList.remove('theme-button__icon--hidden');
+        if (mode === 'system') {
+          els.systemIcon.classList.remove('theme-button__icon--hidden');
         } else if (mode === 'light') {
           els.sunIcon.classList.remove('theme-button__icon--hidden');
         } else {
@@ -56,14 +56,14 @@
       }
 
       if (els.toggle) {
-        var labels = { auto: 'Theme: auto (following system)', light: 'Theme: light', dark: 'Theme: dark' };
+        var labels = { system: 'Theme: system (following system)', light: 'Theme: light', dark: 'Theme: dark' };
         els.toggle.setAttribute('aria-label', labels[mode] || 'Toggle theme');
       }
     }
 
     function nextMode(current) {
-      var cycle = { auto: 'light', light: 'dark', dark: 'auto' };
-      return cycle[current] || 'auto';
+      var cycle = { system: 'light', light: 'dark', dark: 'system' };
+      return cycle[current] || 'system';
     }
 
     var currentMode = getMode();
@@ -75,7 +75,7 @@
       if (els.toggle) {
         els.toggle.addEventListener('click', function() {
           currentMode = nextMode(currentMode);
-          if (currentMode === 'auto') {
+          if (currentMode === 'system') {
             localStorage.removeItem('theme');
           } else {
             localStorage.setItem('theme', currentMode);
@@ -86,8 +86,8 @@
     });
 
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function() {
-      if (getMode() === 'auto') {
-        applyTheme('auto');
+      if (getMode() === 'system') {
+        applyTheme('system');
       }
     });
   })();

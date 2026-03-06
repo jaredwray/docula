@@ -68,6 +68,12 @@ export class DoculaOptions {
 	 */
 	public enableLlmsTxt = true;
 	/**
+	 * Override the default theme toggle. By default the site follows the system
+	 * preference. Set to "light" or "dark" to use that theme when no user
+	 * preference is stored in localStorage.
+	 */
+	public themeDefault?: "light" | "dark";
+	/**
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
 	 */
@@ -186,6 +192,13 @@ export class DoculaOptions {
 			typeof options.enableLlmsTxt === "boolean"
 		) {
 			this.enableLlmsTxt = options.enableLlmsTxt;
+		}
+
+		if (
+			options.themeDefault !== undefined &&
+			(options.themeDefault === "light" || options.themeDefault === "dark")
+		) {
+			this.themeDefault = options.themeDefault;
 		}
 
 		if (options.assetExtensions && Array.isArray(options.assetExtensions)) {
