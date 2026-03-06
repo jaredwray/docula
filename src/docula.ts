@@ -166,6 +166,7 @@ export default class Docula {
 			case "serve": {
 				if (consoleProcess.args.build || consoleProcess.args.watch) {
 					if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+						/* v8 ignore next -- @preserve */
 						fs.rmSync(this.options.output, { recursive: true, force: true });
 					}
 
