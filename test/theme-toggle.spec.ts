@@ -192,16 +192,7 @@ test.describe("Theme Toggle - System Preference Reactivity", () => {
 		).toBeNull();
 
 		await page.emulateMedia({ colorScheme: "light" });
-		await page.waitForFunction(
-			() => document.documentElement.getAttribute("data-theme") === "light",
-			null,
-			{ timeout: 3000 },
-		);
-		expect(
-			await page.evaluate(() =>
-				document.documentElement.getAttribute("data-theme"),
-			),
-		).toBe("light");
+		await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 	});
 
 	test("ignores system color scheme change in explicit mode", async ({
