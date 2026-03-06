@@ -9,6 +9,7 @@ export const options = {
 	siteTitle: 'docula',
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',
+	themeMode: 'light',
 };
 
 export const onPrepare = async config => {

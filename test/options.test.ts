@@ -19,6 +19,7 @@ describe("DoculaOptions", () => {
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
+			expect(options.themeMode).toBeUndefined();
 		});
 
 		it("should create an instance of DoculaOptions with custom values", () => {
@@ -159,6 +160,26 @@ describe("DoculaOptions", () => {
 		it("should not update enableLlmsTxt for non-boolean values", () => {
 			options.parseOptions({ enableLlmsTxt: "yes" });
 			expect(options.enableLlmsTxt).toEqual(true);
+		});
+
+		it("should parse themeMode set to light", () => {
+			options.parseOptions({ themeMode: "light" });
+			expect(options.themeMode).toEqual("light");
+		});
+
+		it("should parse themeMode set to dark", () => {
+			options.parseOptions({ themeMode: "dark" });
+			expect(options.themeMode).toEqual("dark");
+		});
+
+		it("should not update themeMode for invalid values", () => {
+			options.parseOptions({ themeMode: "invalid" });
+			expect(options.themeMode).toBeUndefined();
+		});
+
+		it("should not update themeMode for non-string values", () => {
+			options.parseOptions({ themeMode: true });
+			expect(options.themeMode).toBeUndefined();
 		});
 
 		it("should parse assetExtensions from options", () => {
