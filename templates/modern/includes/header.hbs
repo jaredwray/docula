@@ -6,7 +6,7 @@
 <link rel="icon" href="/favicon.ico">
 <script>
   (function(){
-    var mode = localStorage.getItem('theme') || '{{themeMode}}' || 'system';
+    var mode = localStorage.getItem('theme') || {{#if themeMode}}'{{themeMode}}'{{else}}'system'{{/if}};
     var resolved = mode === 'system'
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
       : mode;

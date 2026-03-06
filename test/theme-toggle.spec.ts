@@ -111,7 +111,9 @@ test.describe("Theme Toggle - Click Cycle", () => {
 		await expect(page.locator(".theme-button__icon--moon")).toHaveClass(
 			/theme-button__icon--hidden/,
 		);
-		expect(await page.evaluate(() => localStorage.getItem("theme"))).toBeNull();
+		expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe(
+			"system",
+		);
 	});
 });
 
@@ -155,7 +157,7 @@ test.describe("Theme Toggle - Persistence", () => {
 		).toBeNull();
 	});
 
-	test("system mode clears localStorage and follows system after reload", async ({
+	test("system mode persists in localStorage and follows system after reload", async ({
 		page,
 	}) => {
 		await page.emulateMedia({ colorScheme: "light" });
@@ -167,7 +169,9 @@ test.describe("Theme Toggle - Persistence", () => {
 
 		await page.reload();
 
-		expect(await page.evaluate(() => localStorage.getItem("theme"))).toBeNull();
+		expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe(
+			"system",
+		);
 		await expect(toggle).toHaveAttribute(
 			"aria-label",
 			"Theme: system (following system)",
