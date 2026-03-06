@@ -82,3 +82,5 @@ test-results/
 # AI
 .claude
 /test/temp-watch-output
+/test/temp-watch-site
+/test/temp-watch-error-site
