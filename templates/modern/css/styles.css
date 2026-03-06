@@ -12,6 +12,7 @@
   --pre-bg: rgba(255, 255, 255, 0.05);
   --link: #6ea8fe;
   --scrollbar: rgba(255, 255, 255, 0.2);
+  --header-height: 81px;
 }
 
 [data-theme="light"] {
@@ -32,6 +33,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -75,7 +77,6 @@ body {
   color: var(--fg);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-size: 16px;
-  overflow-x: hidden;
 }
 
 .header {
@@ -216,8 +217,8 @@ body {
   flex-direction: column;
   gap: 20px;
   position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 60px);
+  top: var(--header-height);
+  max-height: calc(100vh - var(--header-height));
   overflow-y: auto;
   align-self: flex-start;
 }
@@ -331,8 +332,8 @@ body {
   padding: 30px 20px 30px 40px;
   font-size: 13px;
   position: sticky;
-  top: 90px;
-  max-height: calc(100vh - 90px);
+  top: var(--header-height);
+  max-height: calc(100vh - var(--header-height));
   overflow-y: auto;
   align-self: flex-start;
 }
@@ -459,6 +460,10 @@ body {
     display: block;
     padding: 8px 16px;
     border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: var(--header-height);
+    z-index: 40;
+    background: var(--bg);
   }
 
   .page-dropdown__toggle {
