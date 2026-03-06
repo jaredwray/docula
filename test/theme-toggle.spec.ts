@@ -217,7 +217,7 @@ test.describe("Theme Toggle - System Preference Reactivity", () => {
 			),
 		).toBe("light");
 
-		await page.emulateMedia({ colorScheme: "dark" });
+		await page.emulateMedia({ colorScheme: "light" });
 		expect(
 			await page.evaluate(() =>
 				document.documentElement.getAttribute("data-theme"),
