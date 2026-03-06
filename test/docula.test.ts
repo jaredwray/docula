@@ -72,13 +72,6 @@ describe("docula", () => {
 		docula.options = newOptions;
 		expect(docula.options).toEqual(newOptions);
 	});
-	it("is a single page site or not", () => {
-		const docula = new Docula(defaultOptions);
-		const singlePageSite = "test/fixtures/single-page-site";
-		const multiPageSite = "test/fixtures/multi-page-site";
-		expect(docula.isSinglePageWebsite(singlePageSite)).toEqual(true);
-		expect(docula.isSinglePageWebsite(multiPageSite)).toEqual(false);
-	});
 	it("should generate the site init files and folders", () => {
 		const docula = new Docula(defaultOptions);
 		const consoleLog = console.log;
@@ -387,6 +380,7 @@ describe("docula execute", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/fixtures/single-page-site/dist3";
 		options.templatePath = "test/fixtures/template-example/";
+		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8181"];
 		const consoleLog = console.log;
@@ -413,6 +407,7 @@ describe("docula execute", () => {
 			process.cwd(),
 			"test/fixtures/single-page-site/dist3",
 		);
+		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8182"];
 		const consoleLog = console.log;
@@ -434,6 +429,7 @@ describe("docula execute", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/fixtures/single-page-site/dist3";
+		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8183"];
 		const consoleLog = console.log;
@@ -458,6 +454,7 @@ describe("docula execute", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/fixtures/single-page-site/dist4";
+		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "--port", "8184"];
 		const consoleLog = console.log;
@@ -543,6 +540,7 @@ describe("docula watch", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/fixtures/single-page-site/dist-watch2";
 		options.templatePath = "test/fixtures/template-example/";
+		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8191"];
 		const consoleLog = console.log;

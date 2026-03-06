@@ -40,10 +40,6 @@ export class DoculaOptions {
 	 */
 	public port = 3000;
 	/**
-	 * Single page website
-	 */
-	public singlePage = true;
-	/**
 	 * Sections
 	 */
 	public sections?: DoculaSection[];
@@ -77,7 +73,7 @@ export class DoculaOptions {
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
 	 */
-	public assetExtensions: string[] = [
+	public allowedAssets: string[] = [
 		".png",
 		".jpg",
 		".jpeg",
@@ -161,13 +157,6 @@ export class DoculaOptions {
 			this.port = options.port as number;
 		}
 
-		if (
-			options.singlePage !== undefined &&
-			typeof options.singlePage === "boolean"
-		) {
-			this.singlePage = options.singlePage;
-		}
-
 		/* v8 ignore next -- @preserve */
 		if (options.openApiUrl) {
 			this.openApiUrl = options.openApiUrl as string;
@@ -201,8 +190,8 @@ export class DoculaOptions {
 			this.themeMode = options.themeMode;
 		}
 
-		if (options.assetExtensions && Array.isArray(options.assetExtensions)) {
-			this.assetExtensions = options.assetExtensions as string[];
+		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {
+			this.allowedAssets = options.allowedAssets as string[];
 		}
 	}
 }

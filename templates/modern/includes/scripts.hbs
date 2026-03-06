@@ -153,5 +153,12 @@
         tocList.style.display = 'none';
       }
     }
+
+    // Hide the TOC aside if it has no entries
+    const tocSidebar = document.getElementById('toc-list');
+    if (tocSidebar && tocSidebar.children.length === 0) {
+      const aside = tocSidebar.closest('.content-aside');
+      if (aside) { aside.style.display = 'none'; }
+    }
   });
 </script>

@@ -627,12 +627,12 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - Document Parser", () => {
-		it("should include TOC heading in generatedHtml for empty markdown", async () => {
+		it("should not include TOC heading in generatedHtml for empty markdown", async () => {
 			const builder = new DoculaBuilder();
 
 			const documentsPath = "test/fixtures/empty.md";
 			const parsedDocument = builder.parseDocumentData(documentsPath);
-			expect(parsedDocument.generatedHtml).toContain("table-of-contents");
+			expect(parsedDocument.generatedHtml).not.toContain("table-of-contents");
 		});
 
 		it("should render inline TOC when markdown already has a table of contents", async () => {
@@ -2963,7 +2963,7 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
-		it("should respect custom assetExtensions from options", async () => {
+		it("should respect custom allowedAssets from options", async () => {
 			const tempSitePath = "test/temp-content-assets-custom-ext-site";
 			const docsPath = `${tempSitePath}/docs`;
 
@@ -2984,7 +2984,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			// Only allow .xyz extension
-			options.assetExtensions = [".xyz"];
+			options.allowedAssets = [".xyz"];
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			console.log = () => {};

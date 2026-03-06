@@ -1362,9 +1362,14 @@ export class DoculaBuilder {
 			}
 		}
 
-		// Prepend a TOC heading if none exists so Writr's remark-toc populates it inline
+		// Only insert a TOC heading when the page has multiple sections.
+		// Place it just before the first ## heading so intro content is preserved.
 		if (!this.hasTableOfContents(markdownContent)) {
-			markdownContent = `## Table of Contents\n\n${markdownContent}`;
+			const h2Matches = markdownContent.match(/^## /gm);
+			if (h2Matches && h2Matches.length >= 2) {
+				const firstH2 = markdownContent.search(/^## /m);
+				markdownContent = `${markdownContent.slice(0, firstH2)}## Table of Contents\n\n${markdownContent.slice(firstH2)}`;
+			}
 		}
 
 		return {
@@ -1535,7 +1540,7 @@ export class DoculaBuilder {
 				results.push(...this.listContentAssets(fullPath, root));
 			} else {
 				const ext = path.extname(file).toLowerCase();
-				if (this.options.assetExtensions.includes(ext)) {
+				if (this.options.allowedAssets.includes(ext)) {
 					results.push(path.relative(root, fullPath));
 				}
 			}
@@ -1565,7 +1570,7 @@ export class DoculaBuilder {
 				this.copyContentAssets(source, target);
 			} else {
 				const ext = path.extname(file).toLowerCase();
-				if (this.options.assetExtensions.includes(ext)) {
+				if (this.options.allowedAssets.includes(ext)) {
 					fs.mkdirSync(targetPath, { recursive: true });
 					fs.copyFileSync(source, target);
 				}

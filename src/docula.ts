@@ -103,9 +103,6 @@ export default class Docula {
 
 		const consoleProcess = this._console.parseProcessArgv(process.argv);
 
-		// Automatic detect singlePage option
-		this.options.singlePage = this.isSinglePageWebsite(this.options.sitePath);
-
 		// Update options
 		if (consoleProcess.args.sitePath) {
 			this.options.sitePath = consoleProcess.args.sitePath;
@@ -172,10 +169,10 @@ export default class Docula {
 			}
 
 			case "serve": {
-				const builder = new DoculaBuilder(this.options);
-				await builder.build();
 				await this.serve(this.options);
 				if (consoleProcess.args.watch) {
+					const builder = new DoculaBuilder(this.options);
+					await builder.build();
 					this.watch(this.options, builder);
 				}
 
@@ -188,21 +185,6 @@ export default class Docula {
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Checks if the site is a single page website
-	 * @param {string} sitePath
-	 * @returns {boolean}
-	 */
-	public isSinglePageWebsite(sitePath: string): boolean {
-		const documentationPath = `${sitePath}/docs`;
-		if (!fs.existsSync(documentationPath)) {
-			return true;
-		}
-
-		const files = fs.readdirSync(documentationPath);
-		return files.length === 0;
 	}
 
 	/**
@@ -369,6 +351,11 @@ export default class Docula {
 		const { port } = options;
 		const { output } = options;
 
+		/* v8 ignore next 3 -- @preserve */
+		if (!fs.existsSync(output)) {
+			fs.mkdirSync(output, { recursive: true });
+		}
+
 		const config = {
 			public: output,
 		};
@@ -387,3 +374,4 @@ export default class Docula {
 }
 
 export { Writr } from "writr";
+export { DoculaOptions } from "./options.js";

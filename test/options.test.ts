@@ -15,7 +15,6 @@ describe("DoculaOptions", () => {
 				"Beautiful Website for Your Projects",
 			);
 			expect(options.siteUrl).toEqual("https://docula.org");
-			expect(options.singlePage).toEqual(true);
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
@@ -31,7 +30,6 @@ describe("DoculaOptions", () => {
 				siteTitle: "Custom Title",
 				siteDescription: "Custom Description",
 				siteUrl: "https://custom-url.com",
-				singlePage: false,
 				sections: [{ name: "Custom Section", path: "custom-section" }],
 			});
 			expect(options.templatePath).toContain("/custom-template");
@@ -41,7 +39,6 @@ describe("DoculaOptions", () => {
 			expect(options.siteTitle).toEqual("Custom Title");
 			expect(options.siteDescription).toEqual("Custom Description");
 			expect(options.siteUrl).toEqual("https://custom-url.com");
-			expect(options.singlePage).toEqual(false);
 			expect(options.sections).toEqual([
 				{ name: "Custom Section", path: "custom-section" },
 			]);
@@ -182,22 +179,22 @@ describe("DoculaOptions", () => {
 			expect(options.themeMode).toBeUndefined();
 		});
 
-		it("should parse assetExtensions from options", () => {
-			options.parseOptions({ assetExtensions: [".png", ".custom"] });
-			expect(options.assetExtensions).toEqual([".png", ".custom"]);
+		it("should parse allowedAssets from options", () => {
+			options.parseOptions({ allowedAssets: [".png", ".custom"] });
+			expect(options.allowedAssets).toEqual([".png", ".custom"]);
 		});
 
-		it("should not update assetExtensions for non-array values", () => {
-			const defaultExtensions = [...options.assetExtensions];
-			options.parseOptions({ assetExtensions: "not-an-array" });
-			expect(options.assetExtensions).toEqual(defaultExtensions);
+		it("should not update allowedAssets for non-array values", () => {
+			const defaultExtensions = [...options.allowedAssets];
+			options.parseOptions({ allowedAssets: "not-an-array" });
+			expect(options.allowedAssets).toEqual(defaultExtensions);
 		});
 
-		it("should have default assetExtensions", () => {
-			expect(options.assetExtensions).toContain(".png");
-			expect(options.assetExtensions).toContain(".jpg");
-			expect(options.assetExtensions).toContain(".pdf");
-			expect(options.assetExtensions).toContain(".svg");
+		it("should have default allowedAssets", () => {
+			expect(options.allowedAssets).toContain(".png");
+			expect(options.allowedAssets).toContain(".jpg");
+			expect(options.allowedAssets).toContain(".pdf");
+			expect(options.allowedAssets).toContain(".svg");
 		});
 	});
 });
