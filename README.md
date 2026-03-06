@@ -4,7 +4,7 @@
 
 [![tests](https://github.com/jaredwray/docula/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/docula/actions/workflows/tests.yaml)
 [![GitHub license](https://img.shields.io/github/license/jaredwray/docula)](https://github.com/jaredwray/docula/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/jaredwray/docula/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/gh/jaredwray/docula)
+[![codecov](https://codecov.io/gh/jaredwray/docula/branch/main/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/gh/jaredwray/docula)
 [![npm](https://img.shields.io/npm/dm/docula)](https://npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula)](https://npmjs.com/package/docula)
 
@@ -94,6 +94,21 @@ This will build and serve your site locally at `http://localhost:3000`. You can 
 | `-s, --site` | Set the path where site files are located | `./site` |
 | `-o, --output` | Set the output directory | `./site/dist` |
 | `-w, --watch` | Watch for changes and rebuild | `false` |
+| `-c, --clean` | Clean the output directory before building | `false` |
+
+### Watch Mode
+
+Use the `--watch` flag to automatically rebuild your site when files change:
+
+> npx docula serve --watch
+
+When watch mode is enabled:
+1. An initial build runs at startup
+2. The dev server starts and serves your site
+3. File changes in `sitePath` (e.g., `./site`) are detected and trigger an automatic rebuild
+4. Changes in the output directory are ignored to prevent rebuild loops
+
+This is useful during development when you want to see changes reflected immediately without manually re-running the build.
 
 # TypeScript Configuration
 

@@ -4,7 +4,6 @@ order: 2
 ---
 
 
-
 > Simple key-value storage with support for multiple backends
 
 [![build](https://github.com/jaredwray/keyv/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/keyv/actions/workflows/tests.yaml)

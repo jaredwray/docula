@@ -23,6 +23,7 @@ export default class Docula {
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	private _configFileModule: any = {};
 	private _server: http.Server | undefined;
+	private _watcher: fs.FSWatcher | undefined;
 
 	/**
 	 * Initialize the Docula class
@@ -58,6 +59,14 @@ export default class Docula {
 	 */
 	public get server(): http.Server | undefined {
 		return this._server;
+	}
+
+	/**
+	 * The file watcher used in watch mode
+	 * @returns {fs.FSWatcher | undefined}
+	 */
+	public get watcher(): fs.FSWatcher | undefined {
+		return this._watcher;
 	}
 
 	/**
@@ -138,6 +147,11 @@ export default class Docula {
 			this.options.port = consoleProcess.args.port;
 		}
 
+		if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+			/* v8 ignore next -- @preserve */
+			fs.rmSync(this.options.output, { recursive: true, force: true });
+		}
+
 		switch (consoleProcess.command) {
 			case "init": {
 				this.generateInit(
@@ -161,6 +175,10 @@ export default class Docula {
 				const builder = new DoculaBuilder(this.options);
 				await builder.build();
 				await this.serve(this.options);
+				if (consoleProcess.args.watch) {
+					this.watch(this.options, builder);
+				}
+
 				break;
 			}
 
@@ -266,6 +284,76 @@ export default class Docula {
 			const absolutePath = path.resolve(mjsConfigFile);
 			this._configFileModule = await import(pathToFileURL(absolutePath).href);
 		}
+	}
+
+	/**
+	 * Watch the site path for file changes and rebuild on change
+	 * @param {DoculaOptions} options
+	 * @param {DoculaBuilder} builder
+	 * @returns {fs.FSWatcher}
+	 */
+	public watch(options: DoculaOptions, builder: DoculaBuilder): fs.FSWatcher {
+		if (this._watcher) {
+			this._watcher.close();
+		}
+
+		let debounceTimer: NodeJS.Timeout | undefined;
+		let isBuilding = false;
+		let pendingRebuild = false;
+		const outputRelative = path.relative(options.sitePath, options.output);
+
+		const runBuild = async (filename: string) => {
+			isBuilding = true;
+			this._console.log(`File changed: ${filename}, rebuilding...`);
+			try {
+				await builder.build();
+				this._console.log("Rebuild complete");
+			} catch (error) {
+				this._console.error(`Rebuild failed: ${(error as Error).message}`);
+			} finally {
+				isBuilding = false;
+				/* v8 ignore next 4 -- @preserve */
+				if (pendingRebuild) {
+					pendingRebuild = false;
+					await runBuild("queued changes");
+				}
+			}
+		};
+
+		this._watcher = fs.watch(
+			options.sitePath,
+			{ recursive: true },
+			(_eventType, filename) => {
+				// Ignore changes in the output directory
+				if (
+					filename &&
+					outputRelative &&
+					!outputRelative.startsWith("..") &&
+					(String(filename) === outputRelative ||
+						String(filename).startsWith(`${outputRelative}${path.sep}`))
+				) {
+					return;
+				}
+
+				/* v8 ignore next 3 -- @preserve */
+				if (isBuilding) {
+					pendingRebuild = true;
+					return;
+				}
+
+				/* v8 ignore next -- @preserve */
+				if (debounceTimer) {
+					clearTimeout(debounceTimer);
+				}
+
+				debounceTimer = setTimeout(async () => {
+					await runBuild(String(filename));
+				}, 300);
+			},
+		);
+
+		this._console.log("Watching for file changes...");
+		return this._watcher;
 	}
 
 	/**

@@ -37,6 +37,9 @@ export class DoculaConsole {
 		console.log("   Arguments build:");
 		console.log("     -w, --watch            watch for changes and rebuild");
 		console.log(
+			"     -c, --clean            Clean the output directory before building",
+		);
+		console.log(
 			"     -s, --site             Set the path where site files are located",
 		);
 		console.log(
@@ -50,6 +53,9 @@ export class DoculaConsole {
 		console.log("   Arguments serve:");
 		console.log("     -p, --port         Set the port number used with serve");
 		console.log("     -w, --watch        watch for changes and rebuild");
+		console.log(
+			"     -c, --clean        Clean the output directory before building",
+		);
 		console.log(
 			"     -s, --site         Set the path where site files are located",
 		);
@@ -98,6 +104,7 @@ export class DoculaConsole {
 			template: "",
 			output: "",
 			watch: false,
+			clean: false,
 			port: undefined,
 			typescript: false,
 		};
@@ -126,6 +133,12 @@ export class DoculaConsole {
 				case "-w":
 				case "--watch": {
 					arguments_.watch = true;
+					break;
+				}
+
+				case "-c":
+				case "--clean": {
+					arguments_.clean = true;
 					break;
 				}
 
@@ -175,6 +188,7 @@ type DoculaConsoleArguments = {
 	template: string | undefined;
 	output: string | undefined;
 	watch: boolean;
+	clean: boolean;
 	port: number | undefined;
 	typescript: boolean;
 };
