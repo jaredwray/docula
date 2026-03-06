@@ -374,3 +374,4 @@ export default class Docula {
 }
 
 export { Writr } from "writr";
+export { DoculaOptions } from "./options.js";

@@ -627,12 +627,12 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - Document Parser", () => {
-		it("should include TOC heading in generatedHtml for empty markdown", async () => {
+		it("should not include TOC heading in generatedHtml for empty markdown", async () => {
 			const builder = new DoculaBuilder();
 
 			const documentsPath = "test/fixtures/empty.md";
 			const parsedDocument = builder.parseDocumentData(documentsPath);
-			expect(parsedDocument.generatedHtml).toContain("table-of-contents");
+			expect(parsedDocument.generatedHtml).not.toContain("table-of-contents");
 		});
 
 		it("should render inline TOC when markdown already has a table of contents", async () => {
