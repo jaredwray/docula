@@ -203,6 +203,11 @@ export class DoculaBuilder {
 		// Build the home page (index.html)
 		if (!this.options.homePage && doculaData.hasDocuments) {
 			await this.buildDocsHomePage(doculaData);
+		} else if (!this.options.homePage && !doculaData.hasDocuments) {
+			console.error(
+				"homePage is set to false but no documents were found in the docs directory. " +
+					"Add documents to the docs/ folder or set homePage to true.",
+			);
 		} else {
 			await this.buildIndexPage(doculaData);
 		}
