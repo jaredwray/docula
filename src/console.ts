@@ -52,6 +52,7 @@ export class DoculaConsole {
 		console.log();
 		console.log("   Arguments serve:");
 		console.log("     -p, --port         Set the port number used with serve");
+		console.log("     -b, --build        Build the site before serving");
 		console.log("     -w, --watch        watch for changes and rebuild");
 		console.log(
 			"     -c, --clean        Clean the output directory before building",
@@ -105,6 +106,7 @@ export class DoculaConsole {
 			output: "",
 			watch: false,
 			clean: false,
+			build: false,
 			port: undefined,
 			typescript: false,
 		};
@@ -139,6 +141,12 @@ export class DoculaConsole {
 				case "-c":
 				case "--clean": {
 					arguments_.clean = true;
+					break;
+				}
+
+				case "-b":
+				case "--build": {
+					arguments_.build = true;
 					break;
 				}
 
@@ -189,6 +197,7 @@ type DoculaConsoleArguments = {
 	output: string | undefined;
 	watch: boolean;
 	clean: boolean;
+	build: boolean;
 	port: number | undefined;
 	typescript: boolean;
 };

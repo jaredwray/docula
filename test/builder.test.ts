@@ -105,6 +105,33 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
+		it("should log error when homePage is false but no docs exist", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-no-docs";
+			options.sitePath = "test/fixtures/single-page-site";
+			options.homePage = false;
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			const consoleError = console.error;
+			const errors: string[] = [];
+			console.log = (_message) => {};
+			console.error = (message) => {
+				errors.push(message as string);
+			};
+
+			try {
+				await builder.build();
+				expect(
+					errors.some((e) =>
+						e.includes("homePage is set to false but no documents were found"),
+					),
+				).toBe(true);
+			} finally {
+				await fs.promises.rm(options.output, { recursive: true, force: true });
+				console.log = consoleLog;
+				console.error = consoleError;
+			}
+		});
 		it("should build multi page", async () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp-build-test";

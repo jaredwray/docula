@@ -144,11 +144,6 @@ export default class Docula {
 			this.options.port = consoleProcess.args.port;
 		}
 
-		if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
-			/* v8 ignore next -- @preserve */
-			fs.rmSync(this.options.output, { recursive: true, force: true });
-		}
-
 		switch (consoleProcess.command) {
 			case "init": {
 				this.generateInit(
@@ -169,17 +164,29 @@ export default class Docula {
 			}
 
 			case "serve": {
-				await this.serve(this.options);
-				if (consoleProcess.args.watch) {
+				if (consoleProcess.args.build || consoleProcess.args.watch) {
+					if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+						/* v8 ignore next -- @preserve */
+						fs.rmSync(this.options.output, { recursive: true, force: true });
+					}
+
 					const builder = new DoculaBuilder(this.options);
 					await builder.build();
-					this.watch(this.options, builder);
+					if (consoleProcess.args.watch) {
+						this.watch(this.options, builder);
+					}
 				}
 
+				await this.serve(this.options);
 				break;
 			}
 
 			default: {
+				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+					/* v8 ignore next -- @preserve */
+					fs.rmSync(this.options.output, { recursive: true, force: true });
+				}
+
 				const builder = new DoculaBuilder(this.options);
 				await builder.build();
 				break;
