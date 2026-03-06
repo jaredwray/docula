@@ -81,3 +81,4 @@ test-results/
 
 # AI
 .claude
+/test/temp-watch-output
