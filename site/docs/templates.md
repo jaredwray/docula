@@ -17,17 +17,17 @@ export const options = {
 };
 ```
 
-### Home Page
-
-The home page features a clean hero section with your project logo and description, quick-action buttons for Documentation, API Reference, and Changelog, a contributors grid, and a releases timeline.
-
-![Modern template home page](images/modern-home.png)
-
 ### Documentation Page
 
-Documentation pages use a sticky header bar with icon-based navigation, a collapsible sidebar with section grouping, and an inline table of contents for the current page. On mobile, the sidebar collapses into a dropdown selector.
+Documentation pages use a sticky header bar with icon-based navigation links (Documentation, API Reference, Changelog), a collapsible left sidebar with grouped section navigation, a main content area, and a right-side Table of Contents panel. On mobile, the sidebar collapses into a dropdown selector.
 
-![Modern template docs page](images/modern-docs.png)
+![Modern template docs page](modern-docs.png)
+
+### API Reference Page
+
+When an OpenAPI URL is configured, the Modern template renders a full API reference with a left sidebar listing HTTP methods and endpoint categories, a main content area showing endpoint details with parameters and response codes, and an interactive "Test Request" panel on the right for trying endpoints directly in the browser.
+
+![Modern template API reference page](modern-api-reference.png)
 
 ### Key Features
 
@@ -53,17 +53,11 @@ export const options = {
 };
 ```
 
-### Home Page
-
-The home page displays a hero section with your project logo, description, and quick links. When in multi-page mode it also shows documentation and API reference buttons, contributors, and releases.
-
-![Classic template home page](images/classic-home.png)
-
 ### Documentation Page
 
-Documentation pages use a sidebar-based navigation with a simple list layout. The table of contents is rendered as a fixed sidebar element on desktop.
+Documentation pages use a clean white layout with the project logo displayed prominently in the top-left corner, a flat left sidebar listing navigation links, and a main content area with an inline Table of Contents rendered at the top of the page. Code blocks use a dark theme for contrast.
 
-![Classic template docs page](images/classic-docs.png)
+![Classic template docs page](classic-docs.png)
 
 ### Key Features
 
