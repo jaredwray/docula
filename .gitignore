@@ -84,3 +84,4 @@ test-results/
 /test/temp-watch-output
 /test/temp-watch-site
 /test/temp-watch-error-site
+/test/temp-build-api-home-no-template-button

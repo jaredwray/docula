@@ -559,6 +559,45 @@ describe("docula watch", () => {
 			console.log = consoleLog;
 		}
 	});
+	it("should not clean output directory when serve is called with --clean but without --build or --watch", async () => {
+		const outputDir = path.resolve(
+			"test/fixtures/single-page-site/dist-clean-serve",
+		);
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = outputDir;
+		options.templatePath = "test/fixtures/template-example/";
+		await fs.promises.mkdir(outputDir, { recursive: true });
+		// Create a marker file to verify it doesn't get deleted
+		fs.writeFileSync(path.join(outputDir, "marker.txt"), "keep");
+		const docula = new Docula(options);
+		process.argv = [
+			"node",
+			"docula",
+			"serve",
+			"-p",
+			"8193",
+			"--clean",
+			"-o",
+			"test/fixtures/single-page-site/dist-clean-serve",
+		];
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			// The marker file should still exist — clean should not have run
+			expect(fs.existsSync(path.join(outputDir, "marker.txt"))).toBe(true);
+		} finally {
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(outputDir, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
 	it("should build and serve when --build flag is used without --watch", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
