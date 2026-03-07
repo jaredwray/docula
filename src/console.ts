@@ -12,6 +12,9 @@ import {
 	yellow,
 } from "colorette";
 
+// biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
+const ansiRegex = /\u001B\[[0-9;]*m/g;
+
 export class DoculaConsole {
 	log(message: string): void {
 		console.log(message);
@@ -58,7 +61,13 @@ export class DoculaConsole {
 			statusColor = yellow;
 		}
 
-		const parts = [`  ${bold(method)}`, url, statusColor(String(statusCode))];
+		const sanitizedMethod = method.replace(ansiRegex, "");
+		const sanitizedUrl = url.replace(ansiRegex, "");
+		const parts = [
+			`  ${bold(sanitizedMethod)}`,
+			sanitizedUrl,
+			statusColor(String(statusCode)),
+		];
 		if (durationMs !== undefined) {
 			parts.push(gray(`${durationMs}ms`));
 		}
