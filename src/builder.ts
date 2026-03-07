@@ -1471,12 +1471,21 @@ export class DoculaBuilder {
 		}
 
 		const overrideDir = path.join(sitePath, "templates", templateName);
+		const cacheDir = path.join(sitePath, ".cache", "templates", templateName);
+
+		// Validate that resolved paths stay within sitePath to prevent path traversal
+		if (
+			!this.isPathWithinBasePath(overrideDir, sitePath) ||
+			!this.isPathWithinBasePath(cacheDir, sitePath)
+		) {
+			return resolvedTemplatePath;
+		}
+
 		if (!fs.existsSync(overrideDir)) {
 			return resolvedTemplatePath;
 		}
 
 		const overrideFiles = this.listFilesRecursive(overrideDir);
-		const cacheDir = path.join(sitePath, ".cache", "templates", templateName);
 
 		// Check if we can reuse the existing cache by comparing modification times
 		if (
@@ -1510,6 +1519,10 @@ export class DoculaBuilder {
 
 		// Overlay user overrides on top
 		this.copyDirectory(overrideDir, cacheDir);
+
+		// Write manifest so isCacheFresh can detect deleted/renamed overrides
+		const manifestPath = path.join(cacheDir, ".manifest.json");
+		fs.writeFileSync(manifestPath, JSON.stringify(overrideFiles));
 
 		return cacheDir;
 	}
@@ -1545,10 +1558,23 @@ export class DoculaBuilder {
 		cacheDir: string,
 		overrideFiles: string[],
 	): boolean {
-		// Cache must contain files to be considered valid
-		const cachedFiles = this.listFilesRecursive(cacheDir);
-		/* v8 ignore next 3 -- @preserve */
-		if (cachedFiles.length === 0) {
+		// Check manifest to detect deleted/renamed override files
+		const manifestPath = path.join(cacheDir, ".manifest.json");
+		if (!fs.existsSync(manifestPath)) {
+			return false;
+		}
+
+		try {
+			const previousFiles = JSON.parse(
+				fs.readFileSync(manifestPath, "utf8"),
+			) as string[];
+			if (
+				previousFiles.length !== overrideFiles.length ||
+				!previousFiles.every((f, i) => f === overrideFiles[i])
+			) {
+				return false;
+			}
+		} catch {
 			return false;
 		}
 

@@ -189,6 +189,19 @@ describe("DoculaBuilder", () => {
 			expect(result).toBe("test/fixtures/template-example");
 		});
 
+		it("should return original path when templateName contains path traversal", () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/single-page-site";
+			const builder = new DoculaBuilder(options);
+			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+			const result = (builder as any).mergeTemplateOverrides(
+				"templates/modern",
+				options.sitePath,
+				"../../../../etc",
+			);
+			expect(result).toBe("templates/modern");
+		});
+
 		it("should merge template overrides and log overridden files", async () => {
 			const sitePath = "test/fixtures/single-page-site";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
@@ -386,6 +399,126 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 				expect(
 					messages.some((m) => m.includes("Applying template overrides")),
+				).toBe(false);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
+				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
+		});
+
+		it("should invalidate cache when an override file is deleted", () => {
+			const sitePath = "test/fixtures/single-page-site";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+			const cacheDir = `${sitePath}/.cache`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>A</footer>");
+			fs.writeFileSync(`${overrideDir}/header.hbs`, "<header>B</header>");
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// First merge — builds cache with two override files
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// Delete one override file
+				fs.unlinkSync(`${overrideDir}/header.hbs`);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second merge — should rebuild, not reuse cache
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) => m.includes("Using cached template overrides")),
+				).toBe(false);
+				expect(
+					messages.some((m) => m.includes("Applying template overrides")),
+				).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
+				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
+		});
+
+		it("should rebuild when manifest is missing or corrupt", () => {
+			const sitePath = "test/fixtures/single-page-site";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+			const cacheDir = `${sitePath}/.cache`;
+			const cachePath = `${sitePath}/.cache/templates/modern`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>X</footer>");
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// First merge — builds cache
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// Corrupt the manifest
+				fs.writeFileSync(`${cachePath}/.manifest.json`, "not json");
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Should rebuild due to corrupt manifest
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) => m.includes("Using cached template overrides")),
+				).toBe(false);
+
+				// Now delete the manifest entirely
+				fs.unlinkSync(`${cachePath}/.manifest.json`);
+				messages.length = 0;
+
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) => m.includes("Using cached template overrides")),
 				).toBe(false);
 			} finally {
 				console.log = consoleLog;
