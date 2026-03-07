@@ -393,6 +393,178 @@ describe("DoculaBuilder", () => {
 				fs.rmSync(cacheDir, { recursive: true, force: true });
 			}
 		});
+
+		it("should create .gitignore with .cache when it does not exist", () => {
+			const sitePath = "test/temp-gitignore-create";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>test</footer>");
+
+			const consoleLog = console.log;
+			const messages: string[] = [];
+			console.log = (message) => {
+				messages.push(stripAnsi(message as string));
+			};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// .gitignore should be created with .cache entry
+				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(true);
+				const content = fs.readFileSync(`${sitePath}/.gitignore`, "utf8");
+				expect(content).toContain(".cache");
+				expect(
+					messages.some((m) => m.includes("Created .gitignore with .cache")),
+				).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should append .cache to existing .gitignore", () => {
+			const sitePath = "test/temp-gitignore-append";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>test</footer>");
+			fs.writeFileSync(`${sitePath}/.gitignore`, "dist\nnode_modules\n");
+
+			const consoleLog = console.log;
+			const messages: string[] = [];
+			console.log = (message) => {
+				messages.push(stripAnsi(message as string));
+			};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				const content = fs.readFileSync(`${sitePath}/.gitignore`, "utf8");
+				expect(content).toContain("dist");
+				expect(content).toContain(".cache");
+				expect(
+					messages.some((m) => m.includes("Added .cache to .gitignore")),
+				).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should not modify .gitignore when .cache entry already exists", () => {
+			const sitePath = "test/temp-gitignore-exists";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>test</footer>");
+			fs.writeFileSync(`${sitePath}/.gitignore`, "dist\n.cache\n");
+
+			const consoleLog = console.log;
+			const messages: string[] = [];
+			console.log = (message) => {
+				messages.push(stripAnsi(message as string));
+			};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				const content = fs.readFileSync(`${sitePath}/.gitignore`, "utf8");
+				expect(content).toBe("dist\n.cache\n");
+				expect(messages.some((m) => m.includes("Added .cache"))).toBe(false);
+				expect(messages.some((m) => m.includes("Created .gitignore"))).toBe(
+					false,
+				);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should not modify .gitignore when autoUpdateIgnores is false", () => {
+			const sitePath = "test/temp-gitignore-disabled";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>test</footer>");
+
+			const consoleLog = console.log;
+			console.log = (_message) => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.autoUpdateIgnores = false;
+				const builder = new DoculaBuilder(options);
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// .gitignore should NOT be created
+				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(false);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should not modify .gitignore when .cache already exists", () => {
+			const sitePath = "test/temp-gitignore-cache-exists";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>test</footer>");
+			// Create .cache before merge
+			fs.mkdirSync(`${sitePath}/.cache`, { recursive: true });
+
+			const consoleLog = console.log;
+			console.log = (_message) => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// .gitignore should NOT be created since .cache already existed
+				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(false);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
 	});
 
 	describe("Docula Builder - Validate Options", () => {

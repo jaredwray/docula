@@ -18,6 +18,7 @@ describe("DoculaOptions", () => {
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
+			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.themeMode).toBeUndefined();
 		});
 
@@ -157,6 +158,16 @@ describe("DoculaOptions", () => {
 		it("should not update enableLlmsTxt for non-boolean values", () => {
 			options.parseOptions({ enableLlmsTxt: "yes" });
 			expect(options.enableLlmsTxt).toEqual(true);
+		});
+
+		it("should parse autoUpdateIgnores set to false", () => {
+			options.parseOptions({ autoUpdateIgnores: false });
+			expect(options.autoUpdateIgnores).toEqual(false);
+		});
+
+		it("should not update autoUpdateIgnores for non-boolean values", () => {
+			options.parseOptions({ autoUpdateIgnores: "yes" });
+			expect(options.autoUpdateIgnores).toEqual(true);
 		});
 
 		it("should parse themeMode set to light", () => {

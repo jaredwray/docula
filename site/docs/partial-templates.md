@@ -90,5 +90,6 @@ During the build, Docula will log which files are being overridden:
 ## Notes
 
 - **Built-in templates only** — Partial overrides work with the `template` option (e.g., `modern`, `classic`). If you use `templatePath` to provide a fully custom template, overrides are not applied since you already control the entire template.
-- **Cache directory** — Docula merges overrides into a `.cache/templates/{templateName}/` directory inside your site folder. This directory is automatically managed and recreated on each build. Use `--clean` to remove it along with the output directory.
+- **Cache directory** — Docula merges overrides into a `.cache/templates/{templateName}/` directory inside your site folder. This directory is automatically managed and only rebuilt when override files change. Use `--clean` to remove it along with the output directory.
+- **Automatic .gitignore** — When the `.cache` directory is first created, Docula automatically adds `.cache` to your site folder's `.gitignore` (creating the file if needed). Set `autoUpdateIgnores: false` in your config to disable this behavior.
 - **Any file can be overridden** — The override directory structure mirrors the built-in template exactly. Any file you place in the override directory replaces the corresponding file from the built-in template.

@@ -1495,6 +1495,9 @@ export class DoculaBuilder {
 			}
 		}
 
+		// Ensure .cache is in .gitignore before first creation
+		this.ensureCacheInGitignore(sitePath);
+
 		// Create cache directory and merge templates
 		if (fs.existsSync(cacheDir)) {
 			fs.rmSync(cacheDir, { recursive: true, force: true });
@@ -1509,6 +1512,32 @@ export class DoculaBuilder {
 		this.copyDirectory(overrideDir, cacheDir);
 
 		return cacheDir;
+	}
+
+	private ensureCacheInGitignore(sitePath: string): void {
+		if (!this.options.autoUpdateIgnores) {
+			return;
+		}
+
+		// Only act when .cache doesn't exist yet (first creation)
+		const cacheDir = path.join(sitePath, ".cache");
+		if (fs.existsSync(cacheDir)) {
+			return;
+		}
+
+		const gitignorePath = path.join(sitePath, ".gitignore");
+		const entry = ".cache";
+
+		if (fs.existsSync(gitignorePath)) {
+			const content = fs.readFileSync(gitignorePath, "utf8");
+			if (!content.split("\n").some((line) => line.trim() === entry)) {
+				fs.appendFileSync(gitignorePath, `\n${entry}\n`);
+				this._console.info(`Added ${entry} to .gitignore`);
+			}
+		} else {
+			fs.writeFileSync(gitignorePath, `${entry}\n`);
+			this._console.info("Created .gitignore with .cache");
+		}
 	}
 
 	private isCacheFresh(

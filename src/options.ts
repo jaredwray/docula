@@ -70,6 +70,11 @@ export class DoculaOptions {
 	 */
 	public themeMode?: "light" | "dark";
 	/**
+	 * When true, automatically adds generated paths (e.g., .cache) to the
+	 * site directory's .gitignore file if not already present.
+	 */
+	public autoUpdateIgnores = true;
+	/**
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
 	 */
@@ -188,6 +193,13 @@ export class DoculaOptions {
 			(options.themeMode === "light" || options.themeMode === "dark")
 		) {
 			this.themeMode = options.themeMode;
+		}
+
+		if (
+			options.autoUpdateIgnores !== undefined &&
+			typeof options.autoUpdateIgnores === "boolean"
+		) {
+			this.autoUpdateIgnores = options.autoUpdateIgnores;
 		}
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {
