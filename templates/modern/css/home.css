@@ -82,19 +82,11 @@
 }
 
 
-/* Mobile: prevent home page from scrolling vertically */
+/* Mobile adjustments */
 @media (max-width: 767px) {
-  .home {
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
   .home-hero {
     min-height: auto;
     padding: 2rem 1rem 1rem;
-    flex: 1 1 auto;
   }
 
   .home-hero img {
@@ -111,11 +103,6 @@
 
   .home-actions {
     padding-bottom: 1rem;
-    flex-shrink: 0;
-  }
-
-  .home .home-content {
-    display: none;
   }
 }
 
