@@ -114,7 +114,7 @@
     flex-shrink: 0;
   }
 
-  .home-content {
+  .home .home-content {
     display: none;
   }
 }
