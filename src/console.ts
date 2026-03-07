@@ -45,7 +45,7 @@ export class DoculaConsole {
 	}
 
 	fileCopied(filePath: string): void {
-		console.log(dim(`  \u2192 ${filePath}`));
+		this.fileBuilt(filePath);
 	}
 
 	serverLog(

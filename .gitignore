@@ -85,3 +85,5 @@ test-results/
 /test/temp-watch-site
 /test/temp-watch-error-site
 /test/temp-build-api-home-no-template-button
+/test/temp-build-api-autodetect
+/test/temp-content-assets-unreferenced-site
