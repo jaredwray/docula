@@ -3,6 +3,35 @@
   box-sizing: border-box;
 }
 
+/* Mobile: prevent home page from scrolling vertically */
+@media (max-width: 767px) {
+  .home {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home .home-hero {
+    flex: 1 1 auto;
+    height: auto;
+    padding: 1.5rem 0 1rem;
+  }
+
+  .home .home-hero img {
+    max-width: 8rem;
+  }
+
+  .home .home-actions {
+    padding-bottom: 1rem;
+    flex-shrink: 0;
+  }
+
+  .home .home-container {
+    display: none;
+  }
+}
+
 .hidden {
   display: none;
 }

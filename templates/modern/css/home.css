@@ -82,6 +82,43 @@
 }
 
 
+/* Mobile: prevent home page from scrolling vertically */
+@media (max-width: 767px) {
+  .home {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-hero {
+    min-height: auto;
+    padding: 2rem 1rem 1rem;
+    flex: 1 1 auto;
+  }
+
+  .home-hero img {
+    max-width: 8rem;
+  }
+
+  .hero-container {
+    margin: 1rem auto;
+  }
+
+  .hero-container h1 {
+    font-size: 1.125rem;
+  }
+
+  .home-actions {
+    padding-bottom: 1rem;
+    flex-shrink: 0;
+  }
+
+  .home-content {
+    display: none;
+  }
+}
+
 /* Responsive hero */
 @media (min-width: 768px) {
   .home-hero { min-height: 50vh; }
