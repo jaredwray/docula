@@ -43,7 +43,7 @@ test.describe("Home page mobile scroll", () => {
 		await page.goto("/");
 		await page.waitForLoadState("domcontentloaded");
 
-		const homeContent = page.locator(".home-content");
+		const homeContent = page.locator(".home .home-content");
 		await expect(homeContent).toBeHidden();
 	});
 });
