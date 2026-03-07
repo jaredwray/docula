@@ -701,15 +701,19 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - Validate Options", () => {
-		it("should validate githubPath options", async () => {
+		it("should allow empty githubPath", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
-			try {
-				options.githubPath = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe("No github options provided");
-			}
+			options.githubPath = "";
+			expect(() => builder.validateOptions(options)).not.toThrow();
+		});
+		it("should reject malformed githubPath without slash", () => {
+			const builder = new DoculaBuilder();
+			const options = new DoculaOptions();
+			options.githubPath = "invalid";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"githubPath must be in 'owner/repo' format",
+			);
 		});
 		it("should validate siteDescription options", async () => {
 			const builder = new DoculaBuilder();
@@ -2257,6 +2261,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp-build-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
 			const builder = new DoculaBuilder(options);
 

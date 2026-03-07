@@ -129,7 +129,9 @@ export class DoculaBuilder {
 		}
 
 		// Get data from github
-		doculaData.github = await this.getGithubData(this.options.githubPath);
+		if (this.options.githubPath) {
+			doculaData.github = await this.getGithubData(this.options.githubPath);
+		}
 		// Get the documents
 		doculaData.documents = this.getDocuments(
 			`${doculaData.sitePath}/docs`,
@@ -340,8 +342,8 @@ export class DoculaBuilder {
 	}
 
 	public validateOptions(options: DoculaOptions): void {
-		if (options.githubPath.length < 3) {
-			throw new Error("No github options provided");
+		if (options.githubPath && !options.githubPath.includes("/")) {
+			throw new Error("githubPath must be in 'owner/repo' format");
 		}
 
 		if (options.siteDescription.length < 3) {

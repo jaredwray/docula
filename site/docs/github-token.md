@@ -1,6 +1,6 @@
 ---
 title: GitHub Token
-order: 13
+order: 14
 ---
 
 Docula fetches contributor and release data from the GitHub API during builds. A token is optional but recommended to avoid rate limits and to support private repositories.

@@ -22,7 +22,7 @@ export class DoculaOptions {
 	/**
 	 * Path to the github repository
 	 */
-	public githubPath = "jaredwray/docula";
+	public githubPath = "";
 	/**
 	 * Site title
 	 */

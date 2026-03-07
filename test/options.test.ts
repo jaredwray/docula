@@ -9,7 +9,7 @@ describe("DoculaOptions", () => {
 			expect(options.templatePath).toEqual("");
 			expect(options.output).toContain("/dist");
 			expect(options.sitePath).toContain("/site");
-			expect(options.githubPath).toEqual("jaredwray/docula");
+			expect(options.githubPath).toEqual("");
 			expect(options.siteTitle).toEqual("docula");
 			expect(options.siteDescription).toEqual(
 				"Beautiful Website for Your Projects",
