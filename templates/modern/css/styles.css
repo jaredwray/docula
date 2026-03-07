@@ -215,7 +215,7 @@ body {
   min-width: 288px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   position: sticky;
   top: var(--header-height);
   max-height: calc(100vh - var(--header-height));
@@ -228,7 +228,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   line-height: 16px;
-  margin-block: 8px;
+  margin-block: 4px;
   color: var(--muted);
   padding: 0 0 0 10px;
   letter-spacing: 0.24px;
@@ -240,7 +240,7 @@ body {
 
 .nav-sidebar__item {
   font-size: 14px;
-  padding: 4px 8px 4px 12px;
+  padding: 3px 8px 3px 12px;
   border-radius: 4px;
   width: 100%;
   display: flex;

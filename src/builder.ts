@@ -98,9 +98,10 @@ export class DoculaBuilder {
 		// Validate the options
 		this.validateOptions(this.options);
 
-		// Resolve the template path from options
-		const resolvedTemplatePath = resolveTemplatePath(
-			this.options.templatePath,
+		// Resolve the template path from options and apply any local overrides
+		const resolvedTemplatePath = this.mergeTemplateOverrides(
+			resolveTemplatePath(this.options.templatePath, this.options.template),
+			this.options.sitePath,
 			this.options.template,
 		);
 
@@ -1457,6 +1458,117 @@ export class DoculaBuilder {
 		}
 
 		return false;
+	}
+
+	private mergeTemplateOverrides(
+		resolvedTemplatePath: string,
+		sitePath: string,
+		templateName: string,
+	): string {
+		// Only apply overrides for built-in templates (not custom templatePath)
+		if (this.options.templatePath) {
+			return resolvedTemplatePath;
+		}
+
+		const overrideDir = path.join(sitePath, "templates", templateName);
+		if (!fs.existsSync(overrideDir)) {
+			return resolvedTemplatePath;
+		}
+
+		const overrideFiles = this.listFilesRecursive(overrideDir);
+		const cacheDir = path.join(sitePath, ".cache", "templates", templateName);
+
+		// Check if we can reuse the existing cache by comparing modification times
+		if (
+			fs.existsSync(cacheDir) &&
+			this.isCacheFresh(overrideDir, cacheDir, overrideFiles)
+		) {
+			this._console.step("Using cached template overrides...");
+			return cacheDir;
+		}
+
+		// Log overridden files
+		if (overrideFiles.length > 0) {
+			this._console.step("Applying template overrides...");
+			for (const file of overrideFiles) {
+				this._console.info(`Template override: ${file}`);
+			}
+		}
+
+		// Create cache directory and merge templates
+		if (fs.existsSync(cacheDir)) {
+			fs.rmSync(cacheDir, { recursive: true, force: true });
+		}
+
+		fs.mkdirSync(cacheDir, { recursive: true });
+
+		// Copy built-in template first
+		this.copyDirectory(resolvedTemplatePath, cacheDir);
+
+		// Overlay user overrides on top
+		this.copyDirectory(overrideDir, cacheDir);
+
+		return cacheDir;
+	}
+
+	private isCacheFresh(
+		overrideDir: string,
+		cacheDir: string,
+		overrideFiles: string[],
+	): boolean {
+		// Cache must contain files to be considered valid
+		const cachedFiles = this.listFilesRecursive(cacheDir);
+		/* v8 ignore next 3 -- @preserve */
+		if (cachedFiles.length === 0) {
+			return false;
+		}
+
+		// Every override file must exist in cache and be older or equal in mtime
+		for (const file of overrideFiles) {
+			const overridePath = path.join(overrideDir, file);
+			const cachedPath = path.join(cacheDir, file);
+
+			/* v8 ignore next 3 -- @preserve */
+			if (!fs.existsSync(cachedPath)) {
+				return false;
+			}
+
+			const overrideMtime = fs.statSync(overridePath).mtimeMs;
+			const cachedMtime = fs.statSync(cachedPath).mtimeMs;
+
+			if (overrideMtime > cachedMtime) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private listFilesRecursive(dir: string, prefix = ""): string[] {
+		const results: string[] = [];
+		const entries = fs.readdirSync(dir);
+		for (const entry of entries) {
+			/* v8 ignore next -- @preserve */
+			if (entry.startsWith(".")) {
+				continue;
+			}
+
+			const fullPath = path.join(dir, entry);
+			const relativePath = prefix ? `${prefix}/${entry}` : entry;
+			const stat = fs.lstatSync(fullPath);
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
+			if (stat.isDirectory()) {
+				results.push(...this.listFilesRecursive(fullPath, relativePath));
+			} else {
+				results.push(relativePath);
+			}
+		}
+
+		return results;
 	}
 
 	private copyDirectory(source: string, target: string): void {

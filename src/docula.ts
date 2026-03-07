@@ -169,6 +169,14 @@ export default class Docula {
 						fs.rmSync(this.options.output, { recursive: true, force: true });
 					}
 
+					/* v8 ignore next 6 -- @preserve */
+					if (consoleProcess.args.clean) {
+						const cachePath = `${this.options.sitePath}/.cache`;
+						if (fs.existsSync(cachePath)) {
+							fs.rmSync(cachePath, { recursive: true, force: true });
+						}
+					}
+
 					const builder = new DoculaBuilder(this.options);
 					await builder.build();
 					if (consoleProcess.args.watch) {
@@ -184,6 +192,14 @@ export default class Docula {
 				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
 					/* v8 ignore next -- @preserve */
 					fs.rmSync(this.options.output, { recursive: true, force: true });
+				}
+
+				if (consoleProcess.args.clean) {
+					const cachePath = `${this.options.sitePath}/.cache`;
+					/* v8 ignore next 3 -- @preserve */
+					if (fs.existsSync(cachePath)) {
+						fs.rmSync(cachePath, { recursive: true, force: true });
+					}
 				}
 
 				const builder = new DoculaBuilder(this.options);
