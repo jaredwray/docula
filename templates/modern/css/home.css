@@ -104,6 +104,19 @@
   .home-actions {
     padding-bottom: 1rem;
   }
+
+  .home-content {
+    padding: 0.75rem;
+  }
+
+  .home-content > section {
+    padding: 0.75rem 0;
+  }
+
+  .home-content .home-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 /* Responsive hero */
