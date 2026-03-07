@@ -1,5 +1,5 @@
 ---
-title: Partial Template Overrides
+title: Partial Templates
 order: 5
 ---
 
