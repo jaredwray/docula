@@ -98,9 +98,10 @@ export class DoculaBuilder {
 		// Validate the options
 		this.validateOptions(this.options);
 
-		// Resolve the template path from options
-		const resolvedTemplatePath = resolveTemplatePath(
-			this.options.templatePath,
+		// Resolve the template path from options and apply any local overrides
+		const resolvedTemplatePath = this.mergeTemplateOverrides(
+			resolveTemplatePath(this.options.templatePath, this.options.template),
+			this.options.sitePath,
 			this.options.template,
 		);
 
@@ -128,7 +129,9 @@ export class DoculaBuilder {
 		}
 
 		// Get data from github
-		doculaData.github = await this.getGithubData(this.options.githubPath);
+		if (this.options.githubPath) {
+			doculaData.github = await this.getGithubData(this.options.githubPath);
+		}
 		// Get the documents
 		doculaData.documents = this.getDocuments(
 			`${doculaData.sitePath}/docs`,
@@ -339,8 +342,8 @@ export class DoculaBuilder {
 	}
 
 	public validateOptions(options: DoculaOptions): void {
-		if (options.githubPath.length < 3) {
-			throw new Error("No github options provided");
+		if (options.githubPath && !options.githubPath.includes("/")) {
+			throw new Error("githubPath must be in 'owner/repo' format");
 		}
 
 		if (options.siteDescription.length < 3) {
@@ -1457,6 +1460,172 @@ export class DoculaBuilder {
 		}
 
 		return false;
+	}
+
+	private mergeTemplateOverrides(
+		resolvedTemplatePath: string,
+		sitePath: string,
+		templateName: string,
+	): string {
+		// Only apply overrides for built-in templates (not custom templatePath)
+		if (this.options.templatePath) {
+			return resolvedTemplatePath;
+		}
+
+		const overrideDir = path.join(sitePath, "templates", templateName);
+		const cacheDir = path.join(sitePath, ".cache", "templates", templateName);
+
+		// Validate that resolved paths stay within sitePath to prevent path traversal
+		if (
+			!this.isPathWithinBasePath(overrideDir, sitePath) ||
+			!this.isPathWithinBasePath(cacheDir, sitePath)
+		) {
+			return resolvedTemplatePath;
+		}
+
+		if (!fs.existsSync(overrideDir)) {
+			return resolvedTemplatePath;
+		}
+
+		const overrideFiles = this.listFilesRecursive(overrideDir);
+
+		// Check if we can reuse the existing cache by comparing modification times
+		if (
+			fs.existsSync(cacheDir) &&
+			this.isCacheFresh(overrideDir, cacheDir, overrideFiles)
+		) {
+			this._console.step("Using cached template overrides...");
+			return cacheDir;
+		}
+
+		// Log overridden files
+		if (overrideFiles.length > 0) {
+			this._console.step("Applying template overrides...");
+			for (const file of overrideFiles) {
+				this._console.info(`Template override: ${file}`);
+			}
+		}
+
+		// Ensure .cache is in .gitignore before first creation
+		this.ensureCacheInGitignore(sitePath);
+
+		// Create cache directory and merge templates
+		if (fs.existsSync(cacheDir)) {
+			fs.rmSync(cacheDir, { recursive: true, force: true });
+		}
+
+		fs.mkdirSync(cacheDir, { recursive: true });
+
+		// Copy built-in template first
+		this.copyDirectory(resolvedTemplatePath, cacheDir);
+
+		// Overlay user overrides on top
+		this.copyDirectory(overrideDir, cacheDir);
+
+		// Write manifest so isCacheFresh can detect deleted/renamed overrides
+		const manifestPath = path.join(cacheDir, ".manifest.json");
+		fs.writeFileSync(manifestPath, JSON.stringify(overrideFiles));
+
+		return cacheDir;
+	}
+
+	private ensureCacheInGitignore(sitePath: string): void {
+		if (!this.options.autoUpdateIgnores) {
+			return;
+		}
+
+		// Only act when .cache doesn't exist yet (first creation)
+		const cacheDir = path.join(sitePath, ".cache");
+		if (fs.existsSync(cacheDir)) {
+			return;
+		}
+
+		const gitignorePath = path.join(sitePath, ".gitignore");
+		const entry = ".cache";
+
+		if (fs.existsSync(gitignorePath)) {
+			const content = fs.readFileSync(gitignorePath, "utf8");
+			if (!content.split("\n").some((line) => line.trim() === entry)) {
+				fs.appendFileSync(gitignorePath, `\n${entry}\n`);
+				this._console.info(`Added ${entry} to .gitignore`);
+			}
+		} else {
+			fs.writeFileSync(gitignorePath, `${entry}\n`);
+			this._console.info("Created .gitignore with .cache");
+		}
+	}
+
+	private isCacheFresh(
+		overrideDir: string,
+		cacheDir: string,
+		overrideFiles: string[],
+	): boolean {
+		// Check manifest to detect deleted/renamed override files
+		const manifestPath = path.join(cacheDir, ".manifest.json");
+		if (!fs.existsSync(manifestPath)) {
+			return false;
+		}
+
+		try {
+			const previousFiles = JSON.parse(
+				fs.readFileSync(manifestPath, "utf8"),
+			) as string[];
+			if (
+				previousFiles.length !== overrideFiles.length ||
+				!previousFiles.every((f, i) => f === overrideFiles[i])
+			) {
+				return false;
+			}
+		} catch {
+			return false;
+		}
+
+		// Every override file must exist in cache and be older or equal in mtime
+		for (const file of overrideFiles) {
+			const overridePath = path.join(overrideDir, file);
+			const cachedPath = path.join(cacheDir, file);
+
+			/* v8 ignore next 3 -- @preserve */
+			if (!fs.existsSync(cachedPath)) {
+				return false;
+			}
+
+			const overrideMtime = fs.statSync(overridePath).mtimeMs;
+			const cachedMtime = fs.statSync(cachedPath).mtimeMs;
+
+			if (overrideMtime > cachedMtime) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private listFilesRecursive(dir: string, prefix = ""): string[] {
+		const results: string[] = [];
+		const entries = fs.readdirSync(dir);
+		for (const entry of entries) {
+			/* v8 ignore next -- @preserve */
+			if (entry.startsWith(".")) {
+				continue;
+			}
+
+			const fullPath = path.join(dir, entry);
+			const relativePath = prefix ? `${prefix}/${entry}` : entry;
+			const stat = fs.lstatSync(fullPath);
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
+			if (stat.isDirectory()) {
+				results.push(...this.listFilesRecursive(fullPath, relativePath));
+			} else {
+				results.push(relativePath);
+			}
+		}
+
+		return results;
 	}
 
 	private copyDirectory(source: string, target: string): void {

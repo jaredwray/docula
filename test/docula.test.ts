@@ -266,6 +266,40 @@ describe("docula execute", () => {
 			console.log = consoleLog;
 		}
 	});
+	it("should clean the .cache directory when --clean flag is set", async () => {
+		const sitePath = "test/temp-clean-cache-site";
+		const outputDir = `${sitePath}/dist`;
+
+		// Create a minimal site fixture without a config file (so sitePath isn't overridden)
+		fs.mkdirSync(sitePath, { recursive: true });
+		fs.writeFileSync(`${sitePath}/README.md`, "# Test");
+
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = sitePath;
+		buildOptions.output = outputDir;
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		const cachePath = `${sitePath}/.cache`;
+
+		try {
+			// Create a fake cache directory
+			fs.mkdirSync(`${cachePath}/templates/modern`, { recursive: true });
+			fs.writeFileSync(`${cachePath}/templates/modern/test.hbs`, "test");
+			expect(fs.existsSync(cachePath)).toEqual(true);
+
+			// Build with --clean
+			process.argv = ["node", "docula", "--clean"];
+			await docula.execute(process);
+
+			// Cache directory should be removed
+			expect(fs.existsSync(cachePath)).toEqual(false);
+		} finally {
+			console.log = consoleLog;
+			fs.rmSync(sitePath, { recursive: true, force: true });
+		}
+	});
 	it("should generate llms files during build for docs/api/changelog sites", async () => {
 		const sourcePath = "test/fixtures/mega-page-site-no-home-page";
 		const sitePath = "test/temp-llms-integration-site";

@@ -1,6 +1,6 @@
 ---
 title: Changelog
-order: 10
+order: 11
 ---
 
 # Changelog

@@ -63,7 +63,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `templatePath` | `string` | `'./template'` | Path to custom template directory |
 | `output` | `string` | `'./dist'` | Output directory for built site |
 | `sitePath` | `string` | `'./site'` | Directory containing site content |
-| `githubPath` | `string` | - | GitHub repository path (e.g., `'user/repo'`) |
+| `githubPath` | `string` | `''` | GitHub repository path (e.g., `'user/repo'`). Optional — when empty, GitHub features are disabled. See [GitHub Integration](/docs/github-integration). |
 | `siteTitle` | `string` | `'docula'` | Website title |
 | `siteDescription` | `string` | - | Website description |
 | `siteUrl` | `string` | - | Website URL |

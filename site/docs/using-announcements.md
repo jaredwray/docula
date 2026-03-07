@@ -1,6 +1,6 @@
 ---
 title: Using Announcements
-order: 9
+order: 10
 ---
 
 # Home Page Announcements

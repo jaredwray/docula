@@ -78,6 +78,29 @@ export default class Docula {
 	}
 
 	/**
+	 * Remove the .cache directory inside the site path.
+	 * Resolves the path and verifies it stays within sitePath to prevent
+	 * path-traversal attacks.
+	 * @param {string} sitePath
+	 */
+	private cleanCache(sitePath: string): void {
+		const resolvedSitePath = path.resolve(sitePath);
+		const cachePath = path.resolve(resolvedSitePath, ".cache");
+		/* v8 ignore next 3 -- @preserve */
+		if (
+			!cachePath.startsWith(resolvedSitePath + path.sep) &&
+			cachePath !== resolvedSitePath
+		) {
+			return;
+		}
+
+		/* v8 ignore next 3 -- @preserve */
+		if (fs.existsSync(cachePath)) {
+			fs.rmSync(cachePath, { recursive: true, force: true });
+		}
+	}
+
+	/**
 	 * Check for updates
 	 * @returns {void}
 	 */
@@ -169,6 +192,11 @@ export default class Docula {
 						fs.rmSync(this.options.output, { recursive: true, force: true });
 					}
 
+					/* v8 ignore next 3 -- @preserve */
+					if (consoleProcess.args.clean) {
+						this.cleanCache(this.options.sitePath);
+					}
+
 					const builder = new DoculaBuilder(this.options);
 					await builder.build();
 					if (consoleProcess.args.watch) {
@@ -184,6 +212,11 @@ export default class Docula {
 				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
 					/* v8 ignore next -- @preserve */
 					fs.rmSync(this.options.output, { recursive: true, force: true });
+				}
+
+				/* v8 ignore next 3 -- @preserve */
+				if (consoleProcess.args.clean) {
+					this.cleanCache(this.options.sitePath);
 				}
 
 				const builder = new DoculaBuilder(this.options);
