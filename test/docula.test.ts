@@ -6,6 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Docula from "../src/docula.js";
 import { DoculaOptions } from "../src/options.js";
 
+// biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
+const ansiRegex = /\u001B\[[0-9;]*m/g;
+function stripAnsi(str: string): string {
+	return str.replace(ansiRegex, "");
+}
+
 const githubMockContributors = JSON.parse(
 	fs.readFileSync(
 		"./test/fixtures/data-mocks/github-contributors.json",
@@ -520,7 +526,9 @@ describe("docula watch", () => {
 			expect(docula.server).toBeDefined();
 			expect(docula.watcher).toBeDefined();
 			expect(
-				messages.some((m) => m.includes("Watching for file changes...")),
+				messages.some((m) =>
+					stripAnsi(m).includes("Watching for file changes..."),
+				),
 			).toBe(true);
 		} finally {
 			if (docula.watcher) {

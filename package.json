@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@cacheable/net": "^2.0.5",
+    "colorette": "^2.0.20",
     "ecto": "^4.8.2",
     "feed": "^5.2.0",
     "jiti": "^2.6.1",
