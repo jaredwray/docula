@@ -1,5 +1,19 @@
 import path from "node:path";
 import process from "node:process";
+import {
+	blue,
+	bold,
+	cyan,
+	dim,
+	gray,
+	green,
+	magenta,
+	red,
+	yellow,
+} from "colorette";
+
+// biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
+const ansiRegex = /\u001B\[[0-9;]*m/g;
 
 export class DoculaConsole {
 	log(message: string): void {
@@ -7,58 +21,129 @@ export class DoculaConsole {
 	}
 
 	error(message: string): void {
-		console.error(message);
+		console.error(red(bold(`\u2718 [error] ${message}`)));
 	}
 
 	warn(message: string): void {
-		console.warn(message);
+		console.warn(yellow(`\u26A0 [warn] ${message}`));
+	}
+
+	success(message: string): void {
+		console.log(green(bold(`\u2714 ${message}`)));
+	}
+
+	info(message: string): void {
+		console.log(cyan(`\u2139 ${message}`));
+	}
+
+	step(message: string): void {
+		console.log(bold(blue(`\u25B6 ${message}`)));
+	}
+
+	fileBuilt(filePath: string): void {
+		console.log(dim(`  \u2192 ${filePath}`));
+	}
+
+	fileCopied(filePath: string): void {
+		this.fileBuilt(filePath);
+	}
+
+	serverLog(
+		method: string,
+		url: string,
+		statusCode: number,
+		durationMs?: number,
+	): void {
+		let statusColor = green;
+		if (statusCode >= 400) {
+			statusColor = red;
+		} else if (statusCode >= 300) {
+			statusColor = yellow;
+		}
+
+		const sanitizedMethod = method.replace(ansiRegex, "");
+		const sanitizedUrl = url.replace(ansiRegex, "");
+		const parts = [
+			`  ${bold(sanitizedMethod)}`,
+			sanitizedUrl,
+			statusColor(String(statusCode)),
+		];
+		if (durationMs !== undefined) {
+			parts.push(gray(`${durationMs}ms`));
+		}
+
+		console.log(parts.join(" "));
+	}
+
+	banner(message: string): void {
+		console.log(bold(magenta(message)));
 	}
 
 	printHelp(): void {
-		console.log("   Usage: docula [command] [arguments]");
+		console.log(
+			bold(
+				magenta(
+					"\n  Docula \uD83E\uDD87 \u2014 Beautiful Website for Your Projects\n",
+				),
+			),
+		);
+		console.log(bold(cyan("  Usage:")));
+		console.log("    docula [command] [arguments]");
 		console.log();
-		console.log("   Commands:");
-		console.log("     init           Initialize a new project");
+		console.log(bold(cyan("  Commands:")));
+		console.log(`    ${green("init")}           Initialize a new project`);
 		console.log(
-			"     build          Build the project. By default just npx docula will build the project if it finds a ./site folder",
+			`    ${green("build")}          Build the project. By default just npx docula will build the project if it finds a ./site folder`,
 		);
-		console.log("     serve          Serve the project as a local website");
-		console.log("     help           Print this help");
-		console.log("     version        Print the version");
+		console.log(
+			`    ${green("serve")}          Serve the project as a local website`,
+		);
+		console.log(`    ${green("help")}           Print this help`);
+		console.log(`    ${green("version")}        Print the version`);
 		console.log();
-		console.log("   Arguments init:");
+		console.log(bold(cyan("  Arguments init:")));
 		console.log(
-			"     --typescript       Generate TypeScript config file (docula.config.ts)",
+			`    ${yellow("--typescript")}       Generate TypeScript config file (docula.config.ts)`,
 		);
 		console.log(
-			"     -s, --site         Set the path where site files are located",
-		);
-		console.log();
-		console.log("   Arguments build:");
-		console.log("     -w, --watch            watch for changes and rebuild");
-		console.log(
-			"     -c, --clean            Clean the output directory before building",
-		);
-		console.log(
-			"     -s, --site             Set the path where site files are located",
-		);
-		console.log(
-			"     -o, --output           Set the output directory. Default is ./site/dist",
-		);
-		console.log("     -t, --templatePath     Set the custom template to use");
-		console.log(
-			"     -T, --template         Set the built-in template name (e.g., modern, classic)",
+			`    ${yellow("-s, --site")}         Set the path where site files are located`,
 		);
 		console.log();
-		console.log("   Arguments serve:");
-		console.log("     -p, --port         Set the port number used with serve");
-		console.log("     -b, --build        Build the site before serving");
-		console.log("     -w, --watch        watch for changes and rebuild");
+		console.log(bold(cyan("  Arguments build:")));
 		console.log(
-			"     -c, --clean        Clean the output directory before building",
+			`    ${yellow("-w, --watch")}            watch for changes and rebuild`,
 		);
 		console.log(
-			"     -s, --site         Set the path where site files are located",
+			`    ${yellow("-c, --clean")}            Clean the output directory before building`,
+		);
+		console.log(
+			`    ${yellow("-s, --site")}             Set the path where site files are located`,
+		);
+		console.log(
+			`    ${yellow("-o, --output")}           Set the output directory. Default is ./site/dist`,
+		);
+		console.log(
+			`    ${yellow("-t, --templatePath")}     Set the custom template to use`,
+		);
+		console.log(
+			`    ${yellow("-T, --template")}         Set the built-in template name (e.g., modern, classic)`,
+		);
+		console.log();
+		console.log(bold(cyan("  Arguments serve:")));
+		console.log(
+			`    ${yellow("-p, --port")}         Set the port number used with serve`,
+		);
+		console.log(
+			`    ${yellow("-b, --build")}        Build the site before serving`,
+		);
+		console.log(
+			`    ${yellow("-w, --watch")}        watch for changes and rebuild`,
+		);
+		console.log(
+			`    ${yellow("-c, --clean")}        Clean the output directory before building`,
+		);
+		console.log(
+			`    ${yellow("-s, --site")}         Set the path where site files are located`,
 		);
 	}
 

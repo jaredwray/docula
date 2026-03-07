@@ -7,7 +7,7 @@ export const options: Partial<DoculaOptions> = {
 	template: 'modern',
 	githubPath: 'jaredwray/docula',
 	output: './site/dist',
-	siteTitle: 'docula',
+	siteTitle: 'Docula',
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',
 	themeMode: 'light',

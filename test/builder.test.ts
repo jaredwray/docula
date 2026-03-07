@@ -8,6 +8,13 @@ import {
 	type DoculaSection,
 } from "../src/builder.js";
 import { DoculaOptions } from "../src/options.js";
+
+// biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
+const ansiRegex = /\u001B\[[0-9;]*m/g;
+function stripAnsi(str: string): string {
+	return str.replace(ansiRegex, "");
+}
+
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
@@ -737,7 +744,9 @@ describe("DoculaBuilder", () => {
 
 				// Verify public folder message was logged
 				expect(
-					consoleMessages.some((msg) => msg.includes("Public folder found")),
+					consoleMessages.some((msg) =>
+						stripAnsi(msg).includes("Copying public folder"),
+					),
 				).toBe(true);
 
 				// Verify files were copied
@@ -784,7 +793,9 @@ describe("DoculaBuilder", () => {
 
 				// Verify public folder message was NOT logged
 				expect(
-					consoleMessages.some((msg) => msg.includes("Public folder found")),
+					consoleMessages.some((msg) =>
+						stripAnsi(msg).includes("Copying public folder"),
+					),
 				).toBe(false);
 			} finally {
 				await fs.promises.rm(builder.options.output, { recursive: true });
@@ -824,7 +835,9 @@ describe("DoculaBuilder", () => {
 
 				// Verify build completed (didn't hang from infinite recursion)
 				expect(
-					consoleMessages.some((msg) => msg.includes("Build completed")),
+					consoleMessages.some((msg) =>
+						stripAnsi(msg).includes("Build completed"),
+					),
 				).toBe(true);
 
 				// Verify files were copied but dist folder itself was skipped

@@ -13,7 +13,6 @@ import {
 	doculaconfigts,
 	faviconico,
 	logopng,
-	variablescss,
 } from "./init.js";
 import { DoculaOptions } from "./options.js";
 
@@ -222,13 +221,9 @@ export default class Docula {
 		const faviconBuffer = Buffer.from(faviconico, "base64");
 		fs.writeFileSync(`${sitePath}/favicon.ico`, faviconBuffer);
 
-		// Add in the variables file
-		const variablesBuffer = Buffer.from(variablescss, "base64");
-		fs.writeFileSync(`${sitePath}/variables.css`, variablesBuffer);
-
 		// Output the instructions
 		this._console.log(
-			`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and style the site with site.css file.`,
+			`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image and favicon.`,
 		);
 	}
 
@@ -293,10 +288,10 @@ export default class Docula {
 
 		const runBuild = async (filename: string) => {
 			isBuilding = true;
-			this._console.log(`File changed: ${filename}, rebuilding...`);
+			this._console.info(`File changed: ${filename}, rebuilding...`);
 			try {
 				await builder.build();
-				this._console.log("Rebuild complete");
+				this._console.success("Rebuild complete");
 			} catch (error) {
 				this._console.error(`Rebuild failed: ${(error as Error).message}`);
 			} finally {
@@ -341,7 +336,7 @@ export default class Docula {
 			},
 		);
 
-		this._console.log("Watching for file changes...");
+		this._console.info("Watching for file changes...");
 		return this._watcher;
 	}
 
@@ -367,13 +362,27 @@ export default class Docula {
 			public: output,
 		};
 
-		this._server = http.createServer(async (request, response) =>
-			/* v8 ignore next -- @preserve */
-			handler(request, response, config),
-		);
+		this._server = http.createServer(async (request, response) => {
+			/* v8 ignore start -- @preserve */
+			const start = Date.now();
+			response.on("finish", () => {
+				const duration = Date.now() - start;
+				this._console.serverLog(
+					request.method ?? "GET",
+					request.url ?? "/",
+					response.statusCode,
+					duration,
+				);
+			});
+
+			handler(request, response, config);
+			/* v8 ignore stop -- @preserve */
+		});
 
 		this._server.listen(port, () => {
-			this._console.log(`Docula 🦇 at http://localhost:${port}`);
+			this._console.banner(
+				`\n  Docula \uD83E\uDD87 at http://localhost:${port}\n`,
+			);
 		});
 
 		return this._server;

@@ -201,39 +201,57 @@ export class DoculaBuilder {
 		);
 
 		// Build the home page (index.html)
+		this._console.step("Building pages...");
 		if (!this.options.homePage && doculaData.hasDocuments) {
 			await this.buildDocsHomePage(doculaData);
+			this._console.fileBuilt("index.html");
 		} else if (!this.options.homePage && !doculaData.hasDocuments) {
-			console.error(
+			this._console.error(
 				"homePage is set to false but no documents were found in the docs directory. " +
 					"Add documents to the docs/ folder or set homePage to true.",
 			);
 		} else {
 			await this.buildIndexPage(doculaData);
+			this._console.fileBuilt("index.html");
 		}
 
 		// Build the sitemap (/sitemap.xml)
 		await this.buildSiteMapPage(doculaData);
+		this._console.fileBuilt("sitemap.xml");
 
 		// Build the robots.txt (/robots.txt)
 		await this.buildRobotsPage(this.options);
+		this._console.fileBuilt("robots.txt");
 
 		if (doculaData.hasDocuments) {
+			this._console.step("Building documentation pages...");
 			await this.buildDocsPages(doculaData);
+			for (const document of doculaData.documents ?? []) {
+				this._console.fileBuilt(document.urlPath);
+			}
 		}
 
 		// Build the API documentation page (/api/index.html)
 		if (doculaData.hasApi) {
+			this._console.step("Building API page...");
 			await this.buildApiPage(doculaData);
+			this._console.fileBuilt("api/index.html");
 		}
 
 		// Build changelog pages (/changelog/index.html and /changelog/{slug}/index.html)
 		if (doculaData.hasChangelog) {
+			this._console.step("Building changelog...");
 			await this.buildChangelogPage(doculaData);
+			this._console.fileBuilt("changelog/index.html");
 			await this.buildChangelogEntryPages(doculaData);
+			for (const entry of doculaData.changelogEntries ?? []) {
+				this._console.fileBuilt(`changelog/${entry.slug}/index.html`);
+			}
 		}
 
 		const siteRelativePath = this.options.sitePath;
+
+		this._console.step("Copying assets...");
 
 		// Copy over favicon
 		if (fs.existsSync(`${siteRelativePath}/favicon.ico`)) {
@@ -241,6 +259,7 @@ export class DoculaBuilder {
 				`${siteRelativePath}/favicon.ico`,
 				`${this.options.output}/favicon.ico`,
 			);
+			this._console.fileCopied("favicon.ico");
 		}
 
 		// Copy over logo
@@ -249,6 +268,7 @@ export class DoculaBuilder {
 				`${siteRelativePath}/logo.svg`,
 				`${this.options.output}/logo.svg`,
 			);
+			this._console.fileCopied("logo.svg");
 		}
 
 		// Copy over logo_horizontal
@@ -257,6 +277,7 @@ export class DoculaBuilder {
 				`${siteRelativePath}/logo_horizontal.png`,
 				`${this.options.output}/logo_horizontal.png`,
 			);
+			this._console.fileCopied("logo_horizontal.png");
 		}
 
 		// Copy over css
@@ -266,6 +287,7 @@ export class DoculaBuilder {
 				`${resolvedTemplatePath}/css`,
 				`${this.options.output}/css`,
 			);
+			this._console.fileCopied("css/");
 		}
 
 		// Copy over js
@@ -275,6 +297,7 @@ export class DoculaBuilder {
 				`${resolvedTemplatePath}/js`,
 				`${this.options.output}/js`,
 			);
+			this._console.fileCopied("js/");
 		}
 
 		// Copy over variables
@@ -283,6 +306,7 @@ export class DoculaBuilder {
 				`${siteRelativePath}/variables.css`,
 				`${this.options.output}/css/variables.css`,
 			);
+			this._console.fileCopied("css/variables.css");
 		}
 
 		// Copy over public folder contents
@@ -301,13 +325,17 @@ export class DoculaBuilder {
 		}
 
 		// Build LLM index/content files after static assets are in place
+		if (this.options.enableLlmsTxt) {
+			this._console.step("Building LLM files...");
+		}
+
 		await this.buildLlmsFiles(doculaData);
 
 		const endTime = Date.now();
 
 		const executionTime = endTime - startTime;
 
-		this._console.log(`Build completed in ${executionTime}ms`);
+		this._console.success(`Build completed in ${executionTime}ms`);
 	}
 
 	public validateOptions(options: DoculaOptions): void {
@@ -488,6 +516,8 @@ export class DoculaBuilder {
 			await fs.promises.writeFile(llmsOutputPath, llmsContent, "utf8");
 		}
 
+		this._console.fileBuilt("llms.txt");
+
 		if (llmsFullOverrideContent !== undefined) {
 			await fs.promises.writeFile(
 				llmsFullOutputPath,
@@ -498,6 +528,8 @@ export class DoculaBuilder {
 			const llmsFullContent = await this.generateLlmsFullContent(data);
 			await fs.promises.writeFile(llmsFullOutputPath, llmsFullContent, "utf8");
 		}
+
+		this._console.fileBuilt("llms-full.txt");
 	}
 
 	private generateLlmsIndexContent(data: DoculaData): string {
@@ -1441,6 +1473,12 @@ export class DoculaBuilder {
 
 			const stat = fs.lstatSync(sourcePath);
 
+			// Skip symbolic links to prevent copying sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
 				this.copyDirectory(sourcePath, targetPath);
@@ -1458,7 +1496,7 @@ export class DoculaBuilder {
 			return;
 		}
 
-		this._console.log("Public folder found, copying contents to dist...");
+		this._console.step("Copying public folder...");
 
 		const resolvedOutput = path.resolve(output);
 		this.copyPublicDirectory(publicPath, output, publicPath, resolvedOutput);
@@ -1488,13 +1526,19 @@ export class DoculaBuilder {
 
 			const stat = fs.lstatSync(sourcePath);
 
+			// Skip symbolic links to prevent copying sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
 				this.copyPublicDirectory(sourcePath, targetPath, basePath, output);
 			} else {
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
-				this._console.log(`  Copied: ${relativePath}`);
+				this._console.fileCopied(relativePath);
 			}
 		}
 	}
@@ -1513,6 +1557,12 @@ export class DoculaBuilder {
 			for (const assetRelPath of availableAssets) {
 				if (document.markdown.includes(assetRelPath)) {
 					const source = path.join(sourceDir, assetRelPath);
+					// Skip symbolic links to prevent copying sensitive files
+					/* v8 ignore next 3 -- @preserve */
+					if (fs.lstatSync(source).isSymbolicLink()) {
+						continue;
+					}
+
 					const target = path.join(outputDir, assetRelPath);
 					fs.mkdirSync(path.dirname(target), { recursive: true });
 					fs.copyFileSync(source, target);
@@ -1540,6 +1590,12 @@ export class DoculaBuilder {
 
 			const fullPath = `${sourcePath}/${file}`;
 			const stat = fs.lstatSync(fullPath);
+
+			// Skip symbolic links to prevent exposing sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
 
 			if (stat.isDirectory()) {
 				results.push(...this.listContentAssets(fullPath, root));
@@ -1570,6 +1626,12 @@ export class DoculaBuilder {
 			const source = `${sourcePath}/${file}`;
 			const target = `${targetPath}/${file}`;
 			const stat = fs.lstatSync(source);
+
+			// Skip symbolic links to prevent copying sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
 
 			if (stat.isDirectory()) {
 				this.copyContentAssets(source, target);

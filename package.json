@@ -1,6 +1,6 @@
 {
   "name": "docula",
-  "version": "0.50.0",
+  "version": "0.90.0",
   "description": "Beautiful Website for Your Projects",
   "type": "module",
   "main": "./dist/docula.js",
@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@cacheable/net": "^2.0.5",
+    "colorette": "^2.0.20",
     "ecto": "^4.8.2",
     "feed": "^5.2.0",
     "jiti": "^2.6.1",
