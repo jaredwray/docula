@@ -1473,6 +1473,12 @@ export class DoculaBuilder {
 
 			const stat = fs.lstatSync(sourcePath);
 
+			// Skip symbolic links to prevent copying sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
 				this.copyDirectory(sourcePath, targetPath);
@@ -1520,6 +1526,12 @@ export class DoculaBuilder {
 
 			const stat = fs.lstatSync(sourcePath);
 
+			// Skip symbolic links to prevent copying sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
 				this.copyPublicDirectory(sourcePath, targetPath, basePath, output);
@@ -1545,6 +1557,12 @@ export class DoculaBuilder {
 			for (const assetRelPath of availableAssets) {
 				if (document.markdown.includes(assetRelPath)) {
 					const source = path.join(sourceDir, assetRelPath);
+					// Skip symbolic links to prevent copying sensitive files
+					/* v8 ignore next 3 -- @preserve */
+					if (fs.lstatSync(source).isSymbolicLink()) {
+						continue;
+					}
+
 					const target = path.join(outputDir, assetRelPath);
 					fs.mkdirSync(path.dirname(target), { recursive: true });
 					fs.copyFileSync(source, target);
@@ -1572,6 +1590,12 @@ export class DoculaBuilder {
 
 			const fullPath = `${sourcePath}/${file}`;
 			const stat = fs.lstatSync(fullPath);
+
+			// Skip symbolic links to prevent exposing sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
 
 			if (stat.isDirectory()) {
 				results.push(...this.listContentAssets(fullPath, root));
@@ -1602,6 +1626,12 @@ export class DoculaBuilder {
 			const source = `${sourcePath}/${file}`;
 			const target = `${targetPath}/${file}`;
 			const stat = fs.lstatSync(source);
+
+			// Skip symbolic links to prevent copying sensitive files
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
 
 			if (stat.isDirectory()) {
 				this.copyContentAssets(source, target);

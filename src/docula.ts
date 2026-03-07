@@ -13,7 +13,6 @@ import {
 	doculaconfigts,
 	faviconico,
 	logopng,
-	variablescss,
 } from "./init.js";
 import { DoculaOptions } from "./options.js";
 
@@ -222,13 +221,9 @@ export default class Docula {
 		const faviconBuffer = Buffer.from(faviconico, "base64");
 		fs.writeFileSync(`${sitePath}/favicon.ico`, faviconBuffer);
 
-		// Add in the variables file
-		const variablesBuffer = Buffer.from(variablescss, "base64");
-		fs.writeFileSync(`${sitePath}/variables.css`, variablesBuffer);
-
 		// Output the instructions
 		this._console.log(
-			`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image, favicon, and style the site with site.css file.`,
+			`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image and favicon.`,
 		);
 	}
 

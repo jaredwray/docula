@@ -99,7 +99,6 @@ describe("docula", () => {
 			);
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
-			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
 		}
@@ -125,7 +124,6 @@ describe("docula", () => {
 			);
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
-			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
 		}
@@ -155,7 +153,6 @@ describe("docula", () => {
 			);
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
-			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 
 			// Verify the TypeScript config file contains expected content
 			const configContent = fs.readFileSync(
