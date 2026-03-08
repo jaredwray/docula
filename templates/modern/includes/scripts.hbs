@@ -88,6 +88,48 @@
     });
   })();
 </script>
+{{#if cookieAuth}}
+<script>
+  (function() {
+    var cookieName = '{{#if cookieAuth.cookieName}}{{cookieAuth.cookieName}}{{else}}token{{/if}}';
+    function hasCookie() {
+      return document.cookie.split(';').some(function(c) {
+        return c.trim().startsWith(cookieName + '=');
+      });
+    }
+    function updateAuthUI() {
+      var loggedIn = hasCookie();
+      var els = [
+        { login: document.getElementById('cookie-auth-login'), logout: document.getElementById('cookie-auth-logout') },
+        { login: document.getElementById('cookie-auth-login-mobile'), logout: document.getElementById('cookie-auth-logout-mobile') }
+      ];
+      els.forEach(function(pair) {
+        if (pair.login) pair.login.style.display = loggedIn ? 'none' : '';
+        if (pair.logout) pair.logout.style.display = loggedIn ? '' : 'none';
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      updateAuthUI();
+      var logoutEls = [
+        document.getElementById('cookie-auth-logout'),
+        document.getElementById('cookie-auth-logout-mobile')
+      ];
+      logoutEls.forEach(function(el) {
+        if (el) {
+          el.addEventListener('click', function() {
+            {{#if cookieAuth.logoutUrl}}
+            window.location.href = '{{cookieAuth.logoutUrl}}';
+            {{else}}
+            document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+            window.location.reload();
+            {{/if}}
+          });
+        }
+      });
+    });
+  })();
+</script>
+{{/if}}
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('mobile-menu-toggle');

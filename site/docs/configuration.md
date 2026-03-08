@@ -74,4 +74,5 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
+| `cookieAuth` | `{ loginUrl: string; cookieName?: string; logoutUrl?: string }` | - | Cookie-based auth. Shows a Login/Logout button in the header based on a JWT cookie. See [Cookie Auth](/docs/cookie-auth). |
 | `allowedAssets` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |

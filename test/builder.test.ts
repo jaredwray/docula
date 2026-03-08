@@ -3709,4 +3709,137 @@ describe("DoculaBuilder", () => {
 			}
 		});
 	});
+
+	describe("Docula Builder - cookieAuth", () => {
+		it("should render login button when cookieAuth is configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth";
+			options.homePage = true;
+			options.cookieAuth = { loginUrl: "/login", cookieName: "auth_token" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain('id="cookie-auth-login"');
+				expect(indexHtml).toContain('href="/login"');
+				expect(indexHtml).toContain('id="cookie-auth-logout"');
+				expect(indexHtml).toContain("Log In");
+				expect(indexHtml).toContain("Log Out");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not render login button when cookieAuth is not configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-no-cookie-auth";
+			options.homePage = true;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).not.toContain('id="cookie-auth-login"');
+				expect(indexHtml).not.toContain('id="cookie-auth-logout"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render logoutUrl redirect script when logoutUrl is configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-logout-url";
+			options.homePage = true;
+			options.cookieAuth = {
+				loginUrl: "/login",
+				cookieName: "jwt",
+				logoutUrl: "/api/auth/logout",
+			};
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("/api/auth/logout");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render mobile login button when cookieAuth is configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-mobile";
+			options.homePage = true;
+			options.cookieAuth = { loginUrl: "/login" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				// Check a docs page which uses header-bar with mobile nav
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain('id="cookie-auth-login-mobile"');
+				expect(docsHtml).toContain('id="cookie-auth-logout-mobile"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should use default cookie name when cookieName is not set", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-default-name";
+			options.homePage = true;
+			options.cookieAuth = { loginUrl: "/login" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				// The default cookie name 'token' should appear in the script
+				expect(indexHtml).toContain("cookie-auth-login");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+	});
 });

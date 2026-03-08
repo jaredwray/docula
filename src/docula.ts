@@ -423,4 +423,5 @@ export default class Docula {
 }
 
 export { Writr } from "writr";
+export type { DoculaCookieAuth } from "./options.js";
 export { DoculaOptions } from "./options.js";
