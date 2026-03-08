@@ -137,6 +137,49 @@ body {
   display: none;
 }
 
+.cookie-auth-btn {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+  }
+}
+
+.cookie-auth-btn--fixed {
+  position: fixed;
+  bottom: 16px;
+  left: 56px;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  height: auto;
+}
+
+.cookie-auth-btn--mobile {
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: inherit;
+  color: inherit;
+}
+
 .mobile-menu-toggle {
   display: none;
   align-items: center;

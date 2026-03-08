@@ -207,5 +207,49 @@ describe("DoculaOptions", () => {
 			expect(options.allowedAssets).toContain(".pdf");
 			expect(options.allowedAssets).toContain(".svg");
 		});
+
+		it("should parse cookieAuth with loginUrl", () => {
+			options.parseOptions({
+				cookieAuth: { loginUrl: "/login" },
+			});
+			expect(options.cookieAuth).toEqual({ loginUrl: "/login" });
+		});
+
+		it("should parse cookieAuth with all options", () => {
+			options.parseOptions({
+				cookieAuth: {
+					loginUrl: "/login",
+					cookieName: "auth_token",
+					logoutUrl: "/logout",
+				},
+			});
+			expect(options.cookieAuth).toEqual({
+				loginUrl: "/login",
+				cookieName: "auth_token",
+				logoutUrl: "/logout",
+			});
+		});
+
+		it("should not set cookieAuth when loginUrl is missing", () => {
+			options.parseOptions({
+				cookieAuth: { cookieName: "token" },
+			});
+			expect(options.cookieAuth).toBeUndefined();
+		});
+
+		it("should not set cookieAuth for non-object values", () => {
+			options.parseOptions({ cookieAuth: "invalid" });
+			expect(options.cookieAuth).toBeUndefined();
+		});
+
+		it("should not set cookieAuth for null", () => {
+			options.parseOptions({ cookieAuth: null });
+			expect(options.cookieAuth).toBeUndefined();
+		});
+
+		it("should have cookieAuth undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.cookieAuth).toBeUndefined();
+		});
 	});
 });

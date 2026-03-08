@@ -2,6 +2,12 @@ import path from "node:path";
 import process from "node:process";
 import type { DoculaSection } from "./builder.js";
 
+export type DoculaCookieAuth = {
+	loginUrl: string;
+	cookieName?: string;
+	logoutUrl?: string;
+};
+
 export class DoculaOptions {
 	/**
 	 * Name of the built-in template to use (e.g., "modern", "classic")
@@ -74,6 +80,15 @@ export class DoculaOptions {
 	 * site directory's .gitignore file if not already present.
 	 */
 	public autoUpdateIgnores = true;
+	/**
+	 * File extensions to copy as assets from docs/ and changelog/ directories.
+	 * Override in docula.config to customize.
+	 */
+	/**
+	 * Cookie-based authentication. When set, shows a Login/Logout button
+	 * in the header based on whether a JWT cookie is present.
+	 */
+	public cookieAuth?: DoculaCookieAuth;
 	/**
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
@@ -204,6 +219,14 @@ export class DoculaOptions {
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {
 			this.allowedAssets = options.allowedAssets as string[];
+		}
+
+		if (
+			options.cookieAuth &&
+			typeof options.cookieAuth === "object" &&
+			typeof (options.cookieAuth as DoculaCookieAuth).loginUrl === "string"
+		) {
+			this.cookieAuth = options.cookieAuth as DoculaCookieAuth;
 		}
 	}
 }
