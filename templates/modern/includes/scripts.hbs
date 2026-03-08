@@ -91,7 +91,7 @@
 {{#if cookieAuth}}
 <script>
   (function() {
-    var cookieName = '{{#if cookieAuth.cookieName}}{{cookieAuth.cookieName}}{{else}}token{{/if}}';
+    var cookieName = '{{#if cookieAuth.cookieName}}{{{cookieAuth.cookieName}}}{{else}}token{{/if}}';
     function hasCookie() {
       return document.cookie.split(';').some(function(c) {
         return c.trim().startsWith(cookieName + '=');
@@ -118,7 +118,7 @@
         if (el) {
           el.addEventListener('click', function() {
             {{#if cookieAuth.logoutUrl}}
-            window.location.href = '{{cookieAuth.logoutUrl}}';
+            window.location.href = '{{{cookieAuth.logoutUrl}}}';
             {{else}}
             document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
             window.location.reload();
