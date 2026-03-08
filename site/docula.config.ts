@@ -12,7 +12,7 @@ export const options: Partial<DoculaOptions> = {
 	siteUrl: 'https://docula.org',
 	themeMode: 'light',
 	sections: [
-		{name: 'Project Guidelines', path: 'project-guidelines', order: 15},
+		{name: 'Project Guidelines', path: 'project-guidelines', order: 17},
 	],
 };
 
