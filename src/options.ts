@@ -8,6 +8,12 @@ export type DoculaCookieAuth = {
 	logoutUrl?: string;
 };
 
+export type DoculaCacheOptions = {
+	github: {
+		ttl: number;
+	};
+};
+
 export class DoculaOptions {
 	/**
 	 * Name of the built-in template to use (e.g., "modern", "classic")
@@ -89,6 +95,19 @@ export class DoculaOptions {
 	 * in the header based on whether a JWT cookie is present.
 	 */
 	public cookieAuth?: DoculaCookieAuth;
+	/**
+	 * File extensions to copy as assets from docs/ and changelog/ directories.
+	 * Override in docula.config to customize.
+	 */
+	/**
+	 * Cache settings. Controls caching of external data (e.g., GitHub API responses)
+	 * in the .cache directory within the site path.
+	 */
+	public cache: DoculaCacheOptions = {
+		github: {
+			ttl: 3600,
+		},
+	};
 	/**
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
@@ -215,6 +234,15 @@ export class DoculaOptions {
 			typeof options.autoUpdateIgnores === "boolean"
 		) {
 			this.autoUpdateIgnores = options.autoUpdateIgnores;
+		}
+
+		if (
+			options.cache &&
+			typeof options.cache === "object" &&
+			typeof (options.cache as DoculaCacheOptions).github === "object" &&
+			typeof (options.cache as DoculaCacheOptions).github.ttl === "number"
+		) {
+			this.cache = options.cache as DoculaCacheOptions;
 		}
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {
