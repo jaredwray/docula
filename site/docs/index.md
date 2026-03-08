@@ -13,7 +13,6 @@ This will create a folder called site with the following structure:
 
 ```
 site
-├───site.css
 ├───logo.png
 ├───favicon.ico
 ├───README.md
