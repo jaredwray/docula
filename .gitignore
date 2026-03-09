@@ -89,3 +89,7 @@ test-results/
 /test/temp-content-assets-unreferenced-site
 /test/temp-content-assets-sibling
 /test/temp-build-api-home-button-classic
+/site/.cache
+/test/fixtures/changelog-site/.cache
+/test/fixtures/mega-page-site-no-home-page/.cache
+/test/fixtures/mega-page-site/.cache
