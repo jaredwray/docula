@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import process from "node:process";
 import { CacheableNet } from "@cacheable/net";
 
@@ -12,6 +14,11 @@ export type GithubData = {
 	contributors: Record<string, unknown>;
 };
 
+export type GithubCacheConfig = {
+	cachePath: string;
+	ttl: number;
+};
+
 export class Github {
 	options = {
 		api: "https://api.github.com",
@@ -20,13 +27,25 @@ export class Github {
 	};
 
 	private net: CacheableNet;
+	private cacheConfig?: GithubCacheConfig;
 
-	constructor(options: GithubOptions) {
+	constructor(options: GithubOptions, cacheConfig?: GithubCacheConfig) {
 		this.parseOptions(options);
 		this.net = new CacheableNet();
+		if (cacheConfig) {
+			this.cacheConfig = cacheConfig;
+		}
 	}
 
 	async getData(): Promise<GithubData> {
+		// Try loading from file cache first
+		if (this.cacheConfig && this.cacheConfig.ttl > 0) {
+			const cached = this.loadCache();
+			if (cached) {
+				return cached;
+			}
+		}
+
 		const data = {
 			releases: {},
 			contributors: {},
@@ -36,7 +55,14 @@ export class Github {
 
 		data.contributors = await this.getContributors();
 
-		return data as GithubData;
+		const result = data as GithubData;
+
+		// Save to file cache
+		if (this.cacheConfig && this.cacheConfig.ttl > 0) {
+			this.saveCache(result);
+		}
+
+		return result;
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
@@ -110,6 +136,50 @@ export class Github {
 
 		this.options.author = options.author;
 		this.options.repo = options.repo;
+	}
+
+	private getCacheFilePath(): string {
+		/* v8 ignore next 3 -- @preserve */
+		if (!this.cacheConfig) {
+			throw new Error("Cache config is not set");
+		}
+
+		const cacheDir = path.join(this.cacheConfig.cachePath, "github");
+		return path.join(cacheDir, "github-data.json");
+	}
+
+	private loadCache(): GithubData | undefined {
+		try {
+			const cacheFile = this.getCacheFilePath();
+			if (!fs.existsSync(cacheFile)) {
+				return undefined;
+			}
+
+			const stat = fs.statSync(cacheFile);
+			const ageInSeconds = (Date.now() - stat.mtimeMs) / 1000;
+			if (ageInSeconds > (this.cacheConfig?.ttl ?? 0)) {
+				return undefined;
+			}
+
+			const raw = fs.readFileSync(cacheFile, "utf8");
+			return JSON.parse(raw) as GithubData;
+		} catch {
+			return undefined;
+		}
+	}
+
+	private saveCache(data: GithubData): void {
+		try {
+			const cacheFile = this.getCacheFilePath();
+			const cacheDir = path.dirname(cacheFile);
+			if (!fs.existsSync(cacheDir)) {
+				fs.mkdirSync(cacheDir, { recursive: true });
+			}
+
+			fs.writeFileSync(cacheFile, JSON.stringify(data, null, 2));
+		} catch {
+			// Silently fail on cache write errors
+		}
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
