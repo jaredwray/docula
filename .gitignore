@@ -81,15 +81,9 @@ test-results/
 
 # AI
 .claude
-/test/temp-watch-output
-/test/temp-watch-site
-/test/temp-watch-error-site
-/test/temp-build-api-home-no-template-button
-/test/temp-build-api-autodetect
-/test/temp-content-assets-unreferenced-site
-/test/temp-content-assets-sibling
-/test/temp-build-api-home-button-classic
-/site/.cache
-/test/fixtures/changelog-site/.cache
-/test/fixtures/mega-page-site-no-home-page/.cache
-/test/fixtures/mega-page-site/.cache
+
+# Cache directories
+.cache
+
+# Test Temp Sites
+/test/temp-*
