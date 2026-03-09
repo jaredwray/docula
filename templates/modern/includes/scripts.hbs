@@ -96,6 +96,15 @@
     if (!configEl) return;
     var cookieName = configEl.getAttribute('data-cookie-name');
     var logoutUrl = configEl.getAttribute('data-logout-url');
+    function isSafeUrl(url) {
+      if (!url) return false;
+      try {
+        var parsed = new URL(url, window.location.origin);
+        return parsed.origin === window.location.origin;
+      } catch (e) {
+        return false;
+      }
+    }
     function hasCookie() {
       return document.cookie.split(';').some(function(c) {
         return c.trim().startsWith(cookieName + '=');
@@ -121,7 +130,7 @@
       logoutEls.forEach(function(el) {
         if (el) {
           el.addEventListener('click', function() {
-            if (logoutUrl) {
+            if (isSafeUrl(logoutUrl)) {
               window.location.href = logoutUrl;
             } else {
               document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
