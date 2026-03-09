@@ -89,9 +89,22 @@
   })();
 </script>
 {{#if cookieAuth}}
+<div id="cookie-auth-config" hidden data-cookie-name="{{#if cookieAuth.cookieName}}{{cookieAuth.cookieName}}{{else}}token{{/if}}"{{#if cookieAuth.logoutUrl}} data-logout-url="{{cookieAuth.logoutUrl}}"{{/if}}></div>
 <script>
   (function() {
-    var cookieName = '{{#if cookieAuth.cookieName}}{{cookieAuth.cookieName}}{{else}}token{{/if}}';
+    var configEl = document.getElementById('cookie-auth-config');
+    if (!configEl) return;
+    var cookieName = configEl.getAttribute('data-cookie-name');
+    var logoutUrl = configEl.getAttribute('data-logout-url');
+    function isSafeUrl(url) {
+      if (!url) return false;
+      try {
+        var parsed = new URL(url, window.location.origin);
+        return parsed.origin === window.location.origin;
+      } catch (e) {
+        return false;
+      }
+    }
     function hasCookie() {
       return document.cookie.split(';').some(function(c) {
         return c.trim().startsWith(cookieName + '=');
@@ -117,12 +130,12 @@
       logoutEls.forEach(function(el) {
         if (el) {
           el.addEventListener('click', function() {
-            {{#if cookieAuth.logoutUrl}}
-            window.location.href = '{{cookieAuth.logoutUrl}}';
-            {{else}}
-            document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-            window.location.reload();
-            {{/if}}
+            if (isSafeUrl(logoutUrl)) {
+              window.location.href = logoutUrl;
+            } else {
+              document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+              window.location.reload();
+            }
           });
         }
       });

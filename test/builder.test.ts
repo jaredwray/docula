@@ -3832,8 +3832,8 @@ describe("DoculaBuilder", () => {
 					`${options.output}/index.html`,
 					"utf8",
 				);
-				// The default cookie name 'token' should appear in the script
-				expect(indexHtml).toContain("cookie-auth-login");
+				// The default cookie name 'token' should appear in the config element
+				expect(indexHtml).toContain('data-cookie-name="token"');
 			} finally {
 				await fs.promises.rm(options.output, {
 					recursive: true,
