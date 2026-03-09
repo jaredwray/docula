@@ -26,15 +26,42 @@ site/
           ...
 ```
 
+### GitHub API data
+
+When your site is configured with a [GitHub integration](/docs/github-integration), Docula caches the API responses for releases and contributors to `.cache/github/github-data.json`. On subsequent builds, Docula checks the file's age against the configured TTL and skips the API call if the cache is still fresh.
+
+```
+site/
+  .cache/
+    github/
+      github-data.json   # cached releases and contributors
+```
+
+By default the cache TTL is **3600 seconds (1 hour)**. You can change this in your config:
+
+```typescript
+import type { DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  cache: {
+    github: {
+      ttl: 7200, // 2 hours
+    },
+  },
+};
+```
+
+Set `ttl` to `0` to disable GitHub caching entirely and always fetch fresh data from the API.
+
 ## Clearing the cache
 
-Use the `--clean` flag to remove the cache along with the output directory:
+Use the `--clean` flag to remove **all** caching along with the output directory:
 
 ```bash
 npx docula build --clean
 ```
 
-This deletes both the output directory (e.g., `dist/`) and the `.cache/` directory, forcing a full rebuild on the next run.
+This deletes both the output directory (e.g., `dist/`) and the entire `.cache/` directory (including template and GitHub caches), forcing a full rebuild on the next run.
 
 You can also manually delete the `.cache` directory at any time. Docula will recreate it as needed.
 
@@ -64,3 +91,4 @@ When disabled, you should add `.cache` to your `.gitignore` yourself:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `autoUpdateIgnores` | `boolean` | `true` | Automatically add `.cache` to the site folder's `.gitignore` on first cache creation |
+| `cache.github.ttl` | `number` | `3600` | Time-to-live in seconds for cached GitHub API data. Set to `0` to disable. |

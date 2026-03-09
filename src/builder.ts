@@ -4,7 +4,12 @@ import { Ecto } from "ecto";
 import { Writr } from "writr";
 import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { DoculaConsole } from "./console.js";
-import { Github, type GithubData, type GithubOptions } from "./github.js";
+import {
+	Github,
+	type GithubCacheConfig,
+	type GithubData,
+	type GithubOptions,
+} from "./github.js";
 import { DoculaOptions } from "./options.js";
 import { resolveTemplatePath } from "./template-resolver.js";
 
@@ -371,7 +376,15 @@ export class DoculaBuilder {
 			author: paths[0],
 			repo: paths[1],
 		};
-		const github = new Github(options);
+		let cacheConfig: GithubCacheConfig | undefined;
+		if (this._options.cache.github.ttl > 0) {
+			cacheConfig = {
+				cachePath: path.join(this._options.sitePath, ".cache"),
+				ttl: this._options.cache.github.ttl,
+			};
+		}
+
+		const github = new Github(options, cacheConfig);
 		return github.getData();
 	}
 

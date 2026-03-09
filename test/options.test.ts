@@ -20,6 +20,7 @@ describe("DoculaOptions", () => {
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.themeMode).toBeUndefined();
+			expect(options.cache).toEqual({ github: { ttl: 3600 } });
 		});
 
 		it("should create an instance of DoculaOptions with custom values", () => {
@@ -250,6 +251,43 @@ describe("DoculaOptions", () => {
 		it("should have cookieAuth undefined by default", () => {
 			const freshOptions = new DoculaOptions();
 			expect(freshOptions.cookieAuth).toBeUndefined();
+		});
+
+		it("should have default cache with github.ttl of 3600", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.cache).toEqual({ github: { ttl: 3600 } });
+		});
+
+		it("should parse cache option with custom ttl", () => {
+			options.parseOptions({
+				cache: { github: { ttl: 7200 } },
+			});
+			expect(options.cache).toEqual({ github: { ttl: 7200 } });
+		});
+
+		it("should parse cache option with ttl of 0", () => {
+			options.parseOptions({
+				cache: { github: { ttl: 0 } },
+			});
+			expect(options.cache).toEqual({ github: { ttl: 0 } });
+		});
+
+		it("should not update cache for non-object values", () => {
+			const defaultCache = { ...options.cache };
+			options.parseOptions({ cache: "invalid" });
+			expect(options.cache).toEqual(defaultCache);
+		});
+
+		it("should not update cache when github is missing", () => {
+			const defaultCache = { ...options.cache };
+			options.parseOptions({ cache: { other: true } });
+			expect(options.cache).toEqual(defaultCache);
+		});
+
+		it("should not update cache when ttl is not a number", () => {
+			const defaultCache = { ...options.cache };
+			options.parseOptions({ cache: { github: { ttl: "invalid" } } });
+			expect(options.cache).toEqual(defaultCache);
 		});
 	});
 });
