@@ -253,6 +253,104 @@ describe("DoculaOptions", () => {
 			expect(freshOptions.cookieAuth).toBeUndefined();
 		});
 
+		it("should parse headerLinks with valid entries", () => {
+			options.parseOptions({
+				headerLinks: [
+					{ label: "Blog", url: "https://blog.example.com" },
+					{ label: "Support", url: "https://support.example.com" },
+				],
+			});
+			expect(options.headerLinks).toEqual([
+				{ label: "Blog", url: "https://blog.example.com" },
+				{ label: "Support", url: "https://support.example.com" },
+			]);
+		});
+
+		it("should parse headerLinks with a single entry", () => {
+			options.parseOptions({
+				headerLinks: [{ label: "Blog", url: "https://blog.example.com" }],
+			});
+			expect(options.headerLinks).toEqual([
+				{ label: "Blog", url: "https://blog.example.com" },
+			]);
+		});
+
+		it("should not set headerLinks for non-array values", () => {
+			options.parseOptions({ headerLinks: "invalid" });
+			expect(options.headerLinks).toBeUndefined();
+		});
+
+		it("should not set headerLinks for null", () => {
+			options.parseOptions({ headerLinks: null });
+			expect(options.headerLinks).toBeUndefined();
+		});
+
+		it("should filter out invalid entries from headerLinks", () => {
+			options.parseOptions({
+				headerLinks: [
+					{ label: "Blog", url: "https://blog.example.com" },
+					{ label: 123, url: "https://bad.com" },
+					{ label: "NoUrl" },
+					"not-an-object",
+					null,
+				],
+			});
+			expect(options.headerLinks).toEqual([
+				{ label: "Blog", url: "https://blog.example.com" },
+			]);
+		});
+
+		it("should not set headerLinks when all entries are invalid", () => {
+			options.parseOptions({
+				headerLinks: [
+					{ label: 123, url: "https://bad.com" },
+					{ label: "NoUrl" },
+				],
+			});
+			expect(options.headerLinks).toBeUndefined();
+		});
+
+		it("should parse headerLinks with optional icon property", () => {
+			options.parseOptions({
+				headerLinks: [
+					{
+						label: "Blog",
+						url: "https://blog.example.com",
+						icon: '<svg width="16" height="16"><circle cx="8" cy="8" r="8"/></svg>',
+					},
+				],
+			});
+			expect(options.headerLinks).toEqual([
+				{
+					label: "Blog",
+					url: "https://blog.example.com",
+					icon: '<svg width="16" height="16"><circle cx="8" cy="8" r="8"/></svg>',
+				},
+			]);
+		});
+
+		it("should parse headerLinks without icon using default", () => {
+			options.parseOptions({
+				headerLinks: [
+					{ label: "Blog", url: "https://blog.example.com" },
+					{
+						label: "Support",
+						url: "https://support.example.com",
+						icon: '<svg width="16" height="16"><rect width="16" height="16"/></svg>',
+					},
+				],
+			});
+			expect(options.headerLinks?.[0].icon).toBeUndefined();
+			expect(options.headerLinks?.[1].icon).toBe(
+				'<svg width="16" height="16"><rect width="16" height="16"/></svg>',
+			);
+		});
+
+		it("should have headerLinks undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.headerLinks).toBeUndefined();
+		});
+
 		it("should have default cache with github.ttl of 3600", () => {
 			const freshOptions = new DoculaOptions();
 			expect(freshOptions.cache).toEqual({ github: { ttl: 3600 } });

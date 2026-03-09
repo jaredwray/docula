@@ -26,6 +26,18 @@
           <span>Changelog</span>
         </a>
         {{/if}}
+        {{#if headerLinks}}
+        {{#each headerLinks}}
+        <a class="header-bottom__item" href="{{this.url}}" target="_blank" rel="noopener noreferrer">
+          {{#if this.icon}}
+          {{{this.icon}}}
+          {{else}}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          {{/if}}
+          <span>{{this.label}}</span>
+        </a>
+        {{/each}}
+        {{/if}}
       </nav>
       {{#if cookieAuth}}
       <a href="{{cookieAuth.loginUrl}}" class="cookie-auth-btn" id="cookie-auth-login">
@@ -60,6 +72,18 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/></svg>
       <span>Changelog</span>
     </a>
+    {{/if}}
+    {{#if headerLinks}}
+    {{#each headerLinks}}
+    <a class="mobile-nav__item" href="{{this.url}}" target="_blank" rel="noopener noreferrer">
+      {{#if this.icon}}
+      {{{this.icon}}}
+      {{else}}
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+      {{/if}}
+      <span>{{this.label}}</span>
+    </a>
+    {{/each}}
     {{/if}}
     {{#if cookieAuth}}
     <a class="mobile-nav__item" href="{{cookieAuth.loginUrl}}" id="cookie-auth-login-mobile">

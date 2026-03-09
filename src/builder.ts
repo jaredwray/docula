@@ -52,6 +52,11 @@ export type DoculaData = {
 		cookieName?: string;
 		logoutUrl?: string;
 	};
+	headerLinks?: Array<{
+		label: string;
+		url: string;
+		icon?: string;
+	}>;
 };
 
 export type DoculaTemplates = {
@@ -129,6 +134,7 @@ export class DoculaBuilder {
 			homePage: this.options.homePage,
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
+			headerLinks: this.options.headerLinks,
 		};
 
 		// Auto-detect swagger.json if openApiUrl is not set

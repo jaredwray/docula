@@ -8,6 +8,12 @@ export type DoculaCookieAuth = {
 	logoutUrl?: string;
 };
 
+export type DoculaHeaderLink = {
+	label: string;
+	url: string;
+	icon?: string;
+};
+
 export type DoculaCacheOptions = {
 	github: {
 		ttl: number;
@@ -95,6 +101,11 @@ export class DoculaOptions {
 	 * in the header based on whether a JWT cookie is present.
 	 */
 	public cookieAuth?: DoculaCookieAuth;
+	/**
+	 * Additional links to display in the site header navigation.
+	 * Each link requires a label and url.
+	 */
+	public headerLinks?: DoculaHeaderLink[];
 	/**
 	 * File extensions to copy as assets from docs/ and changelog/ directories.
 	 * Override in docula.config to customize.
@@ -256,6 +267,19 @@ export class DoculaOptions {
 			typeof (options.cookieAuth as DoculaCookieAuth).loginUrl === "string"
 		) {
 			this.cookieAuth = options.cookieAuth as DoculaCookieAuth;
+		}
+
+		if (options.headerLinks && Array.isArray(options.headerLinks)) {
+			const validLinks = (options.headerLinks as DoculaHeaderLink[]).filter(
+				(link) =>
+					typeof link === "object" &&
+					link !== null &&
+					typeof link.label === "string" &&
+					typeof link.url === "string",
+			);
+			if (validLinks.length > 0) {
+				this.headerLinks = validLinks;
+			}
 		}
 	}
 }
