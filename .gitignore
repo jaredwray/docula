@@ -95,3 +95,5 @@ test-results/
 
 # Cache directories
 .cache/
+/test/temp-no-public-folder-test
+/test/temp-build-release-changelog-test

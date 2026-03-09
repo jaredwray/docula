@@ -141,7 +141,7 @@ export class Github {
 	private getCacheFilePath(): string {
 		/* v8 ignore next 3 -- @preserve */
 		if (!this.cacheConfig) {
-			return "";
+			throw new Error("Cache config is not set");
 		}
 
 		const cacheDir = path.join(this.cacheConfig.cachePath, "github");

@@ -239,6 +239,7 @@ export class DoculaOptions {
 		if (
 			options.cache &&
 			typeof options.cache === "object" &&
+			(options.cache as DoculaCacheOptions).github !== null &&
 			typeof (options.cache as DoculaCacheOptions).github === "object" &&
 			typeof (options.cache as DoculaCacheOptions).github.ttl === "number"
 		) {
