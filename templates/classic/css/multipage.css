@@ -127,6 +127,32 @@
   align-items: center;
 }
 
+.sidebar-links {
+  display: none;
+}
+
+@media screen and (min-width: 992px) {
+  .sidebar-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  .sidebar-header-link {
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0.25rem 0;
+  }
+
+  .sidebar-header-link:hover {
+    text-decoration: underline;
+  }
+}
+
 .header-logo {
   flex-shrink: 0;
   margin-right: 1.5rem;
