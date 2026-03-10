@@ -36,6 +36,13 @@
         {{/forEach}}
       </ul>
 
+      {{#if headerLinks}}
+      <div class="sidebar-links">
+        {{#each headerLinks}}
+        <a class="sidebar-header-link" href="{{this.url}}" target="_blank" rel="noopener noreferrer">{{#if this.icon}}{{{this.icon}}} {{/if}}{{this.label}}</a>
+        {{/each}}
+      </div>
+      {{/if}}
     </div>
   </section>
 

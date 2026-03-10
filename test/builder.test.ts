@@ -3842,4 +3842,151 @@ describe("DoculaBuilder", () => {
 			}
 		});
 	});
+
+	describe("Docula Builder - headerLinks", () => {
+		it("should render header links when headerLinks is configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-header-links";
+			options.homePage = true;
+			options.headerLinks = [
+				{ label: "Blog", url: "https://blog.example.com" },
+				{ label: "Support", url: "https://support.example.com" },
+			];
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				// header-bar is rendered on docs pages, not the home page
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("Blog");
+				expect(docsHtml).toContain('href="https://blog.example.com"');
+				expect(docsHtml).toContain("Support");
+				expect(docsHtml).toContain('href="https://support.example.com"');
+				expect(docsHtml).toContain('target="_blank"');
+				expect(docsHtml).toContain('rel="noopener noreferrer"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not render header links when headerLinks is not configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-no-header-links";
+			options.homePage = true;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).not.toContain('href="https://blog.example.com"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render custom icon when icon property is provided", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-header-links-icon";
+			options.homePage = true;
+			options.headerLinks = [
+				{
+					label: "Blog",
+					url: "https://blog.example.com",
+					icon: '<svg class="custom-blog-icon" width="16" height="16"><circle cx="8" cy="8" r="8"/></svg>',
+				},
+			];
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("custom-blog-icon");
+				expect(docsHtml).toContain("Blog");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render default icon when icon property is not provided", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-header-links-default-icon";
+			options.homePage = true;
+			options.headerLinks = [
+				{ label: "Blog", url: "https://blog.example.com" },
+			];
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				// Default external link icon path should be present
+				expect(docsHtml).toContain("M15 3h6v6");
+				expect(docsHtml).not.toContain("custom-blog-icon");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render header links in mobile nav", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-header-links-mobile";
+			options.homePage = true;
+			options.headerLinks = [
+				{ label: "Blog", url: "https://blog.example.com" },
+			];
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				// Should appear in both desktop nav and mobile sidebar
+				const blogLinkCount = (
+					docsHtml.match(/href="https:\/\/blog\.example\.com"/g) || []
+				).length;
+				expect(blogLinkCount).toBeGreaterThanOrEqual(2);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+	});
 });
