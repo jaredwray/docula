@@ -36,7 +36,7 @@
 * For more complex projects easily add a `docula.config.ts` (TypeScript) or `docula.config.mjs` (JavaScript) file to customize the build process with lifecycle hooks.
 * Full TypeScript support with typed configuration and IDE autocompletion.
 * Support for single page with readme or multiple markdown pages in a docs folder.
-* Will generate a sitemap.xml and robots.txt for your site.
+* Will generate a sitemap.xml, robots.txt, and `feed.xml` for your site.
 * Automatically generates `llms.txt` and `llms-full.txt` for LLM-friendly indexing of docs, API reference, and changelog content.
 * Uses Github release notes to generate a changelog / releases page.
 * Uses Github to show contributors and link to their profiles.
@@ -557,6 +557,15 @@ When changelog entries are found, Docula generates:
 - **Individual entry pages** at `/changelog/{slug}/` — a dedicated page for each entry with a back link to the listing
 
 Changelog URLs are also automatically added to the generated `sitemap.xml`.
+
+## RSS Feed
+
+Docula automatically generates a docs-only RSS 2.0 feed at `/feed.xml` when your site has documentation pages.
+
+- The feed includes one item per generated doc page.
+- Each item uses the document title and canonical page URL.
+- Item descriptions prefer front matter descriptions and otherwise fall back to a short excerpt from the markdown body.
+- `/feed.xml` is added to `sitemap.xml` for discovery.
 
 ## Styling
 

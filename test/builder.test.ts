@@ -862,6 +862,237 @@ describe("DoculaBuilder", () => {
 				}
 			}
 		});
+		it("should include /feed.xml in sitemap when documents exist", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-sitemap-feed-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "Guide description",
+						keywords: [],
+						content: "Guide description",
+						markdown: "# Guide\n\nGuide description",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.output}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/feed.xml</loc>");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
+		});
+	});
+
+	describe("Docula Builder - Build Feed", () => {
+		it("should build the feed.xml (/feed.xml) for documentation pages", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula & docs",
+				siteDescription: "Beautiful <docs> & updates",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: 'Guide & "Tips"',
+						description: "Guide summary",
+						keywords: [],
+						content: "Guide summary",
+						markdown: "# Guide\n\nGuide summary",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain('<rss version="2.0"');
+				expect(feed).toContain("<title>docula &amp; docs</title>");
+				expect(feed).toContain(
+					"<description>Beautiful &lt;docs&gt; &amp; updates</description>",
+				);
+				expect(feed).toContain("<link>http://foo.com/</link>");
+				expect(feed).toContain(
+					'<atom:link href="http://foo.com/feed.xml" rel="self" type="application/rss+xml" />',
+				);
+				expect(feed).toContain("<title>Guide &amp; &quot;Tips&quot;</title>");
+				expect(feed).toContain("<link>http://foo.com/docs/guide/</link>");
+				expect(feed).toContain(
+					'<guid isPermaLink="true">http://foo.com/docs/guide/</guid>',
+				);
+				expect(feed).toContain("<description>Guide summary</description>");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should use a markdown excerpt when document description is empty", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-excerpt-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "",
+						keywords: [],
+						content: "content",
+						markdown:
+							"# Guide\n\nThis **guide** includes [links](http://foo.com), `code`, and more text for excerpt generation.",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain(
+					"<description>This guide includes links, code, and more text for excerpt generation.</description>",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should not build feed.xml when no documents exist", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-no-docs",
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				expect(fs.existsSync(`${data.output}/feed.xml`)).toBe(false);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should not include api or changelog urls in feed.xml", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-scope-test",
+				openApiUrl: "/api/swagger.json",
+				hasApi: true,
+				hasChangelog: true,
+				changelogEntries: [
+					{
+						title: "Test Entry",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						slug: "test-entry",
+						content: "",
+						generatedHtml: "",
+						urlPath: "/changelog/test-entry/index.html",
+					},
+				],
+				documents: [
+					{
+						title: "Doc",
+						navTitle: "Doc",
+						description: "Doc description",
+						keywords: [],
+						content: "# Doc",
+						markdown: "# Doc\n\nDoc description",
+						generatedHtml: "<h1>Doc</h1>",
+						documentPath: "test/fixtures/changelog-site/docs/doc.md",
+						urlPath: "/docs/doc/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain("<link>http://foo.com/docs/doc/</link>");
+				expect(feed).not.toContain("http://foo.com/api");
+				expect(feed).not.toContain("http://foo.com/changelog");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
 	});
 
 	describe("Docula Builder - Build Index", () => {

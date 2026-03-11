@@ -243,6 +243,12 @@ export class DoculaBuilder {
 		await this.buildRobotsPage(this.options);
 		this._console.fileBuilt("robots.txt");
 
+		// Build the RSS feed (/feed.xml)
+		if (doculaData.hasDocuments) {
+			await this.buildFeedPage(doculaData);
+			this._console.fileBuilt("feed.xml");
+		}
+
 		if (doculaData.hasDocuments) {
 			this._console.step("Building documentation pages...");
 			await this.buildDocsPages(doculaData);
@@ -483,6 +489,10 @@ export class DoculaBuilder {
 		const sitemapPath = `${data.output}/sitemap.xml`;
 		const urls = [{ url: data.siteUrl }];
 
+		if (data.documents?.length) {
+			urls.push({ url: `${data.siteUrl}/feed.xml` });
+		}
+
 		if (data.openApiUrl && data.templates?.api) {
 			urls.push({ url: `${data.siteUrl}/api` });
 		}
@@ -521,6 +531,45 @@ export class DoculaBuilder {
 		await fs.promises.mkdir(data.output, { recursive: true });
 
 		await fs.promises.writeFile(sitemapPath, xml, "utf8");
+	}
+
+	public async buildFeedPage(data: DoculaData): Promise<void> {
+		if (!data.documents?.length) {
+			return;
+		}
+
+		const feedPath = `${data.output}/feed.xml`;
+		const channelLink = this.buildAbsoluteSiteUrl(data.siteUrl, "/");
+		const feedUrl = this.buildAbsoluteSiteUrl(data.siteUrl, "/feed.xml");
+		let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+		xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">';
+		xml += "<channel>";
+		xml += `<title>${this.escapeXml(data.siteTitle)}</title>`;
+		xml += `<link>${this.escapeXml(channelLink)}</link>`;
+		xml += `<description>${this.escapeXml(data.siteDescription)}</description>`;
+		xml += `<atom:link href="${this.escapeXml(feedUrl)}" rel="self" type="application/rss+xml" />`;
+
+		for (const document of data.documents) {
+			const itemTitle = document.navTitle || document.title || document.urlPath;
+			const itemLink = this.buildAbsoluteSiteUrl(
+				data.siteUrl,
+				this.normalizePathForUrl(document.urlPath),
+			);
+			const summary =
+				document.description || this.summarizeMarkdown(document.markdown);
+			xml += "<item>";
+			xml += `<title>${this.escapeXml(itemTitle)}</title>`;
+			xml += `<link>${this.escapeXml(itemLink)}</link>`;
+			xml += `<guid isPermaLink="true">${this.escapeXml(itemLink)}</guid>`;
+			xml += `<description>${this.escapeXml(summary)}</description>`;
+			xml += "</item>";
+		}
+
+		xml += "</channel>";
+		xml += "</rss>";
+
+		await fs.promises.mkdir(data.output, { recursive: true });
+		await fs.promises.writeFile(feedPath, xml, "utf8");
 	}
 
 	public async buildLlmsFiles(data: DoculaData): Promise<void> {
@@ -734,6 +783,33 @@ export class DoculaBuilder {
 		}
 
 		return urlPath;
+	}
+
+	private escapeXml(value: string | undefined): string {
+		return String(value ?? "")
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;")
+			.replaceAll("'", "&apos;");
+	}
+
+	private summarizeMarkdown(markdown: string, maxLength = 240): string {
+		const plainText = markdown
+			.replace(/^# .*\n/gm, "")
+			.replace(/```[\s\S]*?```/g, " ")
+			.replace(/`([^`]+)`/g, "$1")
+			.replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+			.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+			.replace(/[*_~>#-]+/g, " ")
+			.replace(/\s+/g, " ")
+			.trim();
+
+		if (plainText.length <= maxLength) {
+			return plainText;
+		}
+
+		return `${plainText.slice(0, maxLength).trimEnd()}...`;
 	}
 
 	private isRemoteUrl(url: string): boolean {
