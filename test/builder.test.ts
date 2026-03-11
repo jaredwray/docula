@@ -1113,6 +1113,53 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should preserve intro content when markdown starts with a thematic break", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-thematic-break-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "",
+						keywords: [],
+						content:
+							"# Guide\n\n---\n\nIntro content should stay.\n\n---\n\nMore content after the break.",
+						markdown:
+							"---\n\nIntro content should stay.\n\n---\n\nMore content after the break.",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain(
+					"<description>Intro content should stay. More content after the break.</description>",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
 		it("should not build feed.xml when no documents exist", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {

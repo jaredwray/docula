@@ -557,7 +557,8 @@ export class DoculaBuilder {
 				this.normalizePathForUrl(document.urlPath),
 			);
 			const summary =
-				document.description || this.summarizeMarkdown(document.content);
+				document.description ||
+				this.summarizeMarkdown(new Writr(document.content).body);
 			xml += "<item>";
 			xml += `<title>${this.escapeXml(itemTitle)}</title>`;
 			xml += `<link>${this.escapeXml(itemLink)}</link>`;
@@ -797,7 +798,6 @@ export class DoculaBuilder {
 
 	private summarizeMarkdown(markdown: string, maxLength = 240): string {
 		const plainText = markdown
-			.replace(/^---[\s\S]*?\n---\n*/m, "")
 			.replace(/^#{1,6}\s+.*$/gm, " ")
 			.replace(/^\s*[-*+]\s+/gm, " ")
 			.replace(/^\s*---+\s*$/gm, " ")
