@@ -114,6 +114,7 @@
     function getDisplayName(token) {
       try {
         var payload = token.split('.')[1];
+        if (!payload) return null;
         var json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
         var claims = JSON.parse(json);
         return claims.name || claims.preferred_username || claims.email || null;

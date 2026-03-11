@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
           cookieStatusEl.classList.remove('api-auth__cookie-status--hidden');
           var configEl = document.getElementById('cookie-auth-config');
           var cookieName = configEl ? configEl.getAttribute('data-cookie-name') : (data.name || 'token');
-          var hasCookie = document.cookie.split(';').some(function(c) { return c.trim().indexOf(cookieName + '=') === 0; });
+          var hasCookie = document.cookie.split(';').some(function(c) { return c.trim().startsWith(cookieName + '='); });
           cookieStatusEl.textContent = hasCookie ? 'Logged in' : 'Not logged in — use Login button above';
           cookieStatusEl.className = 'api-auth__cookie-status' + (hasCookie ? ' api-auth__cookie-status--ok' : ' api-auth__cookie-status--warn');
         }
