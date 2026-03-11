@@ -803,9 +803,15 @@ describe("docula watch", () => {
 		}
 	});
 	it("should handle rebuild errors gracefully", async () => {
+		const tempSitePath = "test/temp-watch-error-site";
+		const tempOutput = "test/temp-watch-error-output";
+		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
+			recursive: true,
+		});
+
 		const options = new DoculaOptions();
-		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-watch4";
+		options.sitePath = tempSitePath;
+		options.output = tempOutput;
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		const consoleLog = console.log;
@@ -823,15 +829,15 @@ describe("docula watch", () => {
 			}
 		};
 
-		const tempSitePath = "test/temp-watch-error-site";
-		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
-			recursive: true,
-		});
-		options.sitePath = tempSitePath;
-
 		try {
 			const { DoculaBuilder } = await import("../src/builder.js");
 			const builder = new DoculaBuilder(options);
+			await builder.build();
+
+			// Clear messages from the initial build
+			messages.length = 0;
+			errors.length = 0;
+
 			// Mock build to throw an error
 			builder.build = async () => {
 				throw new Error("Build error test");
@@ -839,13 +845,18 @@ describe("docula watch", () => {
 
 			docula.watch(options, builder);
 
-			// Write a file to trigger the watcher
-			fs.writeFileSync(`${tempSitePath}/trigger-error.txt`, "test");
+			// Modify an existing file to trigger the watcher reliably
+			fs.appendFileSync(`${tempSitePath}/README.md`, "\n<!-- trigger -->\n");
 
-			// Wait for debounce + error handling
-			await new Promise((resolve) => {
-				setTimeout(resolve, 1500);
-			});
+			const startedAt = Date.now();
+			while (
+				!errors.some((m) => m.includes("Rebuild failed:")) &&
+				Date.now() - startedAt < 3000
+			) {
+				await new Promise((resolve) => {
+					setTimeout(resolve, 100);
+				});
+			}
 
 			expect(errors.some((m) => m.includes("Rebuild failed:"))).toBe(true);
 		} finally {
@@ -854,6 +865,7 @@ describe("docula watch", () => {
 			}
 
 			await fs.promises.rm(tempSitePath, { recursive: true, force: true });
+			await fs.promises.rm(tempOutput, { recursive: true, force: true });
 			console.log = consoleLog;
 			console.error = consoleError;
 		}
