@@ -547,6 +547,7 @@ export class DoculaBuilder {
 		xml += `<title>${this.escapeXml(data.siteTitle)}</title>`;
 		xml += `<link>${this.escapeXml(channelLink)}</link>`;
 		xml += `<description>${this.escapeXml(data.siteDescription)}</description>`;
+		xml += `<lastBuildDate>${this.escapeXml(new Date().toUTCString())}</lastBuildDate>`;
 		xml += `<atom:link href="${this.escapeXml(feedUrl)}" rel="self" type="application/rss+xml" />`;
 
 		for (const document of data.documents) {
@@ -556,7 +557,8 @@ export class DoculaBuilder {
 				this.normalizePathForUrl(document.urlPath),
 			);
 			const summary =
-				document.description || this.summarizeMarkdown(document.markdown);
+				document.description ||
+				this.summarizeMarkdown(new Writr(document.content).body);
 			xml += "<item>";
 			xml += `<title>${this.escapeXml(itemTitle)}</title>`;
 			xml += `<link>${this.escapeXml(itemLink)}</link>`;
@@ -796,12 +798,14 @@ export class DoculaBuilder {
 
 	private summarizeMarkdown(markdown: string, maxLength = 240): string {
 		const plainText = markdown
-			.replace(/^# .*\n/gm, "")
+			.replace(/^#{1,6}\s+.*$/gm, " ")
+			.replace(/^\s*[-*+]\s+/gm, " ")
+			.replace(/^\s*---+\s*$/gm, " ")
 			.replace(/```[\s\S]*?```/g, " ")
 			.replace(/`([^`]+)`/g, "$1")
 			.replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
 			.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-			.replace(/[*_~>#-]+/g, " ")
+			.replace(/[*_~>#]+/g, " ")
 			.replace(/\s+/g, " ")
 			.trim();
 

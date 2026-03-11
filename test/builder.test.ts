@@ -942,12 +942,19 @@ describe("DoculaBuilder", () => {
 					`${data.output}/feed.xml`,
 					"utf8",
 				);
+				const lastBuildDateMatch = feed.match(
+					/<lastBuildDate>([^<]+)<\/lastBuildDate>/,
+				);
 				expect(feed).toContain('<rss version="2.0"');
 				expect(feed).toContain("<title>docula &amp; docs</title>");
 				expect(feed).toContain(
 					"<description>Beautiful &lt;docs&gt; &amp; updates</description>",
 				);
 				expect(feed).toContain("<link>http://foo.com/</link>");
+				expect(lastBuildDateMatch).not.toBeNull();
+				expect(
+					Number.isNaN(new Date(lastBuildDateMatch?.[1] ?? "").getTime()),
+				).toBe(false);
 				expect(feed).toContain(
 					'<atom:link href="http://foo.com/feed.xml" rel="self" type="application/rss+xml" />',
 				);
@@ -979,7 +986,8 @@ describe("DoculaBuilder", () => {
 						navTitle: "Guide",
 						description: "",
 						keywords: [],
-						content: "content",
+						content:
+							"---\ntitle: Guide\n---\n\n# Guide\n\nThis **guide** includes [links](http://foo.com), `code`, and more text for excerpt generation.",
 						markdown:
 							"# Guide\n\nThis **guide** includes [links](http://foo.com), `code`, and more text for excerpt generation.",
 						generatedHtml: "<h1>Guide</h1>",
@@ -1002,6 +1010,148 @@ describe("DoculaBuilder", () => {
 				);
 				expect(feed).toContain(
 					"<description>This guide includes links, code, and more text for excerpt generation.</description>",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should not include generated table of contents text in feed excerpts", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-no-toc-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "",
+						keywords: [],
+						content:
+							"---\ntitle: Guide\n---\n\n# Guide\n\nIntro paragraph.\n\n## Install\n\nInstall details.\n\n## Usage\n\nUsage details.",
+						markdown:
+							"Intro paragraph.\n\n## Table of Contents\n\n- [Install](#install)\n- [Usage](#usage)\n\n## Install\n\nInstall details.\n\n## Usage\n\nUsage details.",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain(
+					"<description>Intro paragraph. Install details. Usage details.</description>",
+				);
+				expect(feed).not.toContain("Table of Contents");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should preserve hyphenated words in feed excerpts", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-hyphen-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "",
+						keywords: [],
+						content:
+							"---\ntitle: Guide\n---\n\n# Guide\n\nA pre-release state-of-the-art guide.\n\n- First item\n- Second item",
+						markdown:
+							"# Guide\n\nA pre-release state-of-the-art guide.\n\n- First item\n- Second item",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain(
+					"<description>A pre-release state-of-the-art guide. First item Second item</description>",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should preserve intro content when markdown starts with a thematic break", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-feed-thematic-break-test",
+				documents: [
+					{
+						title: "Guide",
+						navTitle: "Guide",
+						description: "",
+						keywords: [],
+						content:
+							"# Guide\n\n---\n\nIntro content should stay.\n\n---\n\nMore content after the break.",
+						markdown:
+							"---\n\nIntro content should stay.\n\n---\n\nMore content after the break.",
+						generatedHtml: "<h1>Guide</h1>",
+						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
+						urlPath: "/docs/guide/index.html",
+						isRoot: true,
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildFeedPage(data);
+				const feed = await fs.promises.readFile(
+					`${data.output}/feed.xml`,
+					"utf8",
+				);
+				expect(feed).toContain(
+					"<description>Intro content should stay. More content after the break.</description>",
 				);
 			} finally {
 				if (fs.existsSync(data.output)) {
