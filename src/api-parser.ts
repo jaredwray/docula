@@ -55,6 +55,29 @@ export type ApiGroup = {
 	operations: ApiOperation[];
 };
 
+export type ApiOAuth2Flow = {
+	authorizationUrl?: string;
+	tokenUrl?: string;
+	refreshUrl?: string;
+	scopes: Record<string, string>;
+};
+
+export type ApiSecurityScheme = {
+	key: string;
+	type: string;
+	scheme?: string;
+	bearerFormat?: string;
+	name?: string;
+	in?: string;
+	description: string;
+	flows?: {
+		authorizationCode?: ApiOAuth2Flow;
+		implicit?: ApiOAuth2Flow;
+		clientCredentials?: ApiOAuth2Flow;
+		password?: ApiOAuth2Flow;
+	};
+};
+
 export type ApiSpecData = {
 	info: {
 		title: string;
@@ -63,6 +86,7 @@ export type ApiSpecData = {
 	};
 	servers: Array<{ url: string; description: string }>;
 	groups: ApiGroup[];
+	securitySchemes: ApiSecurityScheme[];
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: OpenAPI specs have dynamic structure
@@ -178,7 +202,46 @@ export function parseOpenApiSpec(specJson: string): ApiSpecData {
 		});
 	}
 
-	return { info, servers, groups };
+	const securitySchemes: ApiSecurityScheme[] = [];
+	const schemesObj = spec.components?.securitySchemes as SpecObject | undefined;
+	if (schemesObj && typeof schemesObj === "object") {
+		for (const [key, value] of Object.entries(schemesObj)) {
+			const scheme = value as SpecObject;
+			const entry: ApiSecurityScheme = {
+				key,
+				type: scheme.type ?? "",
+				scheme: scheme.scheme,
+				bearerFormat: scheme.bearerFormat,
+				name: scheme.name,
+				in: scheme.in,
+				description: scheme.description ?? "",
+			};
+			if (scheme.type === "oauth2" && scheme.flows) {
+				entry.flows = {};
+				for (const flowType of [
+					"authorizationCode",
+					"implicit",
+					"clientCredentials",
+					"password",
+				] as const) {
+					const flow = (scheme.flows as SpecObject)[flowType] as
+						| SpecObject
+						| undefined;
+					if (flow) {
+						entry.flows[flowType] = {
+							authorizationUrl: flow.authorizationUrl,
+							tokenUrl: flow.tokenUrl,
+							refreshUrl: flow.refreshUrl,
+							scopes: (flow.scopes as Record<string, string>) ?? {},
+						};
+					}
+				}
+			}
+			securitySchemes.push(entry);
+		}
+	}
+
+	return { info, servers, groups, securitySchemes };
 }
 
 function getStatusClass(statusCode: string): string {
