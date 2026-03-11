@@ -321,15 +321,20 @@ describe("docula execute", () => {
 			process.argv = ["node", "docula"];
 			await docula.execute(process);
 
+			expect(fs.existsSync(`${output}/feed.xml`)).toBe(true);
 			expect(fs.existsSync(`${output}/llms.txt`)).toBe(true);
 			expect(fs.existsSync(`${output}/llms-full.txt`)).toBe(true);
 
+			const feed = await fs.promises.readFile(`${output}/feed.xml`, "utf8");
 			const llms = await fs.promises.readFile(`${output}/llms.txt`, "utf8");
 			const llmsFull = await fs.promises.readFile(
 				`${output}/llms-full.txt`,
 				"utf8",
 			);
 
+			expect(feed).toContain('<rss version="2.0"');
+			expect(feed).toContain("<item>");
+			expect(feed).toContain("https://docula.org/docs/");
 			expect(llms).toContain("## Documentation");
 			expect(llms).toContain("## API Reference");
 			expect(llms).toContain("## Changelog");
