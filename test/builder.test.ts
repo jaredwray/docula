@@ -1581,6 +1581,52 @@ describe("DoculaBuilder", () => {
 			const sidebarItems = builder.generateSidebarItems(data);
 			expect(sidebarItems[0].children).toBeUndefined();
 		});
+		it("generateSidebarItems should not duplicate children when called multiple times", async () => {
+			// When homePage is false, generateSidebarItems is called twice: once by
+			// buildDocsHomePage (to render the first doc as the index page) and again
+			// by buildDocsPages (to render all doc pages). Because generateSidebarItems
+			// shallow-copies data.sections, the children arrays are shared references
+			// and the second call pushes duplicates into them.
+			const builder = new DoculaBuilder();
+			const documents: DoculaDocument[] = [
+				{
+					title: "Document title",
+					navTitle: "Document",
+					description: "Document description",
+					keywords: [],
+					content: "",
+					markdown: "",
+					generatedHtml: "",
+					documentPath: "",
+					urlPath: "document",
+					isRoot: false,
+					section: "foo",
+				},
+			];
+
+			const data = doculaData;
+			data.templates = {
+				home: "home.hbs",
+			};
+			data.sitePath = "site";
+			data.templatePath = "test/fixtures/template-example";
+			data.output = "test/temp-index-test";
+
+			data.sections = [
+				{
+					name: "foo",
+					path: "foo",
+					order: 1,
+				},
+			];
+			data.documents = documents;
+
+			const firstResult = builder.generateSidebarItems(data);
+			expect(firstResult[0].children).toHaveLength(1);
+
+			const secondResult = builder.generateSidebarItems(data);
+			expect(secondResult[0].children).toHaveLength(1);
+		});
 	});
 
 	describe("Docula Builder - Document Parser", () => {
