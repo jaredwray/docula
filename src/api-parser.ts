@@ -373,7 +373,7 @@ function getSchemaType(schema: SpecObject | undefined): string {
 	if (schema.type === "array") {
 		const items = schema.items as SpecObject | undefined;
 		const itemType = items?.type ?? "any";
-		return `array<${itemType}>`;
+		return `array(${itemType})`;
 	}
 
 	if (schema.type) {
