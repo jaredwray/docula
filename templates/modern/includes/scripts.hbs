@@ -9,7 +9,7 @@
 </script>
 <script>
   (function() {
-    var themeKey = 'docula:theme:' + {{#if siteTitle}}'{{siteTitle}}'{{else}}location.hostname{{/if}};
+    var themeKey = window.__doculaThemeKey;
     function getMode() {
       return localStorage.getItem(themeKey) || {{#if themeMode}}'{{themeMode}}'{{else}}'system'{{/if}};
     }
