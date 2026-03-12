@@ -6,7 +6,7 @@
 <link rel="icon" href="/favicon.ico">
 <script>
   (function(){
-    window.__doculaThemeKey = 'docula:theme:' + {{#if siteTitle}}'{{siteTitle}}'{{else}}location.hostname{{/if}};
+    window.__doculaThemeKey = 'docula:theme:' + {{#if siteUrl}}'{{siteUrl}}'{{else}}location.origin{{/if}};
     var mode = localStorage.getItem(window.__doculaThemeKey) || {{#if themeMode}}'{{themeMode}}'{{else}}'system'{{/if}};
     var resolved = mode === 'system'
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
