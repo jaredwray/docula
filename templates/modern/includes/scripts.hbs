@@ -9,8 +9,9 @@
 </script>
 <script>
   (function() {
+    var themeKey = window.__doculaThemeKey;
     function getMode() {
-      return localStorage.getItem('theme') || {{#if themeMode}}'{{themeMode}}'{{else}}'system'{{/if}};
+      return localStorage.getItem(themeKey) || {{#if themeMode}}'{{themeMode}}'{{else}}'system'{{/if}};
     }
 
     function resolveTheme(mode) {
@@ -75,7 +76,7 @@
       if (els.toggle) {
         els.toggle.addEventListener('click', function() {
           currentMode = nextMode(currentMode);
-          localStorage.setItem('theme', currentMode);
+          localStorage.setItem(themeKey, currentMode);
           applyTheme(currentMode);
         });
       }
