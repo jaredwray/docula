@@ -528,6 +528,40 @@ describe("API Parser", () => {
 			expect(props[0].type).toBe("string");
 		});
 
+		it("should format array property types with parentheses instead of angle brackets", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				paths: {
+					"/test": {
+						get: {
+							requestBody: {
+								content: {
+									"application/json": {
+										schema: {
+											type: "object",
+											properties: {
+												items: { type: "array", items: { type: "object" } },
+												tags: { type: "array", items: { type: "string" } },
+											},
+										},
+									},
+								},
+							},
+							responses: { "200": { description: "OK" } },
+						},
+					},
+				},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			const requestBody = result.groups[0].operations[0].requestBody;
+			expect(requestBody).toBeDefined();
+			const props = requestBody?.schemaProperties;
+			expect(props?.[0].type).toBe("array(object)");
+			expect(props?.[1].type).toBe("array(string)");
+		});
+
 		it("should handle oneOf/anyOf/allOf schema types", () => {
 			const spec = JSON.stringify({
 				openapi: "3.0.3",
@@ -1195,6 +1229,206 @@ describe("API Parser", () => {
 			const props =
 				result.groups[0].operations[0].responses[0].schemaProperties;
 			expect(props).toBeDefined();
+		});
+
+		it("should return empty securitySchemes when spec has none", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toEqual([]);
+		});
+
+		it("should return empty securitySchemes when components exists but has no securitySchemes", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: { schemas: {} },
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toEqual([]);
+		});
+
+		it("should parse an apiKey security scheme", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						api_key: {
+							type: "apiKey",
+							name: "X-API-Key",
+							in: "header",
+							description: "API key auth",
+						},
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(1);
+			expect(result.securitySchemes[0]).toEqual({
+				key: "api_key",
+				type: "apiKey",
+				scheme: undefined,
+				bearerFormat: undefined,
+				name: "X-API-Key",
+				in: "header",
+				description: "API key auth",
+			});
+		});
+
+		it("should parse an apiKey cookie security scheme", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						cookie_auth: {
+							type: "apiKey",
+							name: "access_token",
+							in: "cookie",
+						},
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(1);
+			expect(result.securitySchemes[0]).toEqual({
+				key: "cookie_auth",
+				type: "apiKey",
+				scheme: undefined,
+				bearerFormat: undefined,
+				name: "access_token",
+				in: "cookie",
+				description: "",
+			});
+		});
+
+		it("should parse an http bearer security scheme", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						bearer_auth: {
+							type: "http",
+							scheme: "bearer",
+							bearerFormat: "JWT",
+							description: "Bearer token",
+						},
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(1);
+			expect(result.securitySchemes[0]).toEqual({
+				key: "bearer_auth",
+				type: "http",
+				scheme: "bearer",
+				bearerFormat: "JWT",
+				name: undefined,
+				in: undefined,
+				description: "Bearer token",
+			});
+		});
+
+		it("should parse an oauth2 security scheme with flows", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						oauth2: {
+							type: "oauth2",
+							description: "OAuth2 auth",
+							flows: {
+								authorizationCode: {
+									authorizationUrl: "https://auth.example.com/authorize",
+									tokenUrl: "https://auth.example.com/token",
+									refreshUrl: "https://auth.example.com/refresh",
+									scopes: {
+										"read:users": "Read users",
+										"write:users": "Write users",
+									},
+								},
+								clientCredentials: {
+									tokenUrl: "https://auth.example.com/token",
+									scopes: { admin: "Admin access" },
+								},
+							},
+						},
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(1);
+			const scheme = result.securitySchemes[0];
+			expect(scheme.key).toBe("oauth2");
+			expect(scheme.type).toBe("oauth2");
+			expect(scheme.description).toBe("OAuth2 auth");
+			expect(scheme.flows).toBeDefined();
+			expect(scheme.flows?.authorizationCode).toEqual({
+				authorizationUrl: "https://auth.example.com/authorize",
+				tokenUrl: "https://auth.example.com/token",
+				refreshUrl: "https://auth.example.com/refresh",
+				scopes: { "read:users": "Read users", "write:users": "Write users" },
+			});
+			expect(scheme.flows?.clientCredentials).toEqual({
+				tokenUrl: "https://auth.example.com/token",
+				scopes: { admin: "Admin access" },
+			});
+			expect(scheme.flows?.implicit).toBeUndefined();
+			expect(scheme.flows?.password).toBeUndefined();
+		});
+
+		it("should parse multiple security schemes", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						api_key: { type: "apiKey", name: "X-API-Key", in: "header" },
+						bearer: { type: "http", scheme: "bearer" },
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(2);
+			expect(result.securitySchemes[0].key).toBe("api_key");
+			expect(result.securitySchemes[0].type).toBe("apiKey");
+			expect(result.securitySchemes[1].key).toBe("bearer");
+			expect(result.securitySchemes[1].type).toBe("http");
+		});
+
+		it("should default missing description to empty string in security schemes", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						minimal: { type: "apiKey", name: "key", in: "query" },
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes[0].description).toBe("");
 		});
 
 		it("should generate python code without query params using full URL", () => {

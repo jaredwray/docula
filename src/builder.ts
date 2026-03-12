@@ -57,6 +57,8 @@ export type DoculaData = {
 		url: string;
 		icon?: string;
 	}>;
+	enableLlmsTxt?: boolean;
+	hasFeed?: boolean;
 };
 
 export type DoculaTemplates = {
@@ -135,6 +137,7 @@ export class DoculaBuilder {
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
+			enableLlmsTxt: this.options.enableLlmsTxt,
 		};
 
 		// Auto-detect swagger.json if openApiUrl is not set
@@ -161,6 +164,7 @@ export class DoculaBuilder {
 		);
 
 		doculaData.hasDocuments = doculaData.documents?.length > 0;
+		doculaData.hasFeed = doculaData.hasDocuments;
 
 		// Get file-based changelog entries
 		const changelogPath = `${doculaData.sitePath}/changelog`;
