@@ -1357,7 +1357,10 @@ describe("API Parser", () => {
 									authorizationUrl: "https://auth.example.com/authorize",
 									tokenUrl: "https://auth.example.com/token",
 									refreshUrl: "https://auth.example.com/refresh",
-									scopes: { "read:users": "Read users", "write:users": "Write users" },
+									scopes: {
+										"read:users": "Read users",
+										"write:users": "Write users",
+									},
 								},
 								clientCredentials: {
 									tokenUrl: "https://auth.example.com/token",
@@ -1377,18 +1380,18 @@ describe("API Parser", () => {
 			expect(scheme.type).toBe("oauth2");
 			expect(scheme.description).toBe("OAuth2 auth");
 			expect(scheme.flows).toBeDefined();
-			expect(scheme.flows!.authorizationCode).toEqual({
+			expect(scheme.flows?.authorizationCode).toEqual({
 				authorizationUrl: "https://auth.example.com/authorize",
 				tokenUrl: "https://auth.example.com/token",
 				refreshUrl: "https://auth.example.com/refresh",
 				scopes: { "read:users": "Read users", "write:users": "Write users" },
 			});
-			expect(scheme.flows!.clientCredentials).toEqual({
+			expect(scheme.flows?.clientCredentials).toEqual({
 				tokenUrl: "https://auth.example.com/token",
 				scopes: { admin: "Admin access" },
 			});
-			expect(scheme.flows!.implicit).toBeUndefined();
-			expect(scheme.flows!.password).toBeUndefined();
+			expect(scheme.flows?.implicit).toBeUndefined();
+			expect(scheme.flows?.password).toBeUndefined();
 		});
 
 		it("should parse multiple security schemes", () => {
