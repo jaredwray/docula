@@ -555,10 +555,11 @@ describe("API Parser", () => {
 			});
 
 			const result = parseOpenApiSpec(spec);
-			const props =
-				result.groups[0].operations[0].requestBody!.schemaProperties;
-			expect(props[0].type).toBe("array(object)");
-			expect(props[1].type).toBe("array(string)");
+			const requestBody = result.groups[0].operations[0].requestBody;
+			expect(requestBody).toBeDefined();
+			const props = requestBody?.schemaProperties;
+			expect(props?.[0].type).toBe("array(object)");
+			expect(props?.[1].type).toBe("array(string)");
 		});
 
 		it("should handle oneOf/anyOf/allOf schema types", () => {
