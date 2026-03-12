@@ -1318,7 +1318,12 @@ export class DoculaBuilder {
 	}
 
 	public generateSidebarItems(data: DoculaData): DoculaSection[] {
-		let sidebarItems = [...(data.sections ?? [])];
+		let sidebarItems: DoculaSection[] = (data.sections ?? []).map(
+			(section) => ({
+				...section,
+				children: section.children ? [...section.children] : undefined,
+			}),
+		);
 
 		for (const document of data.documents ?? []) {
 			if (document.isRoot) {
