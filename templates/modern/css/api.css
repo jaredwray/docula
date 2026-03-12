@@ -351,6 +351,36 @@
   display: none;
 }
 
+.api-auth__cookie-status {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.api-auth__cookie-status--hidden {
+  display: none;
+}
+
+.api-auth__cookie-status--ok {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme="light"] .api-auth__cookie-status--ok {
+  color: #065f46;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.api-auth__cookie-status--warn {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="light"] .api-auth__cookie-status--warn {
+  color: #92400e;
+  background: rgba(251, 191, 36, 0.12);
+}
+
 /* Tag Group */
 .api-group {
   margin-bottom: 40px;

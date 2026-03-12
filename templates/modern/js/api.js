@@ -104,19 +104,52 @@ document.addEventListener('DOMContentLoaded', function() {
     group.classList.add('api-sidebar__group--collapsed');
   });
 
-  // Auth type selector: show/hide value input
+  // Auth type selector: show/hide value input based on OpenAPI securitySchemes
   var authTypeSelect = document.getElementById('api-auth-type');
   var authValueInput = document.getElementById('api-auth-value');
+  var cookieStatusEl = document.getElementById('api-auth-cookie-status');
   if (authTypeSelect && authValueInput) {
-    authTypeSelect.addEventListener('change', function() {
-      if (this.value === 'none') {
+    function getSelectedSchemeData() {
+      var option = authTypeSelect.options[authTypeSelect.selectedIndex];
+      return {
+        key: option.value,
+        type: option.getAttribute('data-scheme-type'),
+        scheme: option.getAttribute('data-scheme-scheme'),
+        name: option.getAttribute('data-scheme-name'),
+        inLocation: option.getAttribute('data-scheme-in')
+      };
+    }
+    function updateAuthUI() {
+      var data = getSelectedSchemeData();
+      if (data.key === 'none') {
         authValueInput.classList.add('api-auth__value--hidden');
         authValueInput.value = '';
+        if (cookieStatusEl) cookieStatusEl.classList.add('api-auth__cookie-status--hidden');
+      } else if (data.type === 'apiKey' && data.inLocation === 'cookie') {
+        authValueInput.classList.add('api-auth__value--hidden');
+        authValueInput.value = '';
+        if (cookieStatusEl) {
+          cookieStatusEl.classList.remove('api-auth__cookie-status--hidden');
+          var configEl = document.getElementById('cookie-auth-config');
+          var cookieName = configEl ? configEl.getAttribute('data-cookie-name') : (data.name || 'token');
+          var hasCookie = document.cookie.split(';').some(function(c) { return c.trim().startsWith(cookieName + '='); });
+          cookieStatusEl.textContent = hasCookie ? 'Logged in' : 'Not logged in — use Login button above';
+          cookieStatusEl.className = 'api-auth__cookie-status' + (hasCookie ? ' api-auth__cookie-status--ok' : ' api-auth__cookie-status--warn');
+        }
       } else {
         authValueInput.classList.remove('api-auth__value--hidden');
-        authValueInput.placeholder = this.value === 'apikey' ? 'Enter API key...' : 'Enter token...';
+        if (data.type === 'apiKey') {
+          authValueInput.placeholder = 'Enter API key...';
+        } else if (data.scheme === 'bearer') {
+          authValueInput.placeholder = 'Enter bearer token...';
+        } else {
+          authValueInput.placeholder = 'Enter value...';
+        }
+        if (cookieStatusEl) cookieStatusEl.classList.add('api-auth__cookie-status--hidden');
       }
-    });
+    }
+    authTypeSelect.addEventListener('change', updateAuthUI);
+    updateAuthUI();
   }
 
   // Helper: expand an operation and its corresponding sidebar group
@@ -226,15 +259,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (value) headers[name] = value;
       });
 
-      // Inject global auth header
+      // Inject global auth header from selected security scheme
       var authType = document.getElementById('api-auth-type');
       var authValue = document.getElementById('api-auth-value');
-      if (authType && authValue && authValue.value.trim()) {
-        var authVal = authValue.value.trim();
-        if (authType.value === 'apikey') {
-          headers['x-api-key'] = authVal;
-        } else if (authType.value === 'bearer') {
-          headers['Authorization'] = 'Bearer ' + authVal;
+      var useCookieAuth = false;
+      if (authType && authType.value !== 'none') {
+        var authOption = authType.options[authType.selectedIndex];
+        var schemeType = authOption.getAttribute('data-scheme-type');
+        var schemeName = authOption.getAttribute('data-scheme-name');
+        var schemeIn = authOption.getAttribute('data-scheme-in');
+        var schemeScheme = authOption.getAttribute('data-scheme-scheme');
+        if (schemeType === 'apiKey' && schemeIn === 'cookie') {
+          useCookieAuth = true;
+        } else if (authValue && authValue.value.trim()) {
+          var authVal = authValue.value.trim();
+          if (schemeType === 'apiKey' && schemeIn === 'header' && schemeName) {
+            headers[schemeName] = authVal;
+          } else if (schemeType === 'http' && schemeScheme === 'bearer') {
+            headers['Authorization'] = 'Bearer ' + authVal;
+          } else if (schemeType === 'apiKey' && schemeIn === 'query' && schemeName) {
+            queryParts.push(encodeURIComponent(schemeName) + '=' + encodeURIComponent(authVal));
+            queryString = '?' + queryParts.join('&');
+          }
         }
       }
 
@@ -247,6 +293,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var url = baseUrl + path + queryString;
       var fetchOptions = { method: method, headers: headers };
+      if (useCookieAuth) {
+        fetchOptions.credentials = 'include';
+      }
       if (body && method !== 'GET' && method !== 'HEAD') {
         fetchOptions.body = body;
       }

@@ -105,20 +105,38 @@
         return false;
       }
     }
-    function hasCookie() {
-      return document.cookie.split(';').some(function(c) {
+    function getCookieValue() {
+      var match = document.cookie.split(';').find(function(c) {
         return c.trim().startsWith(cookieName + '=');
       });
+      return match ? match.trim().substring(cookieName.length + 1) : null;
+    }
+    function getDisplayName(token) {
+      try {
+        var payload = token.split('.')[1];
+        if (!payload) return null;
+        var json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+        var claims = JSON.parse(json);
+        return claims.name || claims.preferred_username || claims.email || null;
+      } catch (e) {
+        return null;
+      }
     }
     function updateAuthUI() {
-      var loggedIn = hasCookie();
+      var token = getCookieValue();
+      var loggedIn = !!token;
+      var displayName = loggedIn ? getDisplayName(token) : null;
       var els = [
-        { login: document.getElementById('cookie-auth-login'), logout: document.getElementById('cookie-auth-logout') },
-        { login: document.getElementById('cookie-auth-login-mobile'), logout: document.getElementById('cookie-auth-logout-mobile') }
+        { login: document.getElementById('cookie-auth-login'), logout: document.getElementById('cookie-auth-logout'), user: document.getElementById('cookie-auth-user') },
+        { login: document.getElementById('cookie-auth-login-mobile'), logout: document.getElementById('cookie-auth-logout-mobile'), user: document.getElementById('cookie-auth-user-mobile') }
       ];
       els.forEach(function(pair) {
         if (pair.login) pair.login.style.display = loggedIn ? 'none' : '';
         if (pair.logout) pair.logout.style.display = loggedIn ? '' : 'none';
+        if (pair.user) {
+          pair.user.textContent = displayName || '';
+          pair.user.style.display = (loggedIn && displayName) ? '' : 'none';
+        }
       });
     }
     document.addEventListener('DOMContentLoaded', function() {
