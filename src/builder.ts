@@ -1314,7 +1314,7 @@ export class DoculaBuilder {
 	}
 
 	public generateSidebarItems(data: DoculaData): DoculaSection[] {
-		let sidebarItems = (data.sections ?? []).map((section) => ({
+		let sidebarItems: DoculaSection[] = (data.sections ?? []).map((section) => ({
 			...section,
 			children: section.children ? [...section.children] : undefined,
 		}));
