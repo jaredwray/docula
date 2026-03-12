@@ -528,6 +528,39 @@ describe("API Parser", () => {
 			expect(props[0].type).toBe("string");
 		});
 
+		it("should format array property types with parentheses instead of angle brackets", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				paths: {
+					"/test": {
+						get: {
+							requestBody: {
+								content: {
+									"application/json": {
+										schema: {
+											type: "object",
+											properties: {
+												items: { type: "array", items: { type: "object" } },
+												tags: { type: "array", items: { type: "string" } },
+											},
+										},
+									},
+								},
+							},
+							responses: { "200": { description: "OK" } },
+						},
+					},
+				},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			const props =
+				result.groups[0].operations[0].requestBody!.schemaProperties;
+			expect(props[0].type).toBe("array(object)");
+			expect(props[1].type).toBe("array(string)");
+		});
+
 		it("should handle oneOf/anyOf/allOf schema types", () => {
 			const spec = JSON.stringify({
 				openapi: "3.0.3",
