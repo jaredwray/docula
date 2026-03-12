@@ -60,3 +60,17 @@ cookieAuth: {
   cookieName: 'session',
 },
 ```
+
+## User Display Name
+
+When a user is logged in, Docula extracts a display name from the JWT cookie and shows it in the site header. The name is resolved from the token's claims in this order:
+
+1. `name`
+2. `preferred_username`
+3. `email`
+
+If none of these claims are present, no name is displayed.
+
+## API Reference Integration
+
+When `cookieAuth` is configured and your OpenAPI spec defines an API Key security scheme with `"in": "cookie"`, the [API Reference](/docs/api-reference) page shows a login status indicator in the authorization panel — green when logged in, amber when not. Requests made via the "Try It" panel automatically include the cookie, so no manual token entry is needed.
