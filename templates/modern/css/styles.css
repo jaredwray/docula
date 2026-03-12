@@ -760,6 +760,27 @@ footer img {
   width: auto;
 }
 
+.footer__sep {
+  margin: 0 0.5rem;
+  color: var(--border-strong);
+}
+
+.footer__link {
+  color: var(--muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer__link:hover {
+  color: var(--link);
+}
+
+.footer__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
 @media (min-width: 992px) {
   footer { height: 4.75rem; }
   footer img { height: 1.75rem; }
