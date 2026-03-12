@@ -756,7 +756,7 @@ footer {
 
 footer img {
   margin-left: 0.5rem;
-  height: 1.5rem;
+  height: 1rem;
   width: auto;
 }
 
@@ -783,6 +783,6 @@ footer img {
 
 @media (min-width: 992px) {
   footer { height: 4.75rem; }
-  footer img { height: 1.75rem; }
+  footer img { height: 1.125rem; }
 }
 
