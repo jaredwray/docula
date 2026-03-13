@@ -67,11 +67,31 @@
           {{/if}}
         </div>
         <span class="changelog-entry-date">{{entry.formattedDate}}</span>
-        <div class="changelog-entry-body">
-          {{{entry.generatedHtml}}}
+        <div class="changelog-entry-preview">
+          {{{entry.preview}}}
         </div>
+        <a class="changelog-read-more" href="/changelog/{{entry.slug}}/">Read more &rarr;</a>
       </div>
       {{/each}}
+      {{#if hasNextPage}}
+      <nav class="changelog-pagination">
+        {{#if hasPrevPage}}
+        <a class="changelog-pagination-link" href="{{prevPageUrl}}">&larr; Newer</a>
+        {{else}}
+        <span class="changelog-pagination-link changelog-pagination-disabled">&larr; Newer</span>
+        {{/if}}
+        <span class="changelog-pagination-info">Page {{currentPage}} of {{totalPages}}</span>
+        <a class="changelog-pagination-link" href="{{nextPageUrl}}">Older &rarr;</a>
+      </nav>
+      {{else}}
+      {{#if hasPrevPage}}
+      <nav class="changelog-pagination">
+        <a class="changelog-pagination-link" href="{{prevPageUrl}}">&larr; Newer</a>
+        <span class="changelog-pagination-info">Page {{currentPage}} of {{totalPages}}</span>
+        <span class="changelog-pagination-link changelog-pagination-disabled">Older &rarr;</span>
+      </nav>
+      {{/if}}
+      {{/if}}
       {{/if}}
     </div>
   </main>

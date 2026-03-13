@@ -73,6 +73,10 @@ export class DoculaOptions {
 	 */
 	public enableReleaseChangelog = true;
 	/**
+	 * Number of changelog entries to display per page on the changelog index.
+	 */
+	public changelogPerPage = 20;
+	/**
 	 * When false, the first document becomes the home page (index.html)
 	 * and the home.hbs template is not rendered.
 	 */
@@ -217,6 +221,14 @@ export class DoculaOptions {
 			typeof options.enableReleaseChangelog === "boolean"
 		) {
 			this.enableReleaseChangelog = options.enableReleaseChangelog;
+		}
+
+		if (
+			options.changelogPerPage !== undefined &&
+			typeof options.changelogPerPage === "number" &&
+			options.changelogPerPage > 0
+		) {
+			this.changelogPerPage = options.changelogPerPage;
 		}
 
 		if (

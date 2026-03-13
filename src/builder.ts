@@ -22,6 +22,7 @@ export type DoculaChangelogEntry = {
 	slug: string;
 	content: string;
 	generatedHtml: string;
+	preview: string;
 	urlPath: string;
 };
 
@@ -503,6 +504,18 @@ export class DoculaBuilder {
 
 		if (data.hasChangelog && data.templates?.changelog) {
 			urls.push({ url: `${data.siteUrl}/changelog` });
+
+			const perPage = this.options.changelogPerPage;
+			const totalPages = Math.max(
+				1,
+				Math.ceil((data.changelogEntries ?? []).length / perPage),
+			);
+			for (let page = 2; page <= totalPages; page++) {
+				urls.push({
+					url: `${data.siteUrl}/changelog/page/${page}`,
+				});
+			}
+
 			for (const entry of data.changelogEntries ?? []) {
 				urls.push({
 					url: `${data.siteUrl}/changelog/${entry.slug}`,
@@ -1209,8 +1222,29 @@ export class DoculaBuilder {
 			slug,
 			content: markdownContent,
 			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
+			preview: this.generateChangelogPreview(markdownContent, 200, isMdx),
 			urlPath: `/changelog/${slug}/index.html`,
 		};
+	}
+
+	public generateChangelogPreview(
+		markdown: string,
+		maxLength = 200,
+		mdx = false,
+	): string {
+		if (markdown.length <= maxLength) {
+			return new Writr(markdown).renderSync({ mdx });
+		}
+
+		// Truncate at word boundary
+		let truncated = markdown.slice(0, maxLength);
+		const lastSpace = truncated.lastIndexOf(" ");
+		if (lastSpace > 0) {
+			truncated = truncated.slice(0, lastSpace);
+		}
+
+		truncated += "...";
+		return new Writr(truncated).renderSync({ mdx });
 	}
 
 	public convertReleaseToChangelogEntry(
@@ -1250,6 +1284,7 @@ export class DoculaBuilder {
 			slug,
 			content: body,
 			generatedHtml: new Writr(body).renderSync(),
+			preview: this.generateChangelogPreview(body),
 			urlPath: `/changelog/${slug}/index.html`,
 		};
 	}
@@ -1275,18 +1310,53 @@ export class DoculaBuilder {
 			return;
 		}
 
-		const changelogOutputPath = `${data.output}/changelog`;
-		const changelogIndexPath = `${changelogOutputPath}/index.html`;
-
-		await fs.promises.mkdir(changelogOutputPath, { recursive: true });
-
+		const allEntries = data.changelogEntries ?? [];
+		const perPage = this.options.changelogPerPage;
+		const totalPages = Math.max(1, Math.ceil(allEntries.length / perPage));
 		const changelogTemplate = `${data.templatePath}/${data.templates.changelog}`;
-		const changelogContent = await this._ecto.renderFromFile(
-			changelogTemplate,
-			{ ...data, entries: data.changelogEntries },
-			data.templatePath,
-		);
-		await fs.promises.writeFile(changelogIndexPath, changelogContent, "utf8");
+
+		const promises = [];
+		for (let page = 1; page <= totalPages; page++) {
+			const startIndex = (page - 1) * perPage;
+			const pageEntries = allEntries.slice(startIndex, startIndex + perPage);
+
+			const outputPath =
+				page === 1
+					? `${data.output}/changelog`
+					: `${data.output}/changelog/page/${page}`;
+			const indexPath = `${outputPath}/index.html`;
+
+			const paginationData = {
+				...data,
+				entries: pageEntries,
+				currentPage: page,
+				totalPages,
+				hasNextPage: page < totalPages,
+				hasPrevPage: page > 1,
+				nextPageUrl:
+					page < totalPages ? `/changelog/page/${page + 1}/` : "",
+				prevPageUrl:
+					page > 1
+						? page === 2
+							? "/changelog/"
+							: `/changelog/page/${page - 1}/`
+						: "",
+			};
+
+			promises.push(
+				(async () => {
+					await fs.promises.mkdir(outputPath, { recursive: true });
+					const content = await this._ecto.renderFromFile(
+						changelogTemplate,
+						paginationData,
+						data.templatePath,
+					);
+					await fs.promises.writeFile(indexPath, content, "utf8");
+				})(),
+			);
+		}
+
+		await Promise.all(promises);
 	}
 
 	public async buildChangelogEntryPages(data: DoculaData): Promise<void> {
