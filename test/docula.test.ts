@@ -39,6 +39,18 @@ describe("docula", () => {
 	afterEach(() => {
 		// Reset the mock after each test
 		vi.resetAllMocks();
+		// Clean build manifests to prevent differential build interference between tests
+		for (const fixture of [
+			"test/fixtures/single-page-site",
+			"test/fixtures/single-page-site-ts",
+			"test/fixtures/single-page-site-onprepare",
+			"test/fixtures/single-page-site-ts-onprepare",
+			"test/fixtures/multi-page-site",
+			"test/fixtures/mega-page-site",
+			"test/fixtures/mega-page-site-no-home-page",
+		]) {
+			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+		}
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
@@ -294,8 +306,12 @@ describe("docula execute", () => {
 			process.argv = ["node", "docula", "--clean"];
 			await docula.execute(process);
 
-			// Cache directory should be removed
-			expect(fs.existsSync(cachePath)).toEqual(false);
+			// The pre-existing template cache should be removed by --clean
+			expect(fs.existsSync(`${cachePath}/templates/modern/test.hbs`)).toEqual(
+				false,
+			);
+			// But the build manifest is recreated during the build
+			expect(fs.existsSync(`${cachePath}/build/manifest.json`)).toEqual(true);
 		} finally {
 			console.log = consoleLog;
 			fs.rmSync(sitePath, { recursive: true, force: true });

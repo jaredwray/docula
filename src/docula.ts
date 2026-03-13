@@ -358,8 +358,9 @@ export default class Docula {
 			try {
 				await builder.build();
 				this._console.success(
-					`Rebuild complete \uD83E\uDD87 at http://localhost:${options.port}`,
+					`Rebuild complete`,
 				);
+				this._console.banner(`\uD83E\uDD87 at http://localhost:${options.port}`);
 			} catch (error) {
 				this._console.error(`Rebuild failed: ${(error as Error).message}`);
 			} finally {
@@ -383,6 +384,15 @@ export default class Docula {
 					!outputRelative.startsWith("..") &&
 					(String(filename) === outputRelative ||
 						String(filename).startsWith(`${outputRelative}${path.sep}`))
+				) {
+					return;
+				}
+
+				// Ignore changes in the .cache directory (build manifest, cached data)
+				if (
+					filename &&
+					(String(filename) === ".cache" ||
+						String(filename).startsWith(`.cache${path.sep}`))
 				) {
 					return;
 				}
