@@ -474,6 +474,40 @@ describe("docula execute", () => {
 			console.log = consoleLog;
 		}
 	});
+	it("should error when both --typescript and --javascript flags are used", async () => {
+		const docula = new Docula(defaultOptions);
+		const sitePath = "./custom-site-conflict";
+		let errorMessage = "";
+		const consoleLog = console.log;
+		const consoleError = console.error;
+		console.log = () => {};
+		console.error = (message) => {
+			errorMessage = message as string;
+		};
+
+		process.argv = [
+			"node",
+			"docula",
+			"init",
+			"-s",
+			sitePath,
+			"--typescript",
+			"--javascript",
+		];
+		try {
+			await docula.execute(process);
+			expect(errorMessage).toContain("Cannot use both");
+			expect(fs.existsSync(`${sitePath}/docula.config.ts`)).toEqual(false);
+			expect(fs.existsSync(`${sitePath}/docula.config.mjs`)).toEqual(false);
+		} finally {
+			if (fs.existsSync(sitePath)) {
+				await fs.promises.rm(sitePath, { recursive: true });
+			}
+
+			console.log = consoleLog;
+			console.error = consoleError;
+		}
+	});
 	it("should detect typescript project", () => {
 		const docula = new Docula(defaultOptions);
 		// This project has a tsconfig.json

@@ -168,11 +168,19 @@ export default class Docula {
 
 		switch (consoleProcess.command) {
 			case "init": {
-				let useTypeScript = consoleProcess.args.typescript;
-				if (
-					!consoleProcess.args.typescript &&
-					!consoleProcess.args.javascript
-				) {
+				if (consoleProcess.args.typescript && consoleProcess.args.javascript) {
+					this._console.error(
+						"Cannot use both --typescript and --javascript flags. Please choose one.",
+					);
+					break;
+				}
+
+				let useTypeScript: boolean;
+				if (consoleProcess.args.typescript) {
+					useTypeScript = true;
+				} else if (consoleProcess.args.javascript) {
+					useTypeScript = false;
+				} else {
 					useTypeScript = this.detectTypeScript();
 				}
 
