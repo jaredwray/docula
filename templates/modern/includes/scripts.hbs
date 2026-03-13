@@ -109,7 +109,10 @@
       }
       return current || null;
     }
+    window.__doculaAuth = { loggedIn: false, displayName: null };
     function setAuthUI(loggedIn, displayName) {
+      window.__doculaAuth = { loggedIn: loggedIn, displayName: displayName };
+      document.dispatchEvent(new CustomEvent('docula-auth-change'));
       var els = [
         { login: document.getElementById('cookie-auth-login'), logout: document.getElementById('cookie-auth-logout'), user: document.getElementById('cookie-auth-user') },
         { login: document.getElementById('cookie-auth-login-mobile'), logout: document.getElementById('cookie-auth-logout-mobile'), user: document.getElementById('cookie-auth-user-mobile') }
