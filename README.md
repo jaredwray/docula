@@ -33,6 +33,7 @@
 - [Multiple Pages](https://docula.org/docs/multiple-pages)
 - [Assets](https://docula.org/docs/assets)
 - [Styling](https://docula.org/docs/styling)
+- [Custom Scripts](https://docula.org/docs/custom-scripts)
 - [API Reference](https://docula.org/docs/api-reference)
 - [LLM Files](https://docula.org/docs/llm-files)
 - [Announcements](https://docula.org/docs/using-announcements)
