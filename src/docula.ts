@@ -357,7 +357,9 @@ export default class Docula {
 			this._console.info(`File changed: ${filename}, rebuilding...`);
 			try {
 				await builder.build();
-				this._console.success("Rebuild complete");
+				this._console.success(
+					`Rebuild complete \uD83E\uDD87 at http://localhost:${options.port}`,
+				);
 			} catch (error) {
 				this._console.error(`Rebuild failed: ${(error as Error).message}`);
 			} finally {

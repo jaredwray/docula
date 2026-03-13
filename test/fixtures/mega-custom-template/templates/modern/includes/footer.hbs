@@ -1,0 +1,15 @@
+<footer class="custom-footer">
+  <p>Custom footer override for mega-custom-template</p>
+  {{#if enableLlmsTxt}}
+  <a href="/llms.txt" class="footer__link">llms.txt</a>
+  {{/if}}
+  {{#if hasFeed}}
+  <a href="/feed.xml" class="footer__link" aria-label="RSS Feed">RSS</a>
+  {{/if}}
+  <a href="https://docula.org/" target="_blank" rel="noopener noreferrer" class="footer__link" aria-label="Docula">
+    Powered by Docula
+  </a>
+  {{#if lastModified}}
+  <span class="footer__updated">updated: {{lastModified}}</span>
+  {{/if}}
+</footer>

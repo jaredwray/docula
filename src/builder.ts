@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Ecto } from "ecto";
+import { Hashery } from "hashery";
 import { Writr } from "writr";
 import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { DoculaConsole } from "./console.js";
@@ -100,6 +101,7 @@ export class DoculaBuilder {
 	private readonly _options: DoculaOptions = new DoculaOptions();
 	private readonly _ecto: Ecto;
 	private readonly _console: DoculaConsole = new DoculaConsole();
+	private readonly _hash = new Hashery();
 	public onReleaseChangelog?: (
 		entries: DoculaChangelogEntry[],
 		console: DoculaConsole,
@@ -1788,16 +1790,63 @@ export class DoculaBuilder {
 
 		const overrideFiles = this.listFilesRecursive(overrideDir);
 
-		// Check if we can reuse the existing cache by comparing modification times
-		if (
-			fs.existsSync(cacheDir) &&
-			this.isCacheFresh(overrideDir, cacheDir, overrideFiles)
-		) {
-			this._console.step("Using cached template overrides...");
-			return cacheDir;
+		// Check if we can reuse or incrementally update the existing cache
+		if (fs.existsSync(cacheDir)) {
+			const diff = this.getChangedOverrides(
+				overrideDir,
+				cacheDir,
+				overrideFiles,
+			);
+
+			if (diff) {
+				const hasChanges =
+					diff.added.length > 0 ||
+					diff.changed.length > 0 ||
+					diff.removed.length > 0;
+
+				if (!hasChanges) {
+					this._console.step("Using cached template overrides...");
+					return cacheDir;
+				}
+
+				// Apply incremental updates
+				this._console.step("Updating template overrides...");
+
+				for (const file of diff.added) {
+					this._console.info(`Template override added: ${file}`);
+					const targetPath = path.join(cacheDir, file);
+					fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+					fs.copyFileSync(path.join(overrideDir, file), targetPath);
+				}
+
+				for (const file of diff.changed) {
+					this._console.info(`Template override changed: ${file}`);
+					const targetPath = path.join(cacheDir, file);
+					fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+					fs.copyFileSync(path.join(overrideDir, file), targetPath);
+				}
+
+				for (const file of diff.removed) {
+					this._console.info(`Template override removed: ${file}`);
+					const cachedPath = path.join(cacheDir, file);
+					// Restore original template file if it exists
+					const originalPath = path.join(resolvedTemplatePath, file);
+					if (fs.existsSync(originalPath)) {
+						fs.copyFileSync(originalPath, cachedPath);
+					} else if (fs.existsSync(cachedPath)) {
+						fs.unlinkSync(cachedPath);
+					}
+				}
+
+				// Update manifest with current hashes
+				const manifestPath = path.join(cacheDir, ".manifest.json");
+				fs.writeFileSync(manifestPath, JSON.stringify(diff.currentHashes));
+
+				return cacheDir;
+			}
 		}
 
-		// Log overridden files
+		// Full rebuild: no cache or corrupt manifest
 		/* v8 ignore next 5 -- @preserve */
 		if (overrideFiles.length > 0) {
 			this._console.step("Applying template overrides...");
@@ -1822,9 +1871,14 @@ export class DoculaBuilder {
 		// Overlay user overrides on top
 		this.copyDirectory(overrideDir, cacheDir);
 
-		// Write manifest so isCacheFresh can detect deleted/renamed overrides
+		// Write manifest with content hashes
+		const currentHashes: Record<string, string> = {};
+		for (const file of overrideFiles) {
+			currentHashes[file] = this.hashFile(path.join(overrideDir, file));
+		}
+
 		const manifestPath = path.join(cacheDir, ".manifest.json");
-		fs.writeFileSync(manifestPath, JSON.stringify(overrideFiles));
+		fs.writeFileSync(manifestPath, JSON.stringify(currentHashes));
 
 		return cacheDir;
 	}
@@ -1855,50 +1909,64 @@ export class DoculaBuilder {
 		}
 	}
 
-	private isCacheFresh(
+	private getChangedOverrides(
 		overrideDir: string,
 		cacheDir: string,
 		overrideFiles: string[],
-	): boolean {
-		// Check manifest to detect deleted/renamed override files
+	):
+		| {
+				added: string[];
+				changed: string[];
+				removed: string[];
+				currentHashes: Record<string, string>;
+		  }
+		| undefined {
 		const manifestPath = path.join(cacheDir, ".manifest.json");
 		if (!fs.existsSync(manifestPath)) {
-			return false;
+			return undefined;
 		}
 
+		let previousHashes: Record<string, string>;
 		try {
-			const previousFiles = JSON.parse(
+			previousHashes = JSON.parse(
 				fs.readFileSync(manifestPath, "utf8"),
-			) as string[];
-			if (
-				previousFiles.length !== overrideFiles.length ||
-				!previousFiles.every((f, i) => f === overrideFiles[i])
-			) {
-				return false;
-			}
+			) as Record<string, string>;
 		} catch {
-			return false;
+			return undefined;
 		}
 
-		// Every override file must exist in cache and be older or equal in mtime
+		// Compute current hashes
+		const currentHashes: Record<string, string> = {};
 		for (const file of overrideFiles) {
-			const overridePath = path.join(overrideDir, file);
-			const cachedPath = path.join(cacheDir, file);
+			currentHashes[file] = this.hashFile(path.join(overrideDir, file));
+		}
 
-			/* v8 ignore next 3 -- @preserve */
-			if (!fs.existsSync(cachedPath)) {
-				return false;
-			}
+		const added: string[] = [];
+		const changed: string[] = [];
+		const removed: string[] = [];
 
-			const overrideMtime = fs.statSync(overridePath).mtimeMs;
-			const cachedMtime = fs.statSync(cachedPath).mtimeMs;
-
-			if (overrideMtime > cachedMtime) {
-				return false;
+		// Find added and changed files
+		for (const file of overrideFiles) {
+			if (!(file in previousHashes)) {
+				added.push(file);
+			} else if (currentHashes[file] !== previousHashes[file]) {
+				changed.push(file);
 			}
 		}
 
-		return true;
+		// Find removed files
+		for (const file of Object.keys(previousHashes)) {
+			if (!overrideFiles.includes(file)) {
+				removed.push(file);
+			}
+		}
+
+		return { added, changed, removed, currentHashes };
+	}
+
+	private hashFile(filePath: string): string {
+		const content = fs.readFileSync(filePath);
+		return this._hash.toHashSync(content);
 	}
 
 	private listFilesRecursive(dir: string, prefix = ""): string[] {
