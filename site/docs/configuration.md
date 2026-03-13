@@ -50,6 +50,47 @@ export const onPrepare = async (config: DoculaOptions): Promise<void> => {
 };
 ```
 
+## Manipulating Release Changelog Entries
+
+The `onReleaseChangelog` hook lets you modify, filter, or transform GitHub release entries before they are merged with file-based changelog entries and rendered. This is useful for cleaning up release notes, filtering out unwanted releases, or customizing tags.
+
+```typescript
+import type { DoculaChangelogEntry, DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  githubPath: 'your-username/your-repo',
+  enableReleaseChangelog: true,
+};
+
+export const onReleaseChangelog = (entries: DoculaChangelogEntry[]): DoculaChangelogEntry[] => {
+  return entries
+    // Filter out pre-releases
+    .filter(entry => entry.tag !== 'Pre-release')
+    // Customize titles
+    .map(entry => ({
+      ...entry,
+      title: entry.title.replace(/^v/, 'Version '),
+    }));
+};
+```
+
+Each `DoculaChangelogEntry` has these fields you can read or modify:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | `string` | Entry title (from release name or tag) |
+| `date` | `string` | Date string (YYYY-MM-DD) |
+| `formattedDate` | `string` | Localized display date |
+| `tag` | `string?` | Badge label (e.g., "Release", "Pre-release") |
+| `tagClass` | `string?` | CSS class derived from tag |
+| `slug` | `string` | URL-friendly identifier |
+| `content` | `string` | Raw markdown content |
+| `generatedHtml` | `string` | Rendered HTML |
+| `preview` | `string` | Truncated preview HTML for the changelog index |
+| `urlPath` | `string` | Output file path |
+
+The hook can be synchronous or async. If the hook throws an error, it is logged and the unmodified entries are used.
+
 ## Config File Priority
 
 When both config files exist, Docula loads them in this order (first found wins):
@@ -72,6 +113,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
+| `changelogPerPage` | `number` | `20` | Number of changelog entries to display per page |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
 | `cookieAuth` | `{ loginUrl: string; cookieName?: string; logoutUrl?: string }` | - | Cookie-based auth. Shows a Login/Logout button in the header based on a JWT cookie. See [Cookie Auth](/docs/cookie-auth). |

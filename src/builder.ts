@@ -96,6 +96,9 @@ export class DoculaBuilder {
 	private readonly _options: DoculaOptions = new DoculaOptions();
 	private readonly _ecto: Ecto;
 	private readonly _console: DoculaConsole = new DoculaConsole();
+	public onReleaseChangelog?: (
+		entries: DoculaChangelogEntry[],
+	) => Promise<DoculaChangelogEntry[]> | DoculaChangelogEntry[];
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	constructor(options?: DoculaOptions, engineOptions?: any) {
@@ -185,10 +188,21 @@ export class DoculaBuilder {
 			Array.isArray(doculaData.github.releases) &&
 			doculaData.github.releases.length > 0
 		) {
-			const releaseEntries = this.getReleasesAsChangelogEntries(
+			let releaseEntries = this.getReleasesAsChangelogEntries(
 				// biome-ignore lint/suspicious/noExplicitAny: GitHub release objects
 				doculaData.github.releases as any[],
 			);
+
+			if (this.onReleaseChangelog) {
+				try {
+					releaseEntries = await this.onReleaseChangelog(releaseEntries);
+				} catch (error) {
+					this._console.error(
+						`onReleaseChangelog error: ${(error as Error).message}`,
+					);
+				}
+			}
+
 			allChangelogEntries = [...allChangelogEntries, ...releaseEntries];
 		}
 

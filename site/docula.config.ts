@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import type {DoculaOptions} from 'docula';
+import type {DoculaOptions, DoculaChangelogEntry} from 'docula';
 
 export const options: Partial<DoculaOptions> = {
 	template: 'modern',
@@ -60,3 +60,8 @@ export const onPrepare = async (config: DoculaOptions) => {
 		),
 	]);
 };
+
+export const onReleaseChangelog = (entries: DoculaChangelogEntry[]): DoculaChangelogEntry[] => entries.map(entry => ({
+	...entry,
+	preview: entry.preview.replace(`<h2 id="whats-changed">What's Changed</h2>`, ''),
+}));

@@ -2925,6 +2925,114 @@ describe("DoculaBuilder", () => {
 				});
 			}
 		});
+
+		it("should call onReleaseChangelog hook to modify release entries", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-on-release-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			let hookCalled = false;
+			builder.onReleaseChangelog = (entries) => {
+				hookCalled = true;
+				// Modify titles and filter to only first 2 entries
+				return entries.slice(0, 2).map((entry) => ({
+					...entry,
+					title: `Modified: ${entry.title}`,
+				}));
+			};
+
+			try {
+				await builder.build();
+				expect(hookCalled).toBe(true);
+				const changelog = await fs.promises.readFile(
+					`${options.output}/changelog/index.html`,
+					"utf8",
+				);
+				expect(changelog).toContain("Modified:");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should call async onReleaseChangelog hook", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-on-release-changelog-async-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			builder.onReleaseChangelog = async (entries) =>
+				entries.filter((e) => e.tag === "Release");
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should handle onReleaseChangelog hook errors gracefully", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-on-release-changelog-error-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			builder.onReleaseChangelog = () => {
+				throw new Error("Hook failed");
+			};
+
+			try {
+				// Should not throw — error is caught and logged
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should work normally when onReleaseChangelog is not set", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-no-on-release-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
+				expect(
+					fs.existsSync(`${options.output}/changelog/v1-9-10/index.html`),
+				).toBe(true);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
 	});
 
 	describe("Docula Builder - HTML Entity Handling in Code Blocks", () => {
