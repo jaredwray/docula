@@ -86,7 +86,8 @@ Each `DoculaChangelogEntry` has these fields you can read or modify:
 | `slug` | `string` | URL-friendly identifier |
 | `content` | `string` | Raw markdown content |
 | `generatedHtml` | `string` | Rendered HTML |
-| `preview` | `string` | Truncated preview HTML for the changelog index |
+| `preview` | `string` | Auto-generated preview HTML for the changelog index (300-500 chars, paragraph-aware, headings and images stripped) |
+| `previewImage` | `string?` | Image URL displayed above the preview on the changelog listing page (set via front matter) |
 | `urlPath` | `string` | Output file path |
 
 The hook can be synchronous or async. If the hook throws an error, it is logged and the unmodified entries are used.

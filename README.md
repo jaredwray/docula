@@ -525,6 +525,7 @@ Each changelog entry is a markdown file with front matter:
 title: "Initial Release"
 date: 2025-01-15
 tag: "Release"
+previewImage: /logo.svg
 ---
 
 We're excited to announce the initial release! Here's what's included:
@@ -541,12 +542,13 @@ We're excited to announce the initial release! Here's what's included:
 | `title` | No | Display title for the entry. Defaults to the filename if not provided. |
 | `date` | Yes | Date of the entry (`YYYY-MM-DD`). Used for sorting (newest first). |
 | `tag` | No | A label displayed as a badge (e.g., `Release`, `Bug Fix`, `Feature`). Gets a CSS class based on its value for styling. |
+| `previewImage` | No | URL or path to an image displayed above the preview text on the changelog listing page. |
 
 ## File Naming
 
-Files can optionally be prefixed with a date in `YYYY-MM-DD-` format. The date prefix is stripped to create the URL slug:
+The filename (without extension) becomes the URL slug:
 
-- `2025-01-15-initial-release.md` → `/changelog/initial-release/`
+- `2025-01-15-initial-release.md` → `/changelog/2025-01-15-initial-release/`
 - `new-features.md` → `/changelog/new-features/`
 
 ## Generated Pages
@@ -592,7 +594,24 @@ Tags receive a CSS class based on their value (e.g., a tag of `"Bug Fix"` gets t
   background-color: #f8d7da;
   color: #721c24;
 }
+
+.changelog-entry-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
 ```
+
+## Preview
+
+Each changelog entry on the listing page includes an auto-generated preview of the content. The preview is built with these rules:
+
+- Targets **300–500 characters**, splitting at paragraph boundaries (`\n\n`) to avoid breaking markdown structure.
+- **Headings** (`#`, `##`, etc.) are stripped from the preview text.
+- **Images** in the content are removed; use the `previewImage` front matter field instead to display an image on the listing card.
+- **Links** are converted to plain text (the link text is kept, the URL is removed).
+- For **list-heavy content**, the preview splits at complete list item boundaries rather than mid-item.
+- An ellipsis (`...`) is only appended when no clean paragraph or list boundary can be found.
 
 # Alert, Info, Warn Styling
 

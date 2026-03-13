@@ -1201,8 +1201,7 @@ export class DoculaBuilder {
 		const markdownContent = writr.body;
 
 		const fileName = path.basename(filePath, path.extname(filePath));
-		// Remove leading date prefix pattern (YYYY-MM-DD-) if present
-		const slug = fileName.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+		const slug = fileName;
 
 		const isMdx = filePath.endsWith(".mdx");
 

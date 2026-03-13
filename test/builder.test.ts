@@ -2123,7 +2123,7 @@ describe("DoculaBuilder", () => {
 			expect(entries[0].title).toBe("Critical Bug Fix");
 			expect(entries[0].date).toBe("2025-02-01");
 			expect(entries[0].tag).toBe("Fixed");
-			expect(entries[0].slug).toBe("bug-fix");
+			expect(entries[0].slug).toBe("2025-02-01-bug-fix");
 			expect(entries[1].title).toBe("New Feature Released");
 			expect(entries[2].title).toBe("Performance Improvements");
 			// Invalid dates should be at the end
@@ -2164,7 +2164,7 @@ describe("DoculaBuilder", () => {
 				const entries = builder.getChangelogEntries(changelogPath);
 				expect(entries.length).toBe(1);
 				expect(entries[0].title).toBe("MDX Entry");
-				expect(entries[0].slug).toBe("mdx-entry");
+				expect(entries[0].slug).toBe("2026-03-02-mdx-entry");
 			} finally {
 				await fs.promises.rm(changelogPath, {
 					recursive: true,
@@ -2182,8 +2182,10 @@ describe("DoculaBuilder", () => {
 			expect(entry.date).toBe("2025-01-15");
 			expect(entry.tag).toBe("Added");
 			expect(entry.tagClass).toBe("added");
-			expect(entry.slug).toBe("new-feature");
-			expect(entry.urlPath).toBe("/changelog/new-feature/index.html");
+			expect(entry.slug).toBe("2025-01-15-new-feature");
+			expect(entry.urlPath).toBe(
+				"/changelog/2025-01-15-new-feature/index.html",
+			);
 			expect(entry.generatedHtml).toContain("Feature A");
 		});
 
@@ -2194,7 +2196,7 @@ describe("DoculaBuilder", () => {
 			);
 			expect(entry.title).toBe("String Date Entry");
 			expect(entry.date).toBe("Q1 2025");
-			expect(entry.slug).toBe("string-date");
+			expect(entry.slug).toBe("2024-11-01-string-date");
 		});
 
 		it("should fall back to filename title when changelog entry has no front matter", async () => {
@@ -2210,8 +2212,10 @@ describe("DoculaBuilder", () => {
 				expect(entry.title).toBe("2026-03-02-missing-fields");
 				expect(entry.date).toBe("");
 				expect(entry.formattedDate).toBe("");
-				expect(entry.slug).toBe("missing-fields");
-				expect(entry.urlPath).toBe("/changelog/missing-fields/index.html");
+				expect(entry.slug).toBe("2026-03-02-missing-fields");
+				expect(entry.urlPath).toBe(
+					"/changelog/2026-03-02-missing-fields/index.html",
+				);
 			} finally {
 				await fs.promises.rm(changelogPath, {
 					recursive: true,
@@ -2533,13 +2537,19 @@ describe("DoculaBuilder", () => {
 					true,
 				);
 				expect(
-					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature/index.html`,
+					),
 				).toBe(true);
 				expect(
-					fs.existsSync(`${options.output}/changelog/bug-fix/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-02-01-bug-fix/index.html`,
+					),
 				).toBe(true);
 				expect(
-					fs.existsSync(`${options.output}/changelog/improvements/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2024-12-20-improvements/index.html`,
+					),
 				).toBe(true);
 			} finally {
 				await fs.promises.rm(builder.options.output, {
@@ -2967,7 +2977,9 @@ describe("DoculaBuilder", () => {
 				);
 				// File-based entries should exist
 				expect(
-					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature/index.html`,
+					),
 				).toBe(true);
 				// Release-based entries should also exist (from mock data)
 				expect(
@@ -2995,7 +3007,9 @@ describe("DoculaBuilder", () => {
 				);
 				// File-based entries should still exist
 				expect(
-					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature/index.html`,
+					),
 				).toBe(true);
 				// Release-based entries should NOT exist
 				expect(
