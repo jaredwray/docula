@@ -146,7 +146,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cookieStatusEl) cookieStatusEl.classList.add('api-auth__cookie-status--hidden');
       }
     }
-    authTypeSelect.addEventListener('change', updateAuthUI);
+    var savedAuth = localStorage.getItem('docula-api-auth-type');
+    if (savedAuth) {
+      for (var i = 0; i < authTypeSelect.options.length; i++) {
+        if (authTypeSelect.options[i].value === savedAuth) {
+          authTypeSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    authTypeSelect.addEventListener('change', function() {
+      localStorage.setItem('docula-api-auth-type', authTypeSelect.value);
+      updateAuthUI();
+    });
     document.addEventListener('docula-auth-change', updateAuthUI);
     updateAuthUI();
   }
