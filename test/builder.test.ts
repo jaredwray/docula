@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -1397,6 +1398,16 @@ describe("DoculaBuilder", () => {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
+
+		it("should return false from recordsEqual when values differ for the same key", () => {
+			const builder = new DoculaBuilder();
+			const a: Record<string, string> = { foo: "abc", bar: "def" };
+			const b: Record<string, string> = { foo: "abc", bar: "xyz" };
+			expect(
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).recordsEqual(a, b),
+			).toBe(false);
+		});
 	});
 
 	describe("Docula Builder - Validate Options", () => {
@@ -2455,6 +2466,70 @@ describe("DoculaBuilder", () => {
 			} finally {
 				await fs.promises.rm(builder.options.output, { recursive: true });
 				console.log = consoleLog;
+			}
+		});
+
+		it("should skip copying unchanged public folder files when hashes match", () => {
+			const sitePath = "test/temp-public-diff-skip";
+			const publicPath = `${sitePath}/public`;
+			const outputPath = `${sitePath}/output`;
+
+			try {
+				const builder = new DoculaBuilder();
+
+				// Create a public folder with a file
+				fs.mkdirSync(publicPath, { recursive: true });
+				fs.writeFileSync(`${publicPath}/hello.txt`, "hello world");
+
+				// First copy — populates currentAssets and copies the file
+				const currentAssets: Record<string, string> = {};
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).copyPublicDirectory(
+					publicPath,
+					outputPath,
+					publicPath,
+					path.resolve(outputPath),
+					{},
+					currentAssets,
+				);
+				expect(fs.existsSync(`${outputPath}/hello.txt`)).toBe(true);
+				expect(currentAssets["public/hello.txt"]).toBeDefined();
+
+				// Capture console messages for second copy
+				const consoleLog = console.log;
+				const consoleMessages: string[] = [];
+				console.log = (message) => {
+					consoleMessages.push(message as string);
+				};
+
+				try {
+					// Second copy with same hashes as previousAssets — should skip
+					const secondAssets: Record<string, string> = {};
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).copyPublicDirectory(
+						publicPath,
+						outputPath,
+						publicPath,
+						path.resolve(outputPath),
+						currentAssets,
+						secondAssets,
+					);
+
+					// Hash should still be recorded
+					expect(secondAssets["public/hello.txt"]).toBe(
+						currentAssets["public/hello.txt"],
+					);
+
+					// File should NOT have been logged as copied
+					const copyMessages = consoleMessages.filter((msg) =>
+						stripAnsi(msg).includes("hello.txt"),
+					);
+					expect(copyMessages.length).toBe(0);
+				} finally {
+					console.log = consoleLog;
+				}
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
