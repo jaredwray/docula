@@ -102,6 +102,7 @@ export class DoculaBuilder {
 	private readonly _console: DoculaConsole = new DoculaConsole();
 	public onReleaseChangelog?: (
 		entries: DoculaChangelogEntry[],
+		console: DoculaConsole,
 	) => Promise<DoculaChangelogEntry[]> | DoculaChangelogEntry[];
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
@@ -199,7 +200,10 @@ export class DoculaBuilder {
 
 			if (this.onReleaseChangelog) {
 				try {
-					releaseEntries = await this.onReleaseChangelog(releaseEntries);
+					releaseEntries = await this.onReleaseChangelog(
+						releaseEntries,
+						this._console,
+					);
 				} catch (error) {
 					this._console.error(
 						`onReleaseChangelog error: ${(error as Error).message}`,

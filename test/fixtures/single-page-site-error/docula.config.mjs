@@ -8,6 +8,6 @@ export const options = {
 	siteUrl: "https://docula.org",
 };
 
-export const onPrepare = async (options) => {
+export const onPrepare = async (options, console) => {
 	throw new Error(`onPrepare${JSON.stringify(options)}`);
 };

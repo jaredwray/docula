@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DoculaConsole } from "../src/console.js";
 import Docula from "../src/docula.js";
 import { DoculaOptions } from "../src/options.js";
 
@@ -525,8 +526,10 @@ describe("docula execute", () => {
 
 		const consoleLog = console.log;
 		let consoleMessage = "";
-		console.info = (message) => {
-			consoleMessage = message as string;
+		console.log = (message) => {
+			if (typeof message === "string") {
+				consoleMessage += message;
+			}
 		};
 
 		const docula = new Docula(buildOptions);
@@ -537,7 +540,7 @@ describe("docula execute", () => {
 		expect(consoleMessage).toContain("onPrepare");
 
 		await fs.promises.rm(buildOptions.output, { recursive: true });
-		console.info = consoleLog;
+		console.log = consoleLog;
 	});
 });
 
@@ -973,15 +976,16 @@ describe("docula config file", () => {
 		expect(docula.configFileModule).toBeDefined();
 		expect(docula.configFileModule.options).toBeDefined();
 		expect(docula.configFileModule.onPrepare).toBeDefined();
+		const doculaConsole = new DoculaConsole();
 		const consoleLog = console.log;
 		let consoleMessage = "";
-		console.info = (message) => {
-			if (typeof message === "string") {
-				consoleMessage = message;
-			}
+		const originalInfo = doculaConsole.info.bind(doculaConsole);
+		doculaConsole.info = (message: string) => {
+			consoleMessage = message;
+			originalInfo(message);
 		};
 
-		await docula.configFileModule.onPrepare();
+		await docula.configFileModule.onPrepare(docula.options, doculaConsole);
 		expect(consoleMessage).toContain("onPrepare");
 		console.info = consoleLog;
 	});
@@ -992,15 +996,16 @@ describe("docula config file", () => {
 		expect(docula.configFileModule).toBeDefined();
 		expect(docula.configFileModule.options).toBeDefined();
 		expect(docula.configFileModule.onPrepare).toBeDefined();
+		const doculaConsole = new DoculaConsole();
 		const consoleLog = console.log;
 		let consoleMessage = "";
-		console.info = (message) => {
-			if (typeof message === "string") {
-				consoleMessage = message;
-			}
+		const originalInfo = doculaConsole.info.bind(doculaConsole);
+		doculaConsole.info = (message: string) => {
+			consoleMessage = message;
+			originalInfo(message);
 		};
 
-		await docula.configFileModule.onPrepare();
+		await docula.configFileModule.onPrepare(docula.options, doculaConsole);
 		expect(consoleMessage).toContain("onPrepare TypeScript");
 		console.info = consoleLog;
 	});

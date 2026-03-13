@@ -37,16 +37,16 @@ export const options: Partial<DoculaOptions> = {
 You can add typed lifecycle hooks to your config:
 
 ```typescript
-import type { DoculaOptions } from 'docula';
+import type { DoculaConsole, DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   siteTitle: 'My Project',
   // ... other options
 };
 
-export const onPrepare = async (config: DoculaOptions): Promise<void> => {
+export const onPrepare = async (config: DoculaOptions, console: DoculaConsole): Promise<void> => {
   // Runs before the build process
-  console.log(`Building ${config.siteTitle}...`);
+  console.info(`Building ${config.siteTitle}...`);
 };
 ```
 
@@ -55,14 +55,15 @@ export const onPrepare = async (config: DoculaOptions): Promise<void> => {
 The `onReleaseChangelog` hook lets you modify, filter, or transform GitHub release entries before they are merged with file-based changelog entries and rendered. This is useful for cleaning up release notes, filtering out unwanted releases, or customizing tags.
 
 ```typescript
-import type { DoculaChangelogEntry, DoculaOptions } from 'docula';
+import type { DoculaChangelogEntry, DoculaConsole, DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   githubPath: 'your-username/your-repo',
   enableReleaseChangelog: true,
 };
 
-export const onReleaseChangelog = (entries: DoculaChangelogEntry[]): DoculaChangelogEntry[] => {
+export const onReleaseChangelog = (entries: DoculaChangelogEntry[], console: DoculaConsole): DoculaChangelogEntry[] => {
+  console.info(`Processing ${entries.length} release entries...`);
   return entries
     // Filter out pre-releases
     .filter(entry => entry.tag !== 'Pre-release')
@@ -91,6 +92,19 @@ Each `DoculaChangelogEntry` has these fields you can read or modify:
 | `urlPath` | `string` | Output file path |
 
 The hook can be synchronous or async. If the hook throws an error, it is logged and the unmodified entries are used.
+
+## DoculaConsole Logger
+
+Both `onPrepare` and `onReleaseChangelog` hooks receive a `DoculaConsole` instance as their second argument. This provides styled, consistent logging output:
+
+| Method | Description |
+|--------|-------------|
+| `console.log(message)` | Plain text output |
+| `console.info(message)` | Informational message with cyan prefix |
+| `console.warn(message)` | Warning message with yellow prefix |
+| `console.error(message)` | Error message with red prefix |
+| `console.success(message)` | Success message with green prefix |
+| `console.step(message)` | Step/progress message with blue prefix |
 
 ## Config File Priority
 
