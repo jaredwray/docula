@@ -4334,7 +4334,7 @@ describe("DoculaBuilder", () => {
 				);
 				const logoutMatch = docsHtml.match(/id="cookie-auth-logout"[^>]*/);
 				expect(logoutMatch).toBeTruthy();
-				expect(logoutMatch![0]).not.toContain('style="display:none"');
+				expect(logoutMatch?.[0]).not.toContain('style="display:none"');
 			} finally {
 				await fs.promises.rm(options.output, {
 					recursive: true,
