@@ -723,6 +723,14 @@ body {
   cursor: pointer;
 }
 
+.changelog-entry-single .changelog-entry-title::after {
+  display: none;
+}
+
+.changelog-entry-single:hover {
+  cursor: default;
+}
+
 .changelog-entry-preview {
   margin-top: 12px;
   font-size: 15px;
@@ -735,11 +743,11 @@ body {
   display: inline-block;
   margin-top: 8px;
   font-size: 14px;
-  color: var(--link);
+  color: var(--muted);
 }
 
 .changelog-entry:hover .changelog-read-more {
-  text-decoration: underline;
+  color: var(--fg);
 }
 
 .changelog-pagination {
@@ -754,12 +762,12 @@ body {
 
 .changelog-pagination-link {
   font-size: 14px;
-  color: var(--link);
+  color: var(--muted);
   text-decoration: none;
 }
 
 .changelog-pagination-link:hover {
-  text-decoration: underline;
+  color: var(--fg);
 }
 
 .changelog-pagination-disabled {
