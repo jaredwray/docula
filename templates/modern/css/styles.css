@@ -731,6 +731,16 @@ body {
   cursor: default;
 }
 
+.changelog-entry-image {
+  margin-top: 12px;
+}
+
+.changelog-entry-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
 .changelog-entry-preview {
   margin-top: 12px;
   font-size: 15px;

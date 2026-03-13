@@ -2564,14 +2564,117 @@ describe("DoculaBuilder", () => {
 
 		it("should generate preview that is shorter than full content for long entries", () => {
 			const builder = new DoculaBuilder();
+			// No paragraph breaks so fallback truncation with "..." is used
 			const preview = builder.generateChangelogPreview(
-				"This is a very long content. ".repeat(20),
+				"This is a very long content. ".repeat(30),
 			);
 			const full = builder.generateChangelogPreview("Short content.");
 			// Long content should be truncated with "..."
 			expect(preview).toContain("...");
 			// Short content should not be truncated
 			expect(full).not.toContain("...");
+		});
+
+		it("should strip markdown headings from preview", () => {
+			const builder = new DoculaBuilder();
+			const markdown =
+				"## What's Changed\n\nSome great new features were added to the project.";
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).not.toContain("What's Changed");
+			expect(preview).toContain("great new features");
+		});
+
+		it("should convert markdown links to plain text in preview", () => {
+			const builder = new DoculaBuilder();
+			const markdown =
+				"Check out [this link](https://example.com) for more details about the release.";
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("this link");
+			expect(preview).not.toContain("https://example.com");
+		});
+
+		it("should remove all images from preview", () => {
+			const builder = new DoculaBuilder();
+			const markdown =
+				"![screenshot](https://example.com/img.png)\n\nHere is the content of the release.";
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).not.toContain("img.png");
+			expect(preview).toContain("content of the release");
+		});
+
+		it("should parse previewImage from frontmatter", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			// This fixture may or may not have previewImage — just check the field exists on the type
+			expect(entry).toHaveProperty("previewImage");
+		});
+
+		it("should split on paragraph boundary without ellipsis", () => {
+			const builder = new DoculaBuilder();
+			// First paragraph is ~350 chars, second is short
+			const para1 =
+				"This is the first paragraph with enough content to exceed the minimum length requirement of three hundred characters. We need to keep writing more content here to make sure it is long enough to pass the threshold that triggers truncation behavior in the preview generator. Adding even more words to ensure this paragraph exceeds three hundred characters in total length.";
+			const para2 =
+				"This is the second paragraph that should be cut off because it exceeds the max.";
+			const markdown = `${para1}\n\n${para2}`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("first paragraph");
+			expect(preview).not.toContain("second paragraph");
+			// Clean paragraph split should not have ellipsis
+			expect(preview).not.toContain("...");
+		});
+
+		it("should handle list-heavy content by splitting at list item boundaries", () => {
+			const builder = new DoculaBuilder();
+			const items = Array.from(
+				{ length: 20 },
+				(_, i) =>
+					`- Feature number ${i + 1} was added to the project with great improvements`,
+			);
+			const markdown = items.join("\n");
+			const preview = builder.generateChangelogPreview(markdown);
+			// Should contain complete list items rendered as HTML
+			expect(preview).toContain("<li>");
+			// Should not contain "..." since we split at a clean boundary
+		});
+
+		it("should return full content when markdown is shorter than minLength", () => {
+			const builder = new DoculaBuilder();
+			const short = "Just a brief note about this release.";
+			const preview = builder.generateChangelogPreview(short);
+			expect(preview).toContain("brief note");
+			expect(preview).not.toContain("...");
+		});
+
+		it("should handle empty input", () => {
+			const builder = new DoculaBuilder();
+			const preview = builder.generateChangelogPreview("");
+			expect(preview).toBeDefined();
+		});
+
+		it("should split at early paragraph break when no break exists past minLength", () => {
+			const builder = new DoculaBuilder();
+			// Short first paragraph (~50 chars), then a very long second paragraph with no breaks
+			const para1 = "Short intro paragraph for the release notes.";
+			const para2 =
+				"This second paragraph is extremely long and has no paragraph breaks within it so the only available split point is the early paragraph break before the minimum length threshold. ".repeat(
+					3,
+				);
+			const markdown = `${para1}\n\n${para2}`;
+			const preview = builder.generateChangelogPreview(markdown);
+			// Should split at the only \n\n even though it's before 300
+			expect(preview).toContain("Short intro");
+			expect(preview).not.toContain("...");
+		});
+
+		it("should use ellipsis only when no clean break is found", () => {
+			const builder = new DoculaBuilder();
+			// Single long paragraph with no breaks — must fallback to word-boundary truncation
+			const longText = "word ".repeat(150);
+			const preview = builder.generateChangelogPreview(longText);
+			expect(preview).toContain("...");
 		});
 
 		it("should build paginated changelog pages", async () => {

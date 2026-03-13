@@ -378,6 +378,16 @@ h1.changelog-entry-title {
   cursor: pointer;
 }
 
+.changelog-entry-image {
+  margin-top: 0.75rem;
+}
+
+.changelog-entry-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
 .changelog-entry-preview {
   margin-top: 0.75rem;
   font-size: 0.9375rem;

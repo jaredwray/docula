@@ -22,6 +22,11 @@
             {{/if}}
           </div>
           <span class="changelog-entry-date">{{entry.formattedDate}}</span>
+          {{#if entry.previewImage}}
+          <div class="changelog-entry-image">
+            <img src="{{entry.previewImage}}" alt="{{entry.title}}" />
+          </div>
+          {{/if}}
           <div class="changelog-entry-preview">
             {{{entry.preview}}}
           </div>

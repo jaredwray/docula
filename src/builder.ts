@@ -23,6 +23,7 @@ export type DoculaChangelogEntry = {
 	content: string;
 	generatedHtml: string;
 	preview: string;
+	previewImage?: string;
 	urlPath: string;
 };
 
@@ -1227,6 +1228,8 @@ export class DoculaBuilder {
 			});
 		}
 
+		const previewImage = matterData.previewImage as string | undefined;
+
 		return {
 			title: matterData.title ?? fileName,
 			date: dateString,
@@ -1236,22 +1239,104 @@ export class DoculaBuilder {
 			slug,
 			content: markdownContent,
 			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
-			preview: this.generateChangelogPreview(markdownContent, 200, isMdx),
+			preview: this.generateChangelogPreview(markdownContent, 500, isMdx),
+			previewImage,
 			urlPath: `/changelog/${slug}/index.html`,
 		};
 	}
 
 	public generateChangelogPreview(
 		markdown: string,
-		maxLength = 200,
+		maxLength = 500,
 		mdx = false,
 	): string {
-		if (markdown.length <= maxLength) {
-			return new Writr(markdown).renderSync({ mdx });
+		const minLength = 300;
+
+		// Step 1: Strip markdown headings
+		let cleaned = markdown
+			.split("\n")
+			.filter((line) => !/^#{1,6}\s/.test(line))
+			.join("\n");
+
+		// Step 2: Strip leading blank lines
+		cleaned = cleaned.replace(/^\n+/, "");
+
+		// Step 3: Clean up link syntax — remove images, convert links to text
+		cleaned = cleaned.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+		cleaned = cleaned.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+
+		// Strip leading blank lines after image removal
+		cleaned = cleaned.replace(/^\n+/, "").trim();
+
+		if (cleaned.length <= minLength) {
+			return new Writr(cleaned).renderSync({ mdx });
 		}
 
-		// Truncate at word boundary
-		let truncated = markdown.slice(0, maxLength);
+		// Step 4: Split on paragraph boundaries within the target range
+		const searchArea = cleaned.slice(0, maxLength);
+		let splitIndex = -1;
+
+		// Look for last paragraph break (\n\n) that is >= minLength
+		let pos = searchArea.lastIndexOf("\n\n");
+		while (pos >= 0) {
+			if (pos >= minLength) {
+				splitIndex = pos;
+				break;
+			}
+
+			// Accept any paragraph break within the max range
+			if (splitIndex === -1) {
+				splitIndex = pos;
+			}
+
+			pos = searchArea.lastIndexOf("\n\n", pos - 1);
+		}
+
+		// For list-heavy content, try splitting at last complete list item
+		if (splitIndex === -1) {
+			const lastNewline = searchArea.lastIndexOf("\n");
+			if (lastNewline >= minLength) {
+				// Check if the next line starts a list item
+				const nextLine = cleaned.slice(lastNewline + 1);
+				if (/^[-*]\s/.test(nextLine) || /^\d+\.\s/.test(nextLine)) {
+					splitIndex = lastNewline;
+				}
+			}
+
+			// Also try finding the last list item boundary before maxLength
+			if (splitIndex === -1) {
+				const lines = searchArea.split("\n");
+				let charCount = 0;
+				let lastItemEnd = -1;
+				for (const line of lines) {
+					const lineEnd = charCount + line.length;
+					if (
+						lineEnd <= maxLength &&
+						(/^[-*]\s/.test(line) || /^\d+\.\s/.test(line))
+					) {
+						// The end of the previous line is a valid split point
+						if (charCount > 0 && charCount >= minLength) {
+							lastItemEnd = charCount - 1;
+						}
+					}
+
+					charCount = lineEnd + 1; // +1 for newline
+				}
+
+				if (lastItemEnd > 0) {
+					splitIndex = lastItemEnd;
+				}
+			}
+		}
+
+		// Step 5: Truncate and apply ellipsis only when force-truncated
+		if (splitIndex > 0) {
+			const truncated = cleaned.slice(0, splitIndex).trim();
+			return new Writr(truncated).renderSync({ mdx });
+		}
+
+		// Fallback: truncate at word boundary with ellipsis
+		let truncated = cleaned.slice(0, maxLength);
 		const lastSpace = truncated.lastIndexOf(" ");
 		if (lastSpace > 0) {
 			truncated = truncated.slice(0, lastSpace);

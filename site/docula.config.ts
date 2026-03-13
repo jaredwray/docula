@@ -60,8 +60,3 @@ export const onPrepare = async (config: DoculaOptions) => {
 		),
 	]);
 };
-
-export const onReleaseChangelog = (entries: DoculaChangelogEntry[]): DoculaChangelogEntry[] => entries.map(entry => ({
-	...entry,
-	preview: entry.preview.replace(`<h2 id="whats-changed">What's Changed</h2>`, ''),
-}));
