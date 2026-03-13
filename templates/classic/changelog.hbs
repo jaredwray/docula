@@ -78,7 +78,7 @@
         <span class="changelog-read-more">Read more &rarr;</span>
       </div>
       {{/each}}
-      {{#if hasNextPage}}
+      {{#if hasPagination}}
       <nav class="changelog-pagination">
         {{#if hasPrevPage}}
         <a class="changelog-pagination-link" href="{{prevPageUrl}}">&larr; Newer</a>
@@ -86,16 +86,12 @@
         <span class="changelog-pagination-link changelog-pagination-disabled">&larr; Newer</span>
         {{/if}}
         <span class="changelog-pagination-info">Page {{currentPage}} of {{totalPages}}</span>
+        {{#if hasNextPage}}
         <a class="changelog-pagination-link" href="{{nextPageUrl}}">Older &rarr;</a>
-      </nav>
-      {{else}}
-      {{#if hasPrevPage}}
-      <nav class="changelog-pagination">
-        <a class="changelog-pagination-link" href="{{prevPageUrl}}">&larr; Newer</a>
-        <span class="changelog-pagination-info">Page {{currentPage}} of {{totalPages}}</span>
+        {{else}}
         <span class="changelog-pagination-link changelog-pagination-disabled">Older &rarr;</span>
+        {{/if}}
       </nav>
-      {{/if}}
       {{/if}}
       {{/if}}
     </div>
