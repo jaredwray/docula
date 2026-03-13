@@ -789,6 +789,138 @@ describe("DoculaBuilder", () => {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
+
+		it("should add new override files to an existing cache", () => {
+			const sitePath = "test/fixtures/single-page-site";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+			const cacheDir = `${sitePath}/.cache`;
+			const cachePath = `${sitePath}/.cache/templates/modern`;
+
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(
+				`${overrideDir}/footer.hbs`,
+				"<footer>Original</footer>",
+			);
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// First merge — builds cache with one override file
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// Add a new override file
+				fs.writeFileSync(
+					`${overrideDir}/sidebar.hbs`,
+					"<aside>Custom sidebar</aside>",
+				);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second merge — should detect the added file
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) => m.includes("Updating template overrides")),
+				).toBe(true);
+				expect(
+					messages.some((m) =>
+						m.includes("Template override added: includes/sidebar.hbs"),
+					),
+				).toBe(true);
+
+				// Verify the new file was copied into the cache
+				const cachedSidebar = fs.readFileSync(
+					`${cachePath}/includes/sidebar.hbs`,
+					"utf8",
+				);
+				expect(cachedSidebar).toBe("<aside>Custom sidebar</aside>");
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
+				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
+		});
+
+		it("should delete cached file when removed override has no original template", () => {
+			const sitePath = "test/fixtures/single-page-site";
+			const overrideDir = `${sitePath}/templates/modern`;
+			const cacheDir = `${sitePath}/.cache`;
+			const cachePath = `${sitePath}/.cache/templates/modern`;
+
+			// Create an override file that does NOT exist in the original template
+			fs.mkdirSync(`${overrideDir}/includes`, { recursive: true });
+			fs.writeFileSync(`${overrideDir}/custom-widget.hbs`, "<div>Widget</div>");
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// First merge — builds cache with the custom override
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				// Verify the file exists in cache
+				expect(fs.existsSync(`${cachePath}/custom-widget.hbs`)).toBe(true);
+
+				// Delete the override file
+				fs.unlinkSync(`${overrideDir}/custom-widget.hbs`);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second merge — should detect removal and delete from cache
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"templates/modern",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) => m.includes("Updating template overrides")),
+				).toBe(true);
+				expect(
+					messages.some((m) =>
+						m.includes("Template override removed: custom-widget.hbs"),
+					),
+				).toBe(true);
+
+				// The file should be gone from the cache since it has no original
+				expect(fs.existsSync(`${cachePath}/custom-widget.hbs`)).toBe(false);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
+				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
+		});
 	});
 
 	describe("Docula Builder - Validate Options", () => {
