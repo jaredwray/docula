@@ -13,5 +13,9 @@
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
       : mode;
     if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    try {
+      var a = JSON.parse(localStorage.getItem('docula-auth-state'));
+      if (a && a.loggedIn) document.documentElement.classList.add('docula-auth-logged-in');
+    } catch(e) {}
   })();
 </script>

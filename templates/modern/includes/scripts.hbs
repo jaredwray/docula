@@ -150,6 +150,7 @@
       });
     }
     document.addEventListener('DOMContentLoaded', function() {
+      if (cachedAuth) setAuthUI(cachedAuth.loggedIn, cachedAuth.displayName);
       checkAuth();
       var logoutEls = [
         document.getElementById('cookie-auth-logout'),

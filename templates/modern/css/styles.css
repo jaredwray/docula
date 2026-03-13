@@ -116,6 +116,11 @@ body {
   gap: 8px;
 }
 
+.docula-auth-logged-in #cookie-auth-login,
+.docula-auth-logged-in #cookie-auth-login-mobile { display: none; }
+.docula-auth-logged-in #cookie-auth-logout,
+.docula-auth-logged-in #cookie-auth-logout-mobile { display: flex; }
+
 .cookie-auth-btn {
   border: 1px solid var(--border);
   border-radius: 4px;

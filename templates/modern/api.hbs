@@ -68,6 +68,13 @@
               <option value="{{this.key}}" data-scheme-type="{{this.type}}" data-scheme-scheme="{{this.scheme}}" data-scheme-name="{{this.name}}" data-scheme-in="{{this.in}}">{{this.description}}</option>
               {{/each}}
             </select>
+            <script>
+              (function(){
+                var s = document.getElementById('api-auth-type');
+                var v = localStorage.getItem('docula-api-auth-type');
+                if (s && v) { for (var i = 0; i < s.options.length; i++) { if (s.options[i].value === v) { s.selectedIndex = i; break; } } }
+              })();
+            </script>
             <input type="password" class="api-auth__value api-auth__value--hidden" id="api-auth-value" placeholder="Enter value..." />
             <span class="api-auth__cookie-status api-auth__cookie-status--hidden" id="api-auth-cookie-status"></span>
           </div>
