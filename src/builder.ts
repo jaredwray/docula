@@ -1333,8 +1333,7 @@ export class DoculaBuilder {
 				totalPages,
 				hasNextPage: page < totalPages,
 				hasPrevPage: page > 1,
-				nextPageUrl:
-					page < totalPages ? `/changelog/page/${page + 1}/` : "",
+				nextPageUrl: page < totalPages ? `/changelog/page/${page + 1}/` : "",
 				prevPageUrl:
 					page > 1
 						? page === 2

@@ -16,6 +16,7 @@ describe("DoculaOptions", () => {
 			);
 			expect(options.siteUrl).toEqual("https://docula.org");
 			expect(options.enableReleaseChangelog).toEqual(true);
+			expect(options.changelogPerPage).toEqual(20);
 			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
@@ -139,6 +140,23 @@ describe("DoculaOptions", () => {
 		it("should not update enableReleaseChangelog for non-boolean values", () => {
 			options.parseOptions({ enableReleaseChangelog: "yes" });
 			expect(options.enableReleaseChangelog).toEqual(true);
+		});
+
+		it("should parse changelogPerPage", () => {
+			options.parseOptions({ changelogPerPage: 10 });
+			expect(options.changelogPerPage).toEqual(10);
+		});
+
+		it("should not update changelogPerPage for non-number values", () => {
+			options.parseOptions({ changelogPerPage: "ten" });
+			expect(options.changelogPerPage).toEqual(20);
+		});
+
+		it("should not update changelogPerPage for zero or negative values", () => {
+			options.parseOptions({ changelogPerPage: 0 });
+			expect(options.changelogPerPage).toEqual(20);
+			options.parseOptions({ changelogPerPage: -5 });
+			expect(options.changelogPerPage).toEqual(20);
 		});
 
 		it("should parse homePage set to false", () => {

@@ -1205,6 +1205,7 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "",
 						generatedHtml: "",
+						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
 					},
 				],
@@ -2239,6 +2240,7 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "Test content",
 						generatedHtml: "<p>Test content</p>",
+						preview: "<p>Test content</p>",
 						urlPath: "/changelog/test-entry/index.html",
 					},
 				],
@@ -2290,6 +2292,7 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "Test content",
 						generatedHtml: "<p>Test content</p>",
+						preview: "<p>Test content</p>",
 						urlPath: "/changelog/test-entry/index.html",
 					},
 				],
@@ -2392,6 +2395,7 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "",
 						generatedHtml: "",
+						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
 					},
 				],
@@ -2546,6 +2550,167 @@ describe("DoculaBuilder", () => {
 			expect(consoleMessage).toContain("Build");
 
 			console.log = consoleLog;
+		});
+
+		it("should generate preview from markdown content", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.preview).toBeTruthy();
+			expect(entry.preview).toContain("<");
+			// Preview should be rendered HTML from truncated markdown
+		});
+
+		it("should generate preview that is shorter than full content for long entries", () => {
+			const builder = new DoculaBuilder();
+			const preview = builder.generateChangelogPreview(
+				"This is a very long content. ".repeat(20),
+			);
+			const full = builder.generateChangelogPreview("Short content.");
+			// Long content should be truncated with "..."
+			expect(preview).toContain("...");
+			// Short content should not be truncated
+			expect(full).not.toContain("...");
+		});
+
+		it("should build paginated changelog pages", async () => {
+			const options = new DoculaOptions();
+			options.changelogPerPage = 2;
+			options.output = "test/temp-changelog-pagination-test";
+			const builder = new DoculaBuilder(options);
+
+			const entries = [];
+			for (let i = 0; i < 5; i++) {
+				entries.push({
+					title: `Entry ${i}`,
+					date: `2025-01-${String(15 - i).padStart(2, "0")}`,
+					formattedDate: `January ${15 - i}, 2025`,
+					tag: "Added",
+					tagClass: "added",
+					slug: `entry-${i}`,
+					content: `Content ${i}`,
+					generatedHtml: `<p>Content ${i}</p>`,
+					preview: `<p>Content ${i}</p>`,
+					urlPath: `/changelog/entry-${i}/index.html`,
+				});
+			}
+
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: options.output,
+				hasChangelog: true,
+				changelogEntries: entries,
+				templates: {
+					home: "home.hbs",
+					changelog: "changelog.hbs",
+					changelogEntry: "changelog-entry.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildChangelogPage(data);
+				// Page 1 at /changelog/index.html
+				expect(fs.existsSync(`${data.output}/changelog/index.html`)).toBe(true);
+				// Page 2 at /changelog/page/2/index.html
+				expect(
+					fs.existsSync(`${data.output}/changelog/page/2/index.html`),
+				).toBe(true);
+				// Page 3 at /changelog/page/3/index.html
+				expect(
+					fs.existsSync(`${data.output}/changelog/page/3/index.html`),
+				).toBe(true);
+				// No page 4
+				expect(
+					fs.existsSync(`${data.output}/changelog/page/4/index.html`),
+				).toBe(false);
+
+				const page1 = await fs.promises.readFile(
+					`${data.output}/changelog/index.html`,
+					"utf8",
+				);
+				expect(page1).toContain("Entry 0");
+				expect(page1).toContain("Entry 1");
+				expect(page1).not.toContain("Entry 2");
+
+				const page2 = await fs.promises.readFile(
+					`${data.output}/changelog/page/2/index.html`,
+					"utf8",
+				);
+				expect(page2).toContain("Entry 2");
+				expect(page2).toContain("Entry 3");
+				expect(page2).not.toContain("Entry 4");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
+		});
+
+		it("should include paginated changelog pages in sitemap", async () => {
+			const options = new DoculaOptions();
+			options.changelogPerPage = 2;
+			options.output = "test/temp-sitemap-pagination-test";
+			const builder = new DoculaBuilder(options);
+
+			const entries = [];
+			for (let i = 0; i < 5; i++) {
+				entries.push({
+					title: `Entry ${i}`,
+					date: `2025-01-${String(15 - i).padStart(2, "0")}`,
+					formattedDate: `January ${15 - i}, 2025`,
+					slug: `entry-${i}`,
+					content: "",
+					generatedHtml: "",
+					preview: "",
+					urlPath: `/changelog/entry-${i}/index.html`,
+				});
+			}
+
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: options.output,
+				hasChangelog: true,
+				changelogEntries: entries,
+				templates: {
+					home: "home.hbs",
+					changelog: "changelog.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.output}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/changelog</loc>");
+				expect(sitemap).toContain("<loc>http://foo.com/changelog/page/2</loc>");
+				expect(sitemap).toContain("<loc>http://foo.com/changelog/page/3</loc>");
+				expect(sitemap).not.toContain(
+					"<loc>http://foo.com/changelog/page/4</loc>",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
 		});
 	});
 
@@ -2845,6 +3010,7 @@ describe("DoculaBuilder", () => {
 						content:
 							"```ts\nfunction identity<T>(arg: T): T { return arg; }\n```",
 						generatedHtml,
+						preview: "<p>Code example</p>",
 						urlPath: "/changelog/generics-support/index.html",
 					},
 				],
@@ -3672,6 +3838,7 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "",
 						generatedHtml: "",
+						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
 					},
 				],
