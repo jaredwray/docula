@@ -168,10 +168,15 @@ export default class Docula {
 
 		switch (consoleProcess.command) {
 			case "init": {
-				this.generateInit(
-					this.options.sitePath,
-					consoleProcess.args.typescript,
-				);
+				let useTypeScript = consoleProcess.args.typescript;
+				if (
+					!consoleProcess.args.typescript &&
+					!consoleProcess.args.javascript
+				) {
+					useTypeScript = this.detectTypeScript();
+				}
+
+				this.generateInit(this.options.sitePath, useTypeScript);
 				break;
 			}
 
@@ -236,6 +241,14 @@ export default class Docula {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Detect if the current project uses TypeScript by checking for tsconfig.json
+	 * @returns {boolean}
+	 */
+	public detectTypeScript(): boolean {
+		return fs.existsSync(path.join(process.cwd(), "tsconfig.json"));
 	}
 
 	/**

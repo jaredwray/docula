@@ -25,21 +25,27 @@ Scaffolds a new Docula project in the current directory. Creates a `site/` folde
 npx docula init
 ```
 
+By default, docula auto-detects whether your project uses TypeScript by checking for a `tsconfig.json` in the current directory. If found, it generates `docula.config.ts`; otherwise, it generates `docula.config.mjs`. You can override this with the `--typescript` or `--javascript` flags.
+
 ### Flags
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--typescript` | Generate a TypeScript config file (`docula.config.ts`) instead of JavaScript | `false` |
+| `--typescript` | Force a TypeScript config file (`docula.config.ts`) | auto-detect |
+| `--javascript` | Force a JavaScript config file (`docula.config.mjs`) | auto-detect |
 | `-s, --site <path>` | Set the path where site files will be created | `./site` |
 
 ### Examples
 
 ```bash
-# Initialize with default JavaScript config
+# Initialize (auto-detects TypeScript from tsconfig.json)
 npx docula init
 
-# Initialize with TypeScript config
+# Force TypeScript config
 npx docula init --typescript
+
+# Force JavaScript config
+npx docula init --javascript
 
 # Initialize in a custom directory
 npx docula init -s ./docs-site
@@ -138,14 +144,14 @@ This is useful during development when you want to see changes reflected immedia
 ## Common Workflows
 
 ```bash
-# Quick start: scaffold and serve
+# Quick start: scaffold and serve (auto-detects TypeScript)
 npx docula init
 npx docula serve --watch
 
 # Production build
 npx docula build --clean
 
-# TypeScript project setup
+# Force TypeScript config
 npx docula init --typescript
 npx docula serve --watch
 

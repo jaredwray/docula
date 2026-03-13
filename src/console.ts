@@ -106,6 +106,9 @@ export class DoculaConsole {
 			`    ${yellow("--typescript")}       Generate TypeScript config file (docula.config.ts)`,
 		);
 		console.log(
+			`    ${yellow("--javascript")}       Generate JavaScript config file (docula.config.mjs)`,
+		);
+		console.log(
 			`    ${yellow("-s, --site")}         Set the path where site files are located`,
 		);
 		console.log();
@@ -194,6 +197,7 @@ export class DoculaConsole {
 			build: false,
 			port: undefined,
 			typescript: false,
+			javascript: false,
 		};
 		for (let i = 0; i < argv.length; i++) {
 			const argument = argv[i];
@@ -262,6 +266,11 @@ export class DoculaConsole {
 					arguments_.typescript = true;
 					break;
 				}
+
+				case "--javascript": {
+					arguments_.javascript = true;
+					break;
+				}
 			}
 		}
 
@@ -285,4 +294,5 @@ type DoculaConsoleArguments = {
 	build: boolean;
 	port: number | undefined;
 	typescript: boolean;
+	javascript: boolean;
 };

@@ -346,7 +346,7 @@ describe("docula execute", () => {
 			console.log = consoleLog;
 		}
 	});
-	it("should init based on the init command", async () => {
+	it("should init based on the init command with auto-detect", async () => {
 		const docula = new Docula(defaultOptions);
 		const sitePath = "./custom-site";
 		let consoleMessage = "";
@@ -359,7 +359,8 @@ describe("docula execute", () => {
 		try {
 			await docula.execute(process);
 			expect(fs.existsSync(sitePath)).toEqual(true);
-			expect(fs.existsSync(`${sitePath}/docula.config.mjs`)).toEqual(true);
+			// Auto-detects TypeScript because this project has tsconfig.json
+			expect(fs.existsSync(`${sitePath}/docula.config.ts`)).toEqual(true);
 			expect(consoleMessage).toContain("docula initialized.");
 		} finally {
 			await fs.promises.rm(sitePath, { recursive: true });
@@ -387,6 +388,96 @@ describe("docula execute", () => {
 			await fs.promises.rm(sitePath, { recursive: true });
 			console.log = consoleLog;
 		}
+	});
+	it("should init with javascript config using --javascript flag", async () => {
+		const docula = new Docula(defaultOptions);
+		const sitePath = "./custom-site-js";
+		let consoleMessage = "";
+		const consoleLog = console.log;
+		console.log = (message) => {
+			consoleMessage = message;
+		};
+
+		process.argv = ["node", "docula", "init", "-s", sitePath, "--javascript"];
+		try {
+			await docula.execute(process);
+			expect(fs.existsSync(sitePath)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.mjs`)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.ts`)).toEqual(false);
+			expect(consoleMessage).toContain("docula initialized.");
+			expect(consoleMessage).toContain("docula.config.mjs");
+		} finally {
+			await fs.promises.rm(sitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should auto-detect typescript when tsconfig.json exists", async () => {
+		const docula = new Docula(defaultOptions);
+		const sitePath = "./custom-site-auto-ts";
+		const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
+		const hadTsconfig = fs.existsSync(tsconfigPath);
+		let consoleMessage = "";
+		const consoleLog = console.log;
+		console.log = (message) => {
+			consoleMessage = message;
+		};
+
+		// Ensure tsconfig.json exists (this project already has one)
+		if (!hadTsconfig) {
+			fs.writeFileSync(tsconfigPath, "{}");
+		}
+
+		process.argv = ["node", "docula", "init", "-s", sitePath];
+		try {
+			await docula.execute(process);
+			expect(fs.existsSync(sitePath)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.ts`)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.mjs`)).toEqual(false);
+			expect(consoleMessage).toContain("docula.config.ts");
+		} finally {
+			await fs.promises.rm(sitePath, { recursive: true });
+			if (!hadTsconfig) {
+				fs.unlinkSync(tsconfigPath);
+			}
+
+			console.log = consoleLog;
+		}
+	});
+	it("should --javascript flag override auto-detection", async () => {
+		const docula = new Docula(defaultOptions);
+		const sitePath = "./custom-site-js-override";
+		const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
+		const hadTsconfig = fs.existsSync(tsconfigPath);
+		let consoleMessage = "";
+		const consoleLog = console.log;
+		console.log = (message) => {
+			consoleMessage = message;
+		};
+
+		if (!hadTsconfig) {
+			fs.writeFileSync(tsconfigPath, "{}");
+		}
+
+		process.argv = ["node", "docula", "init", "-s", sitePath, "--javascript"];
+		try {
+			await docula.execute(process);
+			expect(fs.existsSync(sitePath)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.mjs`)).toEqual(true);
+			expect(fs.existsSync(`${sitePath}/docula.config.ts`)).toEqual(false);
+			expect(consoleMessage).toContain("docula.config.mjs");
+		} finally {
+			await fs.promises.rm(sitePath, { recursive: true });
+			if (!hadTsconfig) {
+				fs.unlinkSync(tsconfigPath);
+			}
+
+			console.log = consoleLog;
+		}
+	});
+	it("should detect typescript project", () => {
+		const docula = new Docula(defaultOptions);
+		// This project has a tsconfig.json
+		expect(docula.detectTypeScript()).toEqual(true);
 	});
 	it("should print help command", async () => {
 		const docula = new Docula(defaultOptions);
