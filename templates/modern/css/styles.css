@@ -651,6 +651,7 @@ body {
 }
 
 .changelog-entry {
+  position: relative;
   border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
@@ -711,19 +712,23 @@ body {
   color: #92400e;
 }
 
+.changelog-entry-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.changelog-entry:hover {
+  cursor: pointer;
+}
+
 .changelog-entry-preview {
-  display: block;
   margin-top: 12px;
   font-size: 15px;
   line-height: 1.6;
   overflow-wrap: break-word;
   color: var(--muted);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.changelog-entry-preview:hover {
-  color: var(--fg);
 }
 
 .changelog-read-more {
@@ -733,7 +738,7 @@ body {
   color: var(--link);
 }
 
-.changelog-entry-preview:hover .changelog-read-more {
+.changelog-entry:hover .changelog-read-more {
   text-decoration: underline;
 }
 

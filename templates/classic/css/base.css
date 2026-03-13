@@ -224,6 +224,7 @@ hr {
 
 /* Changelog */
 .changelog-entry {
+  position: relative;
   overflow: hidden;
   width: 100%;
   line-break: anywhere;
@@ -366,19 +367,23 @@ h1.changelog-entry-title {
   border-bottom: none;
 }
 
+.changelog-entry-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.changelog-entry:hover {
+  cursor: pointer;
+}
+
 .changelog-entry-preview {
-  display: block;
   margin-top: 0.75rem;
   font-size: 0.9375rem;
   line-height: 1.6;
   overflow-wrap: break-word;
   color: var(--color-secondary-dark);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.changelog-entry-preview:hover {
-  color: var(--color-text);
 }
 
 .changelog-read-more {
@@ -388,7 +393,7 @@ h1.changelog-entry-title {
   color: var(--color-primary);
 }
 
-.changelog-entry-preview:hover .changelog-read-more {
+.changelog-entry:hover .changelog-read-more {
   text-decoration: underline;
 }
 

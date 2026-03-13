@@ -22,10 +22,10 @@
             {{/if}}
           </div>
           <span class="changelog-entry-date">{{entry.formattedDate}}</span>
-          <a class="changelog-entry-preview" href="/changelog/{{entry.slug}}/">
+          <div class="changelog-entry-preview">
             {{{entry.preview}}}
-            <span class="changelog-read-more">Read more &rarr;</span>
-          </a>
+          </div>
+          <span class="changelog-read-more">Read more &rarr;</span>
         </div>
         {{/each}}
         {{#if hasNextPage}}
