@@ -3069,8 +3069,10 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder(options);
 
 			let hookCalled = false;
-			builder.onReleaseChangelog = (entries) => {
+			let receivedConsole: unknown;
+			builder.onReleaseChangelog = (entries, console) => {
 				hookCalled = true;
+				receivedConsole = console;
 				// Modify titles and filter to only first 2 entries
 				return entries.slice(0, 2).map((entry) => ({
 					...entry,
@@ -3081,6 +3083,13 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 				expect(hookCalled).toBe(true);
+				expect(receivedConsole).toBeDefined();
+				expect(typeof (receivedConsole as Record<string, unknown>).info).toBe(
+					"function",
+				);
+				expect(typeof (receivedConsole as Record<string, unknown>).error).toBe(
+					"function",
+				);
 				const changelog = await fs.promises.readFile(
 					`${options.output}/changelog/index.html`,
 					"utf8",
@@ -3102,7 +3111,7 @@ describe("DoculaBuilder", () => {
 			options.enableReleaseChangelog = true;
 			const builder = new DoculaBuilder(options);
 
-			builder.onReleaseChangelog = async (entries) =>
+			builder.onReleaseChangelog = async (entries, _console) =>
 				entries.filter((e) => e.tag === "Release");
 
 			try {
@@ -3126,7 +3135,7 @@ describe("DoculaBuilder", () => {
 			options.enableReleaseChangelog = true;
 			const builder = new DoculaBuilder(options);
 
-			builder.onReleaseChangelog = () => {
+			builder.onReleaseChangelog = (_entries, _console) => {
 				throw new Error("Hook failed");
 			};
 

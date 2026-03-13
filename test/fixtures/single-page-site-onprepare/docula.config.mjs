@@ -8,6 +8,6 @@ export const options = {
 	siteUrl: "https://docula.org",
 };
 
-export const onPrepare = async () => {
+export const onPrepare = async (options, console) => {
 	console.info("onPrepare");
 };

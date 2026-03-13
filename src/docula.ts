@@ -144,7 +144,7 @@ export default class Docula {
 		// Run the onPrepare function
 		if (this._configFileModule.onPrepare) {
 			try {
-				await this._configFileModule.onPrepare(this.options);
+				await this._configFileModule.onPrepare(this.options, this._console);
 			} catch (error) {
 				this._console.error((error as Error).message);
 			}
@@ -436,6 +436,7 @@ export default class Docula {
 
 export { Writr } from "writr";
 export type { DoculaChangelogEntry } from "./builder.js";
+export { DoculaConsole } from "./console.js";
 export type {
 	DoculaCacheOptions,
 	DoculaCookieAuth,
