@@ -74,7 +74,6 @@ body {
 }
 
 .theme-button {
-  margin-left: auto;
   border: 1px solid transparent;
   border-radius: 4px;
   padding: 0px 5px;
@@ -85,6 +84,13 @@ body {
   &:hover {
     border: 1px solid var(--border);
   }
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .theme-button--fixed {
@@ -102,6 +108,12 @@ body {
 
 .theme-button__icon--hidden {
   display: none;
+}
+
+.cookie-auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cookie-auth-btn {
