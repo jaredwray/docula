@@ -168,10 +168,23 @@ export default class Docula {
 
 		switch (consoleProcess.command) {
 			case "init": {
-				this.generateInit(
-					this.options.sitePath,
-					consoleProcess.args.typescript,
-				);
+				if (consoleProcess.args.typescript && consoleProcess.args.javascript) {
+					this._console.error(
+						"Cannot use both --typescript and --javascript flags. Please choose one.",
+					);
+					break;
+				}
+
+				let useTypeScript: boolean;
+				if (consoleProcess.args.typescript) {
+					useTypeScript = true;
+				} else if (consoleProcess.args.javascript) {
+					useTypeScript = false;
+				} else {
+					useTypeScript = this.detectTypeScript();
+				}
+
+				this.generateInit(this.options.sitePath, useTypeScript);
 				break;
 			}
 
@@ -236,6 +249,14 @@ export default class Docula {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Detect if the current project uses TypeScript by checking for tsconfig.json
+	 * @returns {boolean}
+	 */
+	public detectTypeScript(): boolean {
+		return fs.existsSync(path.join(process.cwd(), "tsconfig.json"));
 	}
 
 	/**

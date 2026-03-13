@@ -19,7 +19,7 @@ site
 ├───docula.config.mjs
 ```
 
-Note: for typescript do `docula init --typescript`
+If your project has a `tsconfig.json`, docula will automatically generate a TypeScript config (`docula.config.ts`). To explicitly choose, use `docula init --typescript` or `docula init --javascript`.
 
 ## Add your content
 

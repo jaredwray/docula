@@ -172,7 +172,7 @@ describe("DoculaConsole", () => {
 
 		const c = new DoculaConsole();
 		c.printHelp();
-		expect(messages.length).toEqual(29);
+		expect(messages.length).toEqual(30);
 		expect(messages.some((m) => m && stripAnsi(m).includes("Docula"))).toBe(
 			true,
 		);

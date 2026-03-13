@@ -9,13 +9,16 @@ Docula supports TypeScript configuration files (`docula.config.ts`) in addition 
 
 ## Initializing with TypeScript
 
-To create a new project with a TypeScript config file:
+When you run `npx docula init`, docula automatically detects TypeScript projects by checking for a `tsconfig.json` in the current directory. If found, it generates a `docula.config.ts` file. Otherwise, it generates `docula.config.mjs`.
+
+You can also explicitly choose:
 
 ```bash
-npx docula init --typescript
+npx docula init --typescript   # Force TypeScript config
+npx docula init --javascript   # Force JavaScript config
 ```
 
-This creates a `docula.config.ts` file with full type support:
+The TypeScript config provides full type support:
 
 ```typescript
 import type { DoculaOptions } from 'docula';
