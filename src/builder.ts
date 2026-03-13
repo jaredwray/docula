@@ -25,6 +25,7 @@ export type DoculaChangelogEntry = {
 	preview: string;
 	previewImage?: string;
 	urlPath: string;
+	lastModified: string;
 };
 
 export type DoculaData = {
@@ -61,6 +62,7 @@ export type DoculaData = {
 	}>;
 	enableLlmsTxt?: boolean;
 	hasFeed?: boolean;
+	lastModified?: string;
 };
 
 export type DoculaTemplates = {
@@ -91,6 +93,7 @@ export type DoculaDocument = {
 	documentPath: string;
 	urlPath: string;
 	isRoot: boolean;
+	lastModified: string;
 };
 
 export class DoculaBuilder {
@@ -239,6 +242,9 @@ export class DoculaBuilder {
 		doculaData.hasApi = Boolean(
 			doculaData.openApiUrl && doculaData.templates?.api,
 		);
+
+		// Set lastModified for pages without a specific source file (home, changelog listing, API)
+		doculaData.lastModified = new Date().toISOString().split("T")[0];
 
 		// Build the home page (index.html)
 		this._console.step("Building pages...");
@@ -1241,6 +1247,7 @@ export class DoculaBuilder {
 			preview: this.generateChangelogPreview(markdownContent, 500, isMdx),
 			previewImage,
 			urlPath: `/changelog/${slug}/index.html`,
+			lastModified: fs.statSync(filePath).mtime.toISOString().split("T")[0],
 		};
 	}
 
@@ -1384,6 +1391,7 @@ export class DoculaBuilder {
 			generatedHtml: new Writr(body).renderSync(),
 			preview: this.generateChangelogPreview(body),
 			urlPath: `/changelog/${slug}/index.html`,
+			lastModified: dateString,
 		};
 	}
 
@@ -1719,6 +1727,7 @@ export class DoculaBuilder {
 			documentPath,
 			urlPath,
 			isRoot,
+			lastModified: fs.statSync(documentPath).mtime.toISOString().split("T")[0],
 		};
 	}
 

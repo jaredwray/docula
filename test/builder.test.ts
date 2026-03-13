@@ -4810,4 +4810,38 @@ describe("DoculaBuilder", () => {
 			}
 		});
 	});
+
+	describe("lastModified field", () => {
+		it("should include lastModified in YYYY-MM-DD format for parseDocumentData", () => {
+			const builder = new DoculaBuilder();
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/front-matter.md",
+			);
+			expect(doc.lastModified).toBeDefined();
+			expect(doc.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		});
+
+		it("should include lastModified in YYYY-MM-DD format for parseChangelogEntry", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.lastModified).toBeDefined();
+			expect(entry.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		});
+
+		it("should include lastModified from release date for GitHub release changelog entries", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.0.0",
+				name: "Release 1.0.0",
+				body: "Release notes",
+				published_at: "2025-06-15T00:00:00Z",
+				prerelease: false,
+				draft: false,
+			};
+			const entries = builder.getReleasesAsChangelogEntries([release]);
+			expect(entries[0].lastModified).toBe("2025-06-15");
+		});
+	});
 });
