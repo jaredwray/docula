@@ -3609,6 +3609,7 @@ describe("DoculaBuilder", () => {
 				slug: `entry-${index + 1}`,
 				content: `Content ${index + 1}`,
 				generatedHtml: `<p>Content ${index + 1}</p>`,
+				preview: `<p>Content ${index + 1}</p>`,
 				urlPath: `/changelog/entry-${index + 1}/index.html`,
 			}));
 			const data: DoculaData = {
@@ -3662,6 +3663,7 @@ describe("DoculaBuilder", () => {
 				slug: `entry-${index + 1}`,
 				content: `Content ${index + 1}`,
 				generatedHtml: `<p>Content ${index + 1}</p>`,
+				preview: `<p>Content ${index + 1}</p>`,
 				urlPath: `/changelog/entry-${index + 1}/index.html`,
 			}));
 			const data: DoculaData = {
