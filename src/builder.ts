@@ -172,9 +172,8 @@ export class DoculaBuilder {
 			validManifest &&
 			fs.existsSync(this.options.output) &&
 			validManifest.templateHash === currentTemplateHash &&
-			JSON.stringify(validManifest.docs) === JSON.stringify(currentDocHashes) &&
-			JSON.stringify(validManifest.changelog) ===
-				JSON.stringify(currentChangelogHashes)
+			this.recordsEqual(validManifest.docs, currentDocHashes) &&
+			this.recordsEqual(validManifest.changelog, currentChangelogHashes)
 		) {
 			// Check assets too
 			const assetsChanged = this.hasAssetsChanged(
@@ -386,7 +385,7 @@ export class DoculaBuilder {
 
 		// Copy over favicon
 		if (
-			!this.shouldSkipAssetCopy(
+			!this.hashAssetAndCheckSkip(
 				`${siteRelativePath}/favicon.ico`,
 				`${this.options.output}/favicon.ico`,
 				"favicon.ico",
@@ -403,7 +402,7 @@ export class DoculaBuilder {
 
 		// Copy over logo
 		if (
-			!this.shouldSkipAssetCopy(
+			!this.hashAssetAndCheckSkip(
 				`${siteRelativePath}/logo.svg`,
 				`${this.options.output}/logo.svg`,
 				"logo.svg",
@@ -420,7 +419,7 @@ export class DoculaBuilder {
 
 		// Copy over logo_horizontal
 		if (
-			!this.shouldSkipAssetCopy(
+			!this.hashAssetAndCheckSkip(
 				`${siteRelativePath}/logo_horizontal.png`,
 				`${this.options.output}/logo_horizontal.png`,
 				"logo_horizontal.png",
@@ -463,7 +462,7 @@ export class DoculaBuilder {
 
 		// Copy over variables
 		if (
-			!this.shouldSkipAssetCopy(
+			!this.hashAssetAndCheckSkip(
 				`${siteRelativePath}/variables.css`,
 				`${this.options.output}/css/variables.css`,
 				"variables.css",
@@ -478,15 +477,13 @@ export class DoculaBuilder {
 			this._console.fileCopied("css/variables.css");
 		}
 
-		// Copy over public folder contents and record their hashes
-		this.copyPublicFolder(siteRelativePath, this.options.output);
-		const publicPath = `${siteRelativePath}/public`;
-		if (fs.existsSync(publicPath)) {
-			const publicHashes = this.hashSourceFiles(publicPath);
-			for (const [file, hash] of Object.entries(publicHashes)) {
-				currentAssetHashes[`public/${file}`] = hash;
-			}
-		}
+		// Copy over public folder contents (differential) and record their hashes
+		this.copyPublicFolder(
+			siteRelativePath,
+			this.options.output,
+			validManifest?.assets ?? {},
+			currentAssetHashes,
+		);
 
 		// Copy non-markdown assets from changelog/ to output
 		this.copyContentAssets(
@@ -2205,7 +2202,12 @@ export class DoculaBuilder {
 		}
 	}
 
-	private copyPublicFolder(sitePath: string, output: string): void {
+	private copyPublicFolder(
+		sitePath: string,
+		output: string,
+		previousAssets: Record<string, string>,
+		currentAssets: Record<string, string>,
+	): void {
 		const publicPath = `${sitePath}/public`;
 
 		if (!fs.existsSync(publicPath)) {
@@ -2215,7 +2217,14 @@ export class DoculaBuilder {
 		this._console.step("Copying public folder...");
 
 		const resolvedOutput = path.resolve(output);
-		this.copyPublicDirectory(publicPath, output, publicPath, resolvedOutput);
+		this.copyPublicDirectory(
+			publicPath,
+			output,
+			publicPath,
+			resolvedOutput,
+			previousAssets,
+			currentAssets,
+		);
 	}
 
 	private copyPublicDirectory(
@@ -2223,6 +2232,8 @@ export class DoculaBuilder {
 		target: string,
 		basePath: string,
 		output: string,
+		previousAssets: Record<string, string>,
+		currentAssets: Record<string, string>,
 	): void {
 		const files = fs.readdirSync(source);
 
@@ -2250,8 +2261,24 @@ export class DoculaBuilder {
 
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
-				this.copyPublicDirectory(sourcePath, targetPath, basePath, output);
+				this.copyPublicDirectory(
+					sourcePath,
+					targetPath,
+					basePath,
+					output,
+					previousAssets,
+					currentAssets,
+				);
 			} else {
+				const assetKey = `public/${relativePath}`;
+				const hash = this.hashFile(sourcePath);
+				currentAssets[assetKey] = hash;
+
+				// Skip copy if file hasn't changed
+				if (previousAssets[assetKey] === hash && fs.existsSync(targetPath)) {
+					continue;
+				}
+
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
 				this._console.fileCopied(relativePath);
@@ -2474,6 +2501,25 @@ export class DoculaBuilder {
 		return hashes;
 	}
 
+	private recordsEqual(
+		a: Record<string, string>,
+		b: Record<string, string>,
+	): boolean {
+		const keysA = Object.keys(a);
+		const keysB = Object.keys(b);
+		if (keysA.length !== keysB.length) {
+			return false;
+		}
+
+		for (const key of keysA) {
+			if (a[key] !== b[key]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private hasAssetsChanged(
 		sitePath: string,
 		previousAssets: Record<string, string>,
@@ -2510,7 +2556,11 @@ export class DoculaBuilder {
 		return false;
 	}
 
-	private shouldSkipAssetCopy(
+	/**
+	 * Hashes the source file, records it in currentAssets, and returns
+	 * whether the copy can be skipped (unchanged from previous build).
+	 */
+	private hashAssetAndCheckSkip(
 		sourcePath: string,
 		targetPath: string,
 		assetKey: string,
