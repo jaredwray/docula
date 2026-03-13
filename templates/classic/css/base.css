@@ -224,6 +224,7 @@ hr {
 
 /* Changelog */
 .changelog-entry {
+  position: relative;
   overflow: hidden;
   width: 100%;
   line-break: anywhere;
@@ -364,6 +365,80 @@ h1.changelog-entry-title {
 
 .changelog-entry-single {
   border-bottom: none;
+}
+
+.changelog-entry-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.changelog-entry:hover {
+  cursor: pointer;
+}
+
+.changelog-entry-image {
+  margin-top: 0.75rem;
+}
+
+.changelog-entry-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.changelog-entry-preview {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  color: var(--color-secondary-dark);
+}
+
+.changelog-read-more {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-primary);
+}
+
+.changelog-entry:hover .changelog-read-more {
+  text-decoration: underline;
+}
+
+.changelog-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.changelog-pagination-link {
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.changelog-pagination-link:hover {
+  text-decoration: underline;
+}
+
+.changelog-pagination-disabled {
+  color: var(--color-secondary-dark);
+  cursor: default;
+}
+
+.changelog-pagination-disabled:hover {
+  text-decoration: none;
+}
+
+.changelog-pagination-info {
+  font-size: 0.875rem;
+  color: var(--color-secondary-dark);
 }
 
 .github-corner {

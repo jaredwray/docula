@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import type {DoculaOptions} from 'docula';
+import type {DoculaConsole, DoculaOptions} from 'docula';
 
 export const options: Partial<DoculaOptions> = {
 	template: 'modern',
@@ -33,7 +33,8 @@ async function copyWithFrontMatter(sourcePath: string, destPath: string, title: 
 	await fs.promises.writeFile(destPath, frontMatter + content);
 }
 
-export const onPrepare = async (config: DoculaOptions) => {
+export const onPrepare = async (config: DoculaOptions, console: DoculaConsole) => {
+	console.step('Preparing project guidelines...');
 	const guidelinesDir = path.join(config.sitePath, 'docs', 'project-guidelines');
 	await fs.promises.mkdir(guidelinesDir, {recursive: true});
 
@@ -59,4 +60,6 @@ export const onPrepare = async (config: DoculaOptions) => {
 			3,
 		),
 	]);
+
+	console.success('Project guidelines prepared');
 };

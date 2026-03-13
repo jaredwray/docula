@@ -9,13 +9,16 @@ Docula supports TypeScript configuration files (`docula.config.ts`) in addition 
 
 ## Initializing with TypeScript
 
-To create a new project with a TypeScript config file:
+When you run `npx docula init`, docula automatically detects TypeScript projects by checking for a `tsconfig.json` in the current directory. If found, it generates a `docula.config.ts` file. Otherwise, it generates `docula.config.mjs`.
+
+You can also explicitly choose:
 
 ```bash
-npx docula init --typescript
+npx docula init --typescript   # Force TypeScript config
+npx docula init --javascript   # Force JavaScript config
 ```
 
-This creates a `docula.config.ts` file with full type support:
+The TypeScript config provides full type support:
 
 ```typescript
 import type { DoculaOptions } from 'docula';
@@ -37,18 +40,74 @@ export const options: Partial<DoculaOptions> = {
 You can add typed lifecycle hooks to your config:
 
 ```typescript
-import type { DoculaOptions } from 'docula';
+import type { DoculaConsole, DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   siteTitle: 'My Project',
   // ... other options
 };
 
-export const onPrepare = async (config: DoculaOptions): Promise<void> => {
+export const onPrepare = async (config: DoculaOptions, console: DoculaConsole): Promise<void> => {
   // Runs before the build process
-  console.log(`Building ${config.siteTitle}...`);
+  console.info(`Building ${config.siteTitle}...`);
 };
 ```
+
+## Manipulating Release Changelog Entries
+
+The `onReleaseChangelog` hook lets you modify, filter, or transform GitHub release entries before they are merged with file-based changelog entries and rendered. This is useful for cleaning up release notes, filtering out unwanted releases, or customizing tags.
+
+```typescript
+import type { DoculaChangelogEntry, DoculaConsole, DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  githubPath: 'your-username/your-repo',
+  enableReleaseChangelog: true,
+};
+
+export const onReleaseChangelog = (entries: DoculaChangelogEntry[], console: DoculaConsole): DoculaChangelogEntry[] => {
+  console.info(`Processing ${entries.length} release entries...`);
+  return entries
+    // Filter out pre-releases
+    .filter(entry => entry.tag !== 'Pre-release')
+    // Customize titles
+    .map(entry => ({
+      ...entry,
+      title: entry.title.replace(/^v/, 'Version '),
+    }));
+};
+```
+
+Each `DoculaChangelogEntry` has these fields you can read or modify:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | `string` | Entry title (from release name or tag) |
+| `date` | `string` | Date string (YYYY-MM-DD) |
+| `formattedDate` | `string` | Localized display date |
+| `tag` | `string?` | Badge label (e.g., "Release", "Pre-release") |
+| `tagClass` | `string?` | CSS class derived from tag |
+| `slug` | `string` | URL-friendly identifier |
+| `content` | `string` | Raw markdown content |
+| `generatedHtml` | `string` | Rendered HTML |
+| `preview` | `string` | Auto-generated preview HTML for the changelog index (300-500 chars, paragraph-aware, headings and images stripped) |
+| `previewImage` | `string?` | Image URL displayed above the preview on the changelog listing page (set via front matter) |
+| `urlPath` | `string` | Output file path |
+
+The hook can be synchronous or async. If the hook throws an error, it is logged and the unmodified entries are used.
+
+## DoculaConsole Logger
+
+Both `onPrepare` and `onReleaseChangelog` hooks receive a `DoculaConsole` instance as their second argument. This provides styled, consistent logging output:
+
+| Method | Description |
+|--------|-------------|
+| `console.log(message)` | Plain text output |
+| `console.info(message)` | Informational message with cyan prefix |
+| `console.warn(message)` | Warning message with yellow prefix |
+| `console.error(message)` | Error message with red prefix |
+| `console.success(message)` | Success message with green prefix |
+| `console.step(message)` | Step/progress message with blue prefix |
 
 ## Config File Priority
 
@@ -72,6 +131,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
+| `changelogPerPage` | `number` | `20` | Number of changelog entries to display per page |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
 | `cookieAuth` | `{ loginUrl: string; cookieName?: string; logoutUrl?: string }` | - | Cookie-based auth. Shows a Login/Logout button in the header based on a JWT cookie. See [Cookie Auth](/docs/cookie-auth). |

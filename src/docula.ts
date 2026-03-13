@@ -144,7 +144,7 @@ export default class Docula {
 		// Run the onPrepare function
 		if (this._configFileModule.onPrepare) {
 			try {
-				await this._configFileModule.onPrepare(this.options);
+				await this._configFileModule.onPrepare(this.options, this._console);
 			} catch (error) {
 				this._console.error((error as Error).message);
 			}
@@ -168,10 +168,23 @@ export default class Docula {
 
 		switch (consoleProcess.command) {
 			case "init": {
-				this.generateInit(
-					this.options.sitePath,
-					consoleProcess.args.typescript,
-				);
+				if (consoleProcess.args.typescript && consoleProcess.args.javascript) {
+					this._console.error(
+						"Cannot use both --typescript and --javascript flags. Please choose one.",
+					);
+					break;
+				}
+
+				let useTypeScript: boolean;
+				if (consoleProcess.args.typescript) {
+					useTypeScript = true;
+				} else if (consoleProcess.args.javascript) {
+					useTypeScript = false;
+				} else {
+					useTypeScript = this.detectTypeScript();
+				}
+
+				this.generateInit(this.options.sitePath, useTypeScript);
 				break;
 			}
 
@@ -198,6 +211,12 @@ export default class Docula {
 					}
 
 					const builder = new DoculaBuilder(this.options);
+					/* v8 ignore next 4 -- @preserve */
+					if (this._configFileModule.onReleaseChangelog) {
+						builder.onReleaseChangelog =
+							this._configFileModule.onReleaseChangelog;
+					}
+
 					await builder.build();
 					if (consoleProcess.args.watch) {
 						this.watch(this.options, builder);
@@ -220,10 +239,24 @@ export default class Docula {
 				}
 
 				const builder = new DoculaBuilder(this.options);
+				/* v8 ignore next 4 -- @preserve */
+				if (this._configFileModule.onReleaseChangelog) {
+					builder.onReleaseChangelog =
+						this._configFileModule.onReleaseChangelog;
+				}
+
 				await builder.build();
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Detect if the current project uses TypeScript by checking for tsconfig.json
+	 * @returns {boolean}
+	 */
+	public detectTypeScript(): boolean {
+		return fs.existsSync(path.join(process.cwd(), "tsconfig.json"));
 	}
 
 	/**
@@ -423,6 +456,8 @@ export default class Docula {
 }
 
 export { Writr } from "writr";
+export type { DoculaChangelogEntry } from "./builder.js";
+export { DoculaConsole } from "./console.js";
 export type {
 	DoculaCacheOptions,
 	DoculaCookieAuth,

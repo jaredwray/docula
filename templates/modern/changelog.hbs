@@ -22,11 +22,32 @@
             {{/if}}
           </div>
           <span class="changelog-entry-date">{{entry.formattedDate}}</span>
-          <div class="changelog-entry-body">
-            {{{entry.generatedHtml}}}
+          {{#if entry.previewImage}}
+          <div class="changelog-entry-image">
+            <img src="{{entry.previewImage}}" alt="{{entry.title}}" />
           </div>
+          {{/if}}
+          <div class="changelog-entry-preview">
+            {{{entry.preview}}}
+          </div>
+          <span class="changelog-read-more">Read more &rarr;</span>
         </div>
         {{/each}}
+        {{#if hasPagination}}
+        <nav class="changelog-pagination">
+          {{#if hasPrevPage}}
+          <a class="changelog-pagination-link" href="{{prevPageUrl}}">&larr; Newer</a>
+          {{else}}
+          <span class="changelog-pagination-link changelog-pagination-disabled">&larr; Newer</span>
+          {{/if}}
+          <span class="changelog-pagination-info">Page {{currentPage}} of {{totalPages}}</span>
+          {{#if hasNextPage}}
+          <a class="changelog-pagination-link" href="{{nextPageUrl}}">Older &rarr;</a>
+          {{else}}
+          <span class="changelog-pagination-link changelog-pagination-disabled">Older &rarr;</span>
+          {{/if}}
+        </nav>
+        {{/if}}
         {{/if}}
       </div>
     </main>

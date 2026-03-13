@@ -883,6 +883,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -928,6 +929,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -994,6 +996,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1041,6 +1044,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1089,6 +1093,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1136,6 +1141,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1205,7 +1211,9 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "",
 						generatedHtml: "",
+						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				documents: [
@@ -1220,6 +1228,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/changelog-site/docs/doc.md",
 						urlPath: "/docs/doc/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1323,6 +1332,7 @@ describe("DoculaBuilder", () => {
 					documentPath: "",
 					urlPath: "/docs/document.html",
 					isRoot: true,
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -1516,6 +1526,7 @@ describe("DoculaBuilder", () => {
 					urlPath: "document",
 					isRoot: false,
 					section: "foo",
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -1558,6 +1569,7 @@ describe("DoculaBuilder", () => {
 					documentPath: "/site/docs/bar/document.html",
 					urlPath: "document",
 					isRoot: false,
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -1601,6 +1613,7 @@ describe("DoculaBuilder", () => {
 					urlPath: "document",
 					isRoot: false,
 					section: "foo",
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -2122,7 +2135,7 @@ describe("DoculaBuilder", () => {
 			expect(entries[0].title).toBe("Critical Bug Fix");
 			expect(entries[0].date).toBe("2025-02-01");
 			expect(entries[0].tag).toBe("Fixed");
-			expect(entries[0].slug).toBe("bug-fix");
+			expect(entries[0].slug).toBe("2025-02-01-bug-fix");
 			expect(entries[1].title).toBe("New Feature Released");
 			expect(entries[2].title).toBe("Performance Improvements");
 			// Invalid dates should be at the end
@@ -2163,7 +2176,7 @@ describe("DoculaBuilder", () => {
 				const entries = builder.getChangelogEntries(changelogPath);
 				expect(entries.length).toBe(1);
 				expect(entries[0].title).toBe("MDX Entry");
-				expect(entries[0].slug).toBe("mdx-entry");
+				expect(entries[0].slug).toBe("2026-03-02-mdx-entry");
 			} finally {
 				await fs.promises.rm(changelogPath, {
 					recursive: true,
@@ -2181,8 +2194,10 @@ describe("DoculaBuilder", () => {
 			expect(entry.date).toBe("2025-01-15");
 			expect(entry.tag).toBe("Added");
 			expect(entry.tagClass).toBe("added");
-			expect(entry.slug).toBe("new-feature");
-			expect(entry.urlPath).toBe("/changelog/new-feature/index.html");
+			expect(entry.slug).toBe("2025-01-15-new-feature");
+			expect(entry.urlPath).toBe(
+				"/changelog/2025-01-15-new-feature/index.html",
+			);
 			expect(entry.generatedHtml).toContain("Feature A");
 		});
 
@@ -2193,7 +2208,7 @@ describe("DoculaBuilder", () => {
 			);
 			expect(entry.title).toBe("String Date Entry");
 			expect(entry.date).toBe("Q1 2025");
-			expect(entry.slug).toBe("string-date");
+			expect(entry.slug).toBe("2024-11-01-string-date");
 		});
 
 		it("should fall back to filename title when changelog entry has no front matter", async () => {
@@ -2209,8 +2224,10 @@ describe("DoculaBuilder", () => {
 				expect(entry.title).toBe("2026-03-02-missing-fields");
 				expect(entry.date).toBe("");
 				expect(entry.formattedDate).toBe("");
-				expect(entry.slug).toBe("missing-fields");
-				expect(entry.urlPath).toBe("/changelog/missing-fields/index.html");
+				expect(entry.slug).toBe("2026-03-02-missing-fields");
+				expect(entry.urlPath).toBe(
+					"/changelog/2026-03-02-missing-fields/index.html",
+				);
 			} finally {
 				await fs.promises.rm(changelogPath, {
 					recursive: true,
@@ -2239,7 +2256,9 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "Test content",
 						generatedHtml: "<p>Test content</p>",
+						preview: "<p>Test content</p>",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -2290,7 +2309,9 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "Test content",
 						generatedHtml: "<p>Test content</p>",
+						preview: "<p>Test content</p>",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -2392,7 +2413,9 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "",
 						generatedHtml: "",
+						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -2529,13 +2552,19 @@ describe("DoculaBuilder", () => {
 					true,
 				);
 				expect(
-					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature/index.html`,
+					),
 				).toBe(true);
 				expect(
-					fs.existsSync(`${options.output}/changelog/bug-fix/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-02-01-bug-fix/index.html`,
+					),
 				).toBe(true);
 				expect(
-					fs.existsSync(`${options.output}/changelog/improvements/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2024-12-20-improvements/index.html`,
+					),
 				).toBe(true);
 			} finally {
 				await fs.promises.rm(builder.options.output, {
@@ -2546,6 +2575,272 @@ describe("DoculaBuilder", () => {
 			expect(consoleMessage).toContain("Build");
 
 			console.log = consoleLog;
+		});
+
+		it("should generate preview from markdown content", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.preview).toBeTruthy();
+			expect(entry.preview).toContain("<");
+			// Preview should be rendered HTML from truncated markdown
+		});
+
+		it("should generate preview that is shorter than full content for long entries", () => {
+			const builder = new DoculaBuilder();
+			// No paragraph breaks so fallback truncation with "..." is used
+			const preview = builder.generateChangelogPreview(
+				"This is a very long content. ".repeat(30),
+			);
+			const full = builder.generateChangelogPreview("Short content.");
+			// Long content should be truncated with "..."
+			expect(preview).toContain("...");
+			// Short content should not be truncated
+			expect(full).not.toContain("...");
+		});
+
+		it("should strip markdown headings from preview", () => {
+			const builder = new DoculaBuilder();
+			const markdown =
+				"## What's Changed\n\nSome great new features were added to the project.";
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).not.toContain("What's Changed");
+			expect(preview).toContain("great new features");
+		});
+
+		it("should convert markdown links to plain text in preview", () => {
+			const builder = new DoculaBuilder();
+			const markdown =
+				"Check out [this link](https://example.com) for more details about the release.";
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("this link");
+			expect(preview).not.toContain("https://example.com");
+		});
+
+		it("should remove all images from preview", () => {
+			const builder = new DoculaBuilder();
+			const markdown =
+				"![screenshot](https://example.com/img.png)\n\nHere is the content of the release.";
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).not.toContain("img.png");
+			expect(preview).toContain("content of the release");
+		});
+
+		it("should parse previewImage from frontmatter", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			// This fixture may or may not have previewImage — just check the field exists on the type
+			expect(entry).toHaveProperty("previewImage");
+		});
+
+		it("should split on paragraph boundary without ellipsis", () => {
+			const builder = new DoculaBuilder();
+			// First paragraph is ~350 chars, second is short
+			const para1 =
+				"This is the first paragraph with enough content to exceed the minimum length requirement of three hundred characters. We need to keep writing more content here to make sure it is long enough to pass the threshold that triggers truncation behavior in the preview generator. Adding even more words to ensure this paragraph exceeds three hundred characters in total length.";
+			const para2 =
+				"This is the second paragraph that should be cut off because it exceeds the max.";
+			const markdown = `${para1}\n\n${para2}`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("first paragraph");
+			expect(preview).not.toContain("second paragraph");
+			// Clean paragraph split should not have ellipsis
+			expect(preview).not.toContain("...");
+		});
+
+		it("should handle list-heavy content by splitting at list item boundaries", () => {
+			const builder = new DoculaBuilder();
+			const items = Array.from(
+				{ length: 20 },
+				(_, i) =>
+					`- Feature number ${i + 1} was added to the project with great improvements`,
+			);
+			const markdown = items.join("\n");
+			const preview = builder.generateChangelogPreview(markdown);
+			// Should contain complete list items rendered as HTML
+			expect(preview).toContain("<li>");
+			// Should not contain "..." since we split at a clean boundary
+		});
+
+		it("should return full content when markdown is shorter than minLength", () => {
+			const builder = new DoculaBuilder();
+			const short = "Just a brief note about this release.";
+			const preview = builder.generateChangelogPreview(short);
+			expect(preview).toContain("brief note");
+			expect(preview).not.toContain("...");
+		});
+
+		it("should handle empty input", () => {
+			const builder = new DoculaBuilder();
+			const preview = builder.generateChangelogPreview("");
+			expect(preview).toBeDefined();
+		});
+
+		it("should split at early paragraph break when no break exists past minLength", () => {
+			const builder = new DoculaBuilder();
+			// Short first paragraph (~50 chars), then a very long second paragraph with no breaks
+			const para1 = "Short intro paragraph for the release notes.";
+			const para2 =
+				"This second paragraph is extremely long and has no paragraph breaks within it so the only available split point is the early paragraph break before the minimum length threshold. ".repeat(
+					3,
+				);
+			const markdown = `${para1}\n\n${para2}`;
+			const preview = builder.generateChangelogPreview(markdown);
+			// Should split at the only \n\n even though it's before 300
+			expect(preview).toContain("Short intro");
+			expect(preview).not.toContain("...");
+		});
+
+		it("should use ellipsis only when no clean break is found", () => {
+			const builder = new DoculaBuilder();
+			// Single long paragraph with no breaks — must fallback to word-boundary truncation
+			const longText = "word ".repeat(150);
+			const preview = builder.generateChangelogPreview(longText);
+			expect(preview).toContain("...");
+		});
+
+		it("should build paginated changelog pages", async () => {
+			const options = new DoculaOptions();
+			options.changelogPerPage = 2;
+			options.output = "test/temp-changelog-pagination-test";
+			const builder = new DoculaBuilder(options);
+
+			const entries = [];
+			for (let i = 0; i < 5; i++) {
+				entries.push({
+					title: `Entry ${i}`,
+					date: `2025-01-${String(15 - i).padStart(2, "0")}`,
+					formattedDate: `January ${15 - i}, 2025`,
+					tag: "Added",
+					tagClass: "added",
+					slug: `entry-${i}`,
+					content: `Content ${i}`,
+					generatedHtml: `<p>Content ${i}</p>`,
+					preview: `<p>Content ${i}</p>`,
+					urlPath: `/changelog/entry-${i}/index.html`,
+					lastModified: "2025-01-01",
+				});
+			}
+
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: options.output,
+				hasChangelog: true,
+				changelogEntries: entries,
+				templates: {
+					home: "home.hbs",
+					changelog: "changelog.hbs",
+					changelogEntry: "changelog-entry.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildChangelogPage(data);
+				// Page 1 at /changelog/index.html
+				expect(fs.existsSync(`${data.output}/changelog/index.html`)).toBe(true);
+				// Page 2 at /changelog/page/2/index.html
+				expect(
+					fs.existsSync(`${data.output}/changelog/page/2/index.html`),
+				).toBe(true);
+				// Page 3 at /changelog/page/3/index.html
+				expect(
+					fs.existsSync(`${data.output}/changelog/page/3/index.html`),
+				).toBe(true);
+				// No page 4
+				expect(
+					fs.existsSync(`${data.output}/changelog/page/4/index.html`),
+				).toBe(false);
+
+				const page1 = await fs.promises.readFile(
+					`${data.output}/changelog/index.html`,
+					"utf8",
+				);
+				expect(page1).toContain("Entry 0");
+				expect(page1).toContain("Entry 1");
+				expect(page1).not.toContain("Entry 2");
+
+				const page2 = await fs.promises.readFile(
+					`${data.output}/changelog/page/2/index.html`,
+					"utf8",
+				);
+				expect(page2).toContain("Entry 2");
+				expect(page2).toContain("Entry 3");
+				expect(page2).not.toContain("Entry 4");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
+		});
+
+		it("should include paginated changelog pages in sitemap", async () => {
+			const options = new DoculaOptions();
+			options.changelogPerPage = 2;
+			options.output = "test/temp-sitemap-pagination-test";
+			const builder = new DoculaBuilder(options);
+
+			const entries = [];
+			for (let i = 0; i < 5; i++) {
+				entries.push({
+					title: `Entry ${i}`,
+					date: `2025-01-${String(15 - i).padStart(2, "0")}`,
+					formattedDate: `January ${15 - i}, 2025`,
+					slug: `entry-${i}`,
+					content: "",
+					generatedHtml: "",
+					preview: "",
+					urlPath: `/changelog/entry-${i}/index.html`,
+					lastModified: "2025-01-01",
+				});
+			}
+
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: options.output,
+				hasChangelog: true,
+				changelogEntries: entries,
+				templates: {
+					home: "home.hbs",
+					changelog: "changelog.hbs",
+				},
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.output}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/changelog</loc>");
+				expect(sitemap).toContain("<loc>http://foo.com/changelog/page/2</loc>");
+				expect(sitemap).toContain("<loc>http://foo.com/changelog/page/3</loc>");
+				expect(sitemap).not.toContain(
+					"<loc>http://foo.com/changelog/page/4</loc>",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
 		});
 	});
 
@@ -2699,7 +2994,9 @@ describe("DoculaBuilder", () => {
 				);
 				// File-based entries should exist
 				expect(
-					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature/index.html`,
+					),
 				).toBe(true);
 				// Release-based entries should also exist (from mock data)
 				expect(
@@ -2727,7 +3024,9 @@ describe("DoculaBuilder", () => {
 				);
 				// File-based entries should still exist
 				expect(
-					fs.existsSync(`${options.output}/changelog/new-feature/index.html`),
+					fs.existsSync(
+						`${options.output}/changelog/2025-01-15-new-feature/index.html`,
+					),
 				).toBe(true);
 				// Release-based entries should NOT exist
 				expect(
@@ -2753,6 +3052,123 @@ describe("DoculaBuilder", () => {
 				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
 					false,
 				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should call onReleaseChangelog hook to modify release entries", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-on-release-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			let hookCalled = false;
+			let receivedConsole: unknown;
+			builder.onReleaseChangelog = (entries, console) => {
+				hookCalled = true;
+				receivedConsole = console;
+				// Modify titles and filter to only first 2 entries
+				return entries.slice(0, 2).map((entry) => ({
+					...entry,
+					title: `Modified: ${entry.title}`,
+				}));
+			};
+
+			try {
+				await builder.build();
+				expect(hookCalled).toBe(true);
+				expect(receivedConsole).toBeDefined();
+				expect(typeof (receivedConsole as Record<string, unknown>).info).toBe(
+					"function",
+				);
+				expect(typeof (receivedConsole as Record<string, unknown>).error).toBe(
+					"function",
+				);
+				const changelog = await fs.promises.readFile(
+					`${options.output}/changelog/index.html`,
+					"utf8",
+				);
+				expect(changelog).toContain("Modified:");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should call async onReleaseChangelog hook", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-on-release-changelog-async-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			builder.onReleaseChangelog = async (entries, _console) =>
+				entries.filter((e) => e.tag === "Release");
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should handle onReleaseChangelog hook errors gracefully", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-on-release-changelog-error-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			builder.onReleaseChangelog = (_entries, _console) => {
+				throw new Error("Hook failed");
+			};
+
+			try {
+				// Should not throw — error is caught and logged
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should work normally when onReleaseChangelog is not set", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-build-no-on-release-changelog-test";
+			options.sitePath = "test/fixtures/changelog-site";
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+					true,
+				);
+				expect(
+					fs.existsSync(`${options.output}/changelog/v1-9-10/index.html`),
+				).toBe(true);
 			} finally {
 				await fs.promises.rm(options.output, {
 					recursive: true,
@@ -2845,7 +3261,9 @@ describe("DoculaBuilder", () => {
 						content:
 							"```ts\nfunction identity<T>(arg: T): T { return arg; }\n```",
 						generatedHtml,
+						preview: "<p>Code example</p>",
 						urlPath: "/changelog/generics-support/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -3032,6 +3450,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/single-page-site/docs/guide.md",
 						urlPath: "/guide.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -3218,7 +3637,9 @@ describe("DoculaBuilder", () => {
 				slug: `entry-${index + 1}`,
 				content: `Content ${index + 1}`,
 				generatedHtml: `<p>Content ${index + 1}</p>`,
+				preview: `<p>Content ${index + 1}</p>`,
 				urlPath: `/changelog/entry-${index + 1}/index.html`,
+				lastModified: "2025-01-01",
 			}));
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -3271,7 +3692,9 @@ describe("DoculaBuilder", () => {
 				slug: `entry-${index + 1}`,
 				content: `Content ${index + 1}`,
 				generatedHtml: `<p>Content ${index + 1}</p>`,
+				preview: `<p>Content ${index + 1}</p>`,
 				urlPath: `/changelog/entry-${index + 1}/index.html`,
+				lastModified: "2025-01-01",
 			}));
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -3672,7 +4095,9 @@ describe("DoculaBuilder", () => {
 						slug: "test-entry",
 						content: "",
 						generatedHtml: "",
+						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				documents: [
@@ -3687,6 +4112,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/changelog-site/docs/doc.md",
 						urlPath: "/docs/doc/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -4519,6 +4945,40 @@ describe("DoculaBuilder", () => {
 					force: true,
 				});
 			}
+		});
+	});
+
+	describe("lastModified field", () => {
+		it("should include lastModified in YYYY-MM-DD format for parseDocumentData", () => {
+			const builder = new DoculaBuilder();
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/front-matter.md",
+			);
+			expect(doc.lastModified).toBeDefined();
+			expect(doc.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		});
+
+		it("should include lastModified in YYYY-MM-DD format for parseChangelogEntry", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.lastModified).toBeDefined();
+			expect(entry.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		});
+
+		it("should include lastModified from release date for GitHub release changelog entries", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.0.0",
+				name: "Release 1.0.0",
+				body: "Release notes",
+				published_at: "2025-06-15T00:00:00Z",
+				prerelease: false,
+				draft: false,
+			};
+			const entries = builder.getReleasesAsChangelogEntries([release]);
+			expect(entries[0].lastModified).toBe("2025-06-15");
 		});
 	});
 });

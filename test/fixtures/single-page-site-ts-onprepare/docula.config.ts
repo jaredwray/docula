@@ -1,3 +1,4 @@
+import type { DoculaConsole } from "../../../src/console.js";
 import type { DoculaOptions } from "../../../src/options.js";
 
 export const options: Partial<DoculaOptions> = {
@@ -10,6 +11,9 @@ export const options: Partial<DoculaOptions> = {
 	siteUrl: "https://docula.org",
 };
 
-export const onPrepare = async (): Promise<void> => {
+export const onPrepare = async (
+	_options: DoculaOptions,
+	console: DoculaConsole,
+): Promise<void> => {
 	console.info("onPrepare TypeScript");
 };

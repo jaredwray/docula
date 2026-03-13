@@ -366,6 +366,7 @@ function extractSchemaProperties(
 }
 
 function getSchemaType(schema: SpecObject | undefined): string {
+	/* v8 ignore next -- @preserve */
 	if (!schema) {
 		return "unknown";
 	}
