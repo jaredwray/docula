@@ -25,8 +25,6 @@
 * Watch mode with auto-rebuild for local development.
 
 # Table of Contents
-- [Features](#features)
-- [Open Source Examples](#open-source-examples)
 - [Getting Started](https://docula.org/docs/index)
 - [Configuration](https://docula.org/docs/configuration)
 - [CLI](https://docula.org/docs/cli)
@@ -46,6 +44,7 @@
 - [Caching](https://docula.org/docs/caching)
 - [Cookie Auth](https://docula.org/docs/cookie-auth)
 - [Robots & Sitemap](https://docula.org/docs/robots-and-sitemap)
+- [Open Source Examples](#open-source-examples)
 - [Code of Conduct and Contributing](#code-of-conduct-and-contributing)
 - [License - MIT](#license)
 
