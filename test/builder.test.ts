@@ -4144,7 +4144,7 @@ describe("DoculaBuilder", () => {
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth";
 			options.homePage = true;
-			options.cookieAuth = { loginUrl: "/login", cookieName: "auth_token" };
+			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -4198,7 +4198,6 @@ describe("DoculaBuilder", () => {
 			options.homePage = true;
 			options.cookieAuth = {
 				loginUrl: "/login",
-				cookieName: "jwt",
 				logoutUrl: "/api/auth/logout",
 			};
 			const builder = new DoculaBuilder(options);
@@ -4244,13 +4243,17 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
-		it("should use default cookie name when cookieName is not set", async () => {
+		it("should render authCheckUrl in config when configured", async () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-default-name";
+			options.output = "test/temp-build-cookie-auth-check-url";
 			options.homePage = true;
-			options.cookieAuth = { loginUrl: "/login" };
+			options.cookieAuth = {
+				loginUrl: "/login",
+				authCheckUrl: "https://api.example.com/me",
+				authCheckUserPath: "email",
+			};
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -4259,8 +4262,10 @@ describe("DoculaBuilder", () => {
 					`${options.output}/index.html`,
 					"utf8",
 				);
-				// The default cookie name 'token' should appear in the config element
-				expect(indexHtml).toContain('data-cookie-name="token"');
+				expect(indexHtml).toContain(
+					'data-auth-check-url="https://api.example.com/me"',
+				);
+				expect(indexHtml).toContain('data-auth-check-user-path="email"');
 			} finally {
 				await fs.promises.rm(options.output, {
 					recursive: true,

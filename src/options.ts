@@ -4,8 +4,10 @@ import type { DoculaSection } from "./builder.js";
 
 export type DoculaCookieAuth = {
 	loginUrl: string;
-	cookieName?: string;
 	logoutUrl?: string;
+	authCheckUrl?: string;
+	authCheckMethod?: string;
+	authCheckUserPath?: string;
 };
 
 export type DoculaHeaderLink = {
