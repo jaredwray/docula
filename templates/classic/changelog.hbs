@@ -67,10 +67,10 @@
           {{/if}}
         </div>
         <span class="changelog-entry-date">{{entry.formattedDate}}</span>
-        <div class="changelog-entry-preview">
+        <a class="changelog-entry-preview" href="/changelog/{{entry.slug}}/">
           {{{entry.preview}}}
-        </div>
-        <a class="changelog-read-more" href="/changelog/{{entry.slug}}/">Read more &rarr;</a>
+          <span class="changelog-read-more">Read more &rarr;</span>
+        </a>
       </div>
       {{/each}}
       {{#if hasNextPage}}

@@ -367,11 +367,18 @@ h1.changelog-entry-title {
 }
 
 .changelog-entry-preview {
+  display: block;
   margin-top: 0.75rem;
   font-size: 0.9375rem;
   line-height: 1.6;
   overflow-wrap: break-word;
   color: var(--color-secondary-dark);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.changelog-entry-preview:hover {
+  color: var(--color-text);
 }
 
 .changelog-read-more {
@@ -379,10 +386,9 @@ h1.changelog-entry-title {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--color-primary);
-  text-decoration: none;
 }
 
-.changelog-read-more:hover {
+.changelog-entry-preview:hover .changelog-read-more {
   text-decoration: underline;
 }
 

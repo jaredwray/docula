@@ -712,11 +712,18 @@ body {
 }
 
 .changelog-entry-preview {
+  display: block;
   margin-top: 12px;
   font-size: 15px;
   line-height: 1.6;
   overflow-wrap: break-word;
   color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.changelog-entry-preview:hover {
+  color: var(--fg);
 }
 
 .changelog-read-more {
@@ -724,10 +731,9 @@ body {
   margin-top: 8px;
   font-size: 14px;
   color: var(--link);
-  text-decoration: none;
 }
 
-.changelog-read-more:hover {
+.changelog-entry-preview:hover .changelog-read-more {
   text-decoration: underline;
 }
 
