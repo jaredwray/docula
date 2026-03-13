@@ -9,7 +9,7 @@ Docula gives you full control over the look and feel of your site through CSS va
 
 ## Custom Stylesheet
 
-When you run `npx docula init`, a `variables.css` file is created in your site directory. This file is loaded after the template's built-in styles, so any values you set here take priority.
+Each template ships with a default `variables.css` that defines its CSS variables. To customize your site's appearance, create a `variables.css` file in your site directory. This file replaces the template's defaults during the build, so any values you set here take priority.
 
 ```
 site/

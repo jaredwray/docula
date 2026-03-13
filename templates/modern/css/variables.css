@@ -1,0 +1,32 @@
+:root {
+  --bg: #121212;
+  --fg: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --border-hover: rgba(255, 255, 255, 0.4);
+  --surface: #262626;
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --muted: #c5cdd3;
+  --muted-fg: rgba(255, 255, 255, 0.65);
+  --code-bg: rgba(255, 255, 255, 0.075);
+  --pre-bg: rgba(255, 255, 255, 0.05);
+  --link: #6ea8fe;
+  --scrollbar: rgba(255, 255, 255, 0.2);
+  --header-height: 81px;
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --border-hover: rgba(0, 0, 0, 0.3);
+  --surface: #f0f0f0;
+  --surface-hover: rgba(0, 0, 0, 0.06);
+  --muted: #6b7280;
+  --muted-fg: rgba(0, 0, 0, 0.5);
+  --code-bg: rgba(0, 0, 0, 0.05);
+  --pre-bg: rgba(0, 0, 0, 0.03);
+  --link: #0969da;
+  --scrollbar: rgba(0, 0, 0, 0.2);
+}
