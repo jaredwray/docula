@@ -1,6 +1,6 @@
 export const options = {
-	output: "./test/fixtures/mega-page-site/dist",
-	sitePath: "./test/fixtures/mega-page-site",
+	output: "./test/fixtures/mega-custom-template/dist",
+	sitePath: "./test/fixtures/mega-custom-template",
 	githubPath: "jaredwray/docula",
 	siteTitle: "docula",
 	siteDescription: "Beautiful Website for Your Projects",

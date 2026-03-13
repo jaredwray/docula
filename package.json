@@ -32,6 +32,7 @@
     "website:build": "node bin/docula.js build -s ./site -o ./site/dist",
     "website:serve": "pnpm build && node bin/docula.js serve -s ./site -o ./site/dist -w -p 3333",
     "website:mega": "node bin/docula.js serve -s ./test/fixtures/mega-page-site --watch --clean",
+    "website:mega:custom": "node bin/docula.js serve -s ./test/fixtures/mega-custom-template --watch",
     "website:nohome": "node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page --watch --clean",
     "website:changelog": "node bin/docula.js serve -s ./test/fixtures/changelog-site --watch --clean",
     "prepare": "pnpm build"
