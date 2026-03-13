@@ -883,6 +883,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -928,6 +929,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -994,6 +996,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1041,6 +1044,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1089,6 +1093,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1136,6 +1141,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/multi-page-site/docs/guide.md",
 						urlPath: "/docs/guide/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1207,6 +1213,7 @@ describe("DoculaBuilder", () => {
 						generatedHtml: "",
 						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				documents: [
@@ -1221,6 +1228,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/changelog-site/docs/doc.md",
 						urlPath: "/docs/doc/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -1324,6 +1332,7 @@ describe("DoculaBuilder", () => {
 					documentPath: "",
 					urlPath: "/docs/document.html",
 					isRoot: true,
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -1517,6 +1526,7 @@ describe("DoculaBuilder", () => {
 					urlPath: "document",
 					isRoot: false,
 					section: "foo",
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -1559,6 +1569,7 @@ describe("DoculaBuilder", () => {
 					documentPath: "/site/docs/bar/document.html",
 					urlPath: "document",
 					isRoot: false,
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -1602,6 +1613,7 @@ describe("DoculaBuilder", () => {
 					urlPath: "document",
 					isRoot: false,
 					section: "foo",
+					lastModified: "2025-01-01",
 				},
 			];
 
@@ -2246,6 +2258,7 @@ describe("DoculaBuilder", () => {
 						generatedHtml: "<p>Test content</p>",
 						preview: "<p>Test content</p>",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -2298,6 +2311,7 @@ describe("DoculaBuilder", () => {
 						generatedHtml: "<p>Test content</p>",
 						preview: "<p>Test content</p>",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -2401,6 +2415,7 @@ describe("DoculaBuilder", () => {
 						generatedHtml: "",
 						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -2706,6 +2721,7 @@ describe("DoculaBuilder", () => {
 					generatedHtml: `<p>Content ${i}</p>`,
 					preview: `<p>Content ${i}</p>`,
 					urlPath: `/changelog/entry-${i}/index.html`,
+					lastModified: "2025-01-01",
 				});
 			}
 
@@ -2785,6 +2801,7 @@ describe("DoculaBuilder", () => {
 					generatedHtml: "",
 					preview: "",
 					urlPath: `/changelog/entry-${i}/index.html`,
+					lastModified: "2025-01-01",
 				});
 			}
 
@@ -3237,6 +3254,7 @@ describe("DoculaBuilder", () => {
 						generatedHtml,
 						preview: "<p>Code example</p>",
 						urlPath: "/changelog/generics-support/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -3423,6 +3441,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/single-page-site/docs/guide.md",
 						urlPath: "/guide.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 			};
@@ -3611,6 +3630,7 @@ describe("DoculaBuilder", () => {
 				generatedHtml: `<p>Content ${index + 1}</p>`,
 				preview: `<p>Content ${index + 1}</p>`,
 				urlPath: `/changelog/entry-${index + 1}/index.html`,
+				lastModified: "2025-01-01",
 			}));
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -3665,6 +3685,7 @@ describe("DoculaBuilder", () => {
 				generatedHtml: `<p>Content ${index + 1}</p>`,
 				preview: `<p>Content ${index + 1}</p>`,
 				urlPath: `/changelog/entry-${index + 1}/index.html`,
+				lastModified: "2025-01-01",
 			}));
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -4067,6 +4088,7 @@ describe("DoculaBuilder", () => {
 						generatedHtml: "",
 						preview: "",
 						urlPath: "/changelog/test-entry/index.html",
+						lastModified: "2025-01-01",
 					},
 				],
 				documents: [
@@ -4081,6 +4103,7 @@ describe("DoculaBuilder", () => {
 						documentPath: "test/fixtures/changelog-site/docs/doc.md",
 						urlPath: "/docs/doc/index.html",
 						isRoot: true,
+						lastModified: "2025-01-01",
 					},
 				],
 				templates: {
@@ -4808,6 +4831,40 @@ describe("DoculaBuilder", () => {
 					force: true,
 				});
 			}
+		});
+	});
+
+	describe("lastModified field", () => {
+		it("should include lastModified in YYYY-MM-DD format for parseDocumentData", () => {
+			const builder = new DoculaBuilder();
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/front-matter.md",
+			);
+			expect(doc.lastModified).toBeDefined();
+			expect(doc.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		});
+
+		it("should include lastModified in YYYY-MM-DD format for parseChangelogEntry", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.lastModified).toBeDefined();
+			expect(entry.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		});
+
+		it("should include lastModified from release date for GitHub release changelog entries", () => {
+			const builder = new DoculaBuilder();
+			const release = {
+				tag_name: "v1.0.0",
+				name: "Release 1.0.0",
+				body: "Release notes",
+				published_at: "2025-06-15T00:00:00Z",
+				prerelease: false,
+				draft: false,
+			};
+			const entries = builder.getReleasesAsChangelogEntries([release]);
+			expect(entries[0].lastModified).toBe("2025-06-15");
 		});
 	});
 });

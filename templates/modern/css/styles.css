@@ -827,6 +827,11 @@ footer {
   height: 1.25rem;
 }
 
+.footer__updated {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 @media (min-width: 992px) {
   footer { height: 4.75rem; }
 }
