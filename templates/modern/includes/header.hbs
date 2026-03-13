@@ -14,12 +14,18 @@
       : mode;
     if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');
     try {
-      var a = JSON.parse(localStorage.getItem('docula-auth-state'));
-      if (a) {
-        window.__doculaAuth = a;
-        if (a.loggedIn) document.documentElement.classList.add('docula-auth-logged-in');
+      var authState = JSON.parse(localStorage.getItem('docula-auth-state'));
+      if (authState) {
+        window.__doculaAuth = authState;
+        if (authState.loggedIn) {
+          document.documentElement.classList.add('docula-auth-logged-in');
+        }
       }
-    } catch(e) {}
-    if (!window.__doculaAuth) window.__doculaAuth = { loggedIn: false, displayName: null };
+    } catch (e) {
+      // Ignore localStorage parsing errors
+    }
+    if (!window.__doculaAuth) {
+      window.__doculaAuth = { loggedIn: false, displayName: null };
+    }
   })();
 </script>

@@ -47,7 +47,13 @@
             <span>Log In</span>
           </a>
           <span class="cookie-auth-user" id="cookie-auth-user"></span>
-          <script>var u=window.__doculaAuth;if(u&&u.displayName){var e=document.getElementById('cookie-auth-user');if(e)e.textContent=u.displayName;}</script>
+          <script>
+            var auth = window.__doculaAuth;
+            if (auth && auth.displayName) {
+              var userEl = document.getElementById('cookie-auth-user');
+              if (userEl) userEl.textContent = auth.displayName;
+            }
+          </script>
           <button class="cookie-auth-btn cookie-auth-logout" id="cookie-auth-logout">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
             <span>Log Out</span>
@@ -97,7 +103,13 @@
       <span>Log In</span>
     </a>
     <span class="cookie-auth-user" id="cookie-auth-user-mobile"></span>
-    <script>var u=window.__doculaAuth;if(u&&u.displayName){var e=document.getElementById('cookie-auth-user-mobile');if(e)e.textContent=u.displayName;}</script>
+    <script>
+      var auth = window.__doculaAuth;
+      if (auth && auth.displayName) {
+        var userEl = document.getElementById('cookie-auth-user-mobile');
+        if (userEl) userEl.textContent = auth.displayName;
+      }
+    </script>
     <button class="mobile-nav__item cookie-auth-btn--mobile" id="cookie-auth-logout-mobile">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
       <span>Log Out</span>
