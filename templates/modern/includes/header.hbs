@@ -15,7 +15,11 @@
     if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');
     try {
       var a = JSON.parse(localStorage.getItem('docula-auth-state'));
-      if (a && a.loggedIn) document.documentElement.classList.add('docula-auth-logged-in');
+      if (a) {
+        window.__doculaAuth = a;
+        if (a.loggedIn) document.documentElement.classList.add('docula-auth-logged-in');
+      }
     } catch(e) {}
+    if (!window.__doculaAuth) window.__doculaAuth = { loggedIn: false, displayName: null };
   })();
 </script>

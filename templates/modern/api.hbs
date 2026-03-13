@@ -77,6 +77,25 @@
             </script>
             <input type="password" class="api-auth__value api-auth__value--hidden" id="api-auth-value" placeholder="Enter value..." />
             <span class="api-auth__cookie-status api-auth__cookie-status--hidden" id="api-auth-cookie-status"></span>
+            <script>
+              (function(){
+                var s = document.getElementById('api-auth-type');
+                if (!s) return;
+                var opt = s.options[s.selectedIndex];
+                var input = document.getElementById('api-auth-value');
+                var badge = document.getElementById('api-auth-cookie-status');
+                if (opt.value === 'none') return;
+                if (opt.getAttribute('data-scheme-type') === 'apiKey' && opt.getAttribute('data-scheme-in') === 'cookie') {
+                  if (badge) {
+                    var auth = window.__doculaAuth || { loggedIn: false };
+                    badge.textContent = auth.loggedIn ? 'Logged in' : 'Not logged in — use Login button above';
+                    badge.className = 'api-auth__cookie-status' + (auth.loggedIn ? ' api-auth__cookie-status--ok' : ' api-auth__cookie-status--warn');
+                  }
+                } else {
+                  if (input) input.classList.remove('api-auth__value--hidden');
+                }
+              })();
+            </script>
           </div>
         </div>
         {{/if}}
