@@ -1965,7 +1965,7 @@ export class DoculaBuilder {
 	}
 
 	private hashFile(filePath: string): string {
-		const content = fs.readFileSync(filePath, "utf8");
+		const content = fs.readFileSync(filePath);
 		return this._hash.toHashSync(content);
 	}
 
