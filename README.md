@@ -11,14 +11,18 @@
 # Features
 * No configuration required. Just setup the folder structure with a logo, favicon, and css file.
 * Builds a static website that can be hosted anywhere.
-* For more complex projects easily add a `docula.config.ts` (TypeScript) or `docula.config.mjs` (JavaScript) file to customize the build process with lifecycle hooks.
-* Full TypeScript support with typed configuration and IDE autocompletion.
+* Simple search is provided by default out of the box.
 * Support for single page with readme or multiple markdown pages in a docs folder.
+* Full TypeScript support with typed configuration and IDE autocompletion.
+* For more complex projects easily add a `docula.config.ts` (TypeScript) or `docula.config.mjs` (JavaScript) file to customize the build process with lifecycle hooks and `DoculaConsole` logging.
 * Will generate a sitemap.xml, robots.txt, and `feed.xml` for your site.
 * Automatically generates `llms.txt` and `llms-full.txt` for LLM-friendly indexing of docs, API reference, and changelog content.
-* Uses Github release notes to generate a changelog / releases page.
+* OpenAPI / Swagger support for auto-generating an interactive API reference page.
+* Uses Github release notes and file-based changelog entries to generate a changelog with individual pages, pagination, and preview text.
 * Uses Github to show contributors and link to their profiles.
-* Simple search is provided by default out of the box.
+* Light, dark, and system theme modes with a built-in toggle.
+* Easy styling customization via `variables.css` with no template editing required.
+* Watch mode with auto-rebuild for local development.
 
 # Table of Contents
 - [Features](#features)
