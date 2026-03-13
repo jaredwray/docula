@@ -198,6 +198,12 @@ export default class Docula {
 					}
 
 					const builder = new DoculaBuilder(this.options);
+					/* v8 ignore next 4 -- @preserve */
+					if (this._configFileModule.onReleaseChangelog) {
+						builder.onReleaseChangelog =
+							this._configFileModule.onReleaseChangelog;
+					}
+
 					await builder.build();
 					if (consoleProcess.args.watch) {
 						this.watch(this.options, builder);
@@ -220,6 +226,12 @@ export default class Docula {
 				}
 
 				const builder = new DoculaBuilder(this.options);
+				/* v8 ignore next 4 -- @preserve */
+				if (this._configFileModule.onReleaseChangelog) {
+					builder.onReleaseChangelog =
+						this._configFileModule.onReleaseChangelog;
+				}
+
 				await builder.build();
 				break;
 			}
@@ -423,6 +435,7 @@ export default class Docula {
 }
 
 export { Writr } from "writr";
+export type { DoculaChangelogEntry } from "./builder.js";
 export type {
 	DoculaCacheOptions,
 	DoculaCookieAuth,

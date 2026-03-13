@@ -651,6 +651,7 @@ body {
 }
 
 .changelog-entry {
+  position: relative;
   border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
@@ -709,6 +710,88 @@ body {
 .changelog-tag-pre-release {
   background-color: rgba(251, 191, 36, 0.15);
   color: #92400e;
+}
+
+.changelog-entry-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.changelog-entry:hover {
+  cursor: pointer;
+}
+
+.changelog-entry-single .changelog-entry-title::after {
+  display: none;
+}
+
+.changelog-entry-single:hover {
+  cursor: default;
+}
+
+.changelog-entry-image {
+  margin-top: 12px;
+}
+
+.changelog-entry-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.changelog-entry-preview {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  color: var(--muted);
+}
+
+.changelog-read-more {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.changelog-entry:hover .changelog-read-more {
+  color: var(--fg);
+}
+
+.changelog-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.changelog-pagination-link {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.changelog-pagination-link:hover {
+  color: var(--fg);
+}
+
+.changelog-pagination-disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.changelog-pagination-disabled:hover {
+  text-decoration: none;
+}
+
+.changelog-pagination-info {
+  font-size: 14px;
+  color: var(--muted);
 }
 
 /* Footer */

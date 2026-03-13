@@ -22,6 +22,8 @@ export type DoculaChangelogEntry = {
 	slug: string;
 	content: string;
 	generatedHtml: string;
+	preview: string;
+	previewImage?: string;
 	urlPath: string;
 };
 
@@ -95,6 +97,9 @@ export class DoculaBuilder {
 	private readonly _options: DoculaOptions = new DoculaOptions();
 	private readonly _ecto: Ecto;
 	private readonly _console: DoculaConsole = new DoculaConsole();
+	public onReleaseChangelog?: (
+		entries: DoculaChangelogEntry[],
+	) => Promise<DoculaChangelogEntry[]> | DoculaChangelogEntry[];
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	constructor(options?: DoculaOptions, engineOptions?: any) {
@@ -184,10 +189,21 @@ export class DoculaBuilder {
 			Array.isArray(doculaData.github.releases) &&
 			doculaData.github.releases.length > 0
 		) {
-			const releaseEntries = this.getReleasesAsChangelogEntries(
+			let releaseEntries = this.getReleasesAsChangelogEntries(
 				// biome-ignore lint/suspicious/noExplicitAny: GitHub release objects
 				doculaData.github.releases as any[],
 			);
+
+			if (this.onReleaseChangelog) {
+				try {
+					releaseEntries = await this.onReleaseChangelog(releaseEntries);
+				} catch (error) {
+					this._console.error(
+						`onReleaseChangelog error: ${(error as Error).message}`,
+					);
+				}
+			}
+
 			allChangelogEntries = [...allChangelogEntries, ...releaseEntries];
 		}
 
@@ -503,6 +519,18 @@ export class DoculaBuilder {
 
 		if (data.hasChangelog && data.templates?.changelog) {
 			urls.push({ url: `${data.siteUrl}/changelog` });
+
+			const perPage = this.options.changelogPerPage;
+			const totalPages = Math.max(
+				1,
+				Math.ceil((data.changelogEntries ?? []).length / perPage),
+			);
+			for (let page = 2; page <= totalPages; page++) {
+				urls.push({
+					url: `${data.siteUrl}/changelog/page/${page}`,
+				});
+			}
+
 			for (const entry of data.changelogEntries ?? []) {
 				urls.push({
 					url: `${data.siteUrl}/changelog/${entry.slug}`,
@@ -1173,8 +1201,7 @@ export class DoculaBuilder {
 		const markdownContent = writr.body;
 
 		const fileName = path.basename(filePath, path.extname(filePath));
-		// Remove leading date prefix pattern (YYYY-MM-DD-) if present
-		const slug = fileName.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+		const slug = fileName;
 
 		const isMdx = filePath.endsWith(".mdx");
 
@@ -1200,6 +1227,8 @@ export class DoculaBuilder {
 			});
 		}
 
+		const previewImage = matterData.previewImage as string | undefined;
+
 		return {
 			title: matterData.title ?? fileName,
 			date: dateString,
@@ -1209,8 +1238,111 @@ export class DoculaBuilder {
 			slug,
 			content: markdownContent,
 			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
+			preview: this.generateChangelogPreview(markdownContent, 500, isMdx),
+			previewImage,
 			urlPath: `/changelog/${slug}/index.html`,
 		};
+	}
+
+	public generateChangelogPreview(
+		markdown: string,
+		maxLength = 500,
+		mdx = false,
+	): string {
+		const minLength = 300;
+
+		// Step 1: Strip markdown headings
+		let cleaned = markdown
+			.split("\n")
+			.filter((line) => !/^#{1,6}\s/.test(line))
+			.join("\n");
+
+		// Step 2: Strip leading blank lines
+		cleaned = cleaned.replace(/^\n+/, "");
+
+		// Step 3: Clean up link syntax — remove images, convert links to text
+		cleaned = cleaned.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+		cleaned = cleaned.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+
+		// Strip leading blank lines after image removal
+		cleaned = cleaned.replace(/^\n+/, "").trim();
+
+		if (cleaned.length <= minLength) {
+			return new Writr(cleaned).renderSync({ mdx });
+		}
+
+		// Step 4: Split on paragraph boundaries within the target range
+		const searchArea = cleaned.slice(0, maxLength);
+		let splitIndex = -1;
+
+		// Look for last paragraph break (\n\n) that is >= minLength
+		let pos = searchArea.lastIndexOf("\n\n");
+		while (pos >= 0) {
+			if (pos >= minLength) {
+				splitIndex = pos;
+				break;
+			}
+
+			// Accept any paragraph break within the max range
+			if (splitIndex === -1) {
+				splitIndex = pos;
+			}
+
+			pos = searchArea.lastIndexOf("\n\n", pos - 1);
+		}
+
+		// For list-heavy content, try splitting at last complete list item
+		if (splitIndex === -1) {
+			const lastNewline = searchArea.lastIndexOf("\n");
+			if (lastNewline >= minLength) {
+				// Check if the next line starts a list item
+				const nextLine = cleaned.slice(lastNewline + 1);
+				if (/^[-*]\s/.test(nextLine) || /^\d+\.\s/.test(nextLine)) {
+					splitIndex = lastNewline;
+				}
+			}
+
+			// Also try finding the last list item boundary before maxLength
+			if (splitIndex === -1) {
+				const lines = searchArea.split("\n");
+				let charCount = 0;
+				let lastItemEnd = -1;
+				for (const line of lines) {
+					const lineEnd = charCount + line.length;
+					if (
+						lineEnd <= maxLength &&
+						(/^[-*]\s/.test(line) || /^\d+\.\s/.test(line))
+					) {
+						// The end of the previous line is a valid split point
+						if (charCount > 0 && charCount >= minLength) {
+							lastItemEnd = charCount - 1;
+						}
+					}
+
+					charCount = lineEnd + 1; // +1 for newline
+				}
+
+				if (lastItemEnd > 0) {
+					splitIndex = lastItemEnd;
+				}
+			}
+		}
+
+		// Step 5: Truncate and apply ellipsis only when force-truncated
+		if (splitIndex > 0) {
+			const truncated = cleaned.slice(0, splitIndex).trim();
+			return new Writr(truncated).renderSync({ mdx });
+		}
+
+		// Fallback: truncate at word boundary with ellipsis
+		let truncated = cleaned.slice(0, maxLength);
+		const lastSpace = truncated.lastIndexOf(" ");
+		if (lastSpace > 0) {
+			truncated = truncated.slice(0, lastSpace);
+		}
+
+		truncated += "...";
+		return new Writr(truncated).renderSync({ mdx });
 	}
 
 	public convertReleaseToChangelogEntry(
@@ -1250,6 +1382,7 @@ export class DoculaBuilder {
 			slug,
 			content: body,
 			generatedHtml: new Writr(body).renderSync(),
+			preview: this.generateChangelogPreview(body),
 			urlPath: `/changelog/${slug}/index.html`,
 		};
 	}
@@ -1275,18 +1408,53 @@ export class DoculaBuilder {
 			return;
 		}
 
-		const changelogOutputPath = `${data.output}/changelog`;
-		const changelogIndexPath = `${changelogOutputPath}/index.html`;
-
-		await fs.promises.mkdir(changelogOutputPath, { recursive: true });
-
+		const allEntries = data.changelogEntries ?? [];
+		const perPage = this.options.changelogPerPage;
+		const totalPages = Math.max(1, Math.ceil(allEntries.length / perPage));
 		const changelogTemplate = `${data.templatePath}/${data.templates.changelog}`;
-		const changelogContent = await this._ecto.renderFromFile(
-			changelogTemplate,
-			{ ...data, entries: data.changelogEntries },
-			data.templatePath,
-		);
-		await fs.promises.writeFile(changelogIndexPath, changelogContent, "utf8");
+
+		const promises = [];
+		for (let page = 1; page <= totalPages; page++) {
+			const startIndex = (page - 1) * perPage;
+			const pageEntries = allEntries.slice(startIndex, startIndex + perPage);
+
+			const outputPath =
+				page === 1
+					? `${data.output}/changelog`
+					: `${data.output}/changelog/page/${page}`;
+			const indexPath = `${outputPath}/index.html`;
+
+			const paginationData = {
+				...data,
+				entries: pageEntries,
+				currentPage: page,
+				totalPages,
+				hasPagination: totalPages > 1,
+				hasNextPage: page < totalPages,
+				hasPrevPage: page > 1,
+				nextPageUrl: page < totalPages ? `/changelog/page/${page + 1}/` : "",
+				prevPageUrl:
+					page > 1
+						? page === 2
+							? "/changelog/"
+							: `/changelog/page/${page - 1}/`
+						: "",
+			};
+
+			promises.push(
+				(async () => {
+					await fs.promises.mkdir(outputPath, { recursive: true });
+					const content = await this._ecto.renderFromFile(
+						changelogTemplate,
+						paginationData,
+						data.templatePath,
+					);
+					await fs.promises.writeFile(indexPath, content, "utf8");
+				})(),
+			);
+		}
+
+		await Promise.all(promises);
 	}
 
 	public async buildChangelogEntryPages(data: DoculaData): Promise<void> {

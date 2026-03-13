@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import type {DoculaOptions} from 'docula';
+import type {DoculaOptions, DoculaChangelogEntry} from 'docula';
 
 export const options: Partial<DoculaOptions> = {
 	template: 'modern',
