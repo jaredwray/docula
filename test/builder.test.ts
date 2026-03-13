@@ -2080,7 +2080,10 @@ describe("DoculaBuilder", () => {
 		it("should get top level documents from mega fixtures", () => {
 			const builder = new DoculaBuilder();
 			const documentsPath = "test/fixtures/mega-page-site/docs";
-			const documents = builder.getDocumentInDirectory(documentsPath);
+			const documents = builder.getDocumentInDirectory(
+				documentsPath,
+				documentsPath,
+			);
 			expect(documents.length).toBe(3);
 		});
 		it("should get all the documents from the mega fixtures", () => {
@@ -3979,6 +3982,7 @@ describe("DoculaBuilder", () => {
 				sections: [],
 				documents: builder.getDocumentInDirectory(
 					"test/fixtures/multi-page-site/docs",
+					"test/fixtures/multi-page-site/docs",
 				),
 				templates: {
 					home: "home.hbs",
@@ -4076,6 +4080,7 @@ describe("DoculaBuilder", () => {
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
+					"test/fixtures/multi-page-site/docs",
 					"test/fixtures/multi-page-site/docs",
 				),
 				templates: {

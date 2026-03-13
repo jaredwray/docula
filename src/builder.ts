@@ -154,13 +154,10 @@ export class DoculaBuilder {
 				? previousManifest
 				: undefined;
 
-		// Hash all source files for change detection
-		// Docs use full paths as keys (matching documentPath in getDocumentInDirectory)
+		// Hash all source files for change detection (keys are relative to the dir)
 		const currentDocHashes = this.hashSourceFiles(
 			`${this.options.sitePath}/docs`,
-			true,
 		);
-		// Changelog uses relative filenames as keys (matching file basename in getChangelogEntries)
 		const currentChangelogHashes = this.hashSourceFiles(
 			`${this.options.sitePath}/changelog`,
 		);
@@ -1725,6 +1722,7 @@ export class DoculaBuilder {
 			// Get top level documents
 			documents = this.getDocumentInDirectory(
 				sitePath,
+				sitePath,
 				cachedDocs,
 				previousDocHashes,
 				currentDocHashes,
@@ -1738,6 +1736,7 @@ export class DoculaBuilder {
 				const sectionPath = `${sitePath}/${section.path}`;
 				const sectionDocuments = this.getDocumentInDirectory(
 					sectionPath,
+					sitePath,
 					cachedDocs,
 					previousDocHashes,
 					currentDocHashes,
@@ -1751,6 +1750,7 @@ export class DoculaBuilder {
 
 	public getDocumentInDirectory(
 		sitePath: string,
+		docsRootPath: string,
 		cachedDocs?: Map<string, DoculaDocument>,
 		previousDocHashes?: Record<string, string>,
 		currentDocHashes?: Record<string, string>,
@@ -1761,6 +1761,7 @@ export class DoculaBuilder {
 		if (documentList.length > 0) {
 			for (const document of documentList) {
 				const documentPath = `${sitePath}/${document}`;
+				const relativeKey = path.relative(docsRootPath, documentPath);
 				const stats = fs.statSync(documentPath);
 				if (
 					stats.isFile() &&
@@ -1769,9 +1770,9 @@ export class DoculaBuilder {
 					// Check if we can use cached parsed document
 					if (cachedDocs && previousDocHashes && currentDocHashes) {
 						const hash =
-							currentDocHashes[documentPath] ?? this.hashFile(documentPath);
-						const prevHash = previousDocHashes[documentPath];
-						const cached = cachedDocs.get(documentPath);
+							currentDocHashes[relativeKey] ?? this.hashFile(documentPath);
+						const prevHash = previousDocHashes[relativeKey];
+						const cached = cachedDocs.get(relativeKey);
 						if (cached && prevHash === hash) {
 							documents.push(cached);
 							continue;
@@ -2440,9 +2441,11 @@ export class DoculaBuilder {
 	): void {
 		const dir = path.join(sitePath, ".cache", "build");
 		fs.mkdirSync(dir, { recursive: true });
+		const docsRoot = path.join(sitePath, "docs");
 		const map: Record<string, DoculaDocument> = {};
 		for (const doc of documents) {
-			map[doc.documentPath] = doc;
+			const relativeKey = path.relative(docsRoot, doc.documentPath);
+			map[relativeKey] = doc;
 		}
 
 		fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
@@ -2482,10 +2485,7 @@ export class DoculaBuilder {
 		fs.writeFileSync(path.join(dir, "changelog.json"), JSON.stringify(map));
 	}
 
-	private hashSourceFiles(
-		dir: string,
-		useFullPaths = false,
-	): Record<string, string> {
+	private hashSourceFiles(dir: string): Record<string, string> {
 		const hashes: Record<string, string> = {};
 		if (!fs.existsSync(dir)) {
 			return hashes;
@@ -2494,8 +2494,7 @@ export class DoculaBuilder {
 		const files = this.listFilesRecursive(dir);
 		for (const file of files) {
 			const fullPath = path.join(dir, file);
-			const key = useFullPaths ? fullPath : file;
-			hashes[key] = this.hashFile(fullPath);
+			hashes[file] = this.hashFile(fullPath);
 		}
 
 		return hashes;
