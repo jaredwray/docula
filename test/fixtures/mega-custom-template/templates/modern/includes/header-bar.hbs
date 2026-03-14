@@ -1,0 +1,22 @@
+<header class="header custom-header">
+  <div class="header-top">
+    <div class="header-top__content">
+      <a href="/">
+        <img alt="{{siteTitle}}" class="logo__img" src="/logo.svg">
+      </a>
+      <nav class="header-bottom__nav">
+        {{#if hasDocuments}}
+        <a class="header-bottom__item" href="/docs/" id="nav-docs">
+          <span>Docs</span>
+        </a>
+        {{/if}}
+        {{#if hasChangelog}}
+        <a class="header-bottom__item" href="/changelog" id="nav-changelog">
+          <span>Changelog</span>
+        </a>
+        {{/if}}
+      </nav>
+      {{> theme-toggle }}
+    </div>
+  </div>
+</header>

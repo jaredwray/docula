@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Ecto } from "ecto";
+import { Hashery } from "hashery";
 import { Writr } from "writr";
 import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { DoculaConsole } from "./console.js";
@@ -98,10 +99,20 @@ export type DoculaDocument = {
 	lastModified: string;
 };
 
+export type BuildManifest = {
+	version: 1;
+	configHash: string;
+	templateHash: string;
+	docs: Record<string, string>;
+	changelog: Record<string, string>;
+	assets: Record<string, string>;
+};
+
 export class DoculaBuilder {
 	private readonly _options: DoculaOptions = new DoculaOptions();
 	private readonly _ecto: Ecto;
 	private readonly _console: DoculaConsole = new DoculaConsole();
+	private readonly _hash = new Hashery();
 	public onReleaseChangelog?: (
 		entries: DoculaChangelogEntry[],
 		console: DoculaConsole,
@@ -133,6 +144,55 @@ export class DoculaBuilder {
 			this.options.template,
 		);
 
+		// Load previous build manifest and compute current hashes
+		const previousManifest = this.loadBuildManifest(this.options.sitePath);
+		const currentConfigHash = this.hashOptions();
+		const currentTemplateHash =
+			this.hashTemplateDirectory(resolvedTemplatePath);
+
+		// If config changed, discard manifest (force full rebuild)
+		const validManifest =
+			previousManifest?.configHash === currentConfigHash
+				? previousManifest
+				: undefined;
+
+		// Hash all source files for change detection (keys are relative to the dir)
+		const currentDocHashes = this.hashSourceFiles(
+			`${this.options.sitePath}/docs`,
+		);
+		const currentChangelogHashes = this.hashSourceFiles(
+			`${this.options.sitePath}/changelog`,
+		);
+		const currentAssetHashes: Record<string, string> = {};
+
+		// Check if anything changed at all (full build skip for watch mode)
+		// Only skip if the output directory exists (otherwise we need a full build)
+		if (
+			validManifest &&
+			fs.existsSync(this.options.output) &&
+			validManifest.templateHash === currentTemplateHash &&
+			this.recordsEqual(validManifest.docs, currentDocHashes) &&
+			this.recordsEqual(validManifest.changelog, currentChangelogHashes)
+		) {
+			// Check assets too
+			const assetsChanged = this.hasAssetsChanged(
+				this.options.sitePath,
+				validManifest.assets,
+			);
+			if (!assetsChanged) {
+				this._console.success("No changes detected, skipping build");
+				return;
+			}
+		}
+
+		// Load cached parsed objects if manifest is valid
+		const cachedDocs = validManifest
+			? this.loadCachedDocuments(this.options.sitePath)
+			: new Map<string, DoculaDocument>();
+		const cachedChangelog = validManifest
+			? this.loadCachedChangelog(this.options.sitePath)
+			: new Map<string, DoculaChangelogEntry>();
+
 		// Set the site options
 		const doculaData: DoculaData = {
 			siteUrl: this.options.siteUrl,
@@ -163,10 +223,13 @@ export class DoculaBuilder {
 		if (this.options.githubPath) {
 			doculaData.github = await this.getGithubData(this.options.githubPath);
 		}
-		// Get the documents
+		// Get the documents (using cached parsed objects for unchanged files)
 		doculaData.documents = this.getDocuments(
 			`${doculaData.sitePath}/docs`,
 			doculaData,
+			cachedDocs,
+			validManifest?.docs ?? {},
+			currentDocHashes,
 		);
 		// Get the sections
 		doculaData.sections = this.getSections(
@@ -179,7 +242,12 @@ export class DoculaBuilder {
 
 		// Get file-based changelog entries
 		const changelogPath = `${doculaData.sitePath}/changelog`;
-		const fileChangelogEntries = this.getChangelogEntries(changelogPath);
+		const fileChangelogEntries = this.getChangelogEntries(
+			changelogPath,
+			cachedChangelog,
+			validManifest?.changelog ?? {},
+			currentChangelogHashes,
+		);
 
 		// Check if a changelog template exists
 		const hasChangelogTemplate =
@@ -310,11 +378,20 @@ export class DoculaBuilder {
 		}
 
 		const siteRelativePath = this.options.sitePath;
+		const previousAssets = validManifest?.assets ?? {};
 
 		this._console.step("Copying assets...");
 
 		// Copy over favicon
-		if (fs.existsSync(`${siteRelativePath}/favicon.ico`)) {
+		if (
+			!this.hashAssetAndCheckSkip(
+				`${siteRelativePath}/favicon.ico`,
+				`${this.options.output}/favicon.ico`,
+				"favicon.ico",
+				previousAssets,
+				currentAssetHashes,
+			)
+		) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/favicon.ico`,
 				`${this.options.output}/favicon.ico`,
@@ -323,7 +400,15 @@ export class DoculaBuilder {
 		}
 
 		// Copy over logo
-		if (fs.existsSync(`${siteRelativePath}/logo.svg`)) {
+		if (
+			!this.hashAssetAndCheckSkip(
+				`${siteRelativePath}/logo.svg`,
+				`${this.options.output}/logo.svg`,
+				"logo.svg",
+				previousAssets,
+				currentAssetHashes,
+			)
+		) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/logo.svg`,
 				`${this.options.output}/logo.svg`,
@@ -332,7 +417,15 @@ export class DoculaBuilder {
 		}
 
 		// Copy over logo_horizontal
-		if (fs.existsSync(`${siteRelativePath}/logo_horizontal.png`)) {
+		if (
+			!this.hashAssetAndCheckSkip(
+				`${siteRelativePath}/logo_horizontal.png`,
+				`${this.options.output}/logo_horizontal.png`,
+				"logo_horizontal.png",
+				previousAssets,
+				currentAssetHashes,
+			)
+		) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/logo_horizontal.png`,
 				`${this.options.output}/logo_horizontal.png`,
@@ -343,9 +436,12 @@ export class DoculaBuilder {
 		// Copy over css
 		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(`${resolvedTemplatePath}/css`)) {
-			this.copyDirectory(
+			this.copyDirectoryWithHashing(
 				`${resolvedTemplatePath}/css`,
 				`${this.options.output}/css`,
+				"css",
+				previousAssets,
+				currentAssetHashes,
 			);
 			this._console.fileCopied("css/");
 		}
@@ -353,15 +449,26 @@ export class DoculaBuilder {
 		// Copy over js
 		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(`${resolvedTemplatePath}/js`)) {
-			this.copyDirectory(
+			this.copyDirectoryWithHashing(
 				`${resolvedTemplatePath}/js`,
 				`${this.options.output}/js`,
+				"js",
+				previousAssets,
+				currentAssetHashes,
 			);
 			this._console.fileCopied("js/");
 		}
 
 		// Copy over variables
-		if (fs.existsSync(`${siteRelativePath}/variables.css`)) {
+		if (
+			!this.hashAssetAndCheckSkip(
+				`${siteRelativePath}/variables.css`,
+				`${this.options.output}/css/variables.css`,
+				"variables.css",
+				previousAssets,
+				currentAssetHashes,
+			)
+		) {
 			await fs.promises.copyFile(
 				`${siteRelativePath}/variables.css`,
 				`${this.options.output}/css/variables.css`,
@@ -369,8 +476,19 @@ export class DoculaBuilder {
 			this._console.fileCopied("css/variables.css");
 		}
 
-		// Copy over public folder contents
-		this.copyPublicFolder(siteRelativePath, this.options.output);
+		// Record swagger.json hash for change detection
+		const swaggerPath = `${siteRelativePath}/api/swagger.json`;
+		if (fs.existsSync(swaggerPath)) {
+			currentAssetHashes["api/swagger.json"] = this.hashFile(swaggerPath);
+		}
+
+		// Copy over public folder contents (differential) and record their hashes
+		this.copyPublicFolder(
+			siteRelativePath,
+			this.options.output,
+			validManifest?.assets ?? {},
+			currentAssetHashes,
+		);
 
 		// Copy non-markdown assets from changelog/ to output
 		this.copyContentAssets(
@@ -391,6 +509,22 @@ export class DoculaBuilder {
 		}
 
 		await this.buildLlmsFiles(doculaData);
+
+		// Save build manifest for differential builds
+		this.ensureCacheInGitignore(this.options.sitePath);
+		const newManifest: BuildManifest = {
+			version: 1,
+			configHash: currentConfigHash,
+			templateHash: currentTemplateHash,
+			docs: currentDocHashes,
+			changelog: currentChangelogHashes,
+			assets: currentAssetHashes,
+		};
+		this.saveBuildManifest(this.options.sitePath, newManifest);
+
+		// Save cached parsed objects
+		this.saveCachedDocuments(this.options.sitePath, doculaData.documents ?? []);
+		this.saveCachedChangelog(this.options.sitePath, fileChangelogEntries);
 
 		const endTime = Date.now();
 
@@ -1168,7 +1302,12 @@ export class DoculaBuilder {
 		await fs.promises.writeFile(apiPath, apiContent, "utf8");
 	}
 
-	public getChangelogEntries(changelogPath: string): DoculaChangelogEntry[] {
+	public getChangelogEntries(
+		changelogPath: string,
+		cachedEntries?: Map<string, DoculaChangelogEntry>,
+		previousHashes?: Record<string, string>,
+		currentHashes?: Record<string, string>,
+	): DoculaChangelogEntry[] {
 		const entries: DoculaChangelogEntry[] = [];
 		if (!fs.existsSync(changelogPath)) {
 			return entries;
@@ -1179,6 +1318,18 @@ export class DoculaBuilder {
 			const filePath = `${changelogPath}/${file}`;
 			const stats = fs.statSync(filePath);
 			if (stats.isFile() && (file.endsWith(".md") || file.endsWith(".mdx"))) {
+				// Check if we can use cached parsed entry
+				if (cachedEntries && previousHashes && currentHashes) {
+					const slug = path.basename(file, path.extname(file));
+					const hash = currentHashes[file] ?? this.hashFile(filePath);
+					const prevHash = previousHashes[file];
+					const cached = cachedEntries.get(slug);
+					if (cached && prevHash === hash) {
+						entries.push(cached);
+						continue;
+					}
+				}
+
 				const entry = this.parseChangelogEntry(filePath);
 				entries.push(entry);
 			}
@@ -1570,11 +1721,20 @@ export class DoculaBuilder {
 	public getDocuments(
 		sitePath: string,
 		doculaData: DoculaData,
+		cachedDocs?: Map<string, DoculaDocument>,
+		previousDocHashes?: Record<string, string>,
+		currentDocHashes?: Record<string, string>,
 	): DoculaDocument[] {
 		let documents: DoculaDocument[] = [];
 		if (fs.existsSync(sitePath)) {
 			// Get top level documents
-			documents = this.getDocumentInDirectory(sitePath);
+			documents = this.getDocumentInDirectory(
+				sitePath,
+				sitePath,
+				cachedDocs,
+				previousDocHashes,
+				currentDocHashes,
+			);
 
 			// Get all sections and parse them
 			doculaData.sections = this.getSections(sitePath, this.options);
@@ -1582,7 +1742,13 @@ export class DoculaBuilder {
 			// Get all documents in each section
 			for (const section of doculaData.sections) {
 				const sectionPath = `${sitePath}/${section.path}`;
-				const sectionDocuments = this.getDocumentInDirectory(sectionPath);
+				const sectionDocuments = this.getDocumentInDirectory(
+					sectionPath,
+					sitePath,
+					cachedDocs,
+					previousDocHashes,
+					currentDocHashes,
+				);
 				documents = [...documents, ...sectionDocuments];
 			}
 		}
@@ -1590,18 +1756,37 @@ export class DoculaBuilder {
 		return documents;
 	}
 
-	public getDocumentInDirectory(sitePath: string): DoculaDocument[] {
+	public getDocumentInDirectory(
+		sitePath: string,
+		docsRootPath: string,
+		cachedDocs?: Map<string, DoculaDocument>,
+		previousDocHashes?: Record<string, string>,
+		currentDocHashes?: Record<string, string>,
+	): DoculaDocument[] {
 		const documents: DoculaDocument[] = [];
 		const documentList = fs.readdirSync(sitePath);
 		/* v8 ignore next -- @preserve */
 		if (documentList.length > 0) {
 			for (const document of documentList) {
 				const documentPath = `${sitePath}/${document}`;
+				const relativeKey = path.relative(docsRootPath, documentPath);
 				const stats = fs.statSync(documentPath);
 				if (
 					stats.isFile() &&
 					(document.endsWith(".md") || document.endsWith(".mdx"))
 				) {
+					// Check if we can use cached parsed document
+					if (cachedDocs && previousDocHashes && currentDocHashes) {
+						const hash =
+							currentDocHashes[relativeKey] ?? this.hashFile(documentPath);
+						const prevHash = previousDocHashes[relativeKey];
+						const cached = cachedDocs.get(relativeKey);
+						if (cached && prevHash === hash) {
+							documents.push(cached);
+							continue;
+						}
+					}
+
 					const documentData = this.parseDocumentData(documentPath);
 					documents.push(documentData);
 				}
@@ -1790,16 +1975,63 @@ export class DoculaBuilder {
 
 		const overrideFiles = this.listFilesRecursive(overrideDir);
 
-		// Check if we can reuse the existing cache by comparing modification times
-		if (
-			fs.existsSync(cacheDir) &&
-			this.isCacheFresh(overrideDir, cacheDir, overrideFiles)
-		) {
-			this._console.step("Using cached template overrides...");
-			return cacheDir;
+		// Check if we can reuse or incrementally update the existing cache
+		if (fs.existsSync(cacheDir)) {
+			const diff = this.getChangedOverrides(
+				overrideDir,
+				cacheDir,
+				overrideFiles,
+			);
+
+			if (diff) {
+				const hasChanges =
+					diff.added.length > 0 ||
+					diff.changed.length > 0 ||
+					diff.removed.length > 0;
+
+				if (!hasChanges) {
+					this._console.step("Using cached template overrides...");
+					return cacheDir;
+				}
+
+				// Apply incremental updates
+				this._console.step("Updating template overrides...");
+
+				for (const file of diff.added) {
+					this._console.info(`Template override added: ${file}`);
+					const targetPath = path.join(cacheDir, file);
+					fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+					fs.copyFileSync(path.join(overrideDir, file), targetPath);
+				}
+
+				for (const file of diff.changed) {
+					this._console.info(`Template override changed: ${file}`);
+					const targetPath = path.join(cacheDir, file);
+					fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+					fs.copyFileSync(path.join(overrideDir, file), targetPath);
+				}
+
+				for (const file of diff.removed) {
+					this._console.info(`Template override removed: ${file}`);
+					const cachedPath = path.join(cacheDir, file);
+					// Restore original template file if it exists
+					const originalPath = path.join(resolvedTemplatePath, file);
+					if (fs.existsSync(originalPath)) {
+						fs.copyFileSync(originalPath, cachedPath);
+					} else if (fs.existsSync(cachedPath)) {
+						fs.unlinkSync(cachedPath);
+					}
+				}
+
+				// Update manifest with current hashes
+				const manifestPath = path.join(cacheDir, ".manifest.json");
+				fs.writeFileSync(manifestPath, JSON.stringify(diff.currentHashes));
+
+				return cacheDir;
+			}
 		}
 
-		// Log overridden files
+		// Full rebuild: no cache or corrupt manifest
 		/* v8 ignore next 5 -- @preserve */
 		if (overrideFiles.length > 0) {
 			this._console.step("Applying template overrides...");
@@ -1824,9 +2056,14 @@ export class DoculaBuilder {
 		// Overlay user overrides on top
 		this.copyDirectory(overrideDir, cacheDir);
 
-		// Write manifest so isCacheFresh can detect deleted/renamed overrides
+		// Write manifest with content hashes
+		const currentHashes: Record<string, string> = {};
+		for (const file of overrideFiles) {
+			currentHashes[file] = this.hashFile(path.join(overrideDir, file));
+		}
+
 		const manifestPath = path.join(cacheDir, ".manifest.json");
-		fs.writeFileSync(manifestPath, JSON.stringify(overrideFiles));
+		fs.writeFileSync(manifestPath, JSON.stringify(currentHashes));
 
 		return cacheDir;
 	}
@@ -1857,50 +2094,64 @@ export class DoculaBuilder {
 		}
 	}
 
-	private isCacheFresh(
+	private getChangedOverrides(
 		overrideDir: string,
 		cacheDir: string,
 		overrideFiles: string[],
-	): boolean {
-		// Check manifest to detect deleted/renamed override files
+	):
+		| {
+				added: string[];
+				changed: string[];
+				removed: string[];
+				currentHashes: Record<string, string>;
+		  }
+		| undefined {
 		const manifestPath = path.join(cacheDir, ".manifest.json");
 		if (!fs.existsSync(manifestPath)) {
-			return false;
+			return undefined;
 		}
 
+		let previousHashes: Record<string, string>;
 		try {
-			const previousFiles = JSON.parse(
+			previousHashes = JSON.parse(
 				fs.readFileSync(manifestPath, "utf8"),
-			) as string[];
-			if (
-				previousFiles.length !== overrideFiles.length ||
-				!previousFiles.every((f, i) => f === overrideFiles[i])
-			) {
-				return false;
-			}
+			) as Record<string, string>;
 		} catch {
-			return false;
+			return undefined;
 		}
 
-		// Every override file must exist in cache and be older or equal in mtime
+		// Compute current hashes
+		const currentHashes: Record<string, string> = {};
 		for (const file of overrideFiles) {
-			const overridePath = path.join(overrideDir, file);
-			const cachedPath = path.join(cacheDir, file);
+			currentHashes[file] = this.hashFile(path.join(overrideDir, file));
+		}
 
-			/* v8 ignore next 3 -- @preserve */
-			if (!fs.existsSync(cachedPath)) {
-				return false;
-			}
+		const added: string[] = [];
+		const changed: string[] = [];
+		const removed: string[] = [];
 
-			const overrideMtime = fs.statSync(overridePath).mtimeMs;
-			const cachedMtime = fs.statSync(cachedPath).mtimeMs;
-
-			if (overrideMtime > cachedMtime) {
-				return false;
+		// Find added and changed files
+		for (const file of overrideFiles) {
+			if (!(file in previousHashes)) {
+				added.push(file);
+			} else if (currentHashes[file] !== previousHashes[file]) {
+				changed.push(file);
 			}
 		}
 
-		return true;
+		// Find removed files
+		for (const file of Object.keys(previousHashes)) {
+			if (!overrideFiles.includes(file)) {
+				removed.push(file);
+			}
+		}
+
+		return { added, changed, removed, currentHashes };
+	}
+
+	private hashFile(filePath: string): string {
+		const content = fs.readFileSync(filePath);
+		return this._hash.toHashSync(content);
 	}
 
 	private listFilesRecursive(dir: string, prefix = ""): string[] {
@@ -1960,7 +2211,12 @@ export class DoculaBuilder {
 		}
 	}
 
-	private copyPublicFolder(sitePath: string, output: string): void {
+	private copyPublicFolder(
+		sitePath: string,
+		output: string,
+		previousAssets: Record<string, string>,
+		currentAssets: Record<string, string>,
+	): void {
 		const publicPath = `${sitePath}/public`;
 
 		if (!fs.existsSync(publicPath)) {
@@ -1970,7 +2226,14 @@ export class DoculaBuilder {
 		this._console.step("Copying public folder...");
 
 		const resolvedOutput = path.resolve(output);
-		this.copyPublicDirectory(publicPath, output, publicPath, resolvedOutput);
+		this.copyPublicDirectory(
+			publicPath,
+			output,
+			publicPath,
+			resolvedOutput,
+			previousAssets,
+			currentAssets,
+		);
 	}
 
 	private copyPublicDirectory(
@@ -1978,6 +2241,8 @@ export class DoculaBuilder {
 		target: string,
 		basePath: string,
 		output: string,
+		previousAssets: Record<string, string>,
+		currentAssets: Record<string, string>,
 	): void {
 		const files = fs.readdirSync(source);
 
@@ -2005,8 +2270,24 @@ export class DoculaBuilder {
 
 			if (stat.isDirectory()) {
 				fs.mkdirSync(targetPath, { recursive: true });
-				this.copyPublicDirectory(sourcePath, targetPath, basePath, output);
+				this.copyPublicDirectory(
+					sourcePath,
+					targetPath,
+					basePath,
+					output,
+					previousAssets,
+					currentAssets,
+				);
 			} else {
+				const assetKey = `public/${relativePath}`;
+				const hash = this.hashFile(sourcePath);
+				currentAssets[assetKey] = hash;
+
+				// Skip copy if file hasn't changed
+				if (previousAssets[assetKey] === hash && fs.existsSync(targetPath)) {
+					continue;
+				}
+
 				fs.mkdirSync(target, { recursive: true });
 				fs.copyFileSync(sourcePath, targetPath);
 				this._console.fileCopied(relativePath);
@@ -2079,6 +2360,284 @@ export class DoculaBuilder {
 		}
 
 		return results;
+	}
+
+	private loadBuildManifest(sitePath: string): BuildManifest | undefined {
+		const manifestPath = path.join(
+			sitePath,
+			".cache",
+			"build",
+			"manifest.json",
+		);
+		if (!fs.existsSync(manifestPath)) {
+			return undefined;
+		}
+
+		try {
+			const data = JSON.parse(
+				fs.readFileSync(manifestPath, "utf8"),
+			) as BuildManifest;
+			if (data.version !== 1) {
+				return undefined;
+			}
+
+			return data;
+		} catch {
+			return undefined;
+		}
+	}
+
+	private saveBuildManifest(sitePath: string, manifest: BuildManifest): void {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+	}
+
+	private hashOptions(): string {
+		const relevant = {
+			siteUrl: this.options.siteUrl,
+			siteTitle: this.options.siteTitle,
+			siteDescription: this.options.siteDescription,
+			githubPath: this.options.githubPath,
+			template: this.options.template,
+			templatePath: this.options.templatePath,
+			homePage: this.options.homePage,
+			enableLlmsTxt: this.options.enableLlmsTxt,
+			changelogPerPage: this.options.changelogPerPage,
+			enableReleaseChangelog: this.options.enableReleaseChangelog,
+			sections: this.options.sections,
+			openApiUrl: this.options.openApiUrl,
+			themeMode: this.options.themeMode,
+			cookieAuth: this.options.cookieAuth,
+			headerLinks: this.options.headerLinks,
+		};
+		return this._hash.toHashSync(JSON.stringify(relevant));
+	}
+
+	private hashTemplateDirectory(templatePath: string): string {
+		/* v8 ignore next 3 -- @preserve */
+		if (!fs.existsSync(templatePath)) {
+			return "";
+		}
+
+		const files = this.listFilesRecursive(templatePath);
+		const hashes = files.map((f) => this.hashFile(path.join(templatePath, f)));
+		return this._hash.toHashSync(hashes.join(""));
+	}
+
+	private loadCachedDocuments(sitePath: string): Map<string, DoculaDocument> {
+		const cachePath = path.join(sitePath, ".cache", "build", "documents.json");
+		/* v8 ignore next 3 -- @preserve */
+		if (!fs.existsSync(cachePath)) {
+			return new Map();
+		}
+
+		try {
+			const data = JSON.parse(fs.readFileSync(cachePath, "utf8")) as Record<
+				string,
+				DoculaDocument
+			>;
+			return new Map(Object.entries(data));
+		} catch {
+			/* v8 ignore next -- @preserve */
+			return new Map();
+		}
+	}
+
+	private saveCachedDocuments(
+		sitePath: string,
+		documents: DoculaDocument[],
+	): void {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		const docsRoot = path.join(sitePath, "docs");
+		const map: Record<string, DoculaDocument> = {};
+		for (const doc of documents) {
+			const relativeKey = path.relative(docsRoot, doc.documentPath);
+			map[relativeKey] = doc;
+		}
+
+		fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
+	}
+
+	private loadCachedChangelog(
+		sitePath: string,
+	): Map<string, DoculaChangelogEntry> {
+		const cachePath = path.join(sitePath, ".cache", "build", "changelog.json");
+		/* v8 ignore next 3 -- @preserve */
+		if (!fs.existsSync(cachePath)) {
+			return new Map();
+		}
+
+		try {
+			const data = JSON.parse(fs.readFileSync(cachePath, "utf8")) as Record<
+				string,
+				DoculaChangelogEntry
+			>;
+			return new Map(Object.entries(data));
+		} catch {
+			return new Map();
+		}
+	}
+
+	private saveCachedChangelog(
+		sitePath: string,
+		entries: DoculaChangelogEntry[],
+	): void {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		const map: Record<string, DoculaChangelogEntry> = {};
+		for (const entry of entries) {
+			map[entry.slug] = entry;
+		}
+
+		fs.writeFileSync(path.join(dir, "changelog.json"), JSON.stringify(map));
+	}
+
+	private hashSourceFiles(dir: string): Record<string, string> {
+		const hashes: Record<string, string> = {};
+		if (!fs.existsSync(dir)) {
+			return hashes;
+		}
+
+		const files = this.listFilesRecursive(dir);
+		for (const file of files) {
+			const fullPath = path.join(dir, file);
+			hashes[file] = this.hashFile(fullPath);
+		}
+
+		return hashes;
+	}
+
+	private recordsEqual(
+		a: Record<string, string>,
+		b: Record<string, string>,
+	): boolean {
+		const keysA = Object.keys(a);
+		const keysB = Object.keys(b);
+		if (keysA.length !== keysB.length) {
+			return false;
+		}
+
+		for (const key of keysA) {
+			if (a[key] !== b[key]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private hasAssetsChanged(
+		sitePath: string,
+		previousAssets: Record<string, string>,
+	): boolean {
+		const assetFiles = [
+			"favicon.ico",
+			"logo.svg",
+			"logo_horizontal.png",
+			"variables.css",
+			"api/swagger.json",
+		];
+		for (const file of assetFiles) {
+			const filePath = path.join(sitePath, file);
+			if (fs.existsSync(filePath)) {
+				const hash = this.hashFile(filePath);
+				if (previousAssets[file] !== hash) {
+					return true;
+				}
+			} else if (previousAssets[file]) {
+				return true;
+			}
+		}
+
+		// Check public folder
+		const publicPath = path.join(sitePath, "public");
+		if (fs.existsSync(publicPath)) {
+			const publicHashes = this.hashSourceFiles(publicPath);
+			for (const [file, hash] of Object.entries(publicHashes)) {
+				if (previousAssets[`public/${file}`] !== hash) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Hashes the source file, records it in currentAssets, and returns
+	 * whether the copy can be skipped (unchanged from previous build).
+	 */
+	private hashAssetAndCheckSkip(
+		sourcePath: string,
+		targetPath: string,
+		assetKey: string,
+		previousAssets: Record<string, string>,
+		currentAssets: Record<string, string>,
+	): boolean {
+		if (!fs.existsSync(sourcePath)) {
+			return true;
+		}
+
+		const hash = this.hashFile(sourcePath);
+		currentAssets[assetKey] = hash;
+
+		if (previousAssets[assetKey] === hash && fs.existsSync(targetPath)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private copyDirectoryWithHashing(
+		source: string,
+		target: string,
+		prefix: string,
+		previousAssets: Record<string, string>,
+		currentAssets: Record<string, string>,
+	): void {
+		/* v8 ignore next 3 -- @preserve */
+		if (!fs.existsSync(source)) {
+			return;
+		}
+
+		const files = fs.readdirSync(source);
+		for (const file of files) {
+			/* v8 ignore next -- @preserve */
+			if (file.startsWith(".")) {
+				continue;
+			}
+
+			const sourcePath = `${source}/${file}`;
+			const targetPath = `${target}/${file}`;
+			const assetKey = prefix ? `${prefix}/${file}` : file;
+			const stat = fs.lstatSync(sourcePath);
+
+			/* v8 ignore next 3 -- @preserve */
+			if (stat.isSymbolicLink()) {
+				continue;
+			}
+
+			if (stat.isDirectory()) {
+				this.copyDirectoryWithHashing(
+					sourcePath,
+					targetPath,
+					assetKey,
+					previousAssets,
+					currentAssets,
+				);
+			} else {
+				const hash = this.hashFile(sourcePath);
+				currentAssets[assetKey] = hash;
+				if (previousAssets[assetKey] === hash && fs.existsSync(targetPath)) {
+					continue;
+				}
+
+				fs.mkdirSync(target, { recursive: true });
+				fs.copyFileSync(sourcePath, targetPath);
+			}
+		}
 	}
 
 	private copyContentAssets(sourcePath: string, targetPath: string): void {

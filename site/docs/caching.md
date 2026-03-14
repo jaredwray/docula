@@ -11,7 +11,7 @@ Docula uses a `.cache` directory inside your site folder to store intermediate b
 
 ### Template overrides
 
-When you use [partial template overrides](/docs/partial-templates), Docula merges your override files with the built-in template into `.cache/templates/{templateName}/`. On subsequent builds, Docula compares file modification times and skips the merge if your overrides haven't changed.
+When you use [partial template overrides](/docs/partial-templates), Docula merges your override files with the built-in template into `.cache/templates/{templateName}/`. On subsequent builds, Docula compares content hashes (stored in `.manifest.json`) and incrementally updates only the files that have been added, changed, or removed.
 
 ```
 site/
@@ -52,6 +52,25 @@ export const options: Partial<DoculaOptions> = {
 ```
 
 Set `ttl` to `0` to disable GitHub caching entirely and always fetch fresh data from the API.
+
+### Build manifest (differential builds)
+
+Docula tracks content hashes for all source files (documents, changelog entries, assets, config, and templates) in a build manifest. On subsequent builds, only changed content is re-processed:
+
+- **Documents and changelog entries** — Parsed markdown objects are cached to disk. Unchanged files are loaded from cache instead of being re-parsed through the Writr renderer.
+- **Assets** — Unchanged assets (favicon, logo, CSS, JS, public folder files) are not re-copied to the output directory.
+- **Full build skip** — If nothing has changed and the output directory exists, the build returns immediately. This is especially useful in `--watch` mode.
+
+```
+site/
+  .cache/
+    build/
+      manifest.json      # content hashes for all source files
+      documents.json     # cached parsed document objects
+      changelog.json     # cached parsed changelog entry objects
+```
+
+A config change (e.g., changing `siteTitle`) invalidates the entire manifest and forces a full rebuild. A template change re-renders all pages but reuses cached parsed documents.
 
 ## Clearing the cache
 
