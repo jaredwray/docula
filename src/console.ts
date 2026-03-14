@@ -98,6 +98,9 @@ export class DoculaConsole {
 		console.log(
 			`    ${green("serve")}          Serve the project as a local website`,
 		);
+		console.log(
+			`    ${green("start")}          Build, watch, and serve the site`,
+		);
 		console.log(`    ${green("help")}           Print this help`);
 		console.log(`    ${green("version")}        Print the version`);
 		console.log();
@@ -148,6 +151,20 @@ export class DoculaConsole {
 		console.log(
 			`    ${yellow("-s, --site")}         Set the path where site files are located`,
 		);
+		console.log();
+		console.log(bold(cyan("  Arguments start:")));
+		console.log(
+			`    ${yellow("-p, --port")}         Set the port number used with serve`,
+		);
+		console.log(
+			`    ${yellow("-c, --clean")}        Clean the output directory before building`,
+		);
+		console.log(
+			`    ${yellow("-s, --site")}         Set the path where site files are located`,
+		);
+		console.log(
+			`    ${yellow("-o, --output")}       Set the output directory. Default is ./site/dist`,
+		);
 	}
 
 	public parseProcessArgv(argv: string[]): DoculaConsoleProcess {
@@ -173,6 +190,10 @@ export class DoculaConsole {
 
 				case "serve": {
 					return "serve";
+				}
+
+				case "start": {
+					return "start";
 				}
 
 				case "help": {

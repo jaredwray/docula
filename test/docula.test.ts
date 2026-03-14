@@ -1016,6 +1016,146 @@ describe("docula watch", () => {
 	});
 });
 
+describe("docula start", () => {
+	afterEach(() => {
+		vi.resetAllMocks();
+		for (const fixture of ["test/fixtures/single-page-site"]) {
+			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+		}
+	});
+	beforeEach(() => {
+		// biome-ignore lint/suspicious/noExplicitAny: test file
+		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
+			if (url.endsWith("releases")) {
+				return { data: githubMockReleases };
+			}
+
+			if (url.endsWith("contributors")) {
+				return { data: githubMockContributors };
+			}
+
+			return { data: {} };
+		});
+	});
+
+	it("should build, watch, and serve the site with start command", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start1";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "start", "-p", "8195"];
+		const consoleLog = console.log;
+		const messages: string[] = [];
+		console.log = (message) => {
+			if (typeof message === "string") {
+				messages.push(message);
+			}
+		};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			expect(docula.watcher).toBeDefined();
+			// Verify that a build was performed
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+			expect(
+				messages.some((m) =>
+					stripAnsi(m).includes("Watching for file changes..."),
+				),
+			).toBe(true);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should start with --clean flag", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start2";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			// First build to create output
+			process.argv = ["node", "docula", "start", "-p", "8196"];
+			await docula.execute(process);
+
+			// Add a stale file
+			fs.writeFileSync(`${options.output}/stale.txt`, "stale");
+			expect(fs.existsSync(`${options.output}/stale.txt`)).toBe(true);
+
+			// Close server and watcher before re-executing
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			// Start again with --clean
+			process.argv = ["node", "docula", "start", "-p", "8197", "--clean"];
+			await docula.execute(process);
+
+			// Stale file should be gone
+			expect(fs.existsSync(`${options.output}/stale.txt`)).toBe(false);
+			// But site should be rebuilt
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should start on a specified port", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start3";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "start", "-p", "8198"];
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			await docula.execute(process);
+
+			expect(docula.server).toBeDefined();
+			const address = docula.server?.address() as { port: number };
+			expect(address.port).toEqual(8198);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+});
+
 describe("docula config file", () => {
 	it("should be able to load the config file", async () => {
 		const docula = new Docula(defaultOptions);

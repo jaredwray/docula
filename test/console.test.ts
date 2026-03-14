@@ -172,7 +172,7 @@ describe("DoculaConsole", () => {
 
 		const c = new DoculaConsole();
 		c.printHelp();
-		expect(messages.length).toEqual(30);
+		expect(messages.length).toEqual(37);
 		expect(messages.some((m) => m && stripAnsi(m).includes("Docula"))).toBe(
 			true,
 		);
@@ -222,7 +222,7 @@ describe("DoculaConsole", () => {
 	});
 	it("should be able to parse serve", () => {
 		const c = new DoculaConsole();
-		const commands = ["serve", "build", "help", "version", "init"];
+		const commands = ["serve", "start", "build", "help", "version", "init"];
 		for (const command of commands) {
 			const result = c.parseProcessArgv(["node", "docula", command]);
 			expect(result.command).toEqual(command);

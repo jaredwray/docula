@@ -198,6 +198,30 @@ export default class Docula {
 				break;
 			}
 
+			case "start": {
+				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
+					/* v8 ignore next -- @preserve */
+					fs.rmSync(this.options.output, { recursive: true, force: true });
+				}
+
+				/* v8 ignore next 3 -- @preserve */
+				if (consoleProcess.args.clean) {
+					this.cleanCache(this.options.sitePath);
+				}
+
+				const startBuilder = new DoculaBuilder(this.options);
+				/* v8 ignore next 4 -- @preserve */
+				if (this._configFileModule.onReleaseChangelog) {
+					startBuilder.onReleaseChangelog =
+						this._configFileModule.onReleaseChangelog;
+				}
+
+				await startBuilder.build();
+				this.watch(this.options, startBuilder);
+				await this.serve(this.options);
+				break;
+			}
+
 			case "serve": {
 				if (consoleProcess.args.build || consoleProcess.args.watch) {
 					if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
