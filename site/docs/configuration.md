@@ -25,7 +25,7 @@ import type { DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   templatePath: './template',
-  output: './dist',
+  output: './site/dist',
   sitePath: './site',
   githubPath: 'your-username/your-repo',
   siteTitle: 'My Project',
@@ -120,7 +120,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `templatePath` | `string` | `'./template'` | Path to custom template directory |
-| `output` | `string` | `'./dist'` | Output directory for built site |
+| `output` | `string` | `'{sitePath}/dist'` | Output directory for built site (defaults to `dist/` inside the site directory) |
 | `sitePath` | `string` | `'./site'` | Directory containing site content |
 | `githubPath` | `string` | `''` | GitHub repository path (e.g., `'user/repo'`). Optional — when empty, GitHub features are disabled. See [GitHub Integration](/docs/github-integration). |
 | `siteTitle` | `string` | `'docula'` | Website title |
