@@ -474,6 +474,12 @@ export class DoculaBuilder {
 			this._console.fileCopied("css/variables.css");
 		}
 
+		// Record swagger.json hash for change detection
+		const swaggerPath = `${siteRelativePath}/api/swagger.json`;
+		if (fs.existsSync(swaggerPath)) {
+			currentAssetHashes["api/swagger.json"] = this.hashFile(swaggerPath);
+		}
+
 		// Copy over public folder contents (differential) and record their hashes
 		this.copyPublicFolder(
 			siteRelativePath,
@@ -2390,6 +2396,7 @@ export class DoculaBuilder {
 			siteUrl: this.options.siteUrl,
 			siteTitle: this.options.siteTitle,
 			siteDescription: this.options.siteDescription,
+			githubPath: this.options.githubPath,
 			template: this.options.template,
 			templatePath: this.options.templatePath,
 			homePage: this.options.homePage,
@@ -2528,6 +2535,7 @@ export class DoculaBuilder {
 			"logo.svg",
 			"logo_horizontal.png",
 			"variables.css",
+			"api/swagger.json",
 		];
 		for (const file of assetFiles) {
 			const filePath = path.join(sitePath, file);
