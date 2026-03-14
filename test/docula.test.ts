@@ -891,6 +891,61 @@ describe("docula watch", () => {
 			console.log = consoleLog;
 		}
 	});
+	it("should ignore changes in the .cache directory", async () => {
+		const tempSitePath = "test/temp-watch-ignore-cache";
+		const tempOutput = `${tempSitePath}/dist`;
+
+		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
+			recursive: true,
+		});
+
+		const options = new DoculaOptions();
+		options.sitePath = tempSitePath;
+		options.output = tempOutput;
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		const consoleLog = console.log;
+		const messages: string[] = [];
+		console.log = (message) => {
+			if (typeof message === "string") {
+				messages.push(message);
+			}
+		};
+
+		try {
+			const { DoculaBuilder } = await import("../src/builder.js");
+			const builder = new DoculaBuilder(options);
+			await builder.build();
+
+			// Clear messages from the initial build
+			messages.length = 0;
+
+			docula.watch(options, builder);
+
+			// Write a file inside the .cache directory
+			fs.mkdirSync(`${tempSitePath}/.cache`, { recursive: true });
+			fs.writeFileSync(`${tempSitePath}/.cache/test.json`, "{}");
+
+			// Wait for debounce period
+			await new Promise((resolve) => {
+				setTimeout(resolve, 1000);
+			});
+
+			// Should NOT have triggered a rebuild
+			expect(messages.some((m) => m.includes("rebuilding..."))).toBe(false);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			await new Promise((resolve) => {
+				setTimeout(resolve, 500);
+			});
+
+			await fs.promises.rm(tempSitePath, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
 	it("should ignore changes in the output directory", async () => {
 		const tempSitePath = "test/temp-watch-ignore-output";
 		const tempOutput = `${tempSitePath}/dist`;
@@ -1016,7 +1071,7 @@ describe("docula watch", () => {
 	});
 });
 
-describe("docula start", () => {
+describe("docula dev", () => {
 	afterEach(() => {
 		vi.resetAllMocks();
 		for (const fixture of ["test/fixtures/single-page-site"]) {
@@ -1038,13 +1093,13 @@ describe("docula start", () => {
 		});
 	});
 
-	it("should build, watch, and serve the site with start command", async () => {
+	it("should build, watch, and serve when dev command is used", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-start1";
+		options.output = "test/fixtures/single-page-site/dist-dev1";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
-		process.argv = ["node", "docula", "start", "-p", "8195"];
+		process.argv = ["node", "docula", "dev", "-p", "8195"];
 		const consoleLog = console.log;
 		const messages: string[] = [];
 		console.log = (message) => {
@@ -1057,90 +1112,14 @@ describe("docula start", () => {
 			await docula.execute(process);
 			expect(docula.server).toBeDefined();
 			expect(docula.watcher).toBeDefined();
-			// Verify that a build was performed
+			// Verify build was performed
 			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+			// Verify watching message
 			expect(
 				messages.some((m) =>
 					stripAnsi(m).includes("Watching for file changes..."),
 				),
 			).toBe(true);
-		} finally {
-			if (docula.watcher) {
-				docula.watcher.close();
-			}
-
-			if (docula.server) {
-				docula.server.close();
-			}
-
-			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
-		}
-	});
-	it("should start with --clean flag", async () => {
-		const options = new DoculaOptions();
-		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-start2";
-		options.templatePath = "test/fixtures/template-example/";
-		const docula = new Docula(options);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
-
-		try {
-			// First build to create output
-			process.argv = ["node", "docula", "start", "-p", "8196"];
-			await docula.execute(process);
-
-			// Add a stale file
-			fs.writeFileSync(`${options.output}/stale.txt`, "stale");
-			expect(fs.existsSync(`${options.output}/stale.txt`)).toBe(true);
-
-			// Close server and watcher before re-executing
-			if (docula.watcher) {
-				docula.watcher.close();
-			}
-
-			if (docula.server) {
-				docula.server.close();
-			}
-
-			// Start again with --clean
-			process.argv = ["node", "docula", "start", "-p", "8197", "--clean"];
-			await docula.execute(process);
-
-			// Stale file should be gone
-			expect(fs.existsSync(`${options.output}/stale.txt`)).toBe(false);
-			// But site should be rebuilt
-			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
-		} finally {
-			if (docula.watcher) {
-				docula.watcher.close();
-			}
-
-			if (docula.server) {
-				docula.server.close();
-			}
-
-			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
-		}
-	});
-	it("should start on a specified port", async () => {
-		const options = new DoculaOptions();
-		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-start3";
-		options.templatePath = "test/fixtures/template-example/";
-		const docula = new Docula(options);
-		process.argv = ["node", "docula", "start", "-p", "8198"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
-
-		try {
-			await docula.execute(process);
-
-			expect(docula.server).toBeDefined();
-			const address = docula.server?.address() as { port: number };
-			expect(address.port).toEqual(8198);
 		} finally {
 			if (docula.watcher) {
 				docula.watcher.close();
@@ -1319,5 +1298,32 @@ describe("docula config file", () => {
 
 		console.log = consoleLog;
 		console.error = consoleError;
+	});
+
+	it("should apply --templatePath flag from CLI args", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/temp-templatepath-test";
+		const docula = new Docula(options);
+		process.argv = [
+			"node",
+			"docula",
+			"build",
+			"-t",
+			"test/fixtures/template-example",
+		];
+		const consoleLog = console.log;
+		console.log = () => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.options.templatePath).toContain(
+				"test/fixtures/template-example",
+			);
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			console.log = consoleLog;
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+		}
 	});
 });
