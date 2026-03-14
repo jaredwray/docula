@@ -297,5 +297,10 @@ export class DoculaOptions {
 				this.headerLinks = validLinks;
 			}
 		}
+
+		// Recompute default output from sitePath if not explicitly provided
+		if (!options.output && !this.output) {
+			this.output = path.join(this.sitePath, "dist");
+		}
 	}
 }

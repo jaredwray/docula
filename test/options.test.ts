@@ -1,8 +1,29 @@
+import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DoculaOptions } from "../src/options.js";
 
 describe("DoculaOptions", () => {
 	describe("constructor", () => {
+		it("should default output to sitePath/dist", () => {
+			const options = new DoculaOptions();
+			expect(options.output).toEqual(path.join(options.sitePath, "dist"));
+		});
+
+		it("should default output to custom sitePath/dist when sitePath is provided", () => {
+			const options = new DoculaOptions({ sitePath: "./custom-site" });
+			expect(options.output).toEqual(
+				path.join(process.cwd(), "custom-site", "dist"),
+			);
+		});
+
+		it("should not override explicit output when sitePath is also provided", () => {
+			const options = new DoculaOptions({
+				sitePath: "./custom-site",
+				output: "./my-output",
+			});
+			expect(options.output).toContain("/my-output");
+		});
+
 		it("should create an instance of DoculaOptions with default values", () => {
 			const options = new DoculaOptions();
 			expect(options.template).toEqual("modern");
