@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -33,6 +34,17 @@ describe("DoculaBuilder", () => {
 	afterEach(() => {
 		// Reset the mock after each test
 		vi.resetAllMocks();
+		// Clean build manifests to prevent differential build interference between tests
+		for (const fixture of [
+			"test/fixtures/single-page-site",
+			"test/fixtures/multi-page-site",
+			"test/fixtures/mega-page-site",
+			"test/fixtures/changelog-site",
+			"test/fixtures/announcement-site",
+			"test/fixtures/mega-custom-template",
+		]) {
+			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+		}
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
@@ -923,6 +935,481 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Docula Builder - Differential Builds", () => {
+		it("should write build manifest after first build", async () => {
+			const sitePath = "test/temp-diff-build-manifest";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+				await builder.build();
+
+				const manifestPath = `${sitePath}/.cache/build/manifest.json`;
+				expect(fs.existsSync(manifestPath)).toBe(true);
+
+				const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+				expect(manifest.version).toBe(1);
+				expect(manifest.configHash).toBeDefined();
+				expect(manifest.templateHash).toBeDefined();
+				expect(manifest.docs).toBeDefined();
+				expect(manifest.assets).toBeDefined();
+
+				// Should also write cached documents
+				expect(fs.existsSync(`${sitePath}/.cache/build/documents.json`)).toBe(
+					true,
+				);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should skip build when nothing has changed", async () => {
+			const sitePath = "test/temp-diff-build-skip";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Second build should skip
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				await builder.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should rebuild when a document changes", async () => {
+			const sitePath = "test/temp-diff-build-doc-change";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Modify a document
+				const docPath = `${sitePath}/docs/index.md`;
+				fs.writeFileSync(
+					docPath,
+					"---\ntitle: Changed\norder: 1\n---\n# Changed content\nNew text here.",
+				);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second build should NOT skip
+				await builder.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(false);
+				expect(messages.some((m) => m.includes("Build completed"))).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should use cached documents for unchanged files", async () => {
+			const sitePath = "test/temp-diff-build-cached-docs";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/multi-page-site", sitePath, { recursive: true });
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Add a new document (forces rebuild, but cached docs should be used for unchanged ones)
+				fs.writeFileSync(
+					`${sitePath}/docs/new-doc.md`,
+					"---\ntitle: New Doc\norder: 99\n---\n# New Document\nContent.",
+				);
+
+				// Second build
+				await builder.build();
+
+				// Verify the new document exists in output
+				expect(fs.existsSync(`${output}/docs/new-doc/index.html`)).toBe(true);
+
+				// Verify cached documents file was updated
+				const cachedDocs = JSON.parse(
+					fs.readFileSync(`${sitePath}/.cache/build/documents.json`, "utf8"),
+				);
+				expect(Object.keys(cachedDocs).length).toBeGreaterThan(1);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should force full rebuild when config changes", async () => {
+			const sitePath = "test/temp-diff-build-config-change";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Change config (different site title)
+				options.siteTitle = "Changed Title";
+				const builder2 = new DoculaBuilder(options);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second build should do a full build (not skip)
+				await builder2.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(false);
+				expect(messages.some((m) => m.includes("Build completed"))).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should load and save build manifest correctly", () => {
+			const sitePath = "test/temp-diff-manifest-io";
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// No manifest initially
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				expect((builder as any).loadBuildManifest(sitePath)).toBeUndefined();
+
+				// Save a manifest
+				const manifest = {
+					version: 1 as const,
+					configHash: "abc",
+					templateHash: "def",
+					docs: { "docs/index.md": "hash1" },
+					changelog: {},
+					assets: { "favicon.ico": "hash2" },
+				};
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).saveBuildManifest(sitePath, manifest);
+
+				// Load it back
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				const loaded = (builder as any).loadBuildManifest(sitePath);
+				expect(loaded).toBeDefined();
+				expect(loaded.version).toBe(1);
+				expect(loaded.configHash).toBe("abc");
+				expect(loaded.docs["docs/index.md"]).toBe("hash1");
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should return undefined for corrupt or wrong-version manifest", () => {
+			const sitePath = "test/temp-diff-manifest-corrupt";
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				const dir = `${sitePath}/.cache/build`;
+				fs.mkdirSync(dir, { recursive: true });
+
+				// Corrupt JSON
+				fs.writeFileSync(`${dir}/manifest.json`, "not json");
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				expect((builder as any).loadBuildManifest(sitePath)).toBeUndefined();
+
+				// Wrong version
+				fs.writeFileSync(
+					`${dir}/manifest.json`,
+					JSON.stringify({ version: 99 }),
+				);
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				expect((builder as any).loadBuildManifest(sitePath)).toBeUndefined();
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should skip unchanged asset copies", async () => {
+			const sitePath = "test/temp-diff-build-asset-skip";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Record mtime of a copied asset
+				const faviconPath = `${output}/favicon.ico`;
+				const mtime1 = fs.statSync(faviconPath).mtimeMs;
+
+				// Wait a small amount to ensure mtime would differ if re-copied
+				await new Promise((resolve) => {
+					setTimeout(resolve, 50);
+				});
+
+				// Change a doc to force rebuild but not asset change
+				fs.writeFileSync(
+					`${sitePath}/docs/index.md`,
+					"---\ntitle: Changed\norder: 1\n---\n# Changed\nNew.",
+				);
+				await builder.build();
+
+				const mtime2 = fs.statSync(faviconPath).mtimeMs;
+				// Asset should NOT have been re-copied
+				expect(mtime2).toBe(mtime1);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should detect asset changes", () => {
+			const sitePath = "test/temp-diff-assets-changed";
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				fs.mkdirSync(sitePath, { recursive: true });
+				fs.writeFileSync(`${sitePath}/favicon.ico`, "icon-data");
+
+				const previousAssets: Record<string, string> = {
+					"favicon.ico": "old-hash",
+				};
+				expect(
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).hasAssetsChanged(sitePath, previousAssets),
+				).toBe(true);
+
+				// Hash the file and set as previous — should report no change
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				const currentHash: string = (builder as any).hashFile(
+					`${sitePath}/favicon.ico`,
+				);
+				previousAssets["favicon.ico"] = currentHash;
+				expect(
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).hasAssetsChanged(sitePath, previousAssets),
+				).toBe(false);
+
+				// Test deleted asset detection
+				previousAssets["logo.svg"] = "some-hash";
+				expect(
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).hasAssetsChanged(sitePath, previousAssets),
+				).toBe(true);
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle cached changelog entries", async () => {
+			const sitePath = "test/temp-diff-build-changelog-cache";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/changelog-site", sitePath, { recursive: true });
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Verify changelog cache was written
+				expect(fs.existsSync(`${sitePath}/.cache/build/changelog.json`)).toBe(
+					true,
+				);
+
+				// Second build — should use cache
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				await builder.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle corrupt cached changelog gracefully", () => {
+			const sitePath = "test/temp-diff-corrupt-changelog";
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				const dir = `${sitePath}/.cache/build`;
+				fs.mkdirSync(dir, { recursive: true });
+				fs.writeFileSync(`${dir}/changelog.json`, "not json");
+
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				const result = (builder as any).loadCachedChangelog(sitePath);
+				expect(result.size).toBe(0);
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should detect public folder asset changes", () => {
+			const sitePath = "test/temp-diff-public-assets";
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				fs.mkdirSync(`${sitePath}/public`, { recursive: true });
+				fs.writeFileSync(`${sitePath}/public/test.txt`, "hello");
+
+				// Previous assets have a different hash for the public file
+				const previousAssets: Record<string, string> = {
+					"public/test.txt": "old-hash",
+				};
+				expect(
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).hasAssetsChanged(sitePath, previousAssets),
+				).toBe(true);
+
+				// Now set correct hash — should report no change
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				const currentHash: string = (builder as any).hashFile(
+					`${sitePath}/public/test.txt`,
+				);
+				previousAssets["public/test.txt"] = currentHash;
+				expect(
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).hasAssetsChanged(sitePath, previousAssets),
+				).toBe(false);
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should return false from recordsEqual when values differ for the same key", () => {
+			const builder = new DoculaBuilder();
+			const a: Record<string, string> = { foo: "abc", bar: "def" };
+			const b: Record<string, string> = { foo: "abc", bar: "xyz" };
+			expect(
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).recordsEqual(a, b),
+			).toBe(false);
+		});
+	});
+
 	describe("Docula Builder - Validate Options", () => {
 		it("should allow empty githubPath", () => {
 			const builder = new DoculaBuilder();
@@ -1593,7 +2080,10 @@ describe("DoculaBuilder", () => {
 		it("should get top level documents from mega fixtures", () => {
 			const builder = new DoculaBuilder();
 			const documentsPath = "test/fixtures/mega-page-site/docs";
-			const documents = builder.getDocumentInDirectory(documentsPath);
+			const documents = builder.getDocumentInDirectory(
+				documentsPath,
+				documentsPath,
+			);
 			expect(documents.length).toBe(3);
 		});
 		it("should get all the documents from the mega fixtures", () => {
@@ -1979,6 +2469,70 @@ describe("DoculaBuilder", () => {
 			} finally {
 				await fs.promises.rm(builder.options.output, { recursive: true });
 				console.log = consoleLog;
+			}
+		});
+
+		it("should skip copying unchanged public folder files when hashes match", () => {
+			const sitePath = "test/temp-public-diff-skip";
+			const publicPath = `${sitePath}/public`;
+			const outputPath = `${sitePath}/output`;
+
+			try {
+				const builder = new DoculaBuilder();
+
+				// Create a public folder with a file
+				fs.mkdirSync(publicPath, { recursive: true });
+				fs.writeFileSync(`${publicPath}/hello.txt`, "hello world");
+
+				// First copy — populates currentAssets and copies the file
+				const currentAssets: Record<string, string> = {};
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).copyPublicDirectory(
+					publicPath,
+					outputPath,
+					publicPath,
+					path.resolve(outputPath),
+					{},
+					currentAssets,
+				);
+				expect(fs.existsSync(`${outputPath}/hello.txt`)).toBe(true);
+				expect(currentAssets["public/hello.txt"]).toBeDefined();
+
+				// Capture console messages for second copy
+				const consoleLog = console.log;
+				const consoleMessages: string[] = [];
+				console.log = (message) => {
+					consoleMessages.push(message as string);
+				};
+
+				try {
+					// Second copy with same hashes as previousAssets — should skip
+					const secondAssets: Record<string, string> = {};
+					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+					(builder as any).copyPublicDirectory(
+						publicPath,
+						outputPath,
+						publicPath,
+						path.resolve(outputPath),
+						currentAssets,
+						secondAssets,
+					);
+
+					// Hash should still be recorded
+					expect(secondAssets["public/hello.txt"]).toBe(
+						currentAssets["public/hello.txt"],
+					);
+
+					// File should NOT have been logged as copied
+					const copyMessages = consoleMessages.filter((msg) =>
+						stripAnsi(msg).includes("hello.txt"),
+					);
+					expect(copyMessages.length).toBe(0);
+				} finally {
+					console.log = consoleLog;
+				}
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
@@ -3428,6 +3982,7 @@ describe("DoculaBuilder", () => {
 				sections: [],
 				documents: builder.getDocumentInDirectory(
 					"test/fixtures/multi-page-site/docs",
+					"test/fixtures/multi-page-site/docs",
 				),
 				templates: {
 					home: "home.hbs",
@@ -3525,6 +4080,7 @@ describe("DoculaBuilder", () => {
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
+					"test/fixtures/multi-page-site/docs",
 					"test/fixtures/multi-page-site/docs",
 				),
 				templates: {
