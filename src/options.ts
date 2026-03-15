@@ -32,7 +32,7 @@ export class DoculaOptions {
 	/**
 	 * Path to the output directory
 	 */
-	public output = path.join(process.cwd(), "./dist");
+	public output = "";
 	/**
 	 * Path to the site directory
 	 */
@@ -154,6 +154,10 @@ export class DoculaOptions {
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
 			this.parseOptions(options);
+		}
+
+		if (!this.output) {
+			this.output = path.join(this.sitePath, "dist");
 		}
 	}
 
@@ -292,6 +296,11 @@ export class DoculaOptions {
 			if (validLinks.length > 0) {
 				this.headerLinks = validLinks;
 			}
+		}
+
+		// Recompute default output from sitePath if not explicitly provided
+		if (!options.output && !this.output) {
+			this.output = path.join(this.sitePath, "dist");
 		}
 	}
 }

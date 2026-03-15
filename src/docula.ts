@@ -157,6 +157,14 @@ export default class Docula {
 
 		if (consoleProcess.args.output) {
 			this.options.output = consoleProcess.args.output;
+		} else {
+			// Recompute default output from current sitePath if not set by config
+			const configOptions = this._configFileModule.options as
+				| Record<string, unknown>
+				| undefined;
+			if (!configOptions?.output) {
+				this.options.output = path.join(this.options.sitePath, "dist");
+			}
 		}
 
 		if (
