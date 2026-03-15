@@ -5655,4 +5655,142 @@ describe("DoculaBuilder", () => {
 			expect(entries[0].lastModified).toBe("2025-06-15");
 		});
 	});
+
+	describe("Branch coverage - uncovered paths", () => {
+		it("should rebuild when assets change but docs and template are unchanged", async () => {
+			const sitePath = "test/temp-diff-build-asset-change";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Modify an asset file (variables.css)
+				fs.writeFileSync(
+					`${sitePath}/variables.css`,
+					":root { --color: red; }",
+				);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second build — assets changed, should NOT skip
+				await builder.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(false);
+				expect(messages.some((m) => m.includes("Build completed"))).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle escapeXml with undefined value", () => {
+			const builder = new DoculaBuilder();
+			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+			const result = (builder as any).escapeXml(undefined);
+			expect(result).toBe("");
+		});
+
+		it("should truncate without word boundary when text has no spaces", () => {
+			const builder = new DoculaBuilder();
+			// Create text with no spaces that exceeds maxLength
+			const longText = "a".repeat(600);
+			const preview = builder.generateChangelogPreview(longText, 500);
+			expect(preview).toContain("...");
+		});
+
+		it("should restore original template file when override is removed", () => {
+			const sitePath = "test/fixtures/single-page-site";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+			const cacheDir = `${sitePath}/.cache`;
+
+			// Create override that shadows an existing template file
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(
+				`${overrideDir}/footer.hbs`,
+				"<footer>Override Footer</footer>",
+			);
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// First merge — creates cache with override
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				const result = (builder as any).mergeTemplateOverrides(
+					"test/fixtures/template-example",
+					sitePath,
+					"modern",
+				);
+
+				// Verify override is in cache
+				const cachedFooter = fs.readFileSync(
+					`${result}/includes/footer.hbs`,
+					"utf8",
+				);
+				expect(cachedFooter).toBe("<footer>Override Footer</footer>");
+
+				// Remove the override
+				fs.unlinkSync(`${overrideDir}/footer.hbs`);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second merge — should detect removal and restore original
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"test/fixtures/template-example",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) =>
+						m.includes("Template override removed: includes/footer.hbs"),
+					),
+				).toBe(true);
+
+				// Original template file should be restored in cache
+				const restoredFooter = fs.readFileSync(
+					`${result}/includes/footer.hbs`,
+					"utf8",
+				);
+				const originalFooter = fs.readFileSync(
+					"test/fixtures/template-example/includes/footer.hbs",
+					"utf8",
+				);
+				expect(restoredFooter).toBe(originalFooter);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
+				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
+		});
+	});
 });
