@@ -77,15 +77,10 @@ order: 2
 
 Subdirectories inside `docs/` automatically become sections in the sidebar navigation.
 
-### The `homePage` Option
+### Automatic Starting View
 
-When using multi page mode, the `homePage` option controls what renders at the root URL (`/`):
+Docula automatically detects what content exists and picks the starting view for your site:
 
-- **`homePage: true`** (default) — A dedicated landing page renders at `/`, and docs are available at `/docs/`.
-- **`homePage: false`** — No separate landing page. The first doc page renders directly as `/index.html`.
-
-```js
-export const options = {
-  homePage: false,
-};
-```
+- **README.md exists** — A dedicated landing page renders at `/` using `home.hbs`, and docs are available at `/docs/`.
+- **No README.md, but docs exist** — The first doc page renders directly as `/index.html`.
+- **No README.md, no docs, but `api/swagger.json` exists** — The API page renders as `/index.html`.

@@ -30,12 +30,19 @@
     {{/if}}
   </header>
   <div class="home-content">{{{content}}}</div>
+  {{#if hasApi}}
+  <div class="home-actions">
+    {{> api-reference }}
+  </div>
+  {{/if}}
   {{> home }}
   {{else}}
   <main class="home">
     {{> hero }}
     <div class="home-actions">
+      {{#if hasDocuments}}
       {{> documentation }}
+      {{/if}}
       {{#if hasApi}}
       {{> api-reference }}
       {{/if}}
