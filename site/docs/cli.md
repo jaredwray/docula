@@ -141,7 +141,7 @@ npx docula dev --clean
 
 ## start
 
-Builds the site and serves it locally without watching for file changes. Use this when you want to preview the built site without live reloading.
+Builds the site and serves it locally. By default it does not watch for file changes, but you can pass `--watch` to enable live rebuilds.
 
 ```bash
 npx docula start
@@ -160,6 +160,9 @@ npx docula start -p 8080
 
 # Clean build and serve
 npx docula start --clean
+
+# Build, serve, and watch for changes
+npx docula start --watch
 ```
 
 ## serve
