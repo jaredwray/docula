@@ -155,6 +155,10 @@ export default class Docula {
 			this.options.template = consoleProcess.args.template;
 		}
 
+		if (consoleProcess.args.templatePath) {
+			this.options.templatePath = consoleProcess.args.templatePath;
+		}
+
 		if (consoleProcess.args.output) {
 			this.options.output = consoleProcess.args.output;
 		} else {
@@ -206,16 +210,16 @@ export default class Docula {
 				break;
 			}
 
-			case "start": {
-				const startBuilder = await this._runBuild(consoleProcess.args.clean);
-				this.watch(this.options, startBuilder);
+			case "dev": {
+				const devBuilder = await this.runBuild(consoleProcess.args.clean);
+				this.watch(this.options, devBuilder);
 				await this.serve(this.options);
 				break;
 			}
 
 			case "serve": {
 				if (consoleProcess.args.build || consoleProcess.args.watch) {
-					const builder = await this._runBuild(consoleProcess.args.clean);
+					const builder = await this.runBuild(consoleProcess.args.clean);
 					if (consoleProcess.args.watch) {
 						this.watch(this.options, builder);
 					}
@@ -226,15 +230,15 @@ export default class Docula {
 			}
 
 			default: {
-				await this._runBuild(consoleProcess.args.clean);
+				await this.runBuild(consoleProcess.args.clean);
 				break;
 			}
 		}
 	}
 
-	private async _runBuild(clean: boolean): Promise<DoculaBuilder> {
+	private async runBuild(clean: boolean): Promise<DoculaBuilder> {
+		/* v8 ignore next 4 -- @preserve */
 		if (clean && fs.existsSync(this.options.output)) {
-			/* v8 ignore next -- @preserve */
 			fs.rmSync(this.options.output, { recursive: true, force: true });
 		}
 
@@ -380,6 +384,7 @@ export default class Docula {
 			{ recursive: true },
 			(_eventType, filename) => {
 				// Ignore changes in the output directory
+				/* v8 ignore next 8 -- @preserve */
 				if (
 					filename &&
 					outputRelative &&

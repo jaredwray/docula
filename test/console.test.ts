@@ -222,11 +222,40 @@ describe("DoculaConsole", () => {
 	});
 	it("should be able to parse serve", () => {
 		const c = new DoculaConsole();
-		const commands = ["serve", "start", "build", "help", "version", "init"];
+		const commands = ["serve", "build", "help", "version", "init", "dev"];
 		for (const command of commands) {
 			const result = c.parseProcessArgv(["node", "docula", command]);
 			expect(result.command).toEqual(command);
 		}
+
+		// start is an alias for dev
+		const startResult = c.parseProcessArgv(["node", "docula", "start"]);
+		expect(startResult.command).toEqual("dev");
+	});
+	it("should not match command names used as flag values", () => {
+		const c = new DoculaConsole();
+		// "dev" here is the value of -s, not a command
+		const result = c.parseProcessArgv(["node", "docula", "-s", "dev"]);
+		expect(result.command).toBeUndefined();
+		expect(result.args.sitePath).toContain("dev");
+
+		// "build" as value of --site
+		const result2 = c.parseProcessArgv(["node", "docula", "--site", "build"]);
+		expect(result2.command).toBeUndefined();
+
+		// "serve" as value of --output
+		const result3 = c.parseProcessArgv(["node", "docula", "-o", "serve"]);
+		expect(result3.command).toBeUndefined();
+
+		// command after a flag+value pair should still work
+		const result4 = c.parseProcessArgv([
+			"node",
+			"docula",
+			"-s",
+			"mysite",
+			"build",
+		]);
+		expect(result4.command).toEqual("build");
 	});
 	it("should be able to parse --typescript flag", () => {
 		const c = new DoculaConsole();

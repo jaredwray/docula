@@ -13,8 +13,8 @@ Docula provides a command-line interface for initializing, building, and serving
 |---------|-------------|
 | `init` | Initialize a new Docula project |
 | `build` | Build the site (default if no command is specified) |
+| `dev` / `start` | Build, watch, and serve the project |
 | `serve` | Serve the site locally |
-| `start` | Build, watch, and serve the site |
 | `help` / `--help` / `-h` | Print help information |
 | `version` | Print the version number |
 
@@ -108,6 +108,36 @@ npx docula build --template classic
 npx docula build --clean
 ```
 
+## dev / start
+
+Builds your site, starts watching for file changes, and serves it locally — all in one command. This is the recommended way to develop locally. `start` is an alias for `dev`.
+
+```bash
+npx docula dev
+```
+
+### Flags
+
+In addition to the [Common Options](#common-options):
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-t, --templatePath <path>` | Set a custom template directory path | - |
+| `-T, --template <name>` | Set the built-in template name (e.g., `modern`) | `modern` |
+
+### Examples
+
+```bash
+# Build, watch, and serve on default port 3000
+npx docula dev
+
+# Serve on a custom port
+npx docula dev -p 8080
+
+# Clean build, watch, and serve
+npx docula dev --clean
+```
+
 ## serve
 
 Starts a local development server for your site. By default it listens on port 3000 and serves the existing output directory without running a build. Use `--build` to run a one-time build before serving, or `--watch` to build first and then automatically rebuild on file changes.
@@ -143,32 +173,6 @@ npx docula serve --watch
 npx docula serve --clean --watch
 ```
 
-## start
-
-Builds the site, starts a file watcher, and serves it locally — all in one command. This is the recommended way to develop with Docula, equivalent to running `docula serve --build --watch`.
-
-```bash
-npx docula start
-```
-
-All flags for `start` are covered by the [Common Options](#common-options).
-
-### Examples
-
-```bash
-# Build, watch, and serve on default port 3000
-npx docula start
-
-# Start on a custom port
-npx docula start -p 8080
-
-# Clean build, then watch and serve
-npx docula start --clean
-
-# Custom site path
-npx docula start -s ./my-site
-```
-
 ## Watch Mode
 
 Use the `--watch` flag with either `build` or `serve` to automatically rebuild your site when files change:
@@ -189,16 +193,16 @@ This is useful during development when you want to see changes reflected immedia
 ## Common Workflows
 
 ```bash
-# Quick start: scaffold and serve (auto-detects TypeScript)
+# Quick start: scaffold and develop (auto-detects TypeScript)
 npx docula init
-npx docula start
+npx docula dev
 
 # Production build
 npx docula build --clean
 
 # Force TypeScript config
 npx docula init --typescript
-npx docula start
+npx docula dev
 
 # Custom paths
 npx docula build -s ./website -o ./website/dist

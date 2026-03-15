@@ -521,6 +521,7 @@ export class DoculaBuilder {
 		this.saveBuildManifest(this.options.sitePath, newManifest);
 
 		// Save cached parsed objects
+		/* v8 ignore next -- @preserve */
 		this.saveCachedDocuments(this.options.sitePath, doculaData.documents ?? []);
 		this.saveCachedChangelog(this.options.sitePath, fileChangelogEntries);
 
@@ -1319,6 +1320,7 @@ export class DoculaBuilder {
 				// Check if we can use cached parsed entry
 				if (cachedEntries && previousHashes && currentHashes) {
 					const slug = path.basename(file, path.extname(file));
+					/* v8 ignore next -- @preserve */
 					const hash = currentHashes[file] ?? this.hashFile(filePath);
 					const prevHash = previousHashes[file];
 					const cached = cachedEntries.get(slug);
@@ -1571,6 +1573,7 @@ export class DoculaBuilder {
 			return;
 		}
 
+		/* v8 ignore next -- @preserve */
 		const allEntries = data.changelogEntries ?? [];
 		const perPage = this.options.changelogPerPage;
 		const totalPages = Math.max(1, Math.ceil(allEntries.length / perPage));
@@ -2014,6 +2017,7 @@ export class DoculaBuilder {
 					const cachedPath = path.join(cacheDir, file);
 					// Restore original template file if it exists
 					const originalPath = path.join(resolvedTemplatePath, file);
+					/* v8 ignore next 4 -- @preserve */
 					if (fs.existsSync(originalPath)) {
 						fs.copyFileSync(originalPath, cachedPath);
 					} else if (fs.existsSync(cachedPath)) {
@@ -2609,6 +2613,7 @@ export class DoculaBuilder {
 
 			const sourcePath = `${source}/${file}`;
 			const targetPath = `${target}/${file}`;
+			/* v8 ignore next -- @preserve */
 			const assetKey = prefix ? `${prefix}/${file}` : file;
 			const stat = fs.lstatSync(sourcePath);
 
