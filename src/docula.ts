@@ -217,6 +217,16 @@ export default class Docula {
 				break;
 			}
 
+			case "start": {
+				const startBuilder = await this.runBuild(consoleProcess.args.clean);
+				if (consoleProcess.args.watch) {
+					this.watch(this.options, startBuilder);
+				}
+
+				await this.serve(this.options);
+				break;
+			}
+
 			case "serve": {
 				if (consoleProcess.args.build || consoleProcess.args.watch) {
 					const builder = await this.runBuild(consoleProcess.args.clean);

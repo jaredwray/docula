@@ -1133,6 +1133,60 @@ describe("docula dev", () => {
 			console.log = consoleLog;
 		}
 	});
+
+	it("should build and serve without watch when start command is used", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start1";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "start", "-p", "8196"];
+		const consoleLog = console.log;
+		console.log = () => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			expect(docula.watcher).toBeUndefined();
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+
+	it("should build, watch, and serve when start command is used with --watch", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start-watch";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "start", "-w", "-p", "8197"];
+		const consoleLog = console.log;
+		console.log = () => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			expect(docula.watcher).toBeDefined();
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
 });
 
 describe("docula config file", () => {

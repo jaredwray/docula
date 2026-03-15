@@ -13,7 +13,8 @@ Docula provides a command-line interface for initializing, building, and serving
 |---------|-------------|
 | `init` | Initialize a new Docula project |
 | `build` | Build the site (default if no command is specified) |
-| `dev` / `start` | Build, watch, and serve the project |
+| `dev` | Build, watch, and serve the project |
+| `start` | Build and serve the project |
 | `serve` | Serve the site locally |
 | `help` / `--help` / `-h` | Print help information |
 | `version` | Print the version number |
@@ -108,9 +109,9 @@ npx docula build --template classic
 npx docula build --clean
 ```
 
-## dev / start
+## dev
 
-Builds your site, starts watching for file changes, and serves it locally — all in one command. This is the recommended way to develop locally. `start` is an alias for `dev`.
+Builds your site, starts watching for file changes, and serves it locally — all in one command. This is the recommended way to develop locally.
 
 ```bash
 npx docula dev
@@ -136,6 +137,32 @@ npx docula dev -p 8080
 
 # Clean build, watch, and serve
 npx docula dev --clean
+```
+
+## start
+
+Builds the site and serves it locally. By default it does not watch for file changes, but you can pass `--watch` to enable live rebuilds.
+
+```bash
+npx docula start
+```
+
+All flags for `start` are covered by the [Common Options](#common-options).
+
+### Examples
+
+```bash
+# Build and serve on default port 3000
+npx docula start
+
+# Build and serve on a custom port
+npx docula start -p 8080
+
+# Clean build and serve
+npx docula start --clean
+
+# Build, serve, and watch for changes
+npx docula start --watch
 ```
 
 ## serve
