@@ -38,7 +38,6 @@ describe("DoculaOptions", () => {
 			expect(options.siteUrl).toEqual("https://docula.org");
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.changelogPerPage).toEqual(20);
-			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.themeMode).toBeUndefined();
@@ -180,14 +179,17 @@ describe("DoculaOptions", () => {
 			expect(options.changelogPerPage).toEqual(20);
 		});
 
-		it("should parse homePage set to false", () => {
-			options.parseOptions({ homePage: false });
-			expect(options.homePage).toEqual(false);
-		});
+		it("should log deprecation warning when homePage is provided", () => {
+			const consoleWarn = console.warn;
+			let warnMessage = "";
+			console.warn = (message: string) => {
+				warnMessage = message;
+			};
 
-		it("should not update homePage for non-boolean values", () => {
-			options.parseOptions({ homePage: "yes" });
-			expect(options.homePage).toEqual(true);
+			options.parseOptions({ homePage: false });
+			expect(warnMessage).toContain("homePage");
+			expect(warnMessage).toContain("deprecated");
+			console.warn = consoleWarn;
 		});
 
 		it("should parse enableLlmsTxt set to false", () => {

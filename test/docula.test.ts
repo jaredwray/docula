@@ -1258,10 +1258,9 @@ describe("docula config file", () => {
 		);
 		console.log = consoleLog;
 	});
-	it("should build docs at root when config sets homePage to false", async () => {
+	it("should build docs at root when no README.md exists", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
-		options.homePage = true;
 		const docula = new Docula(options);
 		const output = "test/temp-build-mega-no-home-test";
 		const consoleLog = console.log;
@@ -1271,8 +1270,6 @@ describe("docula config file", () => {
 			process.argv = ["node", "docula", "-o", output];
 			await docula.execute(process);
 
-			expect(docula.configFileModule.options.homePage).toEqual(false);
-			expect(docula.options.homePage).toEqual(false);
 			const indexHtml = await fs.promises.readFile(
 				`${output}/index.html`,
 				"utf8",

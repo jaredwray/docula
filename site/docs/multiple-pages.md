@@ -27,10 +27,4 @@ title: Getting Started
 order: 2
 ```
 
-If you want your docs to be the root home page (`/`) instead of rendering the template home page, set `homePage: false`:
-
-```js
-export const options = {
-  homePage: false,
-};
-```
+If you want your docs to be the root home page (`/`) instead of the template landing page, simply remove the `README.md` file from your site directory. Docula will automatically use the first doc as `/index.html`.
