@@ -207,24 +207,7 @@ export default class Docula {
 			}
 
 			case "start": {
-				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
-					/* v8 ignore next -- @preserve */
-					fs.rmSync(this.options.output, { recursive: true, force: true });
-				}
-
-				/* v8 ignore next 3 -- @preserve */
-				if (consoleProcess.args.clean) {
-					this.cleanCache(this.options.sitePath);
-				}
-
-				const startBuilder = new DoculaBuilder(this.options);
-				/* v8 ignore next 4 -- @preserve */
-				if (this._configFileModule.onReleaseChangelog) {
-					startBuilder.onReleaseChangelog =
-						this._configFileModule.onReleaseChangelog;
-				}
-
-				await startBuilder.build();
+				const startBuilder = await this._runBuild(consoleProcess.args.clean);
 				this.watch(this.options, startBuilder);
 				await this.serve(this.options);
 				break;
@@ -232,24 +215,7 @@ export default class Docula {
 
 			case "serve": {
 				if (consoleProcess.args.build || consoleProcess.args.watch) {
-					if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
-						/* v8 ignore next -- @preserve */
-						fs.rmSync(this.options.output, { recursive: true, force: true });
-					}
-
-					/* v8 ignore next 3 -- @preserve */
-					if (consoleProcess.args.clean) {
-						this.cleanCache(this.options.sitePath);
-					}
-
-					const builder = new DoculaBuilder(this.options);
-					/* v8 ignore next 4 -- @preserve */
-					if (this._configFileModule.onReleaseChangelog) {
-						builder.onReleaseChangelog =
-							this._configFileModule.onReleaseChangelog;
-					}
-
-					await builder.build();
+					const builder = await this._runBuild(consoleProcess.args.clean);
 					if (consoleProcess.args.watch) {
 						this.watch(this.options, builder);
 					}
@@ -260,27 +226,31 @@ export default class Docula {
 			}
 
 			default: {
-				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
-					/* v8 ignore next -- @preserve */
-					fs.rmSync(this.options.output, { recursive: true, force: true });
-				}
-
-				/* v8 ignore next 3 -- @preserve */
-				if (consoleProcess.args.clean) {
-					this.cleanCache(this.options.sitePath);
-				}
-
-				const builder = new DoculaBuilder(this.options);
-				/* v8 ignore next 4 -- @preserve */
-				if (this._configFileModule.onReleaseChangelog) {
-					builder.onReleaseChangelog =
-						this._configFileModule.onReleaseChangelog;
-				}
-
-				await builder.build();
+				await this._runBuild(consoleProcess.args.clean);
 				break;
 			}
 		}
+	}
+
+	private async _runBuild(clean: boolean): Promise<DoculaBuilder> {
+		if (clean && fs.existsSync(this.options.output)) {
+			/* v8 ignore next -- @preserve */
+			fs.rmSync(this.options.output, { recursive: true, force: true });
+		}
+
+		/* v8 ignore next 3 -- @preserve */
+		if (clean) {
+			this.cleanCache(this.options.sitePath);
+		}
+
+		const builder = new DoculaBuilder(this.options);
+		/* v8 ignore next 4 -- @preserve */
+		if (this._configFileModule.onReleaseChangelog) {
+			builder.onReleaseChangelog = this._configFileModule.onReleaseChangelog;
+		}
+
+		await builder.build();
+		return builder;
 	}
 
 	/**
