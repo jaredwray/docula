@@ -384,6 +384,7 @@ export default class Docula {
 			{ recursive: true },
 			(_eventType, filename) => {
 				// Ignore changes in the output directory
+				/* v8 ignore next 8 -- @preserve */
 				if (
 					filename &&
 					outputRelative &&
