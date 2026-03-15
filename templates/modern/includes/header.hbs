@@ -13,5 +13,19 @@
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
       : mode;
     if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    try {
+      var authState = JSON.parse(localStorage.getItem('docula-auth-state'));
+      if (authState) {
+        window.__doculaAuth = authState;
+        if (authState.loggedIn) {
+          document.documentElement.classList.add('docula-auth-logged-in');
+        }
+      }
+    } catch (e) {
+      // Ignore localStorage parsing errors
+    }
+    if (!window.__doculaAuth) {
+      window.__doculaAuth = { loggedIn: false, displayName: null };
+    }
   })();
 </script>

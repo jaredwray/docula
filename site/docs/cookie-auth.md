@@ -5,9 +5,9 @@ order: 14
 
 # Cookie Auth
 
-Docula supports cookie-based authentication that displays a **Log In** or **Log Out** button in the site header. When a JWT cookie is detected in the browser, the button switches to "Log Out"; otherwise it shows "Log In".
+Docula supports cookie-based authentication that displays a **Log In** or **Log Out** button in the site header. Authentication state is determined by fetching a configurable URL with credentials included.
 
-This is useful for documentation sites that are gated behind an OAuth provider, such as `docs.hyphen.ai`.
+This is useful for documentation sites that sit on a different domain from their auth provider, such as cross-domain OAuth setups.
 
 ## Configuration
 
@@ -20,7 +20,9 @@ export const options: Partial<DoculaOptions> = {
   siteTitle: 'My Project',
   cookieAuth: {
     loginUrl: '/login',
-    cookieName: 'auth_token',
+    logoutUrl: '/api/auth/logout',
+    authCheckUrl: 'https://api.example.com/me',
+    authCheckUserPath: 'email',
   },
 };
 ```
@@ -30,47 +32,45 @@ export const options: Partial<DoculaOptions> = {
 | Property | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
 | `loginUrl` | `string` | Yes | - | URL to redirect to when "Log In" is clicked |
-| `cookieName` | `string` | No | `'token'` | Name of the JWT cookie to check |
-| `logoutUrl` | `string` | No | - | URL to redirect to on logout. If not set, the cookie is cleared and the page reloads |
+| `logoutUrl` | `string` | No | - | URL to redirect to on logout. If not set, the page reloads |
+| `authCheckUrl` | `string` | No | - | URL to fetch (with `credentials: 'include'`) to determine if the user is logged in. A 2xx response means logged in |
+| `authCheckMethod` | `string` | No | `'GET'` | HTTP method to use when fetching `authCheckUrl` |
+| `authCheckUserPath` | `string` | No | - | Dot-notation path to extract a display name from the JSON response (e.g. `'email'`, `'user.name'`) |
 
 ## How It Works
 
 1. When `cookieAuth` is configured, a **Log In** link and a hidden **Log Out** button are rendered in the site header (both desktop and mobile).
-2. On page load, client-side JavaScript checks whether the configured cookie exists.
-3. If the cookie is present, the "Log In" link is hidden and the "Log Out" button is shown.
-4. If the cookie is not present, the "Log In" link is shown and the "Log Out" button is hidden.
+2. On page load, if `authCheckUrl` is set, client-side JavaScript fetches the URL with `credentials: 'include'` so that cookies are sent cross-domain.
+3. If the response is 2xx, the user is considered logged in. The "Log In" link is hidden and the "Log Out" button is shown.
+4. If the response is not 2xx or the fetch fails, the "Log In" link is shown and the "Log Out" button is hidden.
+
+### Cached Auth State
+
+To avoid a flash of incorrect UI on page load, Docula caches the auth state in `localStorage`. On subsequent page loads, the cached state is applied immediately (before the page body renders) and then refreshed in the background by fetching `authCheckUrl` again. This means:
+
+- First visit: brief delay before auth UI appears (waiting for the fetch)
+- Subsequent visits: auth UI appears instantly from cache, then silently updates if the state has changed
+
+### User Display Name
+
+If `authCheckUserPath` is set, Docula extracts a display name from the JSON response using dot-notation path traversal. For example, if the response is:
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Setting `authCheckUserPath` to `'email'` will display `user@example.com` in the header.
+
+If the path doesn't resolve to a value, no name is displayed.
 
 ### Logout Behavior
 
 **With `logoutUrl`**: Clicking "Log Out" redirects to the specified URL. Use this when your auth provider has a dedicated logout endpoint.
 
-```typescript
-cookieAuth: {
-  loginUrl: '/login',
-  cookieName: 'session',
-  logoutUrl: '/api/auth/logout',
-},
-```
-
-**Without `logoutUrl`**: Clicking "Log Out" clears the cookie and reloads the page.
-
-```typescript
-cookieAuth: {
-  loginUrl: '/login',
-  cookieName: 'session',
-},
-```
-
-## User Display Name
-
-When a user is logged in, Docula extracts a display name from the JWT cookie and shows it in the site header. The name is resolved from the token's claims in this order:
-
-1. `name`
-2. `preferred_username`
-3. `email`
-
-If none of these claims are present, no name is displayed.
+**Without `logoutUrl`**: Clicking "Log Out" reloads the page.
 
 ## API Reference Integration
 
-When `cookieAuth` is configured and your OpenAPI spec defines an API Key security scheme with `"in": "cookie"`, the [API Reference](/docs/api-reference) page shows a login status indicator in the authorization panel — green when logged in, amber when not. Requests made via the "Try It" panel automatically include the cookie, so no manual token entry is needed.
+When `cookieAuth` is configured and your OpenAPI spec defines an API Key security scheme with `"in": "cookie"`, the [API Reference](/docs/api-reference) page shows a login status indicator in the authorization panel. The selected authorization type and auth state are persisted in `localStorage` so they survive page refreshes. Requests made via the "Try It" panel automatically include cookies, so no manual token entry is needed.

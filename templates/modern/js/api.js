@@ -130,11 +130,9 @@ document.addEventListener('DOMContentLoaded', function() {
         authValueInput.value = '';
         if (cookieStatusEl) {
           cookieStatusEl.classList.remove('api-auth__cookie-status--hidden');
-          var configEl = document.getElementById('cookie-auth-config');
-          var cookieName = configEl ? configEl.getAttribute('data-cookie-name') : (data.name || 'token');
-          var hasCookie = document.cookie.split(';').some(function(c) { return c.trim().startsWith(cookieName + '='); });
-          cookieStatusEl.textContent = hasCookie ? 'Logged in' : 'Not logged in — use Login button above';
-          cookieStatusEl.className = 'api-auth__cookie-status' + (hasCookie ? ' api-auth__cookie-status--ok' : ' api-auth__cookie-status--warn');
+          var auth = window.__doculaAuth || { loggedIn: false };
+          cookieStatusEl.textContent = auth.loggedIn ? 'Logged in' : 'Not logged in — use Login button above';
+          cookieStatusEl.className = 'api-auth__cookie-status' + (auth.loggedIn ? ' api-auth__cookie-status--ok' : ' api-auth__cookie-status--warn');
         }
       } else {
         authValueInput.classList.remove('api-auth__value--hidden');
@@ -148,7 +146,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cookieStatusEl) cookieStatusEl.classList.add('api-auth__cookie-status--hidden');
       }
     }
-    authTypeSelect.addEventListener('change', updateAuthUI);
+    var savedAuth = localStorage.getItem('docula-api-auth-type');
+    if (savedAuth) {
+      for (var i = 0; i < authTypeSelect.options.length; i++) {
+        if (authTypeSelect.options[i].value === savedAuth) {
+          authTypeSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    authTypeSelect.addEventListener('change', function() {
+      localStorage.setItem('docula-api-auth-type', authTypeSelect.value);
+      updateAuthUI();
+    });
+    document.addEventListener('docula-auth-change', updateAuthUI);
     updateAuthUI();
   }
 
