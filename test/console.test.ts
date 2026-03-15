@@ -172,7 +172,7 @@ describe("DoculaConsole", () => {
 
 		const c = new DoculaConsole();
 		c.printHelp();
-		expect(messages.length).toEqual(29);
+		expect(messages.length).toEqual(30);
 		expect(messages.some((m) => m && stripAnsi(m).includes("Docula"))).toBe(
 			true,
 		);
@@ -222,15 +222,19 @@ describe("DoculaConsole", () => {
 	});
 	it("should be able to parse serve", () => {
 		const c = new DoculaConsole();
-		const commands = ["serve", "build", "help", "version", "init", "dev"];
+		const commands = [
+			"serve",
+			"build",
+			"help",
+			"version",
+			"init",
+			"dev",
+			"start",
+		];
 		for (const command of commands) {
 			const result = c.parseProcessArgv(["node", "docula", command]);
 			expect(result.command).toEqual(command);
 		}
-
-		// start is an alias for dev
-		const startResult = c.parseProcessArgv(["node", "docula", "start"]);
-		expect(startResult.command).toEqual("dev");
 	});
 	it("should not match command names used as flag values", () => {
 		const c = new DoculaConsole();

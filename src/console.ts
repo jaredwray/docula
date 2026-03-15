@@ -96,8 +96,9 @@ export class DoculaConsole {
 			`    ${green("build")}          Build the project. By default just npx docula will build the project if it finds a ./site folder`,
 		);
 		console.log(
-			`    ${green("dev / start")}     Build, watch, and serve the project`,
+			`    ${green("dev")}            Build, watch, and serve the project`,
 		);
+		console.log(`    ${green("start")}          Build and serve the project`);
 		console.log(
 			`    ${green("serve")}          Serve the project as a local website`,
 		);
@@ -193,9 +194,12 @@ export class DoculaConsole {
 					return "serve";
 				}
 
-				case "dev":
-				case "start": {
+				case "dev": {
 					return "dev";
+				}
+
+				case "start": {
+					return "start";
 				}
 
 				case "help":
