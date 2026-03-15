@@ -15,8 +15,30 @@ Docula provides a command-line interface for initializing, building, and serving
 | `build` | Build the site (default if no command is specified) |
 | `serve` | Serve the site locally |
 | `start` | Build, watch, and serve the site |
-| `help` | Print help information |
+| `help` / `--help` / `-h` | Print help information |
 | `version` | Print the version number |
+
+## Common Options
+
+These options are shared across multiple commands:
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-s, --site <path>` | Set the path where site files are located | `./site` |
+| `-c, --clean` | Clean the output directory before building | `false` |
+| `-o, --output <path>` | Set the output directory | `./site/dist` |
+| `-p, --port <number>` | Set the port number | `3000` |
+| `-w, --watch` | Watch for file changes and rebuild automatically | `false` |
+
+## help
+
+Print usage information. Available as a subcommand or flag:
+
+```bash
+npx docula help
+npx docula --help
+npx docula -h
+```
 
 ## init
 
@@ -30,11 +52,12 @@ By default, docula auto-detects whether your project uses TypeScript by checking
 
 ### Flags
 
+In addition to the [Common Options](#common-options):
+
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--typescript` | Force a TypeScript config file (`docula.config.ts`) | auto-detect |
 | `--javascript` | Force a JavaScript config file (`docula.config.mjs`) | auto-detect |
-| `-s, --site <path>` | Set the path where site files will be created | `./site` |
 
 ### Examples
 
@@ -62,14 +85,12 @@ npx docula build
 
 ### Flags
 
+In addition to the [Common Options](#common-options):
+
 | Flag | Description | Default |
 |------|-------------|---------|
-| `-s, --site <path>` | Set the path where site files are located | `./site` |
-| `-o, --output <path>` | Set the output directory | `./site/dist` |
 | `-t, --templatePath <path>` | Set a custom template directory path | - |
 | `-T, --template <name>` | Set the built-in template name (e.g., `modern`) | `modern` |
-| `-w, --watch` | Watch for file changes and rebuild automatically | `false` |
-| `-c, --clean` | Clean the output directory before building | `false` |
 
 ### Examples
 
@@ -97,14 +118,11 @@ npx docula serve
 
 ### Flags
 
+In addition to the [Common Options](#common-options):
+
 | Flag | Description | Default |
 |------|-------------|---------|
-| `-p, --port <number>` | Set the port number | `3000` |
-| `-s, --site <path>` | Set the path where site files are located | `./site` |
-| `-o, --output <path>` | Set the output directory | `./site/dist` |
 | `-b, --build` | Build the site before serving | `false` |
-| `-w, --watch` | Build the site, then watch for file changes and rebuild automatically | `false` |
-| `-c, --clean` | Clean the output directory before building (only applies with `--build` or `--watch`) | `false` |
 
 ### Examples
 
@@ -133,14 +151,7 @@ Builds the site, starts a file watcher, and serves it locally — all in one com
 npx docula start
 ```
 
-### Flags
-
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-p, --port <number>` | Set the port number | `3000` |
-| `-s, --site <path>` | Set the path where site files are located | `./site` |
-| `-o, --output <path>` | Set the output directory | `./site/dist` |
-| `-c, --clean` | Clean the output directory before building | `false` |
+All flags for `start` are covered by the [Common Options](#common-options).
 
 ### Examples
 
