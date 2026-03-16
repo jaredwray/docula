@@ -53,8 +53,10 @@ export type DoculaData = {
 	themeMode?: string;
 	cookieAuth?: {
 		loginUrl: string;
-		cookieName?: string;
 		logoutUrl?: string;
+		authCheckUrl?: string;
+		authCheckMethod?: string;
+		authCheckUserPath?: string;
 	};
 	headerLinks?: Array<{
 		label: string;

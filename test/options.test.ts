@@ -248,20 +248,24 @@ describe("DoculaOptions", () => {
 			options.parseOptions({
 				cookieAuth: {
 					loginUrl: "/login",
-					cookieName: "auth_token",
 					logoutUrl: "/logout",
+					authCheckUrl: "https://api.example.com/me",
+					authCheckMethod: "POST",
+					authCheckUserPath: "email",
 				},
 			});
 			expect(options.cookieAuth).toEqual({
 				loginUrl: "/login",
-				cookieName: "auth_token",
 				logoutUrl: "/logout",
+				authCheckUrl: "https://api.example.com/me",
+				authCheckMethod: "POST",
+				authCheckUserPath: "email",
 			});
 		});
 
 		it("should not set cookieAuth when loginUrl is missing", () => {
 			options.parseOptions({
-				cookieAuth: { cookieName: "token" },
+				cookieAuth: { authCheckUrl: "https://api.example.com/me" },
 			});
 			expect(options.cookieAuth).toBeUndefined();
 		});

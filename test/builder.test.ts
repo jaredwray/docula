@@ -5388,8 +5388,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth";
-
-			options.cookieAuth = { loginUrl: "/login", cookieName: "auth_token" };
+			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -5443,7 +5442,6 @@ describe("DoculaBuilder", () => {
 
 			options.cookieAuth = {
 				loginUrl: "/login",
-				cookieName: "jwt",
 				logoutUrl: "/api/auth/logout",
 			};
 			const builder = new DoculaBuilder(options);
@@ -5489,13 +5487,116 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
-		it("should use default cookie name when cookieName is not set", async () => {
+		it("should render header-actions wrapper around cookie auth and theme toggle", async () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-default-name";
+			options.output = "test/temp-build-cookie-auth-header-actions";
 
 			options.cookieAuth = { loginUrl: "/login" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain('class="header-actions"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render cached auth state check in head script", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-head-cache";
+
+			options.cookieAuth = { loginUrl: "/login" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("docula-auth-state");
+				expect(docsHtml).toContain("docula-auth-logged-in");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render inline username script after cookie-auth-user element", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-inline-username";
+
+			options.cookieAuth = { loginUrl: "/login" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("cookie-auth-user");
+				expect(docsHtml).toContain("__doculaAuth");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not use inline display:none styles on cookie auth elements", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-no-inline-styles";
+			options.cookieAuth = { loginUrl: "/login" };
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				const logoutMatch = docsHtml.match(/id="cookie-auth-logout"[^>]*/);
+				expect(logoutMatch).toBeTruthy();
+				expect(logoutMatch?.[0]).not.toContain('style="display:none"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render authCheckUrl in config when configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp-build-cookie-auth-check-url";
+
+			options.cookieAuth = {
+				loginUrl: "/login",
+				authCheckUrl: "https://api.example.com/me",
+				authCheckUserPath: "email",
+			};
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -5504,8 +5605,10 @@ describe("DoculaBuilder", () => {
 					`${options.output}/index.html`,
 					"utf8",
 				);
-				// The default cookie name 'token' should appear in the config element
-				expect(indexHtml).toContain('data-cookie-name="token"');
+				expect(indexHtml).toContain(
+					'data-auth-check-url="https://api.example.com/me"',
+				);
+				expect(indexHtml).toContain('data-auth-check-user-path="email"');
 			} finally {
 				await fs.promises.rm(options.output, {
 					recursive: true,

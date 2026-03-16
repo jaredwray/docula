@@ -70,6 +70,43 @@
             </select>
             <input type="password" class="api-auth__value api-auth__value--hidden" id="api-auth-value" placeholder="Enter value..." />
             <span class="api-auth__cookie-status api-auth__cookie-status--hidden" id="api-auth-cookie-status"></span>
+            <script>
+              (function() {
+                var authTypeSelect = document.getElementById('api-auth-type');
+                if (!authTypeSelect) return;
+
+                // Restore selection from localStorage
+                var savedAuthType = localStorage.getItem('docula-api-auth-type');
+                if (savedAuthType) {
+                  for (var i = 0; i < authTypeSelect.options.length; i++) {
+                    if (authTypeSelect.options[i].value === savedAuthType) {
+                      authTypeSelect.selectedIndex = i;
+                      break;
+                    }
+                  }
+                }
+
+                // Update UI based on selection
+                var selectedOption = authTypeSelect.options[authTypeSelect.selectedIndex];
+                var authValueInput = document.getElementById('api-auth-value');
+                var cookieStatusBadge = document.getElementById('api-auth-cookie-status');
+
+                if (selectedOption.value === 'none') return;
+
+                var isCookieAuth = selectedOption.getAttribute('data-scheme-type') === 'apiKey'
+                  && selectedOption.getAttribute('data-scheme-in') === 'cookie';
+
+                if (isCookieAuth) {
+                  if (cookieStatusBadge) {
+                    var auth = window.__doculaAuth || { loggedIn: false };
+                    cookieStatusBadge.textContent = auth.loggedIn ? 'Logged in' : 'Not logged in — use Login button above';
+                    cookieStatusBadge.className = 'api-auth__cookie-status' + (auth.loggedIn ? ' api-auth__cookie-status--ok' : ' api-auth__cookie-status--warn');
+                  }
+                } else {
+                  if (authValueInput) authValueInput.classList.remove('api-auth__value--hidden');
+                }
+              })();
+            </script>
           </div>
         </div>
         {{/if}}
