@@ -5388,13 +5388,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth";
-<<<<<<< half-ogre/features-for-hyphen
-			options.homePage = true;
 			options.cookieAuth = { loginUrl: "/login" };
-=======
-
-			options.cookieAuth = { loginUrl: "/login", cookieName: "auth_token" };
->>>>>>> main
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -5498,7 +5492,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth-header-actions";
-			options.homePage = true;
+
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5522,7 +5516,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth-head-cache";
-			options.homePage = true;
+
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5547,7 +5541,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth-inline-username";
-			options.homePage = true;
+
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5571,13 +5565,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-<<<<<<< half-ogre/features-for-hyphen
 			options.output = "test/temp-build-cookie-auth-no-inline-styles";
-			options.homePage = true;
-=======
-			options.output = "test/temp-build-cookie-auth-default-name";
-
->>>>>>> main
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5603,7 +5591,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth-check-url";
-			options.homePage = true;
+
 			options.cookieAuth = {
 				loginUrl: "/login",
 				authCheckUrl: "https://api.example.com/me",
