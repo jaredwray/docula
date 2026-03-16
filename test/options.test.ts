@@ -179,19 +179,6 @@ describe("DoculaOptions", () => {
 			expect(options.changelogPerPage).toEqual(20);
 		});
 
-		it("should log deprecation warning when homePage is provided", () => {
-			const consoleWarn = console.warn;
-			let warnMessage = "";
-			console.warn = (message: string) => {
-				warnMessage = message;
-			};
-
-			options.parseOptions({ homePage: false });
-			expect(warnMessage).toContain("homePage");
-			expect(warnMessage).toContain("deprecated");
-			console.warn = consoleWarn;
-		});
-
 		it("should parse enableLlmsTxt set to false", () => {
 			options.parseOptions({ enableLlmsTxt: false });
 			expect(options.enableLlmsTxt).toEqual(false);

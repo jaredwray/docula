@@ -230,12 +230,6 @@ export class DoculaOptions {
 			this.changelogPerPage = options.changelogPerPage;
 		}
 
-		if (options.homePage !== undefined) {
-			console.warn(
-				"The 'homePage' option is deprecated and will be ignored. Docula now auto-detects the starting view based on content (README.md, docs/, api/swagger.json).",
-			);
-		}
-
 		if (
 			options.enableLlmsTxt !== undefined &&
 			typeof options.enableLlmsTxt === "boolean"

@@ -209,6 +209,12 @@ export class DoculaBuilder {
 			enableLlmsTxt: this.options.enableLlmsTxt,
 		};
 
+		// Track README.md in asset hashes for change detection
+		const readmePath = `${this.options.sitePath}/README.md`;
+		if (doculaData.hasReadme) {
+			currentAssetHashes["README.md"] = this.hashFile(readmePath);
+		}
+
 		// Auto-detect swagger.json if openApiUrl is not set
 		if (
 			!doculaData.openApiUrl &&
@@ -2555,6 +2561,7 @@ export class DoculaBuilder {
 			"logo_horizontal.png",
 			"variables.css",
 			"api/swagger.json",
+			"README.md",
 		];
 		for (const file of assetFiles) {
 			const filePath = path.join(sitePath, file);
