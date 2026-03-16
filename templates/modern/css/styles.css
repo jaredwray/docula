@@ -258,12 +258,23 @@ body {
   min-width: 288px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
   position: sticky;
   top: var(--header-height);
   max-height: calc(100vh - var(--header-height));
   overflow-y: auto;
   align-self: flex-start;
+}
+
+.nav-sidebar__section {
+  margin-top: 1px;
+}
+
+.nav-sidebar__section:has(.nav-sidebar__title) {
+  margin-top: 12px;
+}
+
+.nav-sidebar__section:first-child {
+  margin-top: 0;
 }
 
 .nav-sidebar__title {

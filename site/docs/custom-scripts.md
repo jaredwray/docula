@@ -1,6 +1,6 @@
 ---
 title: Custom Scripts
-order: 6
+order: 12
 ---
 
 # Adding Custom Scripts

@@ -10,9 +10,9 @@ You can contribute changes to this repo by opening a pull request:
 
 1) After forking this repository to your Git account, make the proposed changes on your forked branch.
 2) Run tests and linting locally.
-	- Make sure to have an `.env` file with `FIREBASE_CERT` and `SENDGRID_API_KEY` values plus the `firebase-cert.json` file and valid cert. 
-	- Run `npm install`.
-	- Run `npm test`.
+	- Ensure you have Node.js >= 20 and pnpm installed.
+	- Run `pnpm install`.
+	- Run `pnpm test` (runs Biome linting and Vitest with coverage — 100% code coverage is required).
 3) Commit your changes and push them to your forked repository.
 4) Navigate to the main `Docula` repository and select the *Pull Requests* tab.
 5) Click the *New pull request* button, then select the option "Compare across forks"

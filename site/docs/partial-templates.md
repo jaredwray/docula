@@ -1,6 +1,6 @@
 ---
 title: Partial Templates
-order: 5
+order: 11
 ---
 
 # Partial Template Overrides

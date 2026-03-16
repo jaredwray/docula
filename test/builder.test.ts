@@ -4,6 +4,7 @@ import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	DoculaBuilder,
+	type DoculaChangelogEntry,
 	type DoculaData,
 	type DoculaDocument,
 	type DoculaSection,
@@ -2961,6 +2962,45 @@ describe("DoculaBuilder", () => {
 					force: true,
 				});
 			}
+		});
+
+		it("should return cached entry when hashes match", () => {
+			const builder = new DoculaBuilder();
+			const changelogPath = "test/fixtures/changelog-site/changelog";
+			const cachedEntry: DoculaChangelogEntry = {
+				title: "Cached Feature",
+				date: "2025-01-15",
+				formattedDate: "January 15, 2025",
+				tag: "Release",
+				tagClass: "release",
+				slug: "2025-01-15-new-feature",
+				content: "cached content",
+				generatedHtml: "<p>cached content</p>",
+				preview: "cached content",
+				urlPath: "changelog/2025-01-15-new-feature.html",
+				lastModified: "2025-01-15",
+			};
+			const cachedEntries = new Map<string, DoculaChangelogEntry>();
+			cachedEntries.set("2025-01-15-new-feature", cachedEntry);
+
+			const matchingHash = "same-hash";
+			const previousHashes: Record<string, string> = {
+				"2025-01-15-new-feature.md": matchingHash,
+			};
+			const currentHashes: Record<string, string> = {
+				"2025-01-15-new-feature.md": matchingHash,
+			};
+
+			const entries = builder.getChangelogEntries(
+				changelogPath,
+				cachedEntries,
+				previousHashes,
+				currentHashes,
+			);
+
+			const matched = entries.find((e) => e.slug === "2025-01-15-new-feature");
+			expect(matched).toBe(cachedEntry);
+			expect(matched?.title).toBe("Cached Feature");
 		});
 
 		it("should parse a changelog entry correctly", () => {
