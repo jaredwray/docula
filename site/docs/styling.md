@@ -1,6 +1,6 @@
 ---
 title: Styling
-order: 12
+order: 7
 ---
 
 # Styling Your Site

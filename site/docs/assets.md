@@ -1,6 +1,6 @@
 ---
 title: Assets & Public Folder
-order: 7
+order: 6
 ---
 
 # Including Assets in Markdown
