@@ -56,11 +56,18 @@
   {{#if content}}
   {{> singlepage/hero }}
   {{> singlepage/content }}
+  {{#if hasApi}}
+  <div class="home-actions">
+    {{> multipage/api-reference }}
+  </div>
+  {{/if}}
   {{else}}
   <main class="home">
     {{> multipage/hero }}
     <div class="home-actions">
+      {{#if hasDocuments}}
       {{> multipage/documentation }}
+      {{/if}}
       {{#if hasApi}}
       {{> multipage/api-reference }}
       {{/if}}

@@ -25,7 +25,7 @@ import type { DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   templatePath: './template',
-  output: './dist',
+  output: './site/dist',
   sitePath: './site',
   githubPath: 'your-username/your-repo',
   siteTitle: 'My Project',
@@ -120,14 +120,13 @@ When both config files exist, Docula loads them in this order (first found wins)
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `templatePath` | `string` | `'./template'` | Path to custom template directory |
-| `output` | `string` | `'./dist'` | Output directory for built site |
+| `output` | `string` | `'{sitePath}/dist'` | Output directory for built site (defaults to `dist/` inside the site directory) |
 | `sitePath` | `string` | `'./site'` | Directory containing site content |
 | `githubPath` | `string` | `''` | GitHub repository path (e.g., `'user/repo'`). Optional — when empty, GitHub features are disabled. See [GitHub Integration](/docs/github-integration). |
 | `siteTitle` | `string` | `'docula'` | Website title |
 | `siteDescription` | `string` | - | Website description |
 | `siteUrl` | `string` | - | Website URL |
 | `port` | `number` | `3000` | Port for local development server |
-| `homePage` | `boolean` | `true` | When `false`, Docula uses the first docs page as `/index.html` instead of rendering `home.hbs` |
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |

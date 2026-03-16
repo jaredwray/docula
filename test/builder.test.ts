@@ -42,6 +42,9 @@ describe("DoculaBuilder", () => {
 			"test/fixtures/changelog-site",
 			"test/fixtures/announcement-site",
 			"test/fixtures/mega-custom-template",
+			"test/fixtures/api-only-site",
+			"test/fixtures/empty-site",
+			"test/fixtures/mega-page-site-no-home-page",
 		]) {
 			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
 		}
@@ -97,11 +100,10 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
-		it("should build multi page with homePage disabled", async () => {
+		it("should use first doc as index.html when no README.md exists", async () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp-build-test";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.homePage = false;
+			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -124,11 +126,10 @@ describe("DoculaBuilder", () => {
 
 			console.log = consoleLog;
 		});
-		it("should log error when homePage is false but no docs exist", async () => {
+		it("should log error when no README.md, no docs, and no API exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-no-docs";
-			options.sitePath = "test/fixtures/single-page-site";
-			options.homePage = false;
+			options.output = "test/temp-build-no-content";
+			options.sitePath = "test/fixtures/empty-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			const consoleError = console.error;
@@ -142,7 +143,7 @@ describe("DoculaBuilder", () => {
 				await builder.build();
 				expect(
 					errors.some((e) =>
-						e.includes("homePage is set to false but no documents were found"),
+						stripAnsi(e).includes("No content found for the home page"),
 					),
 				).toBe(true);
 			} finally {
@@ -2307,11 +2308,11 @@ describe("DoculaBuilder", () => {
 			expect(sidebarItems[0].children).toBeUndefined();
 		});
 		it("generateSidebarItems should not duplicate children when called multiple times", async () => {
-			// When homePage is false, generateSidebarItems is called twice: once by
-			// buildDocsHomePage (to render the first doc as the index page) and again
-			// by buildDocsPages (to render all doc pages). Because generateSidebarItems
-			// shallow-copies data.sections, the children arrays are shared references
-			// and the second call pushes duplicates into them.
+			// When docs is the starting view, generateSidebarItems is called twice:
+			// once by buildDocsHomePage (to render the first doc as the index page)
+			// and again by buildDocsPages (to render all doc pages). Because
+			// generateSidebarItems shallow-copies data.sections, the children arrays
+			// are shared references and the second call pushes duplicates into them.
 			const builder = new DoculaBuilder();
 			const documents: DoculaDocument[] = [
 				{
@@ -2824,7 +2825,7 @@ describe("DoculaBuilder", () => {
 				options.sitePath = "test/fixtures/multi-page-site";
 				options.output = `test/temp-build-api-home-button-${template}`;
 				options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
-				options.homePage = true;
+
 				const builder = new DoculaBuilder(options);
 
 				try {
@@ -2850,7 +2851,7 @@ describe("DoculaBuilder", () => {
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-api-home-no-template-button";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
-			options.homePage = true;
+
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -4918,7 +4919,7 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("Docula Builder - buildDocsHomePage", () => {
-		it("should render first document as index.html when homePage is false", async () => {
+		it("should render first document as index.html when no README.md exists", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
 				siteUrl: "http://foo.com",
@@ -4927,7 +4928,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				output: "test/temp-docs-home-test",
-				homePage: false,
+
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
@@ -4967,7 +4968,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				output: "test/temp-docs-home-error-test",
-				homePage: false,
+
 				hasDocuments: true,
 				documents: [],
 				templates: {
@@ -4976,7 +4977,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
-				"No docPage template found for homePage",
+				"No docPage template found for docs home page",
 			);
 		});
 
@@ -4989,7 +4990,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				output: "test/temp-docs-home-empty-test",
-				homePage: false,
+
 				hasDocuments: true,
 				documents: [],
 				templates: {
@@ -4999,7 +5000,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
-				"No documents found for homePage",
+				"No documents found for docs home page",
 			);
 		});
 
@@ -5012,7 +5013,7 @@ describe("DoculaBuilder", () => {
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
 				output: "test/temp-docs-home-precomputed-sidebar",
-				homePage: false,
+
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
@@ -5037,6 +5038,45 @@ describe("DoculaBuilder", () => {
 			} finally {
 				await fs.promises.rm(data.output, { recursive: true, force: true });
 			}
+		});
+	});
+
+	describe("Docula Builder - buildApiHomePage", () => {
+		it("should render API page as index.html when no README and no docs", async () => {
+			const options = new DoculaOptions();
+			options.output = "test/temp-api-home-test";
+			options.sitePath = "test/fixtures/api-only-site";
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("Test API");
+			} finally {
+				await fs.promises.rm(options.output, { recursive: true, force: true });
+				console.log = consoleLog;
+			}
+		});
+
+		it("should throw error when no API template or openApiUrl found", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/empty-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-api-home-error-test",
+			};
+
+			await expect(builder.renderApiContent(data)).rejects.toThrow(
+				"No API template or openApiUrl found",
+			);
 		});
 	});
 
@@ -5348,8 +5388,13 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth";
+<<<<<<< half-ogre/features-for-hyphen
 			options.homePage = true;
 			options.cookieAuth = { loginUrl: "/login" };
+=======
+
+			options.cookieAuth = { loginUrl: "/login", cookieName: "auth_token" };
+>>>>>>> main
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -5376,7 +5421,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-no-cookie-auth";
-			options.homePage = true;
+
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -5400,7 +5445,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth-logout-url";
-			options.homePage = true;
+
 			options.cookieAuth = {
 				loginUrl: "/login",
 				logoutUrl: "/api/auth/logout",
@@ -5427,7 +5472,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-cookie-auth-mobile";
-			options.homePage = true;
+
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5526,8 +5571,13 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
+<<<<<<< half-ogre/features-for-hyphen
 			options.output = "test/temp-build-cookie-auth-no-inline-styles";
 			options.homePage = true;
+=======
+			options.output = "test/temp-build-cookie-auth-default-name";
+
+>>>>>>> main
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5586,7 +5636,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-header-links";
-			options.homePage = true;
+
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
 				{ label: "Support", url: "https://support.example.com" },
@@ -5619,7 +5669,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-no-header-links";
-			options.homePage = true;
+
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -5642,7 +5692,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-header-links-icon";
-			options.homePage = true;
+
 			options.headerLinks = [
 				{
 					label: "Blog",
@@ -5673,7 +5723,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-header-links-default-icon";
-			options.homePage = true;
+
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
 			];
@@ -5701,7 +5751,7 @@ describe("DoculaBuilder", () => {
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp-build-header-links-mobile";
-			options.homePage = true;
+
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
 			];
@@ -5758,6 +5808,144 @@ describe("DoculaBuilder", () => {
 			};
 			const entries = builder.getReleasesAsChangelogEntries([release]);
 			expect(entries[0].lastModified).toBe("2025-06-15");
+		});
+	});
+
+	describe("Branch coverage - uncovered paths", () => {
+		it("should rebuild when assets change but docs and template are unchanged", async () => {
+			const sitePath = "test/temp-diff-build-asset-change";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
+				recursive: true,
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build
+				await builder.build();
+
+				// Modify an asset file (variables.css)
+				fs.writeFileSync(
+					`${sitePath}/variables.css`,
+					":root { --color: red; }",
+				);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second build — assets changed, should NOT skip
+				await builder.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(false);
+				expect(messages.some((m) => m.includes("Build completed"))).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should handle escapeXml with undefined value", () => {
+			const builder = new DoculaBuilder();
+			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+			const result = (builder as any).escapeXml(undefined);
+			expect(result).toBe("");
+		});
+
+		it("should truncate without word boundary when text has no spaces", () => {
+			const builder = new DoculaBuilder();
+			// Create text with no spaces that exceeds maxLength
+			const longText = "a".repeat(600);
+			const preview = builder.generateChangelogPreview(longText, 500);
+			expect(preview).toContain("...");
+		});
+
+		it("should restore original template file when override is removed", () => {
+			const sitePath = "test/fixtures/single-page-site";
+			const overrideDir = `${sitePath}/templates/modern/includes`;
+			const cacheDir = `${sitePath}/.cache`;
+
+			// Create override that shadows an existing template file
+			fs.mkdirSync(overrideDir, { recursive: true });
+			fs.writeFileSync(
+				`${overrideDir}/footer.hbs`,
+				"<footer>Override Footer</footer>",
+			);
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				const builder = new DoculaBuilder(options);
+
+				// First merge — creates cache with override
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				const result = (builder as any).mergeTemplateOverrides(
+					"test/fixtures/template-example",
+					sitePath,
+					"modern",
+				);
+
+				// Verify override is in cache
+				const cachedFooter = fs.readFileSync(
+					`${result}/includes/footer.hbs`,
+					"utf8",
+				);
+				expect(cachedFooter).toBe("<footer>Override Footer</footer>");
+
+				// Remove the override
+				fs.unlinkSync(`${overrideDir}/footer.hbs`);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second merge — should detect removal and restore original
+				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
+				(builder as any).mergeTemplateOverrides(
+					"test/fixtures/template-example",
+					sitePath,
+					"modern",
+				);
+
+				expect(
+					messages.some((m) =>
+						m.includes("Template override removed: includes/footer.hbs"),
+					),
+				).toBe(true);
+
+				// Original template file should be restored in cache
+				const restoredFooter = fs.readFileSync(
+					`${result}/includes/footer.hbs`,
+					"utf8",
+				);
+				const originalFooter = fs.readFileSync(
+					"test/fixtures/template-example/includes/footer.hbs",
+					"utf8",
+				);
+				expect(restoredFooter).toBe(originalFooter);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
+				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
 		});
 	});
 });

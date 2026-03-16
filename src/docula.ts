@@ -155,8 +155,20 @@ export default class Docula {
 			this.options.template = consoleProcess.args.template;
 		}
 
+		if (consoleProcess.args.templatePath) {
+			this.options.templatePath = consoleProcess.args.templatePath;
+		}
+
 		if (consoleProcess.args.output) {
 			this.options.output = consoleProcess.args.output;
+		} else {
+			// Recompute default output from current sitePath if not set by config
+			const configOptions = this._configFileModule.options as
+				| Record<string, unknown>
+				| undefined;
+			if (!configOptions?.output) {
+				this.options.output = path.join(this.options.sitePath, "dist");
+			}
 		}
 
 		if (
@@ -198,26 +210,26 @@ export default class Docula {
 				break;
 			}
 
+			case "dev": {
+				const devBuilder = await this.runBuild(consoleProcess.args.clean);
+				this.watch(this.options, devBuilder);
+				await this.serve(this.options);
+				break;
+			}
+
+			case "start": {
+				const startBuilder = await this.runBuild(consoleProcess.args.clean);
+				if (consoleProcess.args.watch) {
+					this.watch(this.options, startBuilder);
+				}
+
+				await this.serve(this.options);
+				break;
+			}
+
 			case "serve": {
 				if (consoleProcess.args.build || consoleProcess.args.watch) {
-					if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
-						/* v8 ignore next -- @preserve */
-						fs.rmSync(this.options.output, { recursive: true, force: true });
-					}
-
-					/* v8 ignore next 3 -- @preserve */
-					if (consoleProcess.args.clean) {
-						this.cleanCache(this.options.sitePath);
-					}
-
-					const builder = new DoculaBuilder(this.options);
-					/* v8 ignore next 4 -- @preserve */
-					if (this._configFileModule.onReleaseChangelog) {
-						builder.onReleaseChangelog =
-							this._configFileModule.onReleaseChangelog;
-					}
-
-					await builder.build();
+					const builder = await this.runBuild(consoleProcess.args.clean);
 					if (consoleProcess.args.watch) {
 						this.watch(this.options, builder);
 					}
@@ -228,27 +240,31 @@ export default class Docula {
 			}
 
 			default: {
-				if (consoleProcess.args.clean && fs.existsSync(this.options.output)) {
-					/* v8 ignore next -- @preserve */
-					fs.rmSync(this.options.output, { recursive: true, force: true });
-				}
-
-				/* v8 ignore next 3 -- @preserve */
-				if (consoleProcess.args.clean) {
-					this.cleanCache(this.options.sitePath);
-				}
-
-				const builder = new DoculaBuilder(this.options);
-				/* v8 ignore next 4 -- @preserve */
-				if (this._configFileModule.onReleaseChangelog) {
-					builder.onReleaseChangelog =
-						this._configFileModule.onReleaseChangelog;
-				}
-
-				await builder.build();
+				await this.runBuild(consoleProcess.args.clean);
 				break;
 			}
 		}
+	}
+
+	private async runBuild(clean: boolean): Promise<DoculaBuilder> {
+		/* v8 ignore next 4 -- @preserve */
+		if (clean && fs.existsSync(this.options.output)) {
+			fs.rmSync(this.options.output, { recursive: true, force: true });
+		}
+
+		/* v8 ignore next 3 -- @preserve */
+		if (clean) {
+			this.cleanCache(this.options.sitePath);
+		}
+
+		const builder = new DoculaBuilder(this.options);
+		/* v8 ignore next 4 -- @preserve */
+		if (this._configFileModule.onReleaseChangelog) {
+			builder.onReleaseChangelog = this._configFileModule.onReleaseChangelog;
+		}
+
+		await builder.build();
+		return builder;
 	}
 
 	/**
@@ -378,6 +394,7 @@ export default class Docula {
 			{ recursive: true },
 			(_eventType, filename) => {
 				// Ignore changes in the output directory
+				/* v8 ignore next 8 -- @preserve */
 				if (
 					filename &&
 					outputRelative &&

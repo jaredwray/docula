@@ -96,35 +96,41 @@ export class DoculaConsole {
 			`    ${green("build")}          Build the project. By default just npx docula will build the project if it finds a ./site folder`,
 		);
 		console.log(
+			`    ${green("dev")}            Build, watch, and serve the project`,
+		);
+		console.log(`    ${green("start")}          Build and serve the project`);
+		console.log(
 			`    ${green("serve")}          Serve the project as a local website`,
 		);
 		console.log(`    ${green("help")}           Print this help`);
 		console.log(`    ${green("version")}        Print the version`);
 		console.log();
-		console.log(bold(cyan("  Arguments init:")));
+		console.log(bold(cyan("  Common Options:")));
 		console.log(
-			`    ${yellow("--typescript")}       Generate TypeScript config file (docula.config.ts)`,
-		);
-		console.log(
-			`    ${yellow("--javascript")}       Generate JavaScript config file (docula.config.mjs)`,
-		);
-		console.log(
-			`    ${yellow("-s, --site")}         Set the path where site files are located`,
-		);
-		console.log();
-		console.log(bold(cyan("  Arguments build:")));
-		console.log(
-			`    ${yellow("-w, --watch")}            watch for changes and rebuild`,
+			`    ${yellow("-s, --site")}             Set the path where site files are located`,
 		);
 		console.log(
 			`    ${yellow("-c, --clean")}            Clean the output directory before building`,
 		);
 		console.log(
-			`    ${yellow("-s, --site")}             Set the path where site files are located`,
-		);
-		console.log(
 			`    ${yellow("-o, --output")}           Set the output directory. Default is ./site/dist`,
 		);
+		console.log(
+			`    ${yellow("-p, --port")}             Set the port number. Default is 3000`,
+		);
+		console.log(
+			`    ${yellow("-w, --watch")}            Watch for changes and rebuild`,
+		);
+		console.log();
+		console.log(bold(cyan("  Init Options:")));
+		console.log(
+			`    ${yellow("--typescript")}           Generate TypeScript config file (docula.config.ts)`,
+		);
+		console.log(
+			`    ${yellow("--javascript")}           Generate JavaScript config file (docula.config.mjs)`,
+		);
+		console.log();
+		console.log(bold(cyan("  Build / Dev Options:")));
 		console.log(
 			`    ${yellow("-t, --templatePath")}     Set the custom template to use`,
 		);
@@ -132,21 +138,9 @@ export class DoculaConsole {
 			`    ${yellow("-T, --template")}         Set the built-in template name (e.g., modern, classic)`,
 		);
 		console.log();
-		console.log(bold(cyan("  Arguments serve:")));
+		console.log(bold(cyan("  Serve Options:")));
 		console.log(
-			`    ${yellow("-p, --port")}         Set the port number used with serve`,
-		);
-		console.log(
-			`    ${yellow("-b, --build")}        Build the site before serving`,
-		);
-		console.log(
-			`    ${yellow("-w, --watch")}        watch for changes and rebuild`,
-		);
-		console.log(
-			`    ${yellow("-c, --clean")}        Clean the output directory before building`,
-		);
-		console.log(
-			`    ${yellow("-s, --site")}         Set the path where site files are located`,
+			`    ${yellow("-b, --build")}            Build the site before serving`,
 		);
 	}
 
@@ -161,7 +155,32 @@ export class DoculaConsole {
 	}
 
 	public getCommand(argv: string[]): string | undefined {
+		// Flags that consume the next token as a value
+		const flagsWithValues = new Set([
+			"-s",
+			"--site",
+			"-o",
+			"--output",
+			"-p",
+			"--port",
+			"-t",
+			"--templatePath",
+			"-T",
+			"--template",
+		]);
+
+		let skipNext = false;
 		for (const argument of argv) {
+			if (skipNext) {
+				skipNext = false;
+				continue;
+			}
+
+			if (flagsWithValues.has(argument)) {
+				skipNext = true;
+				continue;
+			}
+
 			switch (argument) {
 				case "init": {
 					return "init";
@@ -175,7 +194,17 @@ export class DoculaConsole {
 					return "serve";
 				}
 
-				case "help": {
+				case "dev": {
+					return "dev";
+				}
+
+				case "start": {
+					return "start";
+				}
+
+				case "help":
+				case "-h":
+				case "--help": {
 					return "help";
 				}
 

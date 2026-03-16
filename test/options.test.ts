@@ -1,8 +1,29 @@
+import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DoculaOptions } from "../src/options.js";
 
 describe("DoculaOptions", () => {
 	describe("constructor", () => {
+		it("should default output to sitePath/dist", () => {
+			const options = new DoculaOptions();
+			expect(options.output).toEqual(path.join(options.sitePath, "dist"));
+		});
+
+		it("should default output to custom sitePath/dist when sitePath is provided", () => {
+			const options = new DoculaOptions({ sitePath: "./custom-site" });
+			expect(options.output).toEqual(
+				path.join(process.cwd(), "custom-site", "dist"),
+			);
+		});
+
+		it("should not override explicit output when sitePath is also provided", () => {
+			const options = new DoculaOptions({
+				sitePath: "./custom-site",
+				output: "./my-output",
+			});
+			expect(options.output).toContain("/my-output");
+		});
+
 		it("should create an instance of DoculaOptions with default values", () => {
 			const options = new DoculaOptions();
 			expect(options.template).toEqual("modern");
@@ -17,7 +38,6 @@ describe("DoculaOptions", () => {
 			expect(options.siteUrl).toEqual("https://docula.org");
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.changelogPerPage).toEqual(20);
-			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.themeMode).toBeUndefined();
@@ -157,16 +177,6 @@ describe("DoculaOptions", () => {
 			expect(options.changelogPerPage).toEqual(20);
 			options.parseOptions({ changelogPerPage: -5 });
 			expect(options.changelogPerPage).toEqual(20);
-		});
-
-		it("should parse homePage set to false", () => {
-			options.parseOptions({ homePage: false });
-			expect(options.homePage).toEqual(false);
-		});
-
-		it("should not update homePage for non-boolean values", () => {
-			options.parseOptions({ homePage: "yes" });
-			expect(options.homePage).toEqual(true);
 		});
 
 		it("should parse enableLlmsTxt set to false", () => {

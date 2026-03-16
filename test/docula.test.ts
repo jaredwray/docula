@@ -891,6 +891,61 @@ describe("docula watch", () => {
 			console.log = consoleLog;
 		}
 	});
+	it("should ignore changes in the .cache directory", async () => {
+		const tempSitePath = "test/temp-watch-ignore-cache";
+		const tempOutput = `${tempSitePath}/dist`;
+
+		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
+			recursive: true,
+		});
+
+		const options = new DoculaOptions();
+		options.sitePath = tempSitePath;
+		options.output = tempOutput;
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		const consoleLog = console.log;
+		const messages: string[] = [];
+		console.log = (message) => {
+			if (typeof message === "string") {
+				messages.push(message);
+			}
+		};
+
+		try {
+			const { DoculaBuilder } = await import("../src/builder.js");
+			const builder = new DoculaBuilder(options);
+			await builder.build();
+
+			// Clear messages from the initial build
+			messages.length = 0;
+
+			docula.watch(options, builder);
+
+			// Write a file inside the .cache directory
+			fs.mkdirSync(`${tempSitePath}/.cache`, { recursive: true });
+			fs.writeFileSync(`${tempSitePath}/.cache/test.json`, "{}");
+
+			// Wait for debounce period
+			await new Promise((resolve) => {
+				setTimeout(resolve, 1000);
+			});
+
+			// Should NOT have triggered a rebuild
+			expect(messages.some((m) => m.includes("rebuilding..."))).toBe(false);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			await new Promise((resolve) => {
+				setTimeout(resolve, 500);
+			});
+
+			await fs.promises.rm(tempSitePath, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
 	it("should ignore changes in the output directory", async () => {
 		const tempSitePath = "test/temp-watch-ignore-output";
 		const tempOutput = `${tempSitePath}/dist`;
@@ -1016,6 +1071,124 @@ describe("docula watch", () => {
 	});
 });
 
+describe("docula dev", () => {
+	afterEach(() => {
+		vi.resetAllMocks();
+		for (const fixture of ["test/fixtures/single-page-site"]) {
+			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+		}
+	});
+	beforeEach(() => {
+		// biome-ignore lint/suspicious/noExplicitAny: test file
+		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
+			if (url.endsWith("releases")) {
+				return { data: githubMockReleases };
+			}
+
+			if (url.endsWith("contributors")) {
+				return { data: githubMockContributors };
+			}
+
+			return { data: {} };
+		});
+	});
+
+	it("should build, watch, and serve when dev command is used", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-dev1";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "dev", "-p", "8195"];
+		const consoleLog = console.log;
+		const messages: string[] = [];
+		console.log = (message) => {
+			if (typeof message === "string") {
+				messages.push(message);
+			}
+		};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			expect(docula.watcher).toBeDefined();
+			// Verify build was performed
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+			// Verify watching message
+			expect(
+				messages.some((m) =>
+					stripAnsi(m).includes("Watching for file changes..."),
+				),
+			).toBe(true);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+
+	it("should build and serve without watch when start command is used", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start1";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "start", "-p", "8196"];
+		const consoleLog = console.log;
+		console.log = () => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			expect(docula.watcher).toBeUndefined();
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+
+	it("should build, watch, and serve when start command is used with --watch", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/fixtures/single-page-site/dist-start-watch";
+		options.templatePath = "test/fixtures/template-example/";
+		const docula = new Docula(options);
+		process.argv = ["node", "docula", "start", "-w", "-p", "8197"];
+		const consoleLog = console.log;
+		console.log = () => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.server).toBeDefined();
+			expect(docula.watcher).toBeDefined();
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			if (docula.watcher) {
+				docula.watcher.close();
+			}
+
+			if (docula.server) {
+				docula.server.close();
+			}
+
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+			console.log = consoleLog;
+		}
+	});
+});
+
 describe("docula config file", () => {
 	it("should be able to load the config file", async () => {
 		const docula = new Docula(defaultOptions);
@@ -1085,10 +1258,9 @@ describe("docula config file", () => {
 		);
 		console.log = consoleLog;
 	});
-	it("should build docs at root when config sets homePage to false", async () => {
+	it("should build docs at root when no README.md exists", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
-		options.homePage = true;
 		const docula = new Docula(options);
 		const output = "test/temp-build-mega-no-home-test";
 		const consoleLog = console.log;
@@ -1098,8 +1270,6 @@ describe("docula config file", () => {
 			process.argv = ["node", "docula", "-o", output];
 			await docula.execute(process);
 
-			expect(docula.configFileModule.options.homePage).toEqual(false);
-			expect(docula.options.homePage).toEqual(false);
 			const indexHtml = await fs.promises.readFile(
 				`${output}/index.html`,
 				"utf8",
@@ -1179,5 +1349,32 @@ describe("docula config file", () => {
 
 		console.log = consoleLog;
 		console.error = consoleError;
+	});
+
+	it("should apply --templatePath flag from CLI args", async () => {
+		const options = new DoculaOptions();
+		options.sitePath = "test/fixtures/single-page-site";
+		options.output = "test/temp-templatepath-test";
+		const docula = new Docula(options);
+		process.argv = [
+			"node",
+			"docula",
+			"build",
+			"-t",
+			"test/fixtures/template-example",
+		];
+		const consoleLog = console.log;
+		console.log = () => {};
+
+		try {
+			await docula.execute(process);
+			expect(docula.options.templatePath).toContain(
+				"test/fixtures/template-example",
+			);
+			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
+		} finally {
+			console.log = consoleLog;
+			await fs.promises.rm(options.output, { recursive: true, force: true });
+		}
 	});
 });

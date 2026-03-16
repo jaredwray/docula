@@ -34,7 +34,7 @@ export class DoculaOptions {
 	/**
 	 * Path to the output directory
 	 */
-	public output = path.join(process.cwd(), "./dist");
+	public output = "";
 	/**
 	 * Path to the site directory
 	 */
@@ -78,11 +78,6 @@ export class DoculaOptions {
 	 * Number of changelog entries to display per page on the changelog index.
 	 */
 	public changelogPerPage = 20;
-	/**
-	 * When false, the first document becomes the home page (index.html)
-	 * and the home.hbs template is not rendered.
-	 */
-	public homePage = true;
 	/**
 	 * When true, generates llms.txt and llms-full.txt files for the built site.
 	 */
@@ -156,6 +151,10 @@ export class DoculaOptions {
 	constructor(options?: Record<string, unknown>) {
 		if (options) {
 			this.parseOptions(options);
+		}
+
+		if (!this.output) {
+			this.output = path.join(this.sitePath, "dist");
 		}
 	}
 
@@ -234,13 +233,6 @@ export class DoculaOptions {
 		}
 
 		if (
-			options.homePage !== undefined &&
-			typeof options.homePage === "boolean"
-		) {
-			this.homePage = options.homePage;
-		}
-
-		if (
 			options.enableLlmsTxt !== undefined &&
 			typeof options.enableLlmsTxt === "boolean"
 		) {
@@ -294,6 +286,11 @@ export class DoculaOptions {
 			if (validLinks.length > 0) {
 				this.headerLinks = validLinks;
 			}
+		}
+
+		// Recompute default output from sitePath if not explicitly provided
+		if (!options.output && !this.output) {
+			this.output = path.join(this.sitePath, "dist");
 		}
 	}
 }
