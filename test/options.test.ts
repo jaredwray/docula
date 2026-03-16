@@ -38,7 +38,6 @@ describe("DoculaOptions", () => {
 			expect(options.siteUrl).toEqual("https://docula.org");
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.changelogPerPage).toEqual(20);
-			expect(options.homePage).toEqual(true);
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.themeMode).toBeUndefined();
@@ -178,16 +177,6 @@ describe("DoculaOptions", () => {
 			expect(options.changelogPerPage).toEqual(20);
 			options.parseOptions({ changelogPerPage: -5 });
 			expect(options.changelogPerPage).toEqual(20);
-		});
-
-		it("should parse homePage set to false", () => {
-			options.parseOptions({ homePage: false });
-			expect(options.homePage).toEqual(false);
-		});
-
-		it("should not update homePage for non-boolean values", () => {
-			options.parseOptions({ homePage: "yes" });
-			expect(options.homePage).toEqual(true);
 		});
 
 		it("should parse enableLlmsTxt set to false", () => {

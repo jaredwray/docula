@@ -77,11 +77,6 @@ export class DoculaOptions {
 	 */
 	public changelogPerPage = 20;
 	/**
-	 * When false, the first document becomes the home page (index.html)
-	 * and the home.hbs template is not rendered.
-	 */
-	public homePage = true;
-	/**
 	 * When true, generates llms.txt and llms-full.txt files for the built site.
 	 */
 	public enableLlmsTxt = true;
@@ -233,13 +228,6 @@ export class DoculaOptions {
 			options.changelogPerPage > 0
 		) {
 			this.changelogPerPage = options.changelogPerPage;
-		}
-
-		if (
-			options.homePage !== undefined &&
-			typeof options.homePage === "boolean"
-		) {
-			this.homePage = options.homePage;
 		}
 
 		if (

@@ -10,6 +10,5 @@ export const options: Partial<DoculaOptions> = {
 	// openApiUrl: '/api/swagger.json',
 	// enableReleaseChangelog: true,
 	// enableLlmsTxt: true,
-	// homePage: true,
 	// themeMode: 'light',
 };
