@@ -32,6 +32,10 @@ export const options: Partial<DoculaOptions> = {
   siteDescription: 'Project description',
   siteUrl: 'https://your-site.com',
   themeMode: 'light', // or 'dark' — defaults to system preference if omitted
+  baseUrl: '/docs', // host under a subpath
+  docsPath: '', // place docs at the output root
+  apiPath: 'api',
+  changelogPath: 'changelog',
 };
 ```
 
@@ -135,4 +139,8 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
 | `cookieAuth` | `{ loginUrl: string; logoutUrl?: string; authCheckUrl?: string; authCheckMethod?: string; authCheckUserPath?: string }` | - | Enables cookie-based authentication, which displays a Login/Logout button in the header. See [Cookie Auth](/docs/cookie-auth). |
 | `headerLinks` | `Array<{ label: string; url: string; icon?: string }>` | - | Additional links to display in the site header navigation. See [Header Links](/docs/header-links). |
+| `baseUrl` | `string` | `''` | Base URL path prefix for all generated paths (e.g., `'/docs'`). When set, all asset and navigation URLs are prefixed with this path. Useful when hosting docs under a subpath of another site. |
+| `docsPath` | `string` | `'docs'` | Output subdirectory and URL segment for documentation pages. Set to `''` to place docs at the output root — useful with `baseUrl` to avoid `/docs/docs/` nesting. |
+| `apiPath` | `string` | `'api'` | Output subdirectory and URL segment for API reference pages. |
+| `changelogPath` | `string` | `'changelog'` | Output subdirectory and URL segment for changelog pages. |
 | `allowedAssets` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |

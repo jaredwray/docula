@@ -4,24 +4,24 @@
       <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
-      <a href="/">
-        <img alt="{{siteTitle}}" class="logo__img" src="/logo.svg">
+      <a href="{{baseUrl}}/">
+        <img alt="{{siteTitle}}" class="logo__img" src="{{baseUrl}}/logo.svg">
       </a>
       <nav class="header-bottom__nav">
         {{#if hasDocuments}}
-        <a class="header-bottom__item" href="/docs/" id="nav-docs">
+        <a class="header-bottom__item" href="{{docsUrl}}/" id="nav-docs">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
           <span>Documentation</span>
         </a>
         {{/if}}
         {{#if openApiUrl}}
-        <a class="header-bottom__item" href="/api" id="nav-api">
+        <a class="header-bottom__item" href="{{apiUrl}}" id="nav-api">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
           <span>API Reference</span>
         </a>
         {{/if}}
         {{#if hasChangelog}}
-        <a class="header-bottom__item" href="/changelog" id="nav-changelog">
+        <a class="header-bottom__item" href="{{changelogUrl}}" id="nav-changelog">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/></svg>
           <span>Changelog</span>
         </a>
@@ -68,19 +68,19 @@
 <aside class="mobile-sidebar" id="mobile-sidebar">
   <nav class="mobile-nav">
     {{#if hasDocuments}}
-    <a class="mobile-nav__item" href="/docs/">
+    <a class="mobile-nav__item" href="{{docsUrl}}/">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
       <span>Documentation</span>
     </a>
     {{/if}}
     {{#if openApiUrl}}
-    <a class="mobile-nav__item" href="/api">
+    <a class="mobile-nav__item" href="{{apiUrl}}">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
       <span>API Reference</span>
     </a>
     {{/if}}
     {{#if hasChangelog}}
-    <a class="mobile-nav__item" href="/changelog">
+    <a class="mobile-nav__item" href="{{changelogUrl}}">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/></svg>
       <span>Changelog</span>
     </a>

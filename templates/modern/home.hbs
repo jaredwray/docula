@@ -3,7 +3,7 @@
 
 <head>
   {{> header }}
-  <link rel="stylesheet" href="/css/home.css">
+  <link rel="stylesheet" href="{{baseUrl}}/css/home.css">
   <title>{{ siteTitle }}</title>
 </head>
 
@@ -24,7 +24,7 @@
 
   {{#if content}}
   <header class="home-hero">
-    <img src="/logo.svg" alt="logo" />
+    <img src="{{baseUrl}}/logo.svg" alt="logo" />
     {{#if announcement}}
     <div class="announcement">{{{announcement}}}</div>
     {{/if}}
