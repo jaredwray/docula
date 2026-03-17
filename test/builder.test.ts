@@ -6453,7 +6453,7 @@ describe("DoculaBuilder", () => {
 				expect(feed.home_page_url).toBe("http://foo.com/docs/");
 				expect(feed.feed_url).toBe("http://foo.com/docs/changelog.json");
 				expect(feed.items[0].url).toBe(
-					"http://foo.com/docs/changelog/release-v1-0",
+					"http://foo.com/docs/changelog/release-v1-0/",
 				);
 			} finally {
 				if (fs.existsSync(data.output)) {
