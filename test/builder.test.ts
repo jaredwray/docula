@@ -46,7 +46,9 @@ describe("DoculaBuilder", () => {
 	afterEach(() => {
 		// Reset the mock after each test
 		vi.resetAllMocks();
-		// Clean build manifests to prevent differential build interference between tests
+		// Clean build manifests to prevent differential build interference between tests.
+		// Wrapped in try/catch because docula.test.ts runs in parallel and may be
+		// writing to .cache/build at the same time, causing ENOTEMPTY races.
 		for (const fixture of [
 			"test/fixtures/single-page-site",
 			"test/fixtures/multi-page-site",
@@ -58,7 +60,11 @@ describe("DoculaBuilder", () => {
 			"test/fixtures/empty-site",
 			"test/fixtures/mega-page-site-no-home-page",
 		]) {
-			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+			try {
+				fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+			} catch {
+				// ignore race conditions with parallel test files
+			}
 		}
 	});
 	beforeEach(() => {
