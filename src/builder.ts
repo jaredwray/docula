@@ -379,6 +379,12 @@ export class DoculaBuilder {
 			this._console.fileBuilt("feed.xml");
 		}
 
+		// Build the changelog JSON feed (/changelog.json)
+		if (doculaData.changelogEntries?.length) {
+			await this.buildChangelogFeedJson(doculaData);
+			this._console.fileBuilt("changelog.json");
+		}
+
 		if (doculaData.hasDocuments) {
 			this._console.step("Building documentation pages...");
 			await this.buildDocsPages(doculaData);
@@ -692,6 +698,10 @@ export class DoculaBuilder {
 			urls.push({ url: `${data.siteUrl}${data.baseUrl}/feed.xml` });
 		}
 
+		if (data.changelogEntries?.length) {
+			urls.push({ url: `${data.siteUrl}${data.baseUrl}/changelog.json` });
+		}
+
 		if (data.openApiUrl && data.templates?.api) {
 			urls.push({
 				url: `${data.siteUrl}${data.apiUrl}`,
@@ -793,6 +803,68 @@ export class DoculaBuilder {
 
 		await fs.promises.mkdir(data.output, { recursive: true });
 		await fs.promises.writeFile(feedPath, xml, "utf8");
+	}
+
+	public async buildChangelogFeedJson(data: DoculaData): Promise<void> {
+		const entries = data.changelogEntries;
+		if (!entries?.length) {
+			return;
+		}
+
+		const feedUrl = this.buildAbsoluteSiteUrl(
+			data.siteUrl,
+			`${data.baseUrl}/changelog.json`,
+		);
+		const homeUrl = this.buildAbsoluteSiteUrl(data.siteUrl, `${data.baseUrl}/`);
+
+		const items = entries.map((entry) => {
+			const itemUrl = this.buildAbsoluteSiteUrl(
+				data.siteUrl,
+				`${data.changelogUrl}/${entry.slug}`,
+			);
+			const item: Record<string, unknown> = {
+				id: entry.slug,
+				title: entry.title,
+				url: itemUrl,
+				date_published: entry.date,
+				date_modified: entry.lastModified,
+				summary: entry.preview,
+			};
+
+			if (entry.generatedHtml) {
+				item.content_html = entry.generatedHtml;
+			}
+
+			if (entry.content) {
+				item.content_text = entry.content;
+			}
+
+			if (entry.tag) {
+				item.tags = [entry.tag];
+			}
+
+			if (entry.previewImage) {
+				item.image = entry.previewImage;
+			}
+
+			return item;
+		});
+
+		const feed = {
+			version: "https://jsonfeed.org/version/1.1",
+			title: data.siteTitle,
+			description: data.siteDescription,
+			home_page_url: homeUrl,
+			feed_url: feedUrl,
+			items,
+		};
+
+		await fs.promises.mkdir(data.output, { recursive: true });
+		await fs.promises.writeFile(
+			`${data.output}/changelog.json`,
+			JSON.stringify(feed, null, 2),
+			"utf8",
+		);
 	}
 
 	public async buildLlmsFiles(data: DoculaData): Promise<void> {

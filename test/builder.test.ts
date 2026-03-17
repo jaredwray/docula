@@ -6201,4 +6201,318 @@ describe("DoculaBuilder", () => {
 			}
 		});
 	});
+
+	describe("Docula Builder - Build Changelog Feed JSON", () => {
+		it("should build changelog.json with valid entries", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "My Site",
+				siteDescription: "Site description",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-changelog-json-test",
+				changelogEntries: [
+					{
+						title: "Release v2.0",
+						date: "2025-03-01",
+						formattedDate: "March 1, 2025",
+						tag: "Added",
+						tagClass: "added",
+						slug: "release-v2-0",
+						content: "# Release v2.0\n\nNew features added.",
+						generatedHtml: "<h1>Release v2.0</h1><p>New features added.</p>",
+						preview: "New features added.",
+						previewImage: "/img/v2.png",
+						urlPath: "/changelog/release-v2-0/",
+						lastModified: "2025-03-01",
+					},
+					{
+						title: "Release v1.0",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						slug: "release-v1-0",
+						content: "# Release v1.0\n\nInitial release.",
+						generatedHtml: "<h1>Release v1.0</h1><p>Initial release.</p>",
+						preview: "Initial release.",
+						urlPath: "/changelog/release-v1-0/",
+						lastModified: "2025-01-15",
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildChangelogFeedJson(data);
+				const raw = await fs.promises.readFile(
+					`${data.output}/changelog.json`,
+					"utf8",
+				);
+				const feed = JSON.parse(raw);
+
+				expect(feed.version).toBe("https://jsonfeed.org/version/1.1");
+				expect(feed.title).toBe("My Site");
+				expect(feed.description).toBe("Site description");
+				expect(feed.home_page_url).toBe("http://foo.com/");
+				expect(feed.feed_url).toBe("http://foo.com/changelog.json");
+				expect(feed.items).toHaveLength(2);
+
+				const first = feed.items[0];
+				expect(first.id).toBe("release-v2-0");
+				expect(first.title).toBe("Release v2.0");
+				expect(first.url).toBe("http://foo.com/changelog/release-v2-0");
+				expect(first.date_published).toBe("2025-03-01");
+				expect(first.date_modified).toBe("2025-03-01");
+				expect(first.summary).toBe("New features added.");
+				expect(first.content_html).toBe(
+					"<h1>Release v2.0</h1><p>New features added.</p>",
+				);
+				expect(first.content_text).toBe(
+					"# Release v2.0\n\nNew features added.",
+				);
+				expect(first.tags).toEqual(["Added"]);
+				expect(first.image).toBe("/img/v2.png");
+
+				const second = feed.items[1];
+				expect(second.id).toBe("release-v1-0");
+				expect(second.title).toBe("Release v1.0");
+				expect(second.tags).toBeUndefined();
+				expect(second.image).toBeUndefined();
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should not create file when changelogEntries is empty", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-changelog-json-empty-test",
+				changelogEntries: [],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildChangelogFeedJson(data);
+				expect(fs.existsSync(`${data.output}/changelog.json`)).toBe(false);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should not create file when changelogEntries is undefined", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-changelog-json-undef-test",
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildChangelogFeedJson(data);
+				expect(fs.existsSync(`${data.output}/changelog.json`)).toBe(false);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should omit optional fields when not present in entry", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-changelog-json-optional-test",
+				changelogEntries: [
+					{
+						title: "Minimal Entry",
+						date: "2025-01-01",
+						formattedDate: "January 1, 2025",
+						slug: "minimal-entry",
+						content: "",
+						generatedHtml: "",
+						preview: "Minimal preview.",
+						urlPath: "/changelog/minimal-entry/",
+						lastModified: "2025-01-01",
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildChangelogFeedJson(data);
+				const raw = await fs.promises.readFile(
+					`${data.output}/changelog.json`,
+					"utf8",
+				);
+				const feed = JSON.parse(raw);
+				const item = feed.items[0];
+
+				expect(item.tags).toBeUndefined();
+				expect(item.image).toBeUndefined();
+				expect(item.content_html).toBeUndefined();
+				expect(item.content_text).toBeUndefined();
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should build correct URLs with baseUrl prefix", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				baseUrl: "/docs",
+				changelogUrl: "/docs/changelog",
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-changelog-json-baseurl-test",
+				changelogEntries: [
+					{
+						title: "Release v1.0",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						slug: "release-v1-0",
+						content: "Content here.",
+						generatedHtml: "<p>Content here.</p>",
+						preview: "Content here.",
+						urlPath: "/docs/changelog/release-v1-0/",
+						lastModified: "2025-01-15",
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildChangelogFeedJson(data);
+				const raw = await fs.promises.readFile(
+					`${data.output}/changelog.json`,
+					"utf8",
+				);
+				const feed = JSON.parse(raw);
+
+				expect(feed.home_page_url).toBe("http://foo.com/docs/");
+				expect(feed.feed_url).toBe("http://foo.com/docs/changelog.json");
+				expect(feed.items[0].url).toBe(
+					"http://foo.com/docs/changelog/release-v1-0",
+				);
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should include changelog.json in sitemap when entries exist", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-sitemap-changelog-json-test",
+				changelogEntries: [
+					{
+						title: "Release v1.0",
+						date: "2025-01-15",
+						formattedDate: "January 15, 2025",
+						slug: "release-v1-0",
+						content: "Content.",
+						generatedHtml: "<p>Content.</p>",
+						preview: "Content.",
+						urlPath: "/changelog/release-v1-0/",
+						lastModified: "2025-01-15",
+					},
+				],
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.output}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).toContain("<loc>http://foo.com/changelog.json</loc>");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+
+		it("should not include changelog.json in sitemap when no entries", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/changelog-site",
+				templatePath: "test/fixtures/template-example",
+				output: "test/temp-sitemap-no-changelog-json-test",
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true, force: true });
+			}
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = await fs.promises.readFile(
+					`${data.output}/sitemap.xml`,
+					"utf8",
+				);
+				expect(sitemap).not.toContain("changelog.json");
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true, force: true });
+				}
+			}
+		});
+	});
 });
