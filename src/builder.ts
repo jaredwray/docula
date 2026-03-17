@@ -66,6 +66,13 @@ export type DoculaData = {
 	enableLlmsTxt?: boolean;
 	hasFeed?: boolean;
 	lastModified?: string;
+	baseUrl: string;
+	docsPath: string;
+	apiPath: string;
+	changelogPath: string;
+	docsUrl: string;
+	apiUrl: string;
+	changelogUrl: string;
 };
 
 export type DoculaTemplates = {
@@ -209,6 +216,16 @@ export class DoculaBuilder {
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
 			enableLlmsTxt: this.options.enableLlmsTxt,
+			baseUrl: this.options.baseUrl,
+			docsPath: this.options.docsPath,
+			apiPath: this.options.apiPath,
+			changelogPath: this.options.changelogPath,
+			docsUrl: this.buildUrlPath(this.options.baseUrl, this.options.docsPath),
+			apiUrl: this.buildUrlPath(this.options.baseUrl, this.options.apiPath),
+			changelogUrl: this.buildUrlPath(
+				this.options.baseUrl,
+				this.options.changelogPath,
+			),
 		};
 
 		// Track README.md in asset hashes for change detection
@@ -222,7 +239,11 @@ export class DoculaBuilder {
 			!doculaData.openApiUrl &&
 			fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)
 		) {
-			doculaData.openApiUrl = "/api/swagger.json";
+			doculaData.openApiUrl = this.buildUrlPath(
+				this.options.baseUrl,
+				this.options.apiPath,
+				"swagger.json",
+			);
 		}
 
 		// Get data from github
@@ -371,18 +392,20 @@ export class DoculaBuilder {
 		if (doculaData.hasApi) {
 			this._console.step("Building API page...");
 			await this.buildApiPage(doculaData);
-			this._console.fileBuilt("api/index.html");
+			this._console.fileBuilt(`${this.options.apiPath}/index.html`);
 		}
 
 		// Build changelog pages (/changelog/index.html and /changelog/{slug}/index.html)
 		if (doculaData.hasChangelog) {
 			this._console.step("Building changelog...");
 			await this.buildChangelogPage(doculaData);
-			this._console.fileBuilt("changelog/index.html");
+			this._console.fileBuilt(`${this.options.changelogPath}/index.html`);
 			await this.buildChangelogEntryPages(doculaData);
 			/* v8 ignore next 3 -- @preserve */
 			for (const entry of doculaData.changelogEntries ?? []) {
-				this._console.fileBuilt(`changelog/${entry.slug}/index.html`);
+				this._console.fileBuilt(
+					`${this.options.changelogPath}/${entry.slug}/index.html`,
+				);
 			}
 		}
 
@@ -502,7 +525,7 @@ export class DoculaBuilder {
 		// Copy non-markdown assets from changelog/ to output
 		this.copyContentAssets(
 			`${doculaData.sitePath}/changelog`,
-			`${this.options.output}/changelog`,
+			`${this.options.output}/${this.options.changelogPath}`,
 		);
 
 		// Copy assets from each document's source directory into its output directory
@@ -666,15 +689,19 @@ export class DoculaBuilder {
 		const urls = [{ url: data.siteUrl }];
 
 		if (data.documents?.length) {
-			urls.push({ url: `${data.siteUrl}/feed.xml` });
+			urls.push({ url: `${data.siteUrl}${data.baseUrl}/feed.xml` });
 		}
 
 		if (data.openApiUrl && data.templates?.api) {
-			urls.push({ url: `${data.siteUrl}/api` });
+			urls.push({
+				url: `${data.siteUrl}${data.apiUrl}`,
+			});
 		}
 
 		if (data.hasChangelog && data.templates?.changelog) {
-			urls.push({ url: `${data.siteUrl}/changelog` });
+			urls.push({
+				url: `${data.siteUrl}${data.changelogUrl}`,
+			});
 
 			const perPage = this.options.changelogPerPage;
 			const totalPages = Math.max(
@@ -683,13 +710,13 @@ export class DoculaBuilder {
 			);
 			for (let page = 2; page <= totalPages; page++) {
 				urls.push({
-					url: `${data.siteUrl}/changelog/page/${page}`,
+					url: `${data.siteUrl}${data.changelogUrl}/page/${page}`,
 				});
 			}
 
 			for (const entry of data.changelogEntries ?? []) {
 				urls.push({
-					url: `${data.siteUrl}/changelog/${entry.slug}`,
+					url: `${data.siteUrl}${data.changelogUrl}/${entry.slug}`,
 				});
 			}
 		}
@@ -702,7 +729,7 @@ export class DoculaBuilder {
 				urlPath = urlPath.slice(0, -10);
 			}
 
-			urls.push({ url: `${data.siteUrl}${urlPath}` });
+			urls.push({ url: `${data.siteUrl}${data.baseUrl}${urlPath}` });
 		}
 
 		let xml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -727,8 +754,14 @@ export class DoculaBuilder {
 		}
 
 		const feedPath = `${data.output}/feed.xml`;
-		const channelLink = this.buildAbsoluteSiteUrl(data.siteUrl, "/");
-		const feedUrl = this.buildAbsoluteSiteUrl(data.siteUrl, "/feed.xml");
+		const channelLink = this.buildAbsoluteSiteUrl(
+			data.siteUrl,
+			`${data.baseUrl}/`,
+		);
+		const feedUrl = this.buildAbsoluteSiteUrl(
+			data.siteUrl,
+			`${data.baseUrl}/feed.xml`,
+		);
 		let xml = '<?xml version="1.0" encoding="UTF-8"?>';
 		xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">';
 		xml += "<channel>";
@@ -742,7 +775,7 @@ export class DoculaBuilder {
 			const itemTitle = document.navTitle || document.title || document.urlPath;
 			const itemLink = this.buildAbsoluteSiteUrl(
 				data.siteUrl,
-				this.normalizePathForUrl(document.urlPath),
+				`${data.baseUrl}${this.normalizePathForUrl(document.urlPath)}`,
 			);
 			const summary =
 				document.description ||
@@ -813,7 +846,7 @@ export class DoculaBuilder {
 		lines.push(data.siteDescription);
 		lines.push("");
 		lines.push(
-			`- [Full LLM Content](${this.buildAbsoluteSiteUrl(data.siteUrl, "/llms-full.txt")})`,
+			`- [Full LLM Content](${this.buildAbsoluteSiteUrl(data.siteUrl, `${data.baseUrl}/llms-full.txt`)})`,
 		);
 		lines.push("");
 		lines.push("## Documentation");
@@ -822,7 +855,7 @@ export class DoculaBuilder {
 			for (const document of documents) {
 				const documentUrl = this.buildAbsoluteSiteUrl(
 					data.siteUrl,
-					this.normalizePathForUrl(document.urlPath),
+					`${data.baseUrl}${this.normalizePathForUrl(document.urlPath)}`,
 				);
 				const description = document.description
 					? ` - ${document.description}`
@@ -837,7 +870,7 @@ export class DoculaBuilder {
 		lines.push("## API Reference");
 		if (data.hasApi) {
 			lines.push(
-				`- [API Documentation](${this.buildAbsoluteSiteUrl(data.siteUrl, "/api")})`,
+				`- [API Documentation](${this.buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)})`,
 			);
 		} else {
 			lines.push("- Not available.");
@@ -847,13 +880,13 @@ export class DoculaBuilder {
 		lines.push("## Changelog");
 		if (data.hasChangelog) {
 			lines.push(
-				`- [Changelog](${this.buildAbsoluteSiteUrl(data.siteUrl, "/changelog")})`,
+				`- [Changelog](${this.buildAbsoluteSiteUrl(data.siteUrl, data.changelogUrl)})`,
 			);
 			for (const entry of changelogEntries.slice(0, 20)) {
 				/* v8 ignore next -- @preserve */
 				const date = entry.formattedDate || entry.date || "No date";
 				lines.push(
-					`- [${entry.title}](${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}) (${date})`,
+					`- [${entry.title}](${this.buildAbsoluteSiteUrl(data.siteUrl, `${data.changelogUrl}/${entry.slug}`)}) (${date})`,
 				);
 			}
 		} else {
@@ -875,7 +908,7 @@ export class DoculaBuilder {
 		lines.push(data.siteDescription);
 		lines.push("");
 		lines.push(
-			`Source Index: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/llms.txt")}`,
+			`Source Index: ${this.buildAbsoluteSiteUrl(data.siteUrl, `${data.baseUrl}/llms.txt`)}`,
 		);
 		lines.push("");
 		lines.push("## Documentation");
@@ -884,7 +917,7 @@ export class DoculaBuilder {
 			for (const document of documents) {
 				const documentUrl = this.buildAbsoluteSiteUrl(
 					data.siteUrl,
-					this.normalizePathForUrl(document.urlPath),
+					`${data.baseUrl}${this.normalizePathForUrl(document.urlPath)}`,
 				);
 				const markdownBody = new Writr(document.content).body.trim();
 
@@ -905,7 +938,9 @@ export class DoculaBuilder {
 		lines.push("");
 		lines.push("## API Reference");
 		if (data.hasApi) {
-			lines.push(`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/api")}`);
+			lines.push(
+				`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)}`,
+			);
 			lines.push("");
 
 			const localOpenApiSpec = await this.getSafeLocalOpenApiSpec(data);
@@ -930,14 +965,14 @@ export class DoculaBuilder {
 		lines.push("## Changelog");
 		if (data.hasChangelog && changelogEntries.length > 0) {
 			lines.push(
-				`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, "/changelog")}`,
+				`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, data.changelogUrl)}`,
 			);
 
 			for (const entry of changelogEntries) {
 				lines.push("");
 				lines.push(`### ${entry.title}`);
 				lines.push(
-					`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, `/changelog/${entry.slug}`)}`,
+					`URL: ${this.buildAbsoluteSiteUrl(data.siteUrl, `${data.changelogUrl}/${entry.slug}`)}`,
 				);
 				/* v8 ignore next 2 -- @preserve */
 				if (entry.formattedDate || entry.date) {
@@ -956,6 +991,19 @@ export class DoculaBuilder {
 		lines.push("");
 
 		return lines.join("\n");
+	}
+
+	private buildUrlPath(...segments: (string | undefined)[]): string {
+		const cleaned = segments
+			.filter((s): s is string => Boolean(s))
+			.map((s) => {
+				let start = 0;
+				let end = s.length;
+				while (start < end && s[start] === "/") start++;
+				while (end > start && s[end - 1] === "/") end--;
+				return s.slice(start, end);
+			});
+		return `/${cleaned.filter(Boolean).join("/")}`;
 	}
 
 	private buildAbsoluteSiteUrl(siteUrl: string, urlPath: string): string {
@@ -1232,7 +1280,11 @@ export class DoculaBuilder {
 	public async buildDocsPages(data: DoculaData): Promise<void> {
 		if (data.templates && data.documents?.length) {
 			const documentsTemplate = `${data.templatePath}/${data.templates.docPage}`;
-			await fs.promises.mkdir(`${data.output}/docs`, { recursive: true });
+			const resolvedDocsPath = data.docsPath;
+			const docsOutputDir = resolvedDocsPath
+				? `${data.output}/${resolvedDocsPath}`
+				: `${data.output}`;
+			await fs.promises.mkdir(docsOutputDir, { recursive: true });
 			data.sidebarItems = this.generateSidebarItems(data);
 
 			const promises = data.documents.map(async (document) => {
@@ -1261,7 +1313,7 @@ export class DoculaBuilder {
 
 		// Copy swagger.json to output if it exists in the site directory
 		const swaggerSource = `${data.sitePath}/api/swagger.json`;
-		const apiOutputPath = `${data.output}/api`;
+		const apiOutputPath = `${data.output}/${data.apiPath}`;
 		await fs.promises.mkdir(apiOutputPath, { recursive: true });
 		if (fs.existsSync(swaggerSource)) {
 			await fs.promises.copyFile(
@@ -1313,7 +1365,7 @@ export class DoculaBuilder {
 			return;
 		}
 
-		const apiPath = `${data.output}/api/index.html`;
+		const apiPath = `${data.output}/${data.apiPath}/index.html`;
 		const apiContent = await this.renderApiContent(data);
 		await fs.promises.writeFile(apiPath, apiContent, "utf8");
 	}
@@ -1427,7 +1479,7 @@ export class DoculaBuilder {
 			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
 			preview: this.generateChangelogPreview(markdownContent, 500, isMdx),
 			previewImage,
-			urlPath: `/changelog/${slug}/index.html`,
+			urlPath: `/${this.options.changelogPath}/${slug}/index.html`,
 			lastModified: fs.statSync(filePath).mtime.toISOString().split("T")[0],
 		};
 	}
@@ -1571,7 +1623,7 @@ export class DoculaBuilder {
 			content: body,
 			generatedHtml: new Writr(body).renderSync(),
 			preview: this.generateChangelogPreview(body),
-			urlPath: `/changelog/${slug}/index.html`,
+			urlPath: `/${this.options.changelogPath}/${slug}/index.html`,
 			lastModified: dateString,
 		};
 	}
@@ -1608,10 +1660,11 @@ export class DoculaBuilder {
 			const startIndex = (page - 1) * perPage;
 			const pageEntries = allEntries.slice(startIndex, startIndex + perPage);
 
+			const changelogOutputBase = `${data.output}/${data.changelogPath}`;
 			const outputPath =
 				page === 1
-					? `${data.output}/changelog`
-					: `${data.output}/changelog/page/${page}`;
+					? changelogOutputBase
+					: `${changelogOutputBase}/page/${page}`;
 			const indexPath = `${outputPath}/index.html`;
 
 			const paginationData = {
@@ -1622,12 +1675,13 @@ export class DoculaBuilder {
 				hasPagination: totalPages > 1,
 				hasNextPage: page < totalPages,
 				hasPrevPage: page > 1,
-				nextPageUrl: page < totalPages ? `/changelog/page/${page + 1}/` : "",
+				nextPageUrl:
+					page < totalPages ? `${data.changelogUrl}/page/${page + 1}/` : "",
 				prevPageUrl:
 					page > 1
 						? page === 2
-							? "/changelog/"
-							: `/changelog/page/${page - 1}/`
+							? `${data.changelogUrl}/`
+							: `${data.changelogUrl}/page/${page - 1}/`
 						: "",
 			};
 
@@ -1659,7 +1713,7 @@ export class DoculaBuilder {
 		const entryTemplate = `${data.templatePath}/${data.templates.changelogEntry}`;
 
 		const promises = data.changelogEntries.map(async (entry) => {
-			const entryOutputPath = `${data.output}/changelog/${entry.slug}`;
+			const entryOutputPath = `${data.output}/${data.changelogPath}/${entry.slug}`;
 			await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
 			const entryContent = await this._ecto.renderFromFile(
@@ -1686,7 +1740,7 @@ export class DoculaBuilder {
 		for (const document of data.documents ?? []) {
 			if (document.isRoot) {
 				sidebarItems.unshift({
-					path: document.urlPath.replace("index.html", ""),
+					path: `${data.baseUrl}${document.urlPath.replace("index.html", "")}`,
 					name: document.navTitle,
 					order: document.order,
 				});
@@ -1712,7 +1766,7 @@ export class DoculaBuilder {
 				sidebarItems[sectionIndex].children ??= [];
 
 				sidebarItems[sectionIndex].children.push({
-					path: document.urlPath.replace("index.html", ""),
+					path: `${data.baseUrl}${document.urlPath.replace("index.html", "")}`,
 					name: document.navTitle,
 					order: document.order,
 				});
@@ -1898,17 +1952,20 @@ export class DoculaBuilder {
 		const fileExtension = isMdx ? ".mdx" : ".md";
 
 		const documentsFolderIndex = documentPath.lastIndexOf("/docs/");
-		let urlPath = documentPath
-			.slice(documentsFolderIndex)
-			.replace(fileExtension, "/index.html");
-		let isRoot = urlPath.split("/").length === 3;
-		if (!documentPath.slice(documentsFolderIndex + 6).includes("/")) {
-			isRoot = true;
-			const filePath = documentPath.slice(documentsFolderIndex + 6);
-			if (filePath === "index.md" || filePath === "index.mdx") {
-				urlPath = documentPath
-					.slice(documentsFolderIndex)
-					.replace(fileExtension, ".html");
+		// Build urlPath relative to the source docs/ folder, then prefix with configured docsPath
+		const relativePath = documentPath.slice(documentsFolderIndex + 6); // strip "/docs/"
+		const docsPrefix = this.options.docsPath ? `/${this.options.docsPath}` : "";
+		let urlPath = `${docsPrefix}/${relativePath}`.replace(
+			fileExtension,
+			"/index.html",
+		);
+		const isRoot = !relativePath.includes("/");
+		if (isRoot) {
+			if (relativePath === "index.md" || relativePath === "index.mdx") {
+				urlPath = `${docsPrefix}/${relativePath}`.replace(
+					fileExtension,
+					".html",
+				);
 			}
 		}
 
@@ -2435,6 +2492,10 @@ export class DoculaBuilder {
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
+			baseUrl: this.options.baseUrl,
+			docsPath: this.options.docsPath,
+			apiPath: this.options.apiPath,
+			changelogPath: this.options.changelogPath,
 		};
 		return this._hash.toHashSync(JSON.stringify(relevant));
 	}

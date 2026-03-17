@@ -22,8 +22,19 @@ import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
 vi.mock("@cacheable/net");
 
+const defaultPathFields = {
+	baseUrl: "",
+	docsPath: "docs",
+	apiPath: "api",
+	changelogPath: "changelog",
+	docsUrl: "/docs",
+	apiUrl: "/api",
+	changelogUrl: "/changelog",
+};
+
 describe("DoculaBuilder", () => {
 	const doculaData: DoculaData = {
+		...defaultPathFields,
 		siteUrl: "http://foo.com",
 		siteTitle: "docula",
 		siteDescription: "Beautiful Website for Your Projects",
@@ -1577,6 +1588,7 @@ describe("DoculaBuilder", () => {
 		it("should include /feed.xml in sitemap when documents exist", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -1623,6 +1635,7 @@ describe("DoculaBuilder", () => {
 		it("should build the feed.xml (/feed.xml) for documentation pages", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula & docs",
 				siteDescription: "Beautiful <docs> & updates",
@@ -1688,6 +1701,7 @@ describe("DoculaBuilder", () => {
 		it("should use a markdown excerpt when document description is empty", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -1736,6 +1750,7 @@ describe("DoculaBuilder", () => {
 		it("should not include generated table of contents text in feed excerpts", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -1785,6 +1800,7 @@ describe("DoculaBuilder", () => {
 		it("should preserve hyphenated words in feed excerpts", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -1833,6 +1849,7 @@ describe("DoculaBuilder", () => {
 		it("should preserve intro content when markdown starts with a thematic break", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -1881,6 +1898,7 @@ describe("DoculaBuilder", () => {
 		it("should not build feed.xml when no documents exist", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -1906,6 +1924,7 @@ describe("DoculaBuilder", () => {
 		it("should not include api or changelog urls in feed.xml", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -2091,6 +2110,7 @@ describe("DoculaBuilder", () => {
 		it("should get all the documents from the mega fixtures", () => {
 			const builder = new DoculaBuilder();
 			const doculaData: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -2618,6 +2638,7 @@ describe("DoculaBuilder", () => {
 		it("should build the API page when openApiUrl is configured", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -2654,6 +2675,7 @@ describe("DoculaBuilder", () => {
 		it("should not build API page when openApiUrl is not configured", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -2682,6 +2704,7 @@ describe("DoculaBuilder", () => {
 		it("should not build API page when api template is not configured", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -2711,6 +2734,7 @@ describe("DoculaBuilder", () => {
 		it("should include /api in sitemap when openApiUrl and api template are configured", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -2746,6 +2770,7 @@ describe("DoculaBuilder", () => {
 		it("should not include /api in sitemap when openApiUrl is configured but api template is missing", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3057,6 +3082,7 @@ describe("DoculaBuilder", () => {
 		it("should build changelog listing page", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3110,6 +3136,7 @@ describe("DoculaBuilder", () => {
 		it("should build changelog entry pages", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3165,6 +3192,7 @@ describe("DoculaBuilder", () => {
 		it("should not build changelog page when hasChangelog is false", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3193,6 +3221,7 @@ describe("DoculaBuilder", () => {
 		it("should not build changelog entry pages when no entries exist", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3216,6 +3245,7 @@ describe("DoculaBuilder", () => {
 		it("should include /changelog in sitemap when changelog exists", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3267,6 +3297,7 @@ describe("DoculaBuilder", () => {
 		it("should include /changelog in sitemap with no changelog entry list", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3301,6 +3332,7 @@ describe("DoculaBuilder", () => {
 		it("should not include /changelog in sitemap when changelog does not exist", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3544,6 +3576,7 @@ describe("DoculaBuilder", () => {
 			}
 
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -3624,6 +3657,7 @@ describe("DoculaBuilder", () => {
 			}
 
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4013,6 +4047,7 @@ describe("DoculaBuilder", () => {
 		it("should build docs pages with generics in code blocks without he.decode", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4062,6 +4097,7 @@ describe("DoculaBuilder", () => {
 			const generatedHtml =
 				"<pre><code>function identity&lt;T&gt;(arg: T): T { return arg; }</code></pre>";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4112,6 +4148,7 @@ describe("DoculaBuilder", () => {
 		it("should handle non-ASCII characters without he.decode", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4169,6 +4206,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const output = "test/temp-llms-docs-only";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4217,6 +4255,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const output = "test/temp-llms-api-local-spec";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4250,6 +4289,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const output = "test/temp-llms-openapi-fallback";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com/",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4299,6 +4339,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const output = "test/temp-llms-api-no-openapi";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4329,6 +4370,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const output = "test/temp-llms-openapi-query-only";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4361,6 +4403,7 @@ describe("DoculaBuilder", () => {
 			const externalSpecPath = "test/temp-llms-safe-openapi-external.json";
 			const externalMarker = "external-openapi-should-not-be-read";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4410,6 +4453,7 @@ describe("DoculaBuilder", () => {
 			const symlinkSpecPath = `${sitePath}/api/swagger-link.json`;
 			const marker = "symlink-openapi-should-not-be-read";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4462,6 +4506,7 @@ describe("DoculaBuilder", () => {
 				lastModified: "2025-01-01",
 			}));
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4517,6 +4562,7 @@ describe("DoculaBuilder", () => {
 				lastModified: "2025-01-01",
 			}));
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4554,6 +4600,7 @@ describe("DoculaBuilder", () => {
 			const customLlms = "# Custom llms.txt";
 			const customLlmsFull = "# Custom llms-full.txt";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4598,6 +4645,7 @@ describe("DoculaBuilder", () => {
 				"test/temp-custom-llms-symlink-source-full.txt";
 			const externalMarker = "symlink-override-should-not-be-read";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4674,6 +4722,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const data: DoculaData = {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -4718,6 +4767,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const data: DoculaData = {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -4800,6 +4850,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const data: DoculaData = {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -4848,6 +4899,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const data: DoculaData = {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -4875,6 +4927,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder(options);
 			const output = "test/temp-llms-disabled";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4898,6 +4951,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const output = "test/temp-sitemap-no-llms";
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -4962,6 +5016,7 @@ describe("DoculaBuilder", () => {
 		it("should render first document as index.html when no README.md exists", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -5002,6 +5057,7 @@ describe("DoculaBuilder", () => {
 		it("should throw error when no docPage template is provided", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -5024,6 +5080,7 @@ describe("DoculaBuilder", () => {
 		it("should throw error when documents array is empty", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -5047,6 +5104,7 @@ describe("DoculaBuilder", () => {
 		it("should render docs home page when sidebarItems are precomputed", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -5106,6 +5164,7 @@ describe("DoculaBuilder", () => {
 		it("should throw error when no API template or openApiUrl found", async () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {
+				...defaultPathFields,
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
@@ -5973,6 +6032,172 @@ describe("DoculaBuilder", () => {
 				console.log = consoleLog;
 				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
 				fs.rmSync(cacheDir, { recursive: true, force: true });
+			}
+		});
+	});
+
+	describe("Docula Builder - Configurable Paths", () => {
+		it("should use custom docsPath for document urlPaths", () => {
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/multi-page-site",
+				docsPath: "guide",
+			});
+			const builder = new DoculaBuilder(options);
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/front-matter.md",
+			);
+			expect(doc.urlPath).toContain("/guide/");
+			expect(doc.urlPath).not.toContain("/docs/");
+		});
+
+		it("should place docs at root when docsPath is empty", () => {
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/multi-page-site",
+				docsPath: "",
+			});
+			const builder = new DoculaBuilder(options);
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/front-matter.md",
+			);
+			expect(doc.urlPath).toMatch(/^\/front-matter\//);
+			expect(doc.urlPath).not.toContain("/docs/");
+		});
+
+		it("should use custom changelogPath for changelog entry urlPaths", () => {
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/changelog-site",
+				changelogPath: "releases",
+			});
+			const builder = new DoculaBuilder(options);
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.urlPath).toContain("/releases/");
+			expect(entry.urlPath).not.toContain("/changelog/");
+		});
+
+		it("should build docs pages at output root when docsPath is empty", async () => {
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/multi-page-site",
+				output: "./test/temp-empty-docspath",
+				docsPath: "",
+			});
+			const builder = new DoculaBuilder(options);
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "test/fixtures/template-example",
+				output: options.output,
+				docsPath: "",
+				docsUrl: "/",
+				templates: { home: "home.hbs", docPage: "docs.hbs" },
+				documents: builder.getDocuments(`${options.sitePath}/docs`, {
+					...defaultPathFields,
+					siteUrl: "http://example.com",
+					siteTitle: "Test",
+					siteDescription: "Test Description",
+					sitePath: options.sitePath,
+					templatePath: "test/fixtures/template-example",
+					output: options.output,
+				}),
+			};
+
+			try {
+				await builder.buildDocsPages(data);
+				// Files should be at output root, not under output/docs/
+				expect(fs.existsSync(`${data.output}/docs`)).toBe(false);
+				const builtFiles = fs.readdirSync(data.output, { recursive: true });
+				expect(builtFiles.length).toBeGreaterThan(0);
+			} finally {
+				fs.rmSync(data.output, { recursive: true, force: true });
+			}
+		});
+
+		it("should include baseUrl in sitemap document URLs", async () => {
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "",
+				output: "test/temp-sitemap-basurl",
+				baseUrl: "/docs",
+				docsPath: "",
+				docsUrl: "/docs",
+				apiPath: "api",
+				apiUrl: "/docs/api",
+				changelogPath: "changelog",
+				changelogUrl: "/docs/changelog",
+				documents: [
+					{
+						title: "Getting Started",
+						navTitle: "Getting Started",
+						description: "",
+						keywords: [],
+						content: "",
+						markdown: "",
+						generatedHtml: "",
+						documentPath: "",
+						urlPath: "/getting-started/index.html",
+						isRoot: true,
+						lastModified: "2025-01-01",
+					},
+				],
+			};
+
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/multi-page-site",
+			});
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = fs.readFileSync(`${data.output}/sitemap.xml`, "utf8");
+				expect(sitemap).toContain(
+					"<loc>http://example.com/docs/getting-started/</loc>",
+				);
+			} finally {
+				fs.rmSync(data.output, { recursive: true, force: true });
+			}
+		});
+
+		it("should include baseUrl and custom apiPath in sitemap", async () => {
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "",
+				output: "test/temp-sitemap-apipath",
+				baseUrl: "/docs",
+				docsPath: "",
+				docsUrl: "/docs",
+				apiPath: "reference",
+				apiUrl: "/docs/reference",
+				changelogPath: "changelog",
+				changelogUrl: "/docs/changelog",
+				openApiUrl: "/reference/swagger.json",
+				templates: { home: "home.hbs", api: "api.hbs" },
+			};
+
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/multi-page-site",
+			});
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.buildSiteMapPage(data);
+				const sitemap = fs.readFileSync(`${data.output}/sitemap.xml`, "utf8");
+				expect(sitemap).toContain(
+					"<loc>http://example.com/docs/reference</loc>",
+				);
+			} finally {
+				fs.rmSync(data.output, { recursive: true, force: true });
 			}
 		});
 	});

@@ -2,6 +2,20 @@ import path from "node:path";
 import process from "node:process";
 import type { DoculaSection } from "./builder.js";
 
+function trimSlashes(value: string): string {
+	let start = 0;
+	let end = value.length;
+	while (start < end && value[start] === "/") start++;
+	while (end > start && value[end - 1] === "/") end--;
+	return value.slice(start, end);
+}
+
+function trimTrailingSlashes(value: string): string {
+	let end = value.length;
+	while (end > 0 && value[end - 1] === "/") end--;
+	return value.slice(0, end);
+}
+
 export type DoculaCookieAuth = {
 	loginUrl: string;
 	logoutUrl?: string;
@@ -94,9 +108,23 @@ export class DoculaOptions {
 	 */
 	public autoUpdateIgnores = true;
 	/**
-	 * File extensions to copy as assets from docs/ and changelog/ directories.
-	 * Override in docula.config to customize.
+	 * Base URL path prefix for all generated paths (e.g., "/docs").
+	 * When set, all asset and navigation URLs are prefixed with this path.
 	 */
+	public baseUrl = "";
+	/**
+	 * Output subdirectory and URL segment for documentation pages.
+	 * Set to empty string to place docs at the output root.
+	 */
+	public docsPath = "docs";
+	/**
+	 * Output subdirectory and URL segment for API reference pages.
+	 */
+	public apiPath = "api";
+	/**
+	 * Output subdirectory and URL segment for changelog pages.
+	 */
+	public changelogPath = "changelog";
 	/**
 	 * Cookie-based authentication. When set, shows a Login/Logout button
 	 * in the header based on whether a JWT cookie is present.
@@ -261,6 +289,28 @@ export class DoculaOptions {
 			typeof (options.cache as DoculaCacheOptions).github.ttl === "number"
 		) {
 			this.cache = options.cache as DoculaCacheOptions;
+		}
+
+		if (options.baseUrl !== undefined && typeof options.baseUrl === "string") {
+			this.baseUrl = trimTrailingSlashes(options.baseUrl);
+		}
+
+		if (
+			options.docsPath !== undefined &&
+			typeof options.docsPath === "string"
+		) {
+			this.docsPath = trimSlashes(options.docsPath);
+		}
+
+		if (options.apiPath !== undefined && typeof options.apiPath === "string") {
+			this.apiPath = trimSlashes(options.apiPath);
+		}
+
+		if (
+			options.changelogPath !== undefined &&
+			typeof options.changelogPath === "string"
+		) {
+			this.changelogPath = trimSlashes(options.changelogPath);
 		}
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {

@@ -419,5 +419,90 @@ describe("DoculaOptions", () => {
 			options.parseOptions({ cache: { github: { ttl: "invalid" } } });
 			expect(options.cache).toEqual(defaultCache);
 		});
+
+		it("should have default baseUrl as empty string", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.baseUrl).toEqual("");
+		});
+
+		it("should have default docsPath as docs", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.docsPath).toEqual("docs");
+		});
+
+		it("should have default apiPath as api", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.apiPath).toEqual("api");
+		});
+
+		it("should have default changelogPath as changelog", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.changelogPath).toEqual("changelog");
+		});
+
+		it("should parse baseUrl", () => {
+			options.parseOptions({ baseUrl: "/docs" });
+			expect(options.baseUrl).toEqual("/docs");
+		});
+
+		it("should strip trailing slashes from baseUrl", () => {
+			options.parseOptions({ baseUrl: "/docs/" });
+			expect(options.baseUrl).toEqual("/docs");
+		});
+
+		it("should parse docsPath", () => {
+			options.parseOptions({ docsPath: "documentation" });
+			expect(options.docsPath).toEqual("documentation");
+		});
+
+		it("should strip leading and trailing slashes from docsPath", () => {
+			options.parseOptions({ docsPath: "/documentation/" });
+			expect(options.docsPath).toEqual("documentation");
+		});
+
+		it("should allow empty string for docsPath", () => {
+			options.parseOptions({ docsPath: "" });
+			expect(options.docsPath).toEqual("");
+		});
+
+		it("should parse apiPath", () => {
+			options.parseOptions({ apiPath: "reference" });
+			expect(options.apiPath).toEqual("reference");
+		});
+
+		it("should strip leading and trailing slashes from apiPath", () => {
+			options.parseOptions({ apiPath: "/reference/" });
+			expect(options.apiPath).toEqual("reference");
+		});
+
+		it("should parse changelogPath", () => {
+			options.parseOptions({ changelogPath: "releases" });
+			expect(options.changelogPath).toEqual("releases");
+		});
+
+		it("should strip leading and trailing slashes from changelogPath", () => {
+			options.parseOptions({ changelogPath: "/releases/" });
+			expect(options.changelogPath).toEqual("releases");
+		});
+
+		it("should not update baseUrl for non-string values", () => {
+			options.parseOptions({ baseUrl: 123 });
+			expect(options.baseUrl).toEqual("");
+		});
+
+		it("should not update docsPath for non-string values", () => {
+			options.parseOptions({ docsPath: 123 });
+			expect(options.docsPath).toEqual("docs");
+		});
+
+		it("should not update apiPath for non-string values", () => {
+			options.parseOptions({ apiPath: 123 });
+			expect(options.apiPath).toEqual("api");
+		});
+
+		it("should not update changelogPath for non-string values", () => {
+			options.parseOptions({ changelogPath: 123 });
+			expect(options.changelogPath).toEqual("changelog");
+		});
 	});
 });
