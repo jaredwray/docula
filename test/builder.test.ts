@@ -6076,6 +6076,51 @@ describe("DoculaBuilder", () => {
 			expect(entry.urlPath).not.toContain("/changelog/");
 		});
 
+		it("should build docs pages at output root when docsPath is empty", async () => {
+			const options = new DoculaOptions({
+				sitePath: "test/fixtures/multi-page-site",
+				output: "./test/temp-empty-docspath",
+				docsPath: "",
+			});
+			const builder = new DoculaBuilder(options);
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "test/fixtures/template-example",
+				output: options.output,
+				docsPath: "",
+				docsUrl: "/",
+				templates: { home: "home.hbs", docPage: "docs.hbs" },
+				documents: builder.getDocuments(
+					`${options.sitePath}/docs`,
+					{
+						...defaultPathFields,
+						siteUrl: "http://example.com",
+						siteTitle: "Test",
+						siteDescription: "Test Description",
+						sitePath: options.sitePath,
+						templatePath: "test/fixtures/template-example",
+						output: options.output,
+					},
+				),
+			};
+
+			try {
+				await builder.buildDocsPages(data);
+				// Files should be at output root, not under output/docs/
+				expect(
+					fs.existsSync(`${data.output}/docs`),
+				).toBe(false);
+				const builtFiles = fs.readdirSync(data.output, { recursive: true });
+				expect(builtFiles.length).toBeGreaterThan(0);
+			} finally {
+				fs.rmSync(data.output, { recursive: true, force: true });
+			}
+		});
+
 		it("should include baseUrl in sitemap document URLs", async () => {
 			const data: DoculaData = {
 				...defaultPathFields,
