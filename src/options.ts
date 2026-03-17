@@ -2,6 +2,20 @@ import path from "node:path";
 import process from "node:process";
 import type { DoculaSection } from "./builder.js";
 
+function trimSlashes(value: string): string {
+	let start = 0;
+	let end = value.length;
+	while (start < end && value[start] === "/") start++;
+	while (end > start && value[end - 1] === "/") end--;
+	return value.slice(start, end);
+}
+
+function trimTrailingSlashes(value: string): string {
+	let end = value.length;
+	while (end > 0 && value[end - 1] === "/") end--;
+	return value.slice(0, end);
+}
+
 export type DoculaCookieAuth = {
 	loginUrl: string;
 	logoutUrl?: string;
@@ -278,25 +292,25 @@ export class DoculaOptions {
 		}
 
 		if (options.baseUrl !== undefined && typeof options.baseUrl === "string") {
-			this.baseUrl = options.baseUrl.replace(/\/+$/, "");
+			this.baseUrl = trimTrailingSlashes(options.baseUrl);
 		}
 
 		if (
 			options.docsPath !== undefined &&
 			typeof options.docsPath === "string"
 		) {
-			this.docsPath = options.docsPath.replace(/^\/+|\/+$/g, "");
+			this.docsPath = trimSlashes(options.docsPath);
 		}
 
 		if (options.apiPath !== undefined && typeof options.apiPath === "string") {
-			this.apiPath = options.apiPath.replace(/^\/+|\/+$/g, "");
+			this.apiPath = trimSlashes(options.apiPath);
 		}
 
 		if (
 			options.changelogPath !== undefined &&
 			typeof options.changelogPath === "string"
 		) {
-			this.changelogPath = options.changelogPath.replace(/^\/+|\/+$/g, "");
+			this.changelogPath = trimSlashes(options.changelogPath);
 		}
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {

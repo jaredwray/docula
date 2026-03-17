@@ -239,7 +239,11 @@ export class DoculaBuilder {
 			!doculaData.openApiUrl &&
 			fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)
 		) {
-			doculaData.openApiUrl = `${this.options.baseUrl}/${this.options.apiPath}/swagger.json`;
+			doculaData.openApiUrl = this.buildUrlPath(
+				this.options.baseUrl,
+				this.options.apiPath,
+				"swagger.json",
+			);
 		}
 
 		// Get data from github
@@ -706,13 +710,13 @@ export class DoculaBuilder {
 			);
 			for (let page = 2; page <= totalPages; page++) {
 				urls.push({
-					url: `${data.siteUrl}${`${data.changelogUrl}/page/${page}`}`,
+					url: `${data.siteUrl}${data.changelogUrl}/page/${page}`,
 				});
 			}
 
 			for (const entry of data.changelogEntries ?? []) {
 				urls.push({
-					url: `${data.siteUrl}${`${data.changelogUrl}/${entry.slug}`}`,
+					url: `${data.siteUrl}${data.changelogUrl}/${entry.slug}`,
 				});
 			}
 		}
@@ -992,7 +996,13 @@ export class DoculaBuilder {
 	private buildUrlPath(...segments: (string | undefined)[]): string {
 		const cleaned = segments
 			.filter((s): s is string => Boolean(s))
-			.map((s) => s.replace(/^\/+|\/+$/g, ""));
+			.map((s) => {
+				let start = 0;
+				let end = s.length;
+				while (start < end && s[start] === "/") start++;
+				while (end > start && s[end - 1] === "/") end--;
+				return s.slice(start, end);
+			});
 		return `/${cleaned.filter(Boolean).join("/")}`;
 	}
 

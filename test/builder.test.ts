@@ -6094,26 +6094,21 @@ describe("DoculaBuilder", () => {
 				docsPath: "",
 				docsUrl: "/",
 				templates: { home: "home.hbs", docPage: "docs.hbs" },
-				documents: builder.getDocuments(
-					`${options.sitePath}/docs`,
-					{
-						...defaultPathFields,
-						siteUrl: "http://example.com",
-						siteTitle: "Test",
-						siteDescription: "Test Description",
-						sitePath: options.sitePath,
-						templatePath: "test/fixtures/template-example",
-						output: options.output,
-					},
-				),
+				documents: builder.getDocuments(`${options.sitePath}/docs`, {
+					...defaultPathFields,
+					siteUrl: "http://example.com",
+					siteTitle: "Test",
+					siteDescription: "Test Description",
+					sitePath: options.sitePath,
+					templatePath: "test/fixtures/template-example",
+					output: options.output,
+				}),
 			};
 
 			try {
 				await builder.buildDocsPages(data);
 				// Files should be at output root, not under output/docs/
-				expect(
-					fs.existsSync(`${data.output}/docs`),
-				).toBe(false);
+				expect(fs.existsSync(`${data.output}/docs`)).toBe(false);
 				const builtFiles = fs.readdirSync(data.output, { recursive: true });
 				expect(builtFiles.length).toBeGreaterThan(0);
 			} finally {
