@@ -51,6 +51,13 @@ describe("docula", () => {
 		]) {
 			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
 		}
+		// Clean any leftover output directories that may have been left behind by a
+		// previous crashed run. Without this, a recursive fs.watch on single-page-site
+		// can race against stale dist/changelog/* directories and crash.
+		fs.rmSync("test/fixtures/single-page-site/dist", {
+			recursive: true,
+			force: true,
+		});
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
@@ -198,13 +205,17 @@ describe("docula execute", () => {
 		const consoleLog = console.log;
 		console.log = (_message) => {};
 
-		process.argv = ["node", "docula"];
-		await docula.execute(process);
-
-		expect(fs.existsSync(buildOptions.output)).toEqual(true);
-
-		await fs.promises.rm(buildOptions.output, { recursive: true });
-		console.log = consoleLog;
+		try {
+			process.argv = ["node", "docula"];
+			await docula.execute(process);
+			expect(fs.existsSync(buildOptions.output)).toEqual(true);
+		} finally {
+			await fs.promises.rm(buildOptions.output, {
+				recursive: true,
+				force: true,
+			});
+			console.log = consoleLog;
+		}
 	});
 	it("should be able to build with typescript config", async () => {
 		const buildOptions = new DoculaOptions();
