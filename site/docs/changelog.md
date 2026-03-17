@@ -64,6 +64,40 @@ When changelog entries are found, Docula generates:
 
 Changelog URLs are also automatically added to the generated `sitemap.xml`.
 
+## JSON Feeds
+
+When changelog entries exist, Docula automatically generates two JSON Feed files at the root of your output directory:
+
+- **`changelog.json`** — contains all changelog entries
+- **`changelog-latest.json`** — contains only the most recent entries, limited by the `changelogPerPage` setting (default 20)
+
+Both files follow the [JSON Feed v1.1](https://www.jsonfeed.org/version/1.1/) specification and include full entry content in both HTML and markdown formats, making them useful for programmatic consumption, integrations, or building custom changelog UIs.
+
+### Example Structure
+
+```json
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "My Project",
+  "description": "Project description",
+  "home_page_url": "https://your-site.com/",
+  "feed_url": "https://your-site.com/changelog.json",
+  "items": [
+    {
+      "id": "initial-release",
+      "title": "Initial Release",
+      "url": "https://your-site.com/changelog/initial-release",
+      "date_published": "2025-01-15",
+      "date_modified": "2025-01-15",
+      "summary": "We're excited to announce the initial release!",
+      "content_html": "<p>We're excited to announce the initial release!</p>",
+      "content_text": "We're excited to announce the initial release!",
+      "tags": ["Release"]
+    }
+  ]
+}
+```
+
 ## Styling
 
 Tags receive a CSS class based on their value (e.g., a tag of `"Bug Fix"` gets the class `changelog-tag-bug-fix`). You can style tags and other changelog elements by overriding these classes in your `variables.css`:

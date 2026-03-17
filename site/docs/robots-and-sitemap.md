@@ -30,6 +30,7 @@ The sitemap automatically includes URLs for:
 
 - **Home page** — your site root URL
 - **RSS feed** — the generated docs feed at `/feed.xml` when documentation pages exist
+- **Changelog JSON feeds** — `/changelog.json` and `/changelog-latest.json` when changelog entries exist
 - **Documentation pages** — every page in `docs/`, using the full resolved URL path
 - **API Reference** — included when `openApiUrl` is configured and the API template exists
 - **Changelog** — the changelog landing page plus individual entries for each release
@@ -43,6 +44,8 @@ All URLs use the absolute `siteUrl` from your config (e.g., `https://your-site.c
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://your-site.com</loc></url>
   <url><loc>https://your-site.com/feed.xml</loc></url>
+  <url><loc>https://your-site.com/changelog.json</loc></url>
+  <url><loc>https://your-site.com/changelog-latest.json</loc></url>
   <url><loc>https://your-site.com/docs/</loc></url>
   <url><loc>https://your-site.com/docs/configuration</loc></url>
   <url><loc>https://your-site.com/api</loc></url>
@@ -64,10 +67,12 @@ When your site contains documentation pages, Docula also generates an RSS 2.0 fe
 
 ## Output Location
 
-All three files are written to the root of your output directory:
+All files are written to the root of your output directory:
 
 ```
 dist/
+  changelog.json
+  changelog-latest.json
   feed.xml
   robots.txt
   sitemap.xml

@@ -379,10 +379,13 @@ export class DoculaBuilder {
 			this._console.fileBuilt("feed.xml");
 		}
 
-		// Build the changelog JSON feed (/changelog.json)
-		if (doculaData.changelogEntries?.length) {
+		// Build the changelog JSON feeds (/changelog.json and /changelog-latest.json)
+		// Require the changelog-entry template so feed URLs don't point to pages that were never built.
+		if (doculaData.hasChangelog && doculaData.templates?.changelogEntry) {
 			await this.buildChangelogFeedJson(doculaData);
 			this._console.fileBuilt("changelog.json");
+			await this.buildChangelogLatestFeedJson(doculaData);
+			this._console.fileBuilt("changelog-latest.json");
 		}
 
 		if (doculaData.hasDocuments) {
@@ -698,8 +701,11 @@ export class DoculaBuilder {
 			urls.push({ url: `${data.siteUrl}${data.baseUrl}/feed.xml` });
 		}
 
-		if (data.changelogEntries?.length) {
+		if (data.hasChangelog && data.templates?.changelogEntry) {
 			urls.push({ url: `${data.siteUrl}${data.baseUrl}/changelog.json` });
+			urls.push({
+				url: `${data.siteUrl}${data.baseUrl}/changelog-latest.json`,
+			});
 		}
 
 		if (data.openApiUrl && data.templates?.api) {
@@ -811,16 +817,38 @@ export class DoculaBuilder {
 			return;
 		}
 
+		await this.writeChangelogFeedJson(data, entries, "changelog.json");
+	}
+
+	public async buildChangelogLatestFeedJson(data: DoculaData): Promise<void> {
+		const entries = data.changelogEntries;
+		if (!entries?.length) {
+			return;
+		}
+
+		const latestEntries = entries.slice(0, this.options.changelogPerPage);
+		await this.writeChangelogFeedJson(
+			data,
+			latestEntries,
+			"changelog-latest.json",
+		);
+	}
+
+	private async writeChangelogFeedJson(
+		data: DoculaData,
+		entries: DoculaChangelogEntry[],
+		filename: string,
+	): Promise<void> {
 		const feedUrl = this.buildAbsoluteSiteUrl(
 			data.siteUrl,
-			`${data.baseUrl}/changelog.json`,
+			`${data.baseUrl}/${filename}`,
 		);
 		const homeUrl = this.buildAbsoluteSiteUrl(data.siteUrl, `${data.baseUrl}/`);
 
 		const items = entries.map((entry) => {
 			const itemUrl = this.buildAbsoluteSiteUrl(
 				data.siteUrl,
-				`${data.changelogUrl}/${entry.slug}`,
+				`${data.changelogUrl}/${entry.slug}/`,
 			);
 			const item: Record<string, unknown> = {
 				id: entry.slug,
@@ -861,7 +889,7 @@ export class DoculaBuilder {
 
 		await fs.promises.mkdir(data.output, { recursive: true });
 		await fs.promises.writeFile(
-			`${data.output}/changelog.json`,
+			`${data.output}/${filename}`,
 			JSON.stringify(feed, null, 2),
 			"utf8",
 		);
