@@ -981,6 +981,11 @@ describe("DoculaBuilder", () => {
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
 				recursive: true,
+				// Exclude transient output/cache dirs written by parallel docula.test.ts tests
+				filter: (src) => {
+					const base = path.basename(src);
+					return !base.startsWith("dist") && base !== ".cache";
+				},
 			});
 
 			const consoleLog = console.log;
@@ -1020,6 +1025,10 @@ describe("DoculaBuilder", () => {
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
 				recursive: true,
+				filter: (src) => {
+					const base = path.basename(src);
+					return !base.startsWith("dist") && base !== ".cache";
+				},
 			});
 
 			const consoleLog = console.log;
@@ -1150,6 +1159,10 @@ describe("DoculaBuilder", () => {
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
 				recursive: true,
+				filter: (src) => {
+					const base = path.basename(src);
+					return !base.startsWith("dist") && base !== ".cache";
+				},
 			});
 
 			const consoleLog = console.log;
