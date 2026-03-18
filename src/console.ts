@@ -328,12 +328,32 @@ export class DoculaConsole {
 			}
 		}
 
-		// Parse download subcommand (next non-flag token after "download")
+		// Parse download subcommand: walk forward past flags and flag values
+		const downloadFlagsWithValues = new Set([
+			"-s",
+			"--site",
+			"-o",
+			"--output",
+			"-p",
+			"--port",
+			"-t",
+			"--templatePath",
+			"-T",
+			"--template",
+		]);
 		const downloadIndex = argv.indexOf("download");
-		if (downloadIndex !== -1 && downloadIndex + 1 < argv.length) {
-			const next = argv[downloadIndex + 1];
-			if (!next.startsWith("-")) {
-				arguments_.downloadTarget = next;
+		if (downloadIndex !== -1) {
+			for (let i = downloadIndex + 1; i < argv.length; i++) {
+				const token = argv[i];
+				if (downloadFlagsWithValues.has(token)) {
+					i++; // skip the flag's value
+					continue;
+				}
+
+				if (!token.startsWith("-")) {
+					arguments_.downloadTarget = token;
+					break;
+				}
 			}
 		}
 

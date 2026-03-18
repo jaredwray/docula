@@ -401,4 +401,31 @@ describe("DoculaConsole", () => {
 		expect(result.command).toEqual("download");
 		expect(result.args.downloadTarget).toEqual("");
 	});
+	it("should parse downloadTarget when flags appear before subcommand", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"--overwrite",
+			"variables",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.downloadTarget).toEqual("variables");
+		expect(result.args.overwrite).toEqual(true);
+	});
+	it("should parse downloadTarget when flag+value pair appears before subcommand", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"-s",
+			"./docs",
+			"template",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.downloadTarget).toEqual("template");
+		expect(result.args.sitePath).toContain("docs");
+	});
 });
