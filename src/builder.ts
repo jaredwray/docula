@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Ecto } from "ecto";
 import { Hashery } from "hashery";
-import { Writr } from "writr";
+import { Writr, type WritrOptions } from "writr";
 import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { DoculaConsole } from "./console.js";
 import {
@@ -13,6 +13,11 @@ import {
 } from "./github.js";
 import { DoculaOptions } from "./options.js";
 import { resolveTemplatePath } from "./template-resolver.js";
+
+const writrOptions: WritrOptions = {
+	throwOnEmitError: false,
+	throwOnEmptyListeners: false,
+};
 
 export type DoculaChangelogEntry = {
 	title: string;
@@ -795,7 +800,7 @@ export class DoculaBuilder {
 			);
 			const summary =
 				document.description ||
-				this.summarizeMarkdown(new Writr(document.content).body);
+				this.summarizeMarkdown(new Writr(document.content, writrOptions).body);
 			xml += "<item>";
 			xml += `<title>${this.escapeXml(itemTitle)}</title>`;
 			xml += `<link>${this.escapeXml(itemLink)}</link>`;
@@ -1019,7 +1024,10 @@ export class DoculaBuilder {
 					data.siteUrl,
 					`${data.baseUrl}${this.normalizePathForUrl(document.urlPath)}`,
 				);
-				const markdownBody = new Writr(document.content).body.trim();
+				const markdownBody = new Writr(
+					document.content,
+					writrOptions,
+				).body.trim();
 
 				lines.push("");
 				lines.push(`### ${document.navTitle}`);
@@ -1359,7 +1367,7 @@ export class DoculaBuilder {
 				`${data.sitePath}/README.md`,
 				"utf8",
 			);
-			htmlReadme = await new Writr(readmeContent).render();
+			htmlReadme = await new Writr(readmeContent, writrOptions).render();
 		}
 
 		return htmlReadme;
@@ -1371,7 +1379,7 @@ export class DoculaBuilder {
 		const announcementPath = `${data.sitePath}/announcement.md`;
 		if (fs.existsSync(announcementPath)) {
 			const announcementContent = fs.readFileSync(announcementPath, "utf8");
-			return new Writr(announcementContent).render();
+			return new Writr(announcementContent, writrOptions).render();
 		}
 
 		return undefined;
@@ -1443,11 +1451,15 @@ export class DoculaBuilder {
 		if (apiSpec) {
 			apiSpec.info.description = new Writr(
 				apiSpec.info.description,
+				writrOptions,
 			).renderSync();
 			for (const group of apiSpec.groups) {
-				group.description = new Writr(group.description).renderSync();
+				group.description = new Writr(
+					group.description,
+					writrOptions,
+				).renderSync();
 				for (const op of group.operations) {
-					op.description = new Writr(op.description).renderSync();
+					op.description = new Writr(op.description, writrOptions).renderSync();
 				}
 			}
 		}
@@ -1535,7 +1547,7 @@ export class DoculaBuilder {
 
 	public parseChangelogEntry(filePath: string): DoculaChangelogEntry {
 		const fileContent = fs.readFileSync(filePath, "utf8");
-		const writr = new Writr(fileContent);
+		const writr = new Writr(fileContent, writrOptions);
 		const matterData = writr.frontMatter;
 		const markdownContent = writr.body;
 
@@ -1576,7 +1588,9 @@ export class DoculaBuilder {
 			tagClass,
 			slug,
 			content: markdownContent,
-			generatedHtml: new Writr(markdownContent).renderSync({ mdx: isMdx }),
+			generatedHtml: new Writr(markdownContent, writrOptions).renderSync({
+				mdx: isMdx,
+			}),
 			preview: this.generateChangelogPreview(markdownContent, 500, isMdx),
 			previewImage,
 			urlPath: `/${this.options.changelogPath}/${slug}/index.html`,
@@ -1608,7 +1622,7 @@ export class DoculaBuilder {
 		cleaned = cleaned.replace(/^\n+/, "").trim();
 
 		if (cleaned.length <= minLength) {
-			return new Writr(cleaned).renderSync({ mdx });
+			return new Writr(cleaned, writrOptions).renderSync({ mdx });
 		}
 
 		// Step 4: Split on paragraph boundaries within the target range
@@ -1671,7 +1685,7 @@ export class DoculaBuilder {
 		// Step 5: Truncate and apply ellipsis only when force-truncated
 		if (splitIndex > 0) {
 			const truncated = cleaned.slice(0, splitIndex).trim();
-			return new Writr(truncated).renderSync({ mdx });
+			return new Writr(truncated, writrOptions).renderSync({ mdx });
 		}
 
 		// Fallback: truncate at word boundary with ellipsis
@@ -1682,7 +1696,7 @@ export class DoculaBuilder {
 		}
 
 		truncated += "...";
-		return new Writr(truncated).renderSync({ mdx });
+		return new Writr(truncated, writrOptions).renderSync({ mdx });
 	}
 
 	public convertReleaseToChangelogEntry(
@@ -1721,7 +1735,7 @@ export class DoculaBuilder {
 			tagClass,
 			slug,
 			content: body,
-			generatedHtml: new Writr(body).renderSync(),
+			generatedHtml: new Writr(body, writrOptions).renderSync(),
 			preview: this.generateChangelogPreview(body),
 			urlPath: `/${this.options.changelogPath}/${slug}/index.html`,
 			lastModified: dateString,
@@ -2040,7 +2054,7 @@ export class DoculaBuilder {
 
 	public parseDocumentData(documentPath: string): DoculaDocument {
 		const documentContent = fs.readFileSync(documentPath, "utf8");
-		const writr = new Writr(documentContent);
+		const writr = new Writr(documentContent, writrOptions);
 		const matterData = writr.frontMatter;
 		let markdownContent = writr.body;
 		markdownContent = markdownContent.replace(/^# .*\n/, "");
@@ -2093,7 +2107,7 @@ export class DoculaBuilder {
 			keywords: matterData.keywords ?? [],
 			content: documentContent,
 			markdown: markdownContent,
-			generatedHtml: new Writr(markdownContent).renderSync({
+			generatedHtml: new Writr(markdownContent, writrOptions).renderSync({
 				toc: true,
 				mdx: isMdx,
 			}),
