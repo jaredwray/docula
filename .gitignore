@@ -86,4 +86,4 @@ test-results/
 .cache
 
 # Test Temp Sites
-temp-*
+test/temp

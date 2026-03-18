@@ -51,13 +51,6 @@ describe("docula", () => {
 		]) {
 			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
 		}
-		// Clean any leftover output directories that may have been left behind by a
-		// previous crashed run. Without this, a recursive fs.watch on single-page-site
-		// can race against stale dist/changelog/* directories and crash.
-		fs.rmSync("test/fixtures/single-page-site/dist", {
-			recursive: true,
-			force: true,
-		});
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
@@ -199,7 +192,7 @@ describe("docula execute", () => {
 	it("should be able to execute with no parameters", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site";
-		buildOptions.output = "test/fixtures/single-page-site/dist";
+		buildOptions.output = "test/temp/docula-exec-no-params";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
@@ -220,7 +213,7 @@ describe("docula execute", () => {
 	it("should be able to build with typescript config", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site-ts";
-		buildOptions.output = "test/fixtures/single-page-site-ts/dist";
+		buildOptions.output = "test/temp/docula-exec-ts-config";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
@@ -241,9 +234,9 @@ describe("docula execute", () => {
 	it("should be able to execute with output parameter", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site";
-		buildOptions.output = "test/fixtures/single-page-site/dist-foo";
+		buildOptions.output = "test/temp/docula-exec-output-initial";
 		buildOptions.templatePath = "test/fixtures/template-example/";
-		const realOutputPath = "test/fixtures/single-page-site/dist1";
+		const realOutputPath = "test/temp/docula-exec-output-param";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
 		console.log = (_message) => {};
@@ -259,7 +252,7 @@ describe("docula execute", () => {
 	it("should clean the output directory when --clean flag is set", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site";
-		buildOptions.output = "test/fixtures/single-page-site/dist-clean";
+		buildOptions.output = "test/temp/docula-exec-clean";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
 		const consoleLog = console.log;
@@ -291,7 +284,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should clean the .cache directory when --clean flag is set", async () => {
-		const sitePath = "test/temp-clean-cache-site";
+		const sitePath = "test/temp/clean-cache-site";
 		const outputDir = `${sitePath}/dist`;
 
 		// Create a minimal site fixture without a config file (so sitePath isn't overridden)
@@ -330,7 +323,7 @@ describe("docula execute", () => {
 	});
 	it("should generate llms files during build for docs/api/changelog sites", async () => {
 		const sourcePath = "test/fixtures/mega-page-site-no-home-page";
-		const sitePath = "test/temp-llms-integration-site";
+		const sitePath = "test/temp/llms-integration-site";
 		const output = `${sitePath}/dist`;
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = sitePath;
@@ -573,7 +566,7 @@ describe("docula execute", () => {
 	it("should serve the site", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist3";
+		options.output = "test/temp/docula-serve-basic";
 		options.templatePath = "test/fixtures/template-example/";
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
@@ -598,10 +591,7 @@ describe("docula execute", () => {
 			process.cwd(),
 			"test/fixtures/single-page-site",
 		);
-		options.output = path.join(
-			process.cwd(),
-			"test/fixtures/single-page-site/dist3",
-		);
+		options.output = path.join(process.cwd(), "test/temp/docula-serve-reset");
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8182"];
@@ -623,7 +613,7 @@ describe("docula execute", () => {
 	it("should serve the site on a specified port", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist3";
+		options.output = "test/temp/docula-serve-port";
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8183"];
@@ -648,7 +638,7 @@ describe("docula execute", () => {
 	it("should serve the site on a specified port with --port flag", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist4";
+		options.output = "test/temp/docula-serve-port-flag";
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "--port", "8184"];
@@ -673,7 +663,7 @@ describe("docula execute", () => {
 	it("should run onPrepare method if exists", async () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = "test/fixtures/single-page-site-onprepare";
-		buildOptions.output = "test/fixtures/single-page-site-onprepare/dist";
+		buildOptions.output = "test/temp/docula-exec-onprepare";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 
 		const consoleLog = console.log;
@@ -700,7 +690,7 @@ describe("docula watch", () => {
 	it("should start watching when serve is called with --watch flag", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-watch1";
+		options.output = "test/temp/docula-serve-watch";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8190", "--watch"];
@@ -737,7 +727,7 @@ describe("docula watch", () => {
 	it("should not start watching when serve is called without --watch flag", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-watch2";
+		options.output = "test/temp/docula-serve-no-watch";
 		options.templatePath = "test/fixtures/template-example/";
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
@@ -759,9 +749,7 @@ describe("docula watch", () => {
 		}
 	});
 	it("should not clean output directory when serve is called with --clean but without --build or --watch", async () => {
-		const outputDir = path.resolve(
-			"test/fixtures/single-page-site/dist-clean-serve",
-		);
+		const outputDir = path.resolve("test/temp/docula-serve-clean-no-build");
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = outputDir;
@@ -778,7 +766,7 @@ describe("docula watch", () => {
 			"8193",
 			"--clean",
 			"-o",
-			"test/fixtures/single-page-site/dist-clean-serve",
+			"test/temp/docula-serve-clean-no-build",
 		];
 		const consoleLog = console.log;
 		console.log = (_message) => {};
@@ -800,7 +788,7 @@ describe("docula watch", () => {
 	it("should build and serve when --build flag is used without --watch", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-build-flag";
+		options.output = "test/temp/docula-serve-build-flag";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8192", "--build"];
@@ -823,8 +811,8 @@ describe("docula watch", () => {
 		}
 	});
 	it("should rebuild when a file changes in the watched directory", async () => {
-		const tempSitePath = "test/temp-watch-site";
-		const tempOutput = "test/temp-watch-output";
+		const tempSitePath = "test/temp/watch-site";
+		const tempOutput = "test/temp/watch-output";
 
 		// Copy fixture to temp directory
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
@@ -854,10 +842,16 @@ describe("docula watch", () => {
 			// Write a file to trigger the watcher
 			fs.writeFileSync(`${tempSitePath}/test-change.txt`, "test content");
 
-			// Wait for debounce + build
-			await new Promise((resolve) => {
-				setTimeout(resolve, 2000);
-			});
+			// Poll until rebuild message appears or timeout
+			const startedAt = Date.now();
+			while (
+				!messages.some((m) => m.includes("rebuilding...")) &&
+				Date.now() - startedAt < 5000
+			) {
+				await new Promise((resolve) => {
+					setTimeout(resolve, 100);
+				});
+			}
 
 			expect(messages.some((m) => m.includes("rebuilding..."))).toBe(true);
 		} finally {
@@ -878,7 +872,7 @@ describe("docula watch", () => {
 	it("should close existing watcher when watch is called again", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-watch3";
+		options.output = "test/temp/docula-watch-close-existing";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		const consoleLog = console.log;
@@ -899,11 +893,12 @@ describe("docula watch", () => {
 				docula.watcher.close();
 			}
 
+			await fs.promises.rm(options.output, { recursive: true, force: true });
 			console.log = consoleLog;
 		}
 	});
 	it("should ignore changes in the .cache directory", async () => {
-		const tempSitePath = "test/temp-watch-ignore-cache";
+		const tempSitePath = "test/temp/watch-ignore-cache";
 		const tempOutput = `${tempSitePath}/dist`;
 
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
@@ -958,7 +953,7 @@ describe("docula watch", () => {
 		}
 	});
 	it("should ignore changes in the output directory", async () => {
-		const tempSitePath = "test/temp-watch-ignore-output";
+		const tempSitePath = "test/temp/watch-ignore-output";
 		const tempOutput = `${tempSitePath}/dist`;
 
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
@@ -1013,8 +1008,8 @@ describe("docula watch", () => {
 		}
 	});
 	it("should handle rebuild errors gracefully", async () => {
-		const tempSitePath = "test/temp-watch-error-site";
-		const tempOutput = "test/temp-watch-error-output";
+		const tempSitePath = "test/temp/watch-error-site";
+		const tempOutput = "test/temp/watch-error-output";
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
 			recursive: true,
 		});
@@ -1107,7 +1102,7 @@ describe("docula dev", () => {
 	it("should build, watch, and serve when dev command is used", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-dev1";
+		options.output = "test/temp/docula-dev-cmd";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "dev", "-p", "8195"];
@@ -1148,7 +1143,7 @@ describe("docula dev", () => {
 	it("should build and serve without watch when start command is used", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-start1";
+		options.output = "test/temp/docula-start-cmd";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "start", "-p", "8196"];
@@ -1173,7 +1168,7 @@ describe("docula dev", () => {
 	it("should build, watch, and serve when start command is used with --watch", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/fixtures/single-page-site/dist-start-watch";
+		options.output = "test/temp/docula-start-watch";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "start", "-w", "-p", "8197"];
@@ -1273,7 +1268,7 @@ describe("docula config file", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 		const docula = new Docula(options);
-		const output = "test/temp-build-mega-no-home-test";
+		const output = "test/temp/build-mega-no-home-test";
 		const consoleLog = console.log;
 		console.log = (_message) => {};
 
@@ -1365,7 +1360,7 @@ describe("docula config file", () => {
 	it("should apply --templatePath flag from CLI args", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/temp-templatepath-test";
+		options.output = "test/temp/templatepath-test";
 		const docula = new Docula(options);
 		process.argv = [
 			"node",

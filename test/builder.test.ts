@@ -40,7 +40,7 @@ describe("DoculaBuilder", () => {
 		siteDescription: "Beautiful Website for Your Projects",
 		sitePath: "test/fixtures/single-page-site",
 		templatePath: "test/fixtures/template-example",
-		output: "test/temp-sitemap-test",
+		output: "test/temp/sitemap-test",
 	};
 
 	afterEach(() => {
@@ -100,7 +100,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Build", () => {
 		it("should build single page", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-test";
+			options.output = "test/temp/build-test";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -120,7 +120,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should use first doc as index.html when no README.md exists", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-test";
+			options.output = "test/temp/build-test";
 			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -146,7 +146,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should log error when no README.md, no docs, and no API exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-no-content";
+			options.output = "test/temp/build-no-content";
 			options.sitePath = "test/fixtures/empty-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -172,7 +172,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should build multi page", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-test";
+			options.output = "test/temp/build-test";
 			options.sitePath = "test/fixtures/multi-page-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -193,7 +193,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should not build changelog.json when changelog-entry template is missing", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-no-changelog-entry-test";
+			options.output = "test/temp/build-no-changelog-entry-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.templatePath = path.join(
 				process.cwd(),
@@ -254,9 +254,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should merge template overrides and log overridden files", async () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-log-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 
 			// Create override directory with a custom footer
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -310,15 +309,14 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should build with template overrides applied", async () => {
 			const sitePath = "test/fixtures/multi-page-site";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const outputDir = "test/temp-build-override-test";
+			const outputDir = "test/temp/build-override-test";
 			const cacheDir = `${sitePath}/.cache`;
 
 			// Create override with a custom footer containing a marker
@@ -350,9 +348,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should update cache when override file content changes", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-update-cache-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -408,15 +405,13 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should reuse cache when override files have not changed", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-reuse-cache-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -460,15 +455,13 @@ describe("DoculaBuilder", () => {
 				).toBe(false);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should invalidate cache when an override file is deleted", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-invalidate-cache-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
 			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>A</footer>");
@@ -519,15 +512,13 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should rebuild when manifest is missing or corrupt", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-manifest-rebuild-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -585,15 +576,13 @@ describe("DoculaBuilder", () => {
 				).toBe(false);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should only replace changed override files and preserve unchanged ones", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-partial-update-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -664,13 +653,12 @@ describe("DoculaBuilder", () => {
 				);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should create .gitignore with .cache when it does not exist", () => {
-			const sitePath = "test/temp-gitignore-create";
+			const sitePath = "test/temp/gitignore-create";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -707,7 +695,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should append .cache to existing .gitignore", () => {
-			const sitePath = "test/temp-gitignore-append";
+			const sitePath = "test/temp/gitignore-append";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -744,7 +732,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should not modify .gitignore when .cache entry already exists", () => {
-			const sitePath = "test/temp-gitignore-exists";
+			const sitePath = "test/temp/gitignore-exists";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -781,7 +769,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should not modify .gitignore when autoUpdateIgnores is false", () => {
-			const sitePath = "test/temp-gitignore-disabled";
+			const sitePath = "test/temp/gitignore-disabled";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -811,7 +799,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should not modify .gitignore when .cache already exists", () => {
-			const sitePath = "test/temp-gitignore-cache-exists";
+			const sitePath = "test/temp/gitignore-cache-exists";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -842,9 +830,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should add new override files to an existing cache", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-add-files-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -905,15 +892,13 @@ describe("DoculaBuilder", () => {
 				expect(cachedSidebar).toBe("<aside>Custom sidebar</aside>");
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should delete cached file when removed override has no original template", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-delete-cached-test";
 			const overrideDir = `${sitePath}/templates/modern`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			// Create an override file that does NOT exist in the original template
@@ -968,15 +953,14 @@ describe("DoculaBuilder", () => {
 				expect(fs.existsSync(`${cachePath}/custom-widget.hbs`)).toBe(false);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 	});
 
 	describe("Docula Builder - Differential Builds", () => {
 		it("should write build manifest after first build", async () => {
-			const sitePath = "test/temp-diff-build-manifest";
+			const sitePath = "test/temp/diff-build-manifest";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1020,7 +1004,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should skip build when nothing has changed", async () => {
-			const sitePath = "test/temp-diff-build-skip";
+			const sitePath = "test/temp/diff-build-skip";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1064,7 +1048,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should rebuild when a document changes", async () => {
-			const sitePath = "test/temp-diff-build-doc-change";
+			const sitePath = "test/temp/diff-build-doc-change";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
@@ -1112,7 +1096,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should use cached documents for unchanged files", async () => {
-			const sitePath = "test/temp-diff-build-cached-docs";
+			const sitePath = "test/temp/diff-build-cached-docs";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, { recursive: true });
@@ -1154,7 +1138,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should force full rebuild when config changes", async () => {
-			const sitePath = "test/temp-diff-build-config-change";
+			const sitePath = "test/temp/diff-build-config-change";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1203,7 +1187,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should load and save build manifest correctly", () => {
-			const sitePath = "test/temp-diff-manifest-io";
+			const sitePath = "test/temp/diff-manifest-io";
 
 			try {
 				const options = new DoculaOptions();
@@ -1239,7 +1223,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should return undefined for corrupt or wrong-version manifest", () => {
-			const sitePath = "test/temp-diff-manifest-corrupt";
+			const sitePath = "test/temp/diff-manifest-corrupt";
 
 			try {
 				const options = new DoculaOptions();
@@ -1267,7 +1251,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should skip unchanged asset copies", async () => {
-			const sitePath = "test/temp-diff-build-asset-skip";
+			const sitePath = "test/temp/diff-build-asset-skip";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
@@ -1313,7 +1297,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should detect asset changes", () => {
-			const sitePath = "test/temp-diff-assets-changed";
+			const sitePath = "test/temp/diff-assets-changed";
 
 			try {
 				const options = new DoculaOptions();
@@ -1354,7 +1338,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should handle cached changelog entries", async () => {
-			const sitePath = "test/temp-diff-build-changelog-cache";
+			const sitePath = "test/temp/diff-build-changelog-cache";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/changelog-site", sitePath, { recursive: true });
@@ -1397,7 +1381,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should handle corrupt cached changelog gracefully", () => {
-			const sitePath = "test/temp-diff-corrupt-changelog";
+			const sitePath = "test/temp/diff-corrupt-changelog";
 
 			try {
 				const options = new DoculaOptions();
@@ -1417,7 +1401,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should detect public folder asset changes", () => {
-			const sitePath = "test/temp-diff-public-assets";
+			const sitePath = "test/temp/diff-public-assets";
 
 			try {
 				const options = new DoculaOptions();
@@ -1561,7 +1545,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/single-page-site";
-			options.output = "test/temp-robots-test";
+			options.output = "test/temp/robots-test";
 
 			if (fs.existsSync(options.output)) {
 				await fs.promises.rm(options.output, { recursive: true });
@@ -1584,7 +1568,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-robots-test-copy";
+			options.output = "test/temp/robots-test-copy";
 
 			if (fs.existsSync(options.output)) {
 				await fs.promises.rm(options.output, { recursive: true });
@@ -1633,7 +1617,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-feed-test",
+				output: "test/temp/sitemap-feed-test",
 				documents: [
 					{
 						title: "Guide",
@@ -1680,7 +1664,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful <docs> & updates",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-test",
+				output: "test/temp/feed-test",
 				documents: [
 					{
 						title: "Guide",
@@ -1746,7 +1730,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-excerpt-test",
+				output: "test/temp/feed-excerpt-test",
 				documents: [
 					{
 						title: "Guide",
@@ -1795,7 +1779,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-no-toc-test",
+				output: "test/temp/feed-no-toc-test",
 				documents: [
 					{
 						title: "Guide",
@@ -1845,7 +1829,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-hyphen-test",
+				output: "test/temp/feed-hyphen-test",
 				documents: [
 					{
 						title: "Guide",
@@ -1894,7 +1878,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-thematic-break-test",
+				output: "test/temp/feed-thematic-break-test",
 				documents: [
 					{
 						title: "Guide",
@@ -1943,7 +1927,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-no-docs",
+				output: "test/temp/feed-no-docs",
 			};
 
 			if (fs.existsSync(data.output)) {
@@ -1969,7 +1953,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-feed-scope-test",
+				output: "test/temp/feed-scope-test",
 				openApiUrl: "/api/swagger.json",
 				hasApi: true,
 				hasChangelog: true,
@@ -2033,7 +2017,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			if (fs.existsSync(data.output)) {
 				await fs.promises.rm(data.output, { recursive: true });
@@ -2056,7 +2040,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder();
 			const data = doculaData;
 			data.sitePath = "template";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 			data.templates = undefined;
 
 			try {
@@ -2082,7 +2066,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 			data.hasDocuments = true;
 			data.sections = [
 				{
@@ -2125,7 +2109,7 @@ describe("DoculaBuilder", () => {
 			data.templates = undefined;
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/no-template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			if (fs.existsSync(data.output)) {
 				await fs.promises.rm(data.output, { recursive: true });
@@ -2155,7 +2139,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/mega-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-test",
+				output: "test/temp/sitemap-test",
 			};
 			const documentsPath = "test/fixtures/mega-page-site/docs";
 			const documents = builder.getDocuments(documentsPath, doculaData);
@@ -2227,7 +2211,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			data.sections = undefined;
 			data.documents = undefined;
@@ -2248,7 +2232,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			data.sections = [
 				{
@@ -2310,7 +2294,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			data.sections = [
 				{
@@ -2353,7 +2337,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			data.sections = [
 				{
@@ -2397,7 +2381,7 @@ describe("DoculaBuilder", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp-index-test";
+			data.output = "test/temp/index-test";
 
 			data.sections = [
 				{
@@ -2486,7 +2470,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Public Folder", () => {
 		it("should copy public folder contents to dist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-public-folder-test";
+			options.output = "test/temp/public-folder-test";
 			options.sitePath = "test/fixtures/single-page-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -2534,7 +2518,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should skip copying unchanged public folder files when hashes match", () => {
-			const sitePath = "test/temp-public-diff-skip";
+			const sitePath = "test/temp/public-diff-skip";
 			const publicPath = `${sitePath}/public`;
 			const outputPath = `${sitePath}/output`;
 
@@ -2599,7 +2583,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not log anything when public folder does not exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-no-public-folder-test";
+			options.output = "test/temp/no-public-folder-test";
 			options.sitePath = "test/fixtures/multi-page-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -2625,7 +2609,7 @@ describe("DoculaBuilder", () => {
 
 		it("should skip output when it is inside public folder to prevent recursive copy", async () => {
 			// Create a temporary site with public folder where output is inside public
-			const tempSitePath = "test/temp-recursive-site";
+			const tempSitePath = "test/temp/recursive-site";
 			const publicPath = `${tempSitePath}/public`;
 			const output = `${publicPath}/dist`;
 
@@ -2683,7 +2667,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp-api-test",
+				output: "test/temp/api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
@@ -2720,7 +2704,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp-api-test-no-url",
+				output: "test/temp/api-test-no-url",
 				templates: {
 					home: "home.hbs",
 				},
@@ -2749,7 +2733,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp-api-test-no-template",
+				output: "test/temp/api-test-no-template",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
@@ -2779,7 +2763,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp-sitemap-api-test",
+				output: "test/temp/sitemap-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
@@ -2815,7 +2799,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp-sitemap-no-api-test",
+				output: "test/temp/sitemap-no-api-test",
 				openApiUrl: "https://petstore.swagger.io/v2/swagger.json",
 				templates: {
 					home: "home.hbs",
@@ -2860,7 +2844,7 @@ describe("DoculaBuilder", () => {
 
 		it("should build with openApiUrl configured", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-api-test";
+			options.output = "test/temp/build-api-test";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -2888,7 +2872,7 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.template = template;
 				options.sitePath = "test/fixtures/multi-page-site";
-				options.output = `test/temp-build-api-home-button-${template}`;
+				options.output = `test/temp/build-api-home-button-${template}`;
 				options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 
 				const builder = new DoculaBuilder(options);
@@ -2914,7 +2898,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.templatePath = "test/fixtures/template-example";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-api-home-no-template-button";
+			options.output = "test/temp/build-api-home-no-template-button";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 
 			const builder = new DoculaBuilder(options);
@@ -2938,7 +2922,7 @@ describe("DoculaBuilder", () => {
 		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/mega-page-site";
-			options.output = "test/temp-build-api-autodetect";
+			options.output = "test/temp/build-api-autodetect";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			console.log = () => {};
@@ -2989,7 +2973,7 @@ describe("DoculaBuilder", () => {
 
 		it("should include mdx changelog files and ignore non-markdown files", async () => {
 			const builder = new DoculaBuilder();
-			const changelogPath = "test/temp-changelog-mixed-files";
+			const changelogPath = "test/temp/changelog-mixed-files";
 			await fs.promises.rm(changelogPath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${changelogPath}/nested`, { recursive: true });
 			await fs.promises.writeFile(
@@ -3095,7 +3079,7 @@ describe("DoculaBuilder", () => {
 
 		it("should fall back to filename title when changelog entry has no front matter", async () => {
 			const builder = new DoculaBuilder();
-			const changelogPath = "test/temp-changelog-missing-frontmatter";
+			const changelogPath = "test/temp/changelog-missing-frontmatter";
 			const filePath = `${changelogPath}/2026-03-02-missing-fields.md`;
 			await fs.promises.rm(changelogPath, { recursive: true, force: true });
 			await fs.promises.mkdir(changelogPath, { recursive: true });
@@ -3127,7 +3111,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-test",
+				output: "test/temp/changelog-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -3181,7 +3165,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-entry-test",
+				output: "test/temp/changelog-entry-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -3237,7 +3221,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-no-changelog-test",
+				output: "test/temp/no-changelog-test",
 				hasChangelog: false,
 			};
 
@@ -3266,7 +3250,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-no-changelog-entries-test",
+				output: "test/temp/no-changelog-entries-test",
 				hasChangelog: false,
 				changelogEntries: [],
 			};
@@ -3290,7 +3274,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-changelog-test",
+				output: "test/temp/sitemap-changelog-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -3342,7 +3326,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-changelog-no-entries-test",
+				output: "test/temp/sitemap-changelog-no-entries-test",
 				hasChangelog: true,
 				templates: {
 					home: "home.hbs",
@@ -3377,7 +3361,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-no-changelog-test",
+				output: "test/temp/sitemap-no-changelog-test",
 				hasChangelog: false,
 				templates: {
 					home: "home.hbs",
@@ -3426,7 +3410,7 @@ describe("DoculaBuilder", () => {
 
 		it("should build with changelog", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-changelog-test";
+			options.output = "test/temp/build-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -3594,7 +3578,7 @@ describe("DoculaBuilder", () => {
 		it("should build paginated changelog pages", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
-			options.output = "test/temp-changelog-pagination-test";
+			options.output = "test/temp/changelog-pagination-test";
 			const builder = new DoculaBuilder(options);
 
 			const entries = [];
@@ -3677,7 +3661,7 @@ describe("DoculaBuilder", () => {
 		it("should include paginated changelog pages in sitemap", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
-			options.output = "test/temp-sitemap-pagination-test";
+			options.output = "test/temp/sitemap-pagination-test";
 			const builder = new DoculaBuilder(options);
 
 			const entries = [];
@@ -3872,7 +3856,7 @@ describe("DoculaBuilder", () => {
 
 		it("should build with enableReleaseChangelog enabled and merge release entries with file entries", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-release-changelog-test";
+			options.output = "test/temp/build-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
@@ -3903,7 +3887,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not include release entries when enableReleaseChangelog is false", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-no-release-changelog-test";
+			options.output = "test/temp/build-no-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.enableReleaseChangelog = false;
 			const builder = new DoculaBuilder(options);
@@ -3933,7 +3917,7 @@ describe("DoculaBuilder", () => {
 
 		it("should skip changelog pages when no changelog entries exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-no-changelog-pages-test";
+			options.output = "test/temp/build-no-changelog-pages-test";
 			options.sitePath = "test/fixtures/single-page-site";
 			options.enableReleaseChangelog = false;
 			const builder = new DoculaBuilder(options);
@@ -3953,7 +3937,7 @@ describe("DoculaBuilder", () => {
 
 		it("should call onReleaseChangelog hook to modify release entries", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-on-release-changelog-test";
+			options.output = "test/temp/build-on-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
@@ -3996,7 +3980,7 @@ describe("DoculaBuilder", () => {
 
 		it("should call async onReleaseChangelog hook", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-on-release-changelog-async-test";
+			options.output = "test/temp/build-on-release-changelog-async-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
@@ -4020,7 +4004,7 @@ describe("DoculaBuilder", () => {
 
 		it("should handle onReleaseChangelog hook errors gracefully", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-on-release-changelog-error-test";
+			options.output = "test/temp/build-on-release-changelog-error-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
@@ -4046,7 +4030,7 @@ describe("DoculaBuilder", () => {
 
 		it("should work normally when onReleaseChangelog is not set", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-build-no-on-release-changelog-test";
+			options.output = "test/temp/build-no-on-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
@@ -4092,7 +4076,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-generics-test",
+				output: "test/temp/generics-test",
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
@@ -4142,7 +4126,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-generics-test",
+				output: "test/temp/changelog-generics-test",
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -4193,7 +4177,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-nonascii-test",
+				output: "test/temp/nonascii-test",
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
@@ -4243,7 +4227,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - LLM Files", () => {
 		it("should generate llms.txt and llms-full.txt for docs-only sites", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-docs-only";
+			const output = "test/temp/llms-docs-only";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -4292,7 +4276,7 @@ describe("DoculaBuilder", () => {
 
 		it("should include API link and local OpenAPI spec text in llms-full.txt", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-api-local-spec";
+			const output = "test/temp/llms-api-local-spec";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -4326,7 +4310,7 @@ describe("DoculaBuilder", () => {
 
 		it("should fall back to OpenAPI URL and preserve non-index doc URLs", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-openapi-fallback";
+			const output = "test/temp/llms-openapi-fallback";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com/",
@@ -4376,7 +4360,7 @@ describe("DoculaBuilder", () => {
 
 		it("should handle API section without openApiUrl", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-api-no-openapi";
+			const output = "test/temp/llms-api-no-openapi";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -4407,7 +4391,7 @@ describe("DoculaBuilder", () => {
 
 		it("should handle openApiUrl with query-only path", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-openapi-query-only";
+			const output = "test/temp/llms-openapi-query-only";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -4437,9 +4421,9 @@ describe("DoculaBuilder", () => {
 
 		it("should not read OpenAPI files outside sitePath", async () => {
 			const builder = new DoculaBuilder();
-			const sitePath = "test/temp-llms-safe-openapi-site";
-			const output = "test/temp-llms-safe-openapi-output";
-			const externalSpecPath = "test/temp-llms-safe-openapi-external.json";
+			const sitePath = "test/temp/llms-safe-openapi-site";
+			const output = "test/temp/llms-safe-openapi-output";
+			const externalSpecPath = "test/temp/llms-safe-openapi-external.json";
 			const externalMarker = "external-openapi-should-not-be-read";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -4486,8 +4470,8 @@ describe("DoculaBuilder", () => {
 
 		it("should not read symbolic linked OpenAPI files", async () => {
 			const builder = new DoculaBuilder();
-			const sitePath = "test/temp-llms-openapi-symlink-site";
-			const output = "test/temp-llms-openapi-symlink-output";
+			const sitePath = "test/temp/llms-openapi-symlink-site";
+			const output = "test/temp/llms-openapi-symlink-output";
 			const targetSpecPath = `${sitePath}/api/real-swagger.json`;
 			const symlinkSpecPath = `${sitePath}/api/swagger-link.json`;
 			const marker = "symlink-openapi-should-not-be-read";
@@ -4532,7 +4516,7 @@ describe("DoculaBuilder", () => {
 
 		it("should include changelog landing and only latest 20 entries in llms.txt", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-changelog-index";
+			const output = "test/temp/llms-changelog-index";
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
 				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
@@ -4588,7 +4572,7 @@ describe("DoculaBuilder", () => {
 
 		it("should include all changelog entries in llms-full.txt", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-llms-full-changelog";
+			const output = "test/temp/llms-full-changelog";
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
 				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
@@ -4634,8 +4618,8 @@ describe("DoculaBuilder", () => {
 
 		it("should copy custom llms files when they exist in site path", async () => {
 			const builder = new DoculaBuilder();
-			const sitePath = "test/temp-custom-llms-site";
-			const output = "test/temp-custom-llms-output";
+			const sitePath = "test/temp/custom-llms-site";
+			const output = "test/temp/custom-llms-output";
 			const customLlms = "# Custom llms.txt";
 			const customLlmsFull = "# Custom llms-full.txt";
 			const data: DoculaData = {
@@ -4677,11 +4661,11 @@ describe("DoculaBuilder", () => {
 
 		it("should ignore symbolic linked llms override files", async () => {
 			const builder = new DoculaBuilder();
-			const sitePath = "test/temp-custom-llms-symlink-site";
-			const output = "test/temp-custom-llms-symlink-output";
-			const externalLlmsPath = "test/temp-custom-llms-symlink-source.txt";
+			const sitePath = "test/temp/custom-llms-symlink-site";
+			const output = "test/temp/custom-llms-symlink-output";
+			const externalLlmsPath = "test/temp/custom-llms-symlink-source.txt";
 			const externalLlmsFullPath =
-				"test/temp-custom-llms-symlink-source-full.txt";
+				"test/temp/custom-llms-symlink-source-full.txt";
 			const externalMarker = "symlink-override-should-not-be-read";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -4741,7 +4725,7 @@ describe("DoculaBuilder", () => {
 
 		it("should return undefined when override candidate path fails boundary check", async () => {
 			const builder = new DoculaBuilder();
-			const sitePath = "test/temp-override-boundary-check";
+			const sitePath = "test/temp/override-boundary-check";
 			const unsafeBuilder = builder as unknown as {
 				isPathWithinBasePath: (
 					candidatePath: string,
@@ -4767,7 +4751,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp-override-boundary-check-output",
+					output: "test/temp/override-boundary-check-output",
 				};
 				await fs.promises.rm(data.output, { recursive: true, force: true });
 
@@ -4781,7 +4765,7 @@ describe("DoculaBuilder", () => {
 				expect(llms).not.toContain("marker-should-not-be-used");
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp-override-boundary-check-output", {
+				await fs.promises.rm("test/temp/override-boundary-check-output", {
 					recursive: true,
 					force: true,
 				});
@@ -4790,7 +4774,7 @@ describe("DoculaBuilder", () => {
 
 		it("should return undefined when override realpath lookup fails", async () => {
 			const builder = new DoculaBuilder();
-			const sitePath = "test/temp-override-realpath-fail";
+			const sitePath = "test/temp/override-realpath-fail";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
@@ -4812,7 +4796,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp-override-realpath-fail-output",
+					output: "test/temp/override-realpath-fail-output",
 				};
 				await fs.promises.rm(data.output, { recursive: true, force: true });
 
@@ -4826,7 +4810,7 @@ describe("DoculaBuilder", () => {
 				expect(llms).not.toContain("marker-should-not-be-used");
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp-override-realpath-fail-output", {
+				await fs.promises.rm("test/temp/override-realpath-fail-output", {
 					recursive: true,
 					force: true,
 				});
@@ -4845,7 +4829,7 @@ describe("DoculaBuilder", () => {
 					basePath: string,
 				) => boolean;
 			};
-			const sitePath = "test/temp-override-realpath-escape";
+			const sitePath = "test/temp/override-realpath-escape";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
@@ -4873,7 +4857,7 @@ describe("DoculaBuilder", () => {
 					data: DoculaData,
 				) => Promise<{ sourcePath: string; content: string } | undefined>;
 			};
-			const sitePath = "test/temp-openapi-realpath-fail";
+			const sitePath = "test/temp/openapi-realpath-fail";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
@@ -4895,7 +4879,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp-openapi-realpath-fail-output",
+					output: "test/temp/openapi-realpath-fail-output",
 					openApiUrl: "/api/swagger.json",
 					hasApi: true,
 				};
@@ -4904,7 +4888,7 @@ describe("DoculaBuilder", () => {
 				expect(spec).toBeUndefined();
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp-openapi-realpath-fail-output", {
+				await fs.promises.rm("test/temp/openapi-realpath-fail-output", {
 					recursive: true,
 					force: true,
 				});
@@ -4922,7 +4906,7 @@ describe("DoculaBuilder", () => {
 					basePath: string,
 				) => boolean;
 			};
-			const sitePath = "test/temp-openapi-realpath-escape";
+			const sitePath = "test/temp/openapi-realpath-escape";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
@@ -4944,7 +4928,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp-openapi-realpath-escape-output",
+					output: "test/temp/openapi-realpath-escape-output",
 					openApiUrl: "/api/swagger.json",
 					hasApi: true,
 				};
@@ -4953,7 +4937,7 @@ describe("DoculaBuilder", () => {
 				expect(spec).toBeUndefined();
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp-openapi-realpath-escape-output", {
+				await fs.promises.rm("test/temp/openapi-realpath-escape-output", {
 					recursive: true,
 					force: true,
 				});
@@ -4964,7 +4948,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.enableLlmsTxt = false;
 			const builder = new DoculaBuilder(options);
-			const output = "test/temp-llms-disabled";
+			const output = "test/temp/llms-disabled";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -4988,7 +4972,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not include llms files in sitemap.xml", async () => {
 			const builder = new DoculaBuilder();
-			const output = "test/temp-sitemap-no-llms";
+			const output = "test/temp/sitemap-no-llms";
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -5061,7 +5045,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-docs-home-test",
+				output: "test/temp/docs-home-test",
 
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
@@ -5071,7 +5055,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath: "test/fixtures/multi-page-site",
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp-docs-home-test",
+					output: "test/temp/docs-home-test",
 				}),
 				templates: {
 					home: "home.hbs",
@@ -5102,7 +5086,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-docs-home-error-test",
+				output: "test/temp/docs-home-error-test",
 
 				hasDocuments: true,
 				documents: [],
@@ -5125,7 +5109,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-docs-home-empty-test",
+				output: "test/temp/docs-home-empty-test",
 
 				hasDocuments: true,
 				documents: [],
@@ -5149,7 +5133,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-docs-home-precomputed-sidebar",
+				output: "test/temp/docs-home-precomputed-sidebar",
 
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
@@ -5159,7 +5143,7 @@ describe("DoculaBuilder", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath: "test/fixtures/multi-page-site",
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp-docs-home-precomputed-sidebar",
+					output: "test/temp/docs-home-precomputed-sidebar",
 				}),
 				sidebarItems: [],
 				templates: {
@@ -5181,7 +5165,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - buildApiHomePage", () => {
 		it("should render API page as index.html when no README and no docs", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-api-home-test";
+			options.output = "test/temp/api-home-test";
 			options.sitePath = "test/fixtures/api-only-site";
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -5209,7 +5193,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/empty-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-api-home-error-test",
+				output: "test/temp/api-home-error-test",
 			};
 
 			await expect(builder.renderApiContent(data)).rejects.toThrow(
@@ -5221,7 +5205,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Content Assets", () => {
 		it("should copy non-markdown files from docs to output docs", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-content-assets-docs";
+			options.output = "test/temp/content-assets-docs";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -5275,7 +5259,7 @@ describe("DoculaBuilder", () => {
 
 		it("should copy non-markdown files from changelog to output changelog", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-content-assets-changelog";
+			options.output = "test/temp/content-assets-changelog";
 			options.sitePath = "test/fixtures/mega-page-site";
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -5317,7 +5301,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should only copy files with allowed asset extensions", async () => {
-			const tempSitePath = "test/temp-content-assets-extensions-site";
+			const tempSitePath = "test/temp/content-assets-extensions-site";
 			const docsPath = `${tempSitePath}/docs`;
 
 			await fs.promises.mkdir(docsPath, { recursive: true });
@@ -5357,7 +5341,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should respect custom allowedAssets from options", async () => {
-			const tempSitePath = "test/temp-content-assets-custom-ext-site";
+			const tempSitePath = "test/temp/content-assets-custom-ext-site";
 			const docsPath = `${tempSitePath}/docs`;
 
 			await fs.promises.mkdir(docsPath, { recursive: true });
@@ -5400,7 +5384,7 @@ describe("DoculaBuilder", () => {
 
 		it("should copy sibling assets into non-index document output directories", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-content-assets-sibling";
+			options.output = "test/temp/content-assets-sibling";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -5455,7 +5439,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should NOT copy unreferenced assets from docs", async () => {
-			const tempSitePath = "test/temp-content-assets-unreferenced-site";
+			const tempSitePath = "test/temp/content-assets-unreferenced-site";
 			const docsPath = `${tempSitePath}/docs`;
 
 			await fs.promises.mkdir(docsPath, { recursive: true });
@@ -5496,7 +5480,7 @@ describe("DoculaBuilder", () => {
 
 		it("should handle docs directory with no non-markdown files", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp-content-assets-no-assets";
+			options.output = "test/temp/content-assets-no-assets";
 			options.sitePath = "test/fixtures/single-page-site";
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -5525,7 +5509,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth";
+			options.output = "test/temp/build-cookie-auth";
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5552,7 +5536,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-no-cookie-auth";
+			options.output = "test/temp/build-no-cookie-auth";
 
 			const builder = new DoculaBuilder(options);
 
@@ -5576,7 +5560,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-logout-url";
+			options.output = "test/temp/build-cookie-auth-logout-url";
 
 			options.cookieAuth = {
 				loginUrl: "/login",
@@ -5603,7 +5587,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-mobile";
+			options.output = "test/temp/build-cookie-auth-mobile";
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -5629,7 +5613,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-header-actions";
+			options.output = "test/temp/build-cookie-auth-header-actions";
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -5653,7 +5637,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-head-cache";
+			options.output = "test/temp/build-cookie-auth-head-cache";
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -5678,7 +5662,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-inline-username";
+			options.output = "test/temp/build-cookie-auth-inline-username";
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -5703,7 +5687,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-no-inline-styles";
+			options.output = "test/temp/build-cookie-auth-no-inline-styles";
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -5728,7 +5712,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-cookie-auth-check-url";
+			options.output = "test/temp/build-cookie-auth-check-url";
 
 			options.cookieAuth = {
 				loginUrl: "/login",
@@ -5761,7 +5745,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-header-links";
+			options.output = "test/temp/build-header-links";
 
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
@@ -5794,7 +5778,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-no-header-links";
+			options.output = "test/temp/build-no-header-links";
 
 			const builder = new DoculaBuilder(options);
 
@@ -5817,7 +5801,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-header-links-icon";
+			options.output = "test/temp/build-header-links-icon";
 
 			options.headerLinks = [
 				{
@@ -5848,7 +5832,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-header-links-default-icon";
+			options.output = "test/temp/build-header-links-default-icon";
 
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
@@ -5876,7 +5860,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp-build-header-links-mobile";
+			options.output = "test/temp/build-header-links-mobile";
 
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
@@ -5939,7 +5923,7 @@ describe("DoculaBuilder", () => {
 
 	describe("Branch coverage - uncovered paths", () => {
 		it("should rebuild when assets change but docs and template are unchanged", async () => {
-			const sitePath = "test/temp-diff-build-asset-change";
+			const sitePath = "test/temp/diff-build-asset-change";
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
@@ -6001,9 +5985,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should restore original template file when override is removed", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-restore-original-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 
 			// Create override that shadows an existing template file
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -6069,8 +6052,7 @@ describe("DoculaBuilder", () => {
 				expect(restoredFooter).toBe(originalFooter);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 	});
@@ -6118,7 +6100,7 @@ describe("DoculaBuilder", () => {
 		it("should build docs pages at output root when docsPath is empty", async () => {
 			const options = new DoculaOptions({
 				sitePath: "test/fixtures/multi-page-site",
-				output: "./test/temp-empty-docspath",
+				output: "./test/temp/empty-docspath",
 				docsPath: "",
 			});
 			const builder = new DoculaBuilder(options);
@@ -6163,7 +6145,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Test Description",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "",
-				output: "test/temp-sitemap-basurl",
+				output: "test/temp/sitemap-basurl",
 				baseUrl: "/docs",
 				docsPath: "",
 				docsUrl: "/docs",
@@ -6212,7 +6194,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Test Description",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "",
-				output: "test/temp-sitemap-apipath",
+				output: "test/temp/sitemap-apipath",
 				baseUrl: "/docs",
 				docsPath: "",
 				docsUrl: "/docs",
@@ -6251,7 +6233,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Site description",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-json-test",
+				output: "test/temp/changelog-json-test",
 				changelogEntries: [
 					{
 						title: "Release v2.0",
@@ -6337,7 +6319,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-json-empty-test",
+				output: "test/temp/changelog-json-empty-test",
 				changelogEntries: [],
 			};
 
@@ -6364,7 +6346,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-json-undef-test",
+				output: "test/temp/changelog-json-undef-test",
 			};
 
 			if (fs.existsSync(data.output)) {
@@ -6390,7 +6372,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-json-optional-test",
+				output: "test/temp/changelog-json-optional-test",
 				changelogEntries: [
 					{
 						title: "Minimal Entry",
@@ -6441,7 +6423,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-json-baseurl-test",
+				output: "test/temp/changelog-json-baseurl-test",
 				changelogEntries: [
 					{
 						title: "Release v1.0",
@@ -6490,7 +6472,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-changelog-json-test",
+				output: "test/temp/sitemap-changelog-json-test",
 				hasChangelog: true,
 				templates: {
 					home: "home.hbs",
@@ -6541,7 +6523,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-sitemap-no-changelog-json-test",
+				output: "test/temp/sitemap-no-changelog-json-test",
 			};
 
 			if (fs.existsSync(data.output)) {
@@ -6575,7 +6557,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Site description",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-latest-json-test",
+				output: "test/temp/changelog-latest-json-test",
 				changelogEntries: [
 					{
 						title: "Release v3.0",
@@ -6648,7 +6630,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-latest-json-all-test",
+				output: "test/temp/changelog-latest-json-all-test",
 				changelogEntries: [
 					{
 						title: "Release v1.0",
@@ -6694,7 +6676,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-latest-json-empty-test",
+				output: "test/temp/changelog-latest-json-empty-test",
 				changelogEntries: [],
 			};
 
@@ -6723,7 +6705,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp-changelog-latest-json-undef-test",
+				output: "test/temp/changelog-latest-json-undef-test",
 			};
 
 			if (fs.existsSync(data.output)) {
