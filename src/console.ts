@@ -105,7 +105,7 @@ export class DoculaConsole {
 		console.log(`    ${green("help")}           Print this help`);
 		console.log(`    ${green("version")}        Print the version`);
 		console.log(
-			`    ${green("download")}        Download template files to your site directory`,
+			`    ${green("download")}       Download template files to your site directory`,
 		);
 		console.log();
 		console.log(bold(cyan("  Common Options:")));
