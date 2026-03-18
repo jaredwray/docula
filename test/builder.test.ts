@@ -254,9 +254,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should merge template overrides and log overridden files", async () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-log-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 
 			// Create override directory with a custom footer
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -310,8 +309,7 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
@@ -350,9 +348,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should update cache when override file content changes", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-update-cache-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -408,15 +405,13 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should reuse cache when override files have not changed", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-reuse-cache-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -460,15 +455,13 @@ describe("DoculaBuilder", () => {
 				).toBe(false);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should invalidate cache when an override file is deleted", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-invalidate-cache-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
 			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>A</footer>");
@@ -519,15 +512,13 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should rebuild when manifest is missing or corrupt", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-manifest-rebuild-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -585,15 +576,13 @@ describe("DoculaBuilder", () => {
 				).toBe(false);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should only replace changed override files and preserve unchanged ones", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-partial-update-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -664,8 +653,7 @@ describe("DoculaBuilder", () => {
 				);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
@@ -842,9 +830,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should add new override files to an existing cache", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-add-files-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -905,15 +892,13 @@ describe("DoculaBuilder", () => {
 				expect(cachedSidebar).toBe("<aside>Custom sidebar</aside>");
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should delete cached file when removed override has no original template", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-delete-cached-test";
 			const overrideDir = `${sitePath}/templates/modern`;
-			const cacheDir = `${sitePath}/.cache`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
 			// Create an override file that does NOT exist in the original template
@@ -968,8 +953,7 @@ describe("DoculaBuilder", () => {
 				expect(fs.existsSync(`${cachePath}/custom-widget.hbs`)).toBe(false);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 	});
@@ -6001,9 +5985,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should restore original template file when override is removed", () => {
-			const sitePath = "test/fixtures/single-page-site";
+			const sitePath = "test/temp/override-restore-original-test";
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const cacheDir = `${sitePath}/.cache`;
 
 			// Create override that shadows an existing template file
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -6069,8 +6052,7 @@ describe("DoculaBuilder", () => {
 				expect(restoredFooter).toBe(originalFooter);
 			} finally {
 				console.log = consoleLog;
-				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
-				fs.rmSync(cacheDir, { recursive: true, force: true });
+				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 	});
