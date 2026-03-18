@@ -291,7 +291,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should clean the .cache directory when --clean flag is set", async () => {
-		const sitePath = "test/temp-clean-cache-site";
+		const sitePath = "test/temp/clean-cache-site";
 		const outputDir = `${sitePath}/dist`;
 
 		// Create a minimal site fixture without a config file (so sitePath isn't overridden)
@@ -330,7 +330,7 @@ describe("docula execute", () => {
 	});
 	it("should generate llms files during build for docs/api/changelog sites", async () => {
 		const sourcePath = "test/fixtures/mega-page-site-no-home-page";
-		const sitePath = "test/temp-llms-integration-site";
+		const sitePath = "test/temp/llms-integration-site";
 		const output = `${sitePath}/dist`;
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = sitePath;
@@ -823,8 +823,8 @@ describe("docula watch", () => {
 		}
 	});
 	it("should rebuild when a file changes in the watched directory", async () => {
-		const tempSitePath = "test/temp-watch-site";
-		const tempOutput = "test/temp-watch-output";
+		const tempSitePath = "test/temp/watch-site";
+		const tempOutput = "test/temp/watch-output";
 
 		// Copy fixture to temp directory
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
@@ -903,7 +903,7 @@ describe("docula watch", () => {
 		}
 	});
 	it("should ignore changes in the .cache directory", async () => {
-		const tempSitePath = "test/temp-watch-ignore-cache";
+		const tempSitePath = "test/temp/watch-ignore-cache";
 		const tempOutput = `${tempSitePath}/dist`;
 
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
@@ -958,7 +958,7 @@ describe("docula watch", () => {
 		}
 	});
 	it("should ignore changes in the output directory", async () => {
-		const tempSitePath = "test/temp-watch-ignore-output";
+		const tempSitePath = "test/temp/watch-ignore-output";
 		const tempOutput = `${tempSitePath}/dist`;
 
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
@@ -1013,8 +1013,8 @@ describe("docula watch", () => {
 		}
 	});
 	it("should handle rebuild errors gracefully", async () => {
-		const tempSitePath = "test/temp-watch-error-site";
-		const tempOutput = "test/temp-watch-error-output";
+		const tempSitePath = "test/temp/watch-error-site";
+		const tempOutput = "test/temp/watch-error-output";
 		fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
 			recursive: true,
 		});
@@ -1273,7 +1273,7 @@ describe("docula config file", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 		const docula = new Docula(options);
-		const output = "test/temp-build-mega-no-home-test";
+		const output = "test/temp/build-mega-no-home-test";
 		const consoleLog = console.log;
 		console.log = (_message) => {};
 
@@ -1365,7 +1365,7 @@ describe("docula config file", () => {
 	it("should apply --templatePath flag from CLI args", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
-		options.output = "test/temp-templatepath-test";
+		options.output = "test/temp/templatepath-test";
 		const docula = new Docula(options);
 		process.argv = [
 			"node",

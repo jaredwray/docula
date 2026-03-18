@@ -193,7 +193,7 @@ describe("Github", () => {
 });
 
 describe("Github file caching", () => {
-	const testCachePath = path.join(process.cwd(), "test/temp-github-cache");
+	const testCachePath = path.join(process.cwd(), "test/temp/github-cache");
 	const cacheConfig: GithubCacheConfig = {
 		cachePath: testCachePath,
 		ttl: 3600,
