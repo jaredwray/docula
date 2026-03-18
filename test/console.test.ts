@@ -172,7 +172,7 @@ describe("DoculaConsole", () => {
 
 		const c = new DoculaConsole();
 		c.printHelp();
-		expect(messages.length).toEqual(30);
+		expect(messages.length).toEqual(36);
 		expect(messages.some((m) => m && stripAnsi(m).includes("Docula"))).toBe(
 			true,
 		);
@@ -230,6 +230,7 @@ describe("DoculaConsole", () => {
 			"init",
 			"dev",
 			"start",
+			"download",
 		];
 		for (const command of commands) {
 			const result = c.parseProcessArgv(["node", "docula", command]);
@@ -337,5 +338,67 @@ describe("DoculaConsole", () => {
 		const result = c.parseProcessArgv(["node", "docula", "serve"]);
 		expect(result.command).toEqual("serve");
 		expect(result.args.build).toEqual(false);
+	});
+	it("should parse --overwrite flag", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"variables",
+			"--overwrite",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.overwrite).toEqual(true);
+	});
+	it("should default overwrite to false when not provided", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"variables",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.overwrite).toEqual(false);
+	});
+	it("should parse download variables subcommand", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"variables",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.downloadTarget).toEqual("variables");
+	});
+	it("should parse download template subcommand", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"template",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.downloadTarget).toEqual("template");
+	});
+	it("should default downloadTarget to empty string when no subcommand provided", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv(["node", "docula", "download"]);
+		expect(result.command).toEqual("download");
+		expect(result.args.downloadTarget).toEqual("");
+	});
+	it("should not set downloadTarget when next token is a flag", () => {
+		const c = new DoculaConsole();
+		const result = c.parseProcessArgv([
+			"node",
+			"docula",
+			"download",
+			"--overwrite",
+		]);
+		expect(result.command).toEqual("download");
+		expect(result.args.downloadTarget).toEqual("");
 	});
 });
