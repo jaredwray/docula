@@ -18,6 +18,7 @@ Docula provides a command-line interface for initializing, building, and serving
 | `serve` | Serve the site locally |
 | `help` / `--help` / `-h` | Print help information |
 | `version` | Print the version number |
+| `download` | Download template files to your site directory |
 
 ## Common Options
 
@@ -74,6 +75,45 @@ npx docula init --javascript
 
 # Initialize in a custom directory
 npx docula init -s ./docs-site
+```
+
+## download
+
+Downloads template files from the active template into your site directory. Use one of the subcommands below to choose what to download. If a target file or directory already exists, the command prints an error and exits. Use `--overwrite` to replace it.
+
+### Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| `variables` | Copy `variables.css` to `site/variables.css` |
+| `template` | Copy the full template to `site/templates/<name>/` |
+
+### Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--overwrite` | Overwrite existing files if they already exist | `false` |
+
+### Examples
+
+```bash
+# Copy variables.css for the current (modern) template
+npx docula download variables
+
+# Copy variables.css in a custom site directory
+npx docula download variables -s ./my-site
+
+# Overwrite an existing variables.css
+npx docula download variables --overwrite
+
+# Copy the full modern template to site/templates/modern/
+npx docula download template
+
+# Copy the classic template
+npx docula download template --template classic
+
+# Overwrite an existing template copy
+npx docula download template --overwrite
 ```
 
 ## build
@@ -222,6 +262,7 @@ This is useful during development when you want to see changes reflected immedia
 ```bash
 # Quick start: scaffold and develop (auto-detects TypeScript)
 npx docula init
+npx docula download variables
 npx docula dev
 
 # Production build

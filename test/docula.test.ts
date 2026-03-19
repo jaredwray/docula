@@ -178,6 +178,171 @@ describe("docula", () => {
 			fs.rmSync(temporarySitePath, { recursive: true });
 		}
 	});
+
+	it("should copy variables.css to site directory from modern template", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-vars";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			docula.downloadVariables(temporarySitePath, "", "modern", false);
+			const dest = `${temporarySitePath}/variables.css`;
+			expect(fs.existsSync(dest)).toEqual(true);
+			const content = fs.readFileSync(dest, "utf8");
+			expect(content).toContain(":root");
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should error if variables.css already exists without --overwrite", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-vars-exists";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const dest = `${temporarySitePath}/variables.css`;
+		fs.writeFileSync(dest, "/* original */");
+		const consoleError = console.error;
+		let errorMessage = "";
+		console.error = (message) => {
+			errorMessage = message;
+		};
+
+		try {
+			docula.downloadVariables(temporarySitePath, "", "modern", false);
+			expect(stripAnsi(errorMessage)).toContain("already exists");
+			expect(stripAnsi(errorMessage)).toContain("--overwrite");
+			expect(fs.readFileSync(dest, "utf8")).toEqual("/* original */");
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.error = consoleError;
+		}
+	});
+	it("should overwrite variables.css when overwrite is true", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-vars-overwrite";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const dest = `${temporarySitePath}/variables.css`;
+		fs.writeFileSync(dest, "/* original */");
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			docula.downloadVariables(temporarySitePath, "", "modern", true);
+			expect(fs.existsSync(dest)).toEqual(true);
+			const content = fs.readFileSync(dest, "utf8");
+			expect(content).not.toEqual("/* original */");
+			expect(content).toContain(":root");
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should copy variables.css from classic template", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-vars-classic";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			docula.downloadVariables(temporarySitePath, "", "classic", false);
+			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should copy full template to site/templates/<name>/", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-template";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			docula.downloadTemplate(temporarySitePath, "", "modern", false);
+			const dest = `${temporarySitePath}/templates/modern`;
+			expect(fs.existsSync(dest)).toEqual(true);
+			expect(fs.statSync(dest).isDirectory()).toEqual(true);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should error if template directory already exists without --overwrite", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-template-exists";
+		const dest = `${temporarySitePath}/templates/modern`;
+		fs.mkdirSync(dest, { recursive: true });
+		const consoleError = console.error;
+		let errorMessage = "";
+		console.error = (message) => {
+			errorMessage = message;
+		};
+
+		try {
+			docula.downloadTemplate(temporarySitePath, "", "modern", false);
+			expect(stripAnsi(errorMessage)).toContain("already exists");
+			expect(stripAnsi(errorMessage)).toContain("--overwrite");
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.error = consoleError;
+		}
+	});
+	it("should overwrite template directory when overwrite is true", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-template-overwrite";
+		const dest = `${temporarySitePath}/templates/modern`;
+		fs.mkdirSync(dest, { recursive: true });
+		fs.writeFileSync(`${dest}/sentinel.txt`, "original");
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			docula.downloadTemplate(temporarySitePath, "", "modern", true);
+			expect(fs.existsSync(`${dest}/css/variables.css`)).toEqual(true);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should copy classic template to site/templates/classic/", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-template-classic";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			docula.downloadTemplate(temporarySitePath, "", "classic", false);
+			expect(fs.existsSync(`${temporarySitePath}/templates/classic`)).toEqual(
+				true,
+			);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should use basename of custom templatePath for output directory name", () => {
+		const docula = new Docula(defaultOptions);
+		const temporarySitePath = "./temp-download-template-custom-path";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+		const customTemplatePath = "templates/modern";
+
+		try {
+			docula.downloadTemplate(temporarySitePath, customTemplatePath, "", false);
+			expect(fs.existsSync(`${temporarySitePath}/templates/modern`)).toEqual(
+				true,
+			);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
 	it("should get the package version", () => {
 		const docula = new Docula(defaultOptions);
 		const packageJson = fs.readFileSync("./package.json", "utf8");
@@ -683,6 +848,94 @@ describe("docula execute", () => {
 
 		await fs.promises.rm(buildOptions.output, { recursive: true });
 		console.log = consoleLog;
+	});
+	it("should execute download variables command and copy variables.css", async () => {
+		const temporarySitePath = "./temp-exec-download-vars";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = temporarySitePath;
+		buildOptions.template = "modern";
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			process.argv = ["node", "docula", "download", "variables"];
+			await docula.execute(process);
+			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should execute download variables --overwrite command and overwrite variables.css", async () => {
+		const temporarySitePath = "./temp-exec-download-vars-overwrite";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const dest = `${temporarySitePath}/variables.css`;
+		fs.writeFileSync(dest, "/* original */");
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = temporarySitePath;
+		buildOptions.template = "modern";
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			process.argv = ["node", "docula", "download", "variables", "--overwrite"];
+			await docula.execute(process);
+			const written = fs.readFileSync(dest, "utf8");
+			expect(written).not.toEqual("/* original */");
+			expect(written).toContain(":root");
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should execute download template command and copy template directory", async () => {
+		const temporarySitePath = "./temp-exec-download-template";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = temporarySitePath;
+		buildOptions.template = "modern";
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		console.log = (_message) => {};
+
+		try {
+			process.argv = ["node", "docula", "download", "template"];
+			await docula.execute(process);
+			expect(fs.existsSync(`${temporarySitePath}/templates/modern`)).toEqual(
+				true,
+			);
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+		}
+	});
+	it("should execute download with no subcommand and print error", async () => {
+		const temporarySitePath = "./temp-exec-download-noarg";
+		fs.mkdirSync(temporarySitePath, { recursive: true });
+		const buildOptions = new DoculaOptions();
+		buildOptions.sitePath = temporarySitePath;
+		buildOptions.template = "modern";
+		const docula = new Docula(buildOptions);
+		const consoleLog = console.log;
+		const consoleError = console.error;
+		let errorMessage = "";
+		console.log = (_message) => {};
+		console.error = (message) => {
+			errorMessage = message;
+		};
+
+		try {
+			process.argv = ["node", "docula", "download"];
+			await docula.execute(process);
+			expect(stripAnsi(errorMessage)).toContain("variables");
+		} finally {
+			fs.rmSync(temporarySitePath, { recursive: true });
+			console.log = consoleLog;
+			console.error = consoleError;
+		}
 	});
 });
 

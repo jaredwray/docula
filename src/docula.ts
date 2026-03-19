@@ -15,6 +15,7 @@ import {
 	logopng,
 } from "./init.js";
 import { DoculaOptions } from "./options.js";
+import { resolveTemplatePath } from "./template-resolver.js";
 
 export default class Docula {
 	private _options: DoculaOptions = new DoculaOptions();
@@ -239,6 +240,38 @@ export default class Docula {
 				break;
 			}
 
+			case "download": {
+				switch (consoleProcess.args.downloadTarget) {
+					case "variables": {
+						this.downloadVariables(
+							this.options.sitePath,
+							this.options.templatePath,
+							this.options.template,
+							consoleProcess.args.overwrite,
+						);
+						break;
+					}
+
+					case "template": {
+						this.downloadTemplate(
+							this.options.sitePath,
+							this.options.templatePath,
+							this.options.template,
+							consoleProcess.args.overwrite,
+						);
+						break;
+					}
+
+					default: {
+						this._console.error(
+							"Please specify a download target: 'variables' or 'template'",
+						);
+					}
+				}
+
+				break;
+			}
+
 			default: {
 				await this.runBuild(consoleProcess.args.clean);
 				break;
@@ -307,6 +340,74 @@ export default class Docula {
 		this._console.log(
 			`docula initialized. Please update the ${doculaConfigFile} file with your site information. In addition, you can replace the image and favicon.`,
 		);
+	}
+
+	/**
+	 * Copy the template's variables.css to the site directory.
+	 * If the file already exists and overwrite is false, prints an error.
+	 * @param {string} sitePath
+	 * @param {string} templatePath
+	 * @param {string} templateName
+	 * @param {boolean} overwrite
+	 * @returns {void}
+	 */
+	public downloadVariables(
+		sitePath: string,
+		templatePath: string,
+		templateName: string,
+		overwrite = false,
+	): void {
+		const resolvedTemplatePath = resolveTemplatePath(
+			templatePath,
+			templateName,
+		);
+		const source = path.join(resolvedTemplatePath, "css", "variables.css");
+		const dest = path.join(sitePath, "variables.css");
+
+		if (fs.existsSync(dest) && !overwrite) {
+			this._console.error(
+				`variables.css already exists at ${dest}. Use --overwrite to replace it.`,
+			);
+			return;
+		}
+
+		fs.copyFileSync(source, dest);
+		this._console.success(`variables.css copied to ${dest}`);
+	}
+
+	/**
+	 * Copy the full template directory to {sitePath}/templates/{outputName}/.
+	 * If the directory already exists and overwrite is false, prints an error.
+	 * @param {string} sitePath
+	 * @param {string} templatePath
+	 * @param {string} templateName
+	 * @param {boolean} overwrite
+	 * @returns {void}
+	 */
+	public downloadTemplate(
+		sitePath: string,
+		templatePath: string,
+		templateName: string,
+		overwrite = false,
+	): void {
+		const resolvedTemplatePath = resolveTemplatePath(
+			templatePath,
+			templateName,
+		);
+		const outputName = templatePath
+			? path.basename(resolvedTemplatePath)
+			: templateName;
+		const dest = path.join(sitePath, "templates", outputName);
+
+		if (fs.existsSync(dest) && !overwrite) {
+			this._console.error(
+				`Template already exists at ${dest}. Use --overwrite to replace it.`,
+			);
+			return;
+		}
+
+		fs.cpSync(resolvedTemplatePath, dest, { recursive: true, force: true });
+		this._console.success(`Template copied to ${dest}`);
 	}
 
 	/**

@@ -104,6 +104,9 @@ export class DoculaConsole {
 		);
 		console.log(`    ${green("help")}           Print this help`);
 		console.log(`    ${green("version")}        Print the version`);
+		console.log(
+			`    ${green("download")}       Download template files to your site directory`,
+		);
 		console.log();
 		console.log(bold(cyan("  Common Options:")));
 		console.log(
@@ -141,6 +144,17 @@ export class DoculaConsole {
 		console.log(bold(cyan("  Serve Options:")));
 		console.log(
 			`    ${yellow("-b, --build")}            Build the site before serving`,
+		);
+		console.log();
+		console.log(bold(cyan("  Download Options:")));
+		console.log(
+			`    ${yellow("variables")}              Copy variables.css to your site directory`,
+		);
+		console.log(
+			`    ${yellow("template")}               Copy the full template to site/templates/<name>/`,
+		);
+		console.log(
+			`    ${yellow("--overwrite")}            Overwrite existing files if they already exist`,
 		);
 	}
 
@@ -211,6 +225,10 @@ export class DoculaConsole {
 				case "version": {
 					return "version";
 				}
+
+				case "download": {
+					return "download";
+				}
 			}
 		}
 	}
@@ -227,6 +245,8 @@ export class DoculaConsole {
 			port: undefined,
 			typescript: false,
 			javascript: false,
+			overwrite: false,
+			downloadTarget: "",
 		};
 		for (let i = 0; i < argv.length; i++) {
 			const argument = argv[i];
@@ -300,6 +320,40 @@ export class DoculaConsole {
 					arguments_.javascript = true;
 					break;
 				}
+
+				case "--overwrite": {
+					arguments_.overwrite = true;
+					break;
+				}
+			}
+		}
+
+		// Parse download subcommand: walk forward past flags and flag values
+		const downloadFlagsWithValues = new Set([
+			"-s",
+			"--site",
+			"-o",
+			"--output",
+			"-p",
+			"--port",
+			"-t",
+			"--templatePath",
+			"-T",
+			"--template",
+		]);
+		const downloadIndex = argv.indexOf("download");
+		if (downloadIndex !== -1) {
+			for (let i = downloadIndex + 1; i < argv.length; i++) {
+				const token = argv[i];
+				if (downloadFlagsWithValues.has(token)) {
+					i++; // skip the flag's value
+					continue;
+				}
+
+				if (!token.startsWith("-")) {
+					arguments_.downloadTarget = token;
+					break;
+				}
 			}
 		}
 
@@ -324,4 +378,6 @@ type DoculaConsoleArguments = {
 	port: number | undefined;
 	typescript: boolean;
 	javascript: boolean;
+	overwrite: boolean;
+	downloadTarget: string;
 };

@@ -11,6 +11,14 @@ Docula gives you full control over the look and feel of your site through CSS va
 
 Each template ships with a default `variables.css` that defines its CSS variables. To customize your site's appearance, create a `variables.css` file in your site directory. This file replaces the template's defaults during the build, so any values you set here take priority.
 
+The quickest way to get started is to run:
+
+```bash
+npx docula download variables
+```
+
+This copies the current template's `variables.css` into your site directory with all default values in place, ready for you to edit. If the file already exists, pass `--overwrite` to replace it.
+
 ```
 site/
   variables.css   <-- your overrides go here
