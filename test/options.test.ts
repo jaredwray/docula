@@ -504,5 +504,38 @@ describe("DoculaOptions", () => {
 			options.parseOptions({ changelogPath: 123 });
 			expect(options.changelogPath).toEqual("changelog");
 		});
+
+		it("should have editPageUrl undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.editPageUrl).toBeUndefined();
+		});
+
+		it("should parse editPageUrl", () => {
+			options.parseOptions({
+				editPageUrl: "https://github.com/owner/repo/edit/main/site/docs",
+			});
+			expect(options.editPageUrl).toEqual(
+				"https://github.com/owner/repo/edit/main/site/docs",
+			);
+		});
+
+		it("should strip trailing slashes from editPageUrl", () => {
+			options.parseOptions({
+				editPageUrl: "https://github.com/owner/repo/edit/main/site/docs/",
+			});
+			expect(options.editPageUrl).toEqual(
+				"https://github.com/owner/repo/edit/main/site/docs",
+			);
+		});
+
+		it("should not update editPageUrl for non-string values", () => {
+			options.parseOptions({ editPageUrl: 123 });
+			expect(options.editPageUrl).toBeUndefined();
+		});
+
+		it("should allow empty string for editPageUrl", () => {
+			options.parseOptions({ editPageUrl: "" });
+			expect(options.editPageUrl).toEqual("");
+		});
 	});
 });

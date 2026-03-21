@@ -126,6 +126,13 @@ export class DoculaOptions {
 	 */
 	public changelogPath = "changelog";
 	/**
+	 * Base URL for "Edit this page" links on documentation pages.
+	 * When set, an edit link is shown at the bottom of each doc page.
+	 * The document's relative path is appended to this URL.
+	 * Example: "https://github.com/owner/repo/edit/main/site/docs"
+	 */
+	public editPageUrl?: string;
+	/**
 	 * Cookie-based authentication. When set, shows a Login/Logout button
 	 * in the header based on whether a JWT cookie is present.
 	 */
@@ -311,6 +318,13 @@ export class DoculaOptions {
 			typeof options.changelogPath === "string"
 		) {
 			this.changelogPath = trimSlashes(options.changelogPath);
+		}
+
+		if (
+			options.editPageUrl !== undefined &&
+			typeof options.editPageUrl === "string"
+		) {
+			this.editPageUrl = trimTrailingSlashes(options.editPageUrl);
 		}
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {

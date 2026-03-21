@@ -74,6 +74,24 @@
   font-size: 0.875em;
 }
 
+/* Edit page link */
+.edit-page-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-secondary);
+  text-decoration: none;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+
+.edit-page-link:hover {
+  color: var(--color-primary);
+}
+
 /* Docs */
 .nav {
   padding-left: 1rem;

@@ -78,6 +78,7 @@ export type DoculaData = {
 	docsUrl: string;
 	apiUrl: string;
 	changelogUrl: string;
+	editPageUrl?: string;
 };
 
 export type DoculaTemplates = {
@@ -231,6 +232,7 @@ export class DoculaBuilder {
 				this.options.baseUrl,
 				this.options.changelogPath,
 			),
+			editPageUrl: this.options.editPageUrl,
 		};
 
 		// Track README.md in asset hashes for change detection
@@ -1352,9 +1354,19 @@ export class DoculaBuilder {
 			data.sidebarItems = this.generateSidebarItems(data);
 		}
 
+		let editPageDocUrl: string | undefined;
+		if (data.editPageUrl) {
+			const docsRoot = path.join(data.sitePath, "docs");
+			const relativeFilePath = path
+				.relative(docsRoot, firstDocument.documentPath)
+				.split(path.sep)
+				.join("/");
+			editPageDocUrl = `${data.editPageUrl}/${relativeFilePath}`;
+		}
+
 		const documentContent = await this._ecto.renderFromFile(
 			documentsTemplate,
-			{ ...data, ...firstDocument },
+			{ ...data, ...firstDocument, editPageDocUrl },
 			data.templatePath,
 		);
 		await fs.promises.writeFile(indexPath, documentContent, "utf8");
@@ -1401,9 +1413,19 @@ export class DoculaBuilder {
 					recursive: true,
 				});
 				const slug = `${data.output}${document.urlPath}`;
+				let editPageDocUrl: string | undefined;
+				if (data.editPageUrl) {
+					const docsRoot = path.join(data.sitePath, "docs");
+					const relativeFilePath = path
+						.relative(docsRoot, document.documentPath)
+						.split(path.sep)
+						.join("/");
+					editPageDocUrl = `${data.editPageUrl}/${relativeFilePath}`;
+				}
+
 				const documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
-					{ ...data, ...document },
+					{ ...data, ...document, editPageDocUrl },
 					data.templatePath,
 				);
 				return fs.promises.writeFile(slug, documentContent, "utf8");
@@ -2606,6 +2628,7 @@ export class DoculaBuilder {
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
+			editPageUrl: this.options.editPageUrl,
 			baseUrl: this.options.baseUrl,
 			docsPath: this.options.docsPath,
 			apiPath: this.options.apiPath,
