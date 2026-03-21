@@ -1354,9 +1354,19 @@ export class DoculaBuilder {
 			data.sidebarItems = this.generateSidebarItems(data);
 		}
 
+		let editPageDocUrl: string | undefined;
+		if (data.editPageUrl) {
+			const docsRoot = path.join(data.sitePath, "docs");
+			const relativeFilePath = path
+				.relative(docsRoot, firstDocument.documentPath)
+				.split(path.sep)
+				.join("/");
+			editPageDocUrl = `${data.editPageUrl}/${relativeFilePath}`;
+		}
+
 		const documentContent = await this._ecto.renderFromFile(
 			documentsTemplate,
-			{ ...data, ...firstDocument },
+			{ ...data, ...firstDocument, editPageDocUrl },
 			data.templatePath,
 		);
 		await fs.promises.writeFile(indexPath, documentContent, "utf8");

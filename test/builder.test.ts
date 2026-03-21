@@ -6875,6 +6875,33 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should render edit page link on docs home page when site has no README", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
+			options.output = "test/temp/build-edit-page-url-no-home";
+			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("Edit this page");
+				expect(indexHtml).toContain("article__edit-link");
+				expect(indexHtml).toContain(
+					'href="https://github.com/owner/repo/edit/main/site/docs/',
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
 		it("should not render edit page link in the classic template when not configured", async () => {
 			const options = new DoculaOptions();
 			options.template = "classic";
