@@ -6845,5 +6845,58 @@ describe("DoculaBuilder", () => {
 				});
 			}
 		});
+
+		it("should render edit page link in the classic template", async () => {
+			const options = new DoculaOptions();
+			options.template = "classic";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-edit-page-url-classic";
+			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("Edit this page");
+				expect(docsHtml).toContain(
+					'href="https://github.com/owner/repo/edit/main/site/docs/front-matter.md"',
+				);
+				expect(docsHtml).toContain('target="_blank"');
+				expect(docsHtml).toContain("edit-page-link");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not render edit page link in the classic template when not configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "classic";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-no-edit-page-url-classic";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).not.toContain("Edit this page");
+				expect(docsHtml).not.toContain("edit-page-link");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
 	});
 });
