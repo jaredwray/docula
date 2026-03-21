@@ -1405,10 +1405,11 @@ export class DoculaBuilder {
 				const slug = `${data.output}${document.urlPath}`;
 				let editPageDocUrl: string | undefined;
 				if (data.editPageUrl) {
-					const docsFolderIndex = document.documentPath.lastIndexOf("/docs/");
-					const relativeFilePath = document.documentPath.slice(
-						docsFolderIndex + 6,
-					);
+					const docsRoot = path.join(data.sitePath, "docs");
+					const relativeFilePath = path
+						.relative(docsRoot, document.documentPath)
+						.split(path.sep)
+						.join("/");
 					editPageDocUrl = `${data.editPageUrl}/${relativeFilePath}`;
 				}
 
