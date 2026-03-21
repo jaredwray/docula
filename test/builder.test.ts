@@ -2537,6 +2537,25 @@ describe("DoculaBuilder", () => {
 			expect(result.ogTwitterCard).toBe("summary_large_image");
 		});
 
+		it("should use preview as fallback for ogDescription (changelog entries)", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {},
+			};
+			const pageData = {
+				preview: "Changelog entry preview text",
+			};
+			const result = builder.resolveOpenGraphData(data, pageData);
+			expect(result.ogDescription).toBe("Changelog entry preview text");
+		});
+
 		it("should set twitterCard to summary when no image is present", () => {
 			const builder = new DoculaBuilder();
 			const data: DoculaData = {

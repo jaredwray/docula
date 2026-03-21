@@ -1123,7 +1123,10 @@ export class DoculaBuilder {
 
 	public resolveOpenGraphData(
 		data: DoculaData,
-		pageData?: Partial<DoculaDocument> & { previewImage?: string },
+		pageData?: Partial<DoculaDocument> & {
+			previewImage?: string;
+			preview?: string;
+		},
 	): Record<string, string | undefined> {
 		if (!data.openGraph) {
 			return {};
@@ -1136,6 +1139,7 @@ export class DoculaBuilder {
 			pageData?.ogDescription ??
 			og.description ??
 			pageData?.description ??
+			pageData?.preview ??
 			data.siteDescription;
 		const ogImage = pageData?.ogImage ?? og.image ?? pageData?.previewImage;
 		const ogUrl = pageData?.urlPath
