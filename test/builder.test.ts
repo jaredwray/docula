@@ -6724,4 +6724,126 @@ describe("DoculaBuilder", () => {
 			}
 		});
 	});
+
+	describe("Docula Builder - editPageUrl", () => {
+		it("should render edit page link when editPageUrl is configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-edit-page-url";
+			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("Edit this page");
+				expect(docsHtml).toContain(
+					'href="https://github.com/owner/repo/edit/main/site/docs/front-matter.md"',
+				);
+				expect(docsHtml).toContain('target="_blank"');
+				expect(docsHtml).toContain('rel="noopener noreferrer"');
+				expect(docsHtml).toContain("article__edit-link");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not render edit page link when editPageUrl is not configured", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-no-edit-page-url";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).not.toContain("Edit this page");
+				expect(docsHtml).not.toContain("article__edit-link");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should strip trailing slashes from editPageUrl via parseOptions", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-edit-page-url-slash";
+			options.parseOptions({
+				editPageUrl: "https://github.com/owner/repo/edit/main/site/docs/",
+			});
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain(
+					'href="https://github.com/owner/repo/edit/main/site/docs/front-matter.md"',
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render correct edit page URL for nested section documents", async () => {
+			const options = new DoculaOptions();
+			options.template = "modern";
+			options.sitePath = "test/fixtures/mega-page-site";
+			options.output = "test/temp/build-edit-page-url-nested";
+			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				// Check a nested section document
+				const nestedFiles = await fs.promises.readdir(
+					`${options.output}/docs`,
+					{ recursive: true },
+				);
+				const htmlFiles = nestedFiles
+					.map((f) => f.toString())
+					.filter((f) => f.endsWith("index.html"));
+				expect(htmlFiles.length).toBeGreaterThan(0);
+
+				// Read the first nested doc and verify it has an edit link
+				const firstHtml = await fs.promises.readFile(
+					`${options.output}/docs/${htmlFiles[0]}`,
+					"utf8",
+				);
+				expect(firstHtml).toContain("Edit this page");
+				expect(firstHtml).toContain(
+					"https://github.com/owner/repo/edit/main/site/docs/",
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+	});
 });

@@ -362,6 +362,23 @@ body {
 .article__main th, .article__main td, .release-body th, .release-body td, .changelog-entry-body th, .changelog-entry-body td, .home-content th, .home-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
 .article__main th, .release-body th, .changelog-entry-body th, .home-content th { font-weight: 600; background: var(--pre-bg); }
 
+.article__edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 30px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+
+.article__edit-link:hover {
+  color: var(--link);
+}
+
 .article__section {
   & * {
     margin-bottom: 15px;
