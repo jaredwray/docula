@@ -2698,6 +2698,7 @@ export class DoculaBuilder {
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
 			editPageUrl: this.options.editPageUrl,
+			openGraph: this.options.openGraph,
 			baseUrl: this.options.baseUrl,
 			docsPath: this.options.docsPath,
 			apiPath: this.options.apiPath,

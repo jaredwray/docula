@@ -1047,6 +1047,55 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should rebuild when openGraph config changes", async () => {
+			const sitePath = "test/temp/diff-build-og-change";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = path.basename(src);
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
+
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				options.templatePath = "test/fixtures/template-example/";
+				const builder = new DoculaBuilder(options);
+
+				// First build without openGraph
+				await builder.build();
+
+				// Enable openGraph
+				options.openGraph = { title: "OG Title" };
+				const builder2 = new DoculaBuilder(options);
+
+				const messages: string[] = [];
+				console.log = (message) => {
+					messages.push(stripAnsi(message as string));
+				};
+
+				// Second build should NOT skip (config hash changed)
+				await builder2.build();
+
+				expect(
+					messages.some((m) =>
+						m.includes("No changes detected, skipping build"),
+					),
+				).toBe(false);
+				expect(messages.some((m) => m.includes("Build completed"))).toBe(true);
+			} finally {
+				console.log = consoleLog;
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
 		it("should rebuild when a document changes", async () => {
 			const sitePath = "test/temp/diff-build-doc-change";
 			const output = `${sitePath}/dist`;
