@@ -1,0 +1,18 @@
+{{#if openGraph}}
+<meta property="og:title" content="{{ogTitle}}" />
+<meta property="og:description" content="{{ogDescription}}" />
+{{#if ogImage}}
+<meta property="og:image" content="{{ogImage}}" />
+{{/if}}
+{{#if ogUrl}}
+<meta property="og:url" content="{{ogUrl}}" />
+{{/if}}
+<meta property="og:type" content="{{ogType}}" />
+<meta property="og:site_name" content="{{ogSiteName}}" />
+<meta name="twitter:card" content="{{ogTwitterCard}}" />
+<meta name="twitter:title" content="{{ogTitle}}" />
+<meta name="twitter:description" content="{{ogDescription}}" />
+{{#if ogImage}}
+<meta name="twitter:image" content="{{ogImage}}" />
+{{/if}}
+{{/if}}

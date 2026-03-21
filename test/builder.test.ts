@@ -2400,6 +2400,160 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Docula Builder - resolveOpenGraphData", () => {
+		it("should return empty object when openGraph is not configured", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+			};
+			expect(builder.resolveOpenGraphData(data)).toEqual({});
+		});
+
+		it("should return resolved OG data with site defaults", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {},
+			};
+			const result = builder.resolveOpenGraphData(data);
+			expect(result.ogTitle).toBe("Test Site");
+			expect(result.ogDescription).toBe("Test Description");
+			expect(result.ogUrl).toBe("https://example.com");
+			expect(result.ogType).toBe("website");
+			expect(result.ogSiteName).toBe("Test Site");
+			expect(result.ogTwitterCard).toBe("summary");
+			expect(result.ogImage).toBeUndefined();
+		});
+
+		it("should use openGraph config values over site defaults", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {
+					title: "OG Title",
+					description: "OG Desc",
+					image: "https://example.com/og.png",
+					url: "https://og.example.com",
+					type: "article",
+					siteName: "OG Site",
+					twitterCard: "summary_large_image",
+				},
+			};
+			const result = builder.resolveOpenGraphData(data);
+			expect(result.ogTitle).toBe("OG Title");
+			expect(result.ogDescription).toBe("OG Desc");
+			expect(result.ogImage).toBe("https://example.com/og.png");
+			expect(result.ogUrl).toBe("https://og.example.com");
+			expect(result.ogType).toBe("article");
+			expect(result.ogSiteName).toBe("OG Site");
+			expect(result.ogTwitterCard).toBe("summary_large_image");
+		});
+
+		it("should use document-level ogTitle/ogDescription/ogImage over site openGraph", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {
+					title: "Site OG Title",
+					description: "Site OG Desc",
+					image: "https://example.com/site-og.png",
+				},
+			};
+			const pageData = {
+				ogTitle: "Page OG Title",
+				ogDescription: "Page OG Desc",
+				ogImage: "https://example.com/page-og.png",
+				urlPath: "/docs/test/index.html",
+			};
+			const result = builder.resolveOpenGraphData(data, pageData);
+			expect(result.ogTitle).toBe("Page OG Title");
+			expect(result.ogDescription).toBe("Page OG Desc");
+			expect(result.ogImage).toBe("https://example.com/page-og.png");
+			expect(result.ogUrl).toBe("https://example.com/docs/test/");
+		});
+
+		it("should fall back to page title/description when openGraph config fields are not set", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {},
+			};
+			const pageData = {
+				title: "Page Title",
+				description: "Page Description",
+			};
+			const result = builder.resolveOpenGraphData(data, pageData);
+			expect(result.ogTitle).toBe("Page Title");
+			expect(result.ogDescription).toBe("Page Description");
+		});
+
+		it("should use previewImage as fallback for ogImage", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {},
+			};
+			const pageData = {
+				previewImage: "https://example.com/preview.png",
+			};
+			const result = builder.resolveOpenGraphData(data, pageData);
+			expect(result.ogImage).toBe("https://example.com/preview.png");
+			expect(result.ogTwitterCard).toBe("summary_large_image");
+		});
+
+		it("should set twitterCard to summary when no image is present", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {},
+			};
+			const result = builder.resolveOpenGraphData(data);
+			expect(result.ogTwitterCard).toBe("summary");
+		});
+	});
+
 	describe("Docula Builder - Document Parser", () => {
 		it("should not include TOC heading in generatedHtml for empty markdown", async () => {
 			const builder = new DoculaBuilder();
@@ -4050,6 +4204,28 @@ describe("DoculaBuilder", () => {
 					force: true,
 				});
 			}
+		});
+	});
+
+	describe("Docula Builder - OpenGraph Frontmatter Parsing", () => {
+		it("should parse ogTitle, ogDescription, ogImage from frontmatter", () => {
+			const builder = new DoculaBuilder();
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/opengraph-doc.md",
+			);
+			expect(doc.ogTitle).toBe("Custom OG Title");
+			expect(doc.ogDescription).toBe("Custom OG Description");
+			expect(doc.ogImage).toBe("https://example.com/custom-og.png");
+		});
+
+		it("should return undefined for og fields when not in frontmatter", () => {
+			const builder = new DoculaBuilder();
+			const doc = builder.parseDocumentData(
+				"test/fixtures/multi-page-site/docs/front-matter.md",
+			);
+			expect(doc.ogTitle).toBeUndefined();
+			expect(doc.ogDescription).toBeUndefined();
+			expect(doc.ogImage).toBeUndefined();
 		});
 	});
 
@@ -6894,6 +7070,122 @@ describe("DoculaBuilder", () => {
 				expect(indexHtml).toContain(
 					'href="https://github.com/owner/repo/edit/main/site/docs/',
 				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render OpenGraph meta tags when openGraph is configured", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-opengraph";
+			options.openGraph = {
+				title: "Default OG Title",
+				description: "Default OG Description",
+				image: "https://example.com/default-og.png",
+			};
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain('property="og:title"');
+				expect(docsHtml).toContain('property="og:description"');
+				expect(docsHtml).toContain('property="og:image"');
+				expect(docsHtml).toContain('property="og:type"');
+				expect(docsHtml).toContain('property="og:site_name"');
+				expect(docsHtml).toContain('name="twitter:card"');
+				expect(docsHtml).toContain('name="twitter:title"');
+				expect(docsHtml).toContain('name="twitter:description"');
+				expect(docsHtml).toContain('name="twitter:image"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not render OpenGraph meta tags when openGraph is not configured", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-no-opengraph";
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/front-matter/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).not.toContain('property="og:title"');
+				expect(docsHtml).not.toContain('name="twitter:card"');
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should use document frontmatter ogTitle/ogDescription/ogImage over site defaults", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-opengraph-override";
+			options.openGraph = {
+				title: "Default OG Title",
+				description: "Default OG Description",
+				image: "https://example.com/default-og.png",
+			};
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const docsHtml = await fs.promises.readFile(
+					`${options.output}/docs/opengraph-doc/index.html`,
+					"utf8",
+				);
+				expect(docsHtml).toContain("Custom OG Title");
+				expect(docsHtml).toContain("Custom OG Description");
+				expect(docsHtml).toContain("https://example.com/custom-og.png");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render OpenGraph meta tags on the home page when configured", async () => {
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-opengraph-home";
+			options.openGraph = {
+				title: "Home OG",
+				description: "Home OG Description",
+			};
+
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const homeHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(homeHtml).toContain('property="og:title"');
+				expect(homeHtml).toContain("Home OG");
+				expect(homeHtml).toContain('name="twitter:card"');
+				expect(homeHtml).toContain("summary");
 			} finally {
 				await fs.promises.rm(options.output, {
 					recursive: true,

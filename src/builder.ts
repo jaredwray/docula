@@ -11,7 +11,7 @@ import {
 	type GithubData,
 	type GithubOptions,
 } from "./github.js";
-import { DoculaOptions } from "./options.js";
+import { type DoculaOpenGraph, DoculaOptions } from "./options.js";
 import { resolveTemplatePath } from "./template-resolver.js";
 
 const writrOptions: WritrOptions = {
@@ -79,6 +79,7 @@ export type DoculaData = {
 	apiUrl: string;
 	changelogUrl: string;
 	editPageUrl?: string;
+	openGraph?: DoculaOpenGraph;
 };
 
 export type DoculaTemplates = {
@@ -110,6 +111,9 @@ export type DoculaDocument = {
 	urlPath: string;
 	isRoot: boolean;
 	lastModified: string;
+	ogTitle?: string;
+	ogDescription?: string;
+	ogImage?: string;
 };
 
 export type BuildManifest = {
@@ -233,6 +237,7 @@ export class DoculaBuilder {
 				this.options.changelogPath,
 			),
 			editPageUrl: this.options.editPageUrl,
+			openGraph: this.options.openGraph,
 		};
 
 		// Track README.md in asset hashes for change detection
@@ -1116,6 +1121,42 @@ export class DoculaBuilder {
 		return `/${cleaned.filter(Boolean).join("/")}`;
 	}
 
+	public resolveOpenGraphData(
+		data: DoculaData,
+		pageData?: Partial<DoculaDocument> & { previewImage?: string },
+	): Record<string, string | undefined> {
+		if (!data.openGraph) {
+			return {};
+		}
+
+		const og = data.openGraph;
+		const ogTitle =
+			pageData?.ogTitle ?? og.title ?? pageData?.title ?? data.siteTitle;
+		const ogDescription =
+			pageData?.ogDescription ??
+			og.description ??
+			pageData?.description ??
+			data.siteDescription;
+		const ogImage = pageData?.ogImage ?? og.image ?? pageData?.previewImage;
+		const ogUrl = pageData?.urlPath
+			? `${data.siteUrl}${data.baseUrl}${pageData.urlPath.replace(/\/index\.html$/, "/")}`
+			: (og.url ?? data.siteUrl);
+		const ogType = og.type ?? "website";
+		const ogSiteName = og.siteName ?? data.siteTitle;
+		const ogTwitterCard =
+			og.twitterCard ?? (ogImage ? "summary_large_image" : "summary");
+
+		return {
+			ogTitle,
+			ogDescription,
+			ogImage,
+			ogUrl,
+			ogType,
+			ogSiteName,
+			ogTwitterCard,
+		};
+	}
+
 	private buildAbsoluteSiteUrl(siteUrl: string, urlPath: string): string {
 		const normalizedSiteUrl = siteUrl.endsWith("/")
 			? siteUrl.slice(0, -1)
@@ -1326,7 +1367,7 @@ export class DoculaBuilder {
 
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
-				{ ...data, content, announcement },
+				{ ...data, content, announcement, ...this.resolveOpenGraphData(data) },
 				data.templatePath,
 			);
 			await fs.promises.writeFile(indexPath, indexContent, "utf8");
@@ -1366,7 +1407,12 @@ export class DoculaBuilder {
 
 		const documentContent = await this._ecto.renderFromFile(
 			documentsTemplate,
-			{ ...data, ...firstDocument, editPageDocUrl },
+			{
+				...data,
+				...firstDocument,
+				editPageDocUrl,
+				...this.resolveOpenGraphData(data, firstDocument),
+			},
 			data.templatePath,
 		);
 		await fs.promises.writeFile(indexPath, documentContent, "utf8");
@@ -1425,7 +1471,12 @@ export class DoculaBuilder {
 
 				const documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
-					{ ...data, ...document, editPageDocUrl },
+					{
+						...data,
+						...document,
+						editPageDocUrl,
+						...this.resolveOpenGraphData(data, document),
+					},
 					data.templatePath,
 				);
 				return fs.promises.writeFile(slug, documentContent, "utf8");
@@ -1489,7 +1540,12 @@ export class DoculaBuilder {
 		const apiTemplate = `${data.templatePath}/${data.templates.api}`;
 		return this._ecto.renderFromFile(
 			apiTemplate,
-			{ ...data, specUrl: data.openApiUrl, apiSpec },
+			{
+				...data,
+				specUrl: data.openApiUrl,
+				apiSpec,
+				...this.resolveOpenGraphData(data),
+			},
 			data.templatePath,
 		);
 	}
@@ -1819,6 +1875,7 @@ export class DoculaBuilder {
 							? `${data.changelogUrl}/`
 							: `${data.changelogUrl}/page/${page - 1}/`
 						: "",
+				...this.resolveOpenGraphData(data),
 			};
 
 			promises.push(
@@ -1854,7 +1911,12 @@ export class DoculaBuilder {
 
 			const entryContent = await this._ecto.renderFromFile(
 				entryTemplate,
-				{ ...data, ...entry, entries: data.changelogEntries },
+				{
+					...data,
+					...entry,
+					entries: data.changelogEntries,
+					...this.resolveOpenGraphData(data, entry),
+				},
 				data.templatePath,
 			);
 
@@ -2127,6 +2189,9 @@ export class DoculaBuilder {
 			section: matterData.section ?? undefined,
 
 			keywords: matterData.keywords ?? [],
+			ogTitle: matterData.ogTitle ?? undefined,
+			ogDescription: matterData.ogDescription ?? undefined,
+			ogImage: matterData.ogImage ?? undefined,
 			content: documentContent,
 			markdown: markdownContent,
 			generatedHtml: new Writr(markdownContent, writrOptions).renderSync({

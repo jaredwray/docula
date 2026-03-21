@@ -538,4 +538,69 @@ describe("DoculaOptions", () => {
 			expect(options.editPageUrl).toEqual("");
 		});
 	});
+
+	describe("openGraph", () => {
+		let options: DoculaOptions;
+
+		beforeEach(() => {
+			options = new DoculaOptions();
+		});
+
+		it("should have openGraph undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.openGraph).toBeUndefined();
+		});
+
+		it("should parse openGraph with all fields", () => {
+			options.parseOptions({
+				openGraph: {
+					title: "My Site",
+					description: "A great site",
+					image: "https://example.com/image.png",
+					url: "https://example.com",
+					type: "article",
+					siteName: "Example",
+					twitterCard: "summary_large_image",
+				},
+			});
+			expect(options.openGraph).toEqual({
+				title: "My Site",
+				description: "A great site",
+				image: "https://example.com/image.png",
+				url: "https://example.com",
+				type: "article",
+				siteName: "Example",
+				twitterCard: "summary_large_image",
+			});
+		});
+
+		it("should parse openGraph with partial fields", () => {
+			options.parseOptions({
+				openGraph: { title: "My Site" },
+			});
+			expect(options.openGraph).toEqual({ title: "My Site" });
+		});
+
+		it("should parse openGraph with empty object", () => {
+			options.parseOptions({
+				openGraph: {},
+			});
+			expect(options.openGraph).toEqual({});
+		});
+
+		it("should not set openGraph for non-object values", () => {
+			options.parseOptions({ openGraph: "invalid" });
+			expect(options.openGraph).toBeUndefined();
+		});
+
+		it("should not set openGraph for null", () => {
+			options.parseOptions({ openGraph: null });
+			expect(options.openGraph).toBeUndefined();
+		});
+
+		it("should not set openGraph for array values", () => {
+			options.parseOptions({ openGraph: ["invalid"] });
+			expect(options.openGraph).toBeUndefined();
+		});
+	});
 });

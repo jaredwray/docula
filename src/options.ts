@@ -30,6 +30,16 @@ export type DoculaHeaderLink = {
 	icon?: string;
 };
 
+export type DoculaOpenGraph = {
+	title?: string;
+	description?: string;
+	image?: string;
+	url?: string;
+	type?: string;
+	siteName?: string;
+	twitterCard?: string;
+};
+
 export type DoculaCacheOptions = {
 	github: {
 		ttl: number;
@@ -132,6 +142,12 @@ export class DoculaOptions {
 	 * Example: "https://github.com/owner/repo/edit/main/site/docs"
 	 */
 	public editPageUrl?: string;
+	/**
+	 * OpenGraph meta tags for social sharing. When set, og: and twitter:
+	 * meta tags are rendered in the page head. Fields fall back to
+	 * siteTitle / siteDescription / siteUrl when omitted.
+	 */
+	public openGraph?: DoculaOpenGraph;
 	/**
 	 * Cookie-based authentication. When set, shows a Login/Logout button
 	 * in the header based on whether a JWT cookie is present.
@@ -329,6 +345,14 @@ export class DoculaOptions {
 
 		if (options.allowedAssets && Array.isArray(options.allowedAssets)) {
 			this.allowedAssets = options.allowedAssets as string[];
+		}
+
+		if (
+			options.openGraph &&
+			typeof options.openGraph === "object" &&
+			!Array.isArray(options.openGraph)
+		) {
+			this.openGraph = options.openGraph as DoculaOpenGraph;
 		}
 
 		if (
