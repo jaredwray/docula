@@ -51,6 +51,18 @@ describe("docula", () => {
 		]) {
 			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
 		}
+
+		// Clean up auto-generated README.md files in fixtures that should not have them
+		for (const fixture of [
+			"test/fixtures/mega-page-site",
+			"test/fixtures/mega-page-site-no-home-page",
+		]) {
+			try {
+				fs.rmSync(`${fixture}/README.md`, { force: true });
+			} catch {
+				// ignore if file does not exist
+			}
+		}
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
@@ -1520,6 +1532,7 @@ describe("docula config file", () => {
 	it("should build docs at root when no README.md exists", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
+		options.autoReadme = false;
 		const docula = new Docula(options);
 		const output = "test/temp/build-mega-no-home-test";
 		const consoleLog = console.log;

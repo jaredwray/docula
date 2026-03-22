@@ -82,6 +82,7 @@ describe("DoculaBuilder", () => {
 			"test/fixtures/changelog-site",
 			"test/fixtures/announcement-site",
 			"test/fixtures/mega-custom-template",
+			"test/fixtures/auto-readme-site",
 			"test/fixtures/api-only-site",
 			"test/fixtures/empty-site",
 			"test/fixtures/mega-page-site-no-home-page",
@@ -90,6 +91,21 @@ describe("DoculaBuilder", () => {
 				fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
 			} catch {
 				// ignore race conditions with parallel test files
+			}
+		}
+
+		// Clean up auto-generated README.md files in fixtures that should not have them
+		for (const fixture of [
+			"test/fixtures/api-only-site",
+			"test/fixtures/auto-readme-site",
+			"test/fixtures/empty-site",
+			"test/fixtures/mega-page-site",
+			"test/fixtures/mega-page-site-no-home-page",
+		]) {
+			try {
+				fs.rmSync(`${fixture}/README.md`, { force: true });
+			} catch {
+				// ignore if file does not exist
 			}
 		}
 	});
@@ -148,6 +164,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp/build-test";
 			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
+			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -174,6 +191,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp/build-no-content";
 			options.sitePath = "test/fixtures/empty-site";
+			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			const consoleError = console.error;
@@ -5692,6 +5710,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp/api-home-test";
 			options.sitePath = "test/fixtures/api-only-site";
+			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			console.log = () => {};
@@ -7408,6 +7427,7 @@ describe("DoculaBuilder", () => {
 			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 			options.output = "test/temp/build-edit-page-url-no-home";
 			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
+			options.autoReadme = false;
 
 			const builder = new DoculaBuilder(options);
 
@@ -7568,6 +7588,198 @@ describe("DoculaBuilder", () => {
 					force: true,
 				});
 			}
+		});
+	});
+
+	describe("autoReadme", () => {
+		const tempDir = "test/temp/auto-readme-test";
+		const tempSitePath = `${tempDir}/site`;
+		const tempCwdPath = `${tempDir}/cwd`;
+
+		beforeEach(async () => {
+			await fs.promises.mkdir(tempSitePath, { recursive: true });
+			await fs.promises.mkdir(tempCwdPath, { recursive: true });
+		});
+
+		afterEach(async () => {
+			fs.rmSync(tempDir, { recursive: true, force: true });
+		});
+
+		it("should copy README.md from cwd to sitePath and prepend package name as title", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "Some content here");
+			fs.writeFileSync(
+				`${tempCwdPath}/package.json`,
+				JSON.stringify({ name: "test-pkg" }),
+			);
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			options.autoReadme = true;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
+			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
+			expect(content).toContain("# test-pkg");
+			expect(content).toContain("Some content here");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should not copy README when autoReadme is false", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "Some content");
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			options.autoReadme = false;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should not overwrite existing site README", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempSitePath}/README.md`, "Existing content");
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "Root content");
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
+			expect(content).toEqual("Existing content");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should do nothing when no README exists in cwd", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should not prepend title when README already has a heading", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Existing Title\n\nSome content",
+			);
+			fs.writeFileSync(
+				`${tempCwdPath}/package.json`,
+				JSON.stringify({ name: "test-pkg" }),
+			);
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
+			expect(content).toEqual("# Existing Title\n\nSome content");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should copy README as-is when no package.json exists", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "No heading content");
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
+			expect(content).toEqual("No heading content");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should handle invalid package.json gracefully", () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "Some content");
+			fs.writeFileSync(`${tempCwdPath}/package.json`, "not valid json");
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.autoReadme();
+
+			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
+			expect(content).toEqual("Some content");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should auto-copy README during build and produce index.html", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# My Project\n\nWelcome to the project.",
+			);
+			fs.writeFileSync(
+				`${tempCwdPath}/package.json`,
+				JSON.stringify({ name: "my-project" }),
+			);
+
+			const options = new DoculaOptions();
+			options.sitePath = "test/fixtures/auto-readme-site";
+			options.output = `${tempDir}/output`;
+
+			const builder = new DoculaBuilder(options);
+			const consoleLog = console.log;
+			console.log = () => {};
+
+			try {
+				await builder.build();
+				expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
+				const indexHtml = fs.readFileSync(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("My Project");
+			} finally {
+				fs.rmSync(options.output, { recursive: true, force: true });
+				fs.rmSync("test/fixtures/auto-readme-site/README.md", {
+					force: true,
+				});
+				fs.rmSync("test/fixtures/auto-readme-site/.cache", {
+					recursive: true,
+					force: true,
+				});
+				console.log = consoleLog;
+			}
+
+			cwdSpy.mockRestore();
 		});
 	});
 });

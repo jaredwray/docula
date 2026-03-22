@@ -43,6 +43,20 @@ describe("DoculaBuilder - API", () => {
 				// ignore race conditions with parallel test files
 			}
 		}
+
+		// Clean up auto-generated README.md files in fixtures that should not have them
+		for (const fixture of [
+			"test/fixtures/api-only-site",
+			"test/fixtures/empty-site",
+			"test/fixtures/mega-page-site",
+			"test/fixtures/mega-page-site-no-home-page",
+		]) {
+			try {
+				fs.rmSync(`${fixture}/README.md`, { force: true });
+			} catch {
+				// ignore if file does not exist
+			}
+		}
 	});
 	beforeEach(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: test file
@@ -351,6 +365,7 @@ describe("DoculaBuilder - API", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp/api-home-test";
 			options.sitePath = "test/fixtures/api-only-site";
+			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			console.log = () => {};

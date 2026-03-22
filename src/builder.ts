@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import process from "node:process";
 import { Ecto } from "ecto";
 import { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
@@ -184,6 +185,9 @@ export class DoculaBuilder {
 		const cachedChangelog = validManifest
 			? loadCachedChangelog(this.options.sitePath)
 			: new Map<string, DoculaChangelogEntry>();
+
+		// Auto-copy README.md from project root if not present in site path
+		this.autoReadme();
 
 		// Set the site options
 		const doculaData: DoculaData = {
@@ -590,6 +594,47 @@ export class DoculaBuilder {
 		if (!options.siteUrl) {
 			throw new Error("No site url options provided");
 		}
+	}
+
+	public autoReadme(): void {
+		if (!this._options.autoReadme) {
+			return;
+		}
+
+		const siteReadmePath = path.join(this._options.sitePath, "README.md");
+		if (fs.existsSync(siteReadmePath)) {
+			return;
+		}
+
+		const cwdReadmePath = path.join(process.cwd(), "README.md");
+		if (!fs.existsSync(cwdReadmePath)) {
+			return;
+		}
+
+		let readmeContent = fs.readFileSync(cwdReadmePath, "utf8");
+
+		// Check if README already has a title (# heading on the first non-empty line)
+		const firstLine = readmeContent.trimStart().split("\n")[0] ?? "";
+		const hasTitle = /^#\s+/.test(firstLine);
+
+		if (!hasTitle) {
+			const packageJsonPath = path.join(process.cwd(), "package.json");
+			if (fs.existsSync(packageJsonPath)) {
+				try {
+					const packageJson = JSON.parse(
+						fs.readFileSync(packageJsonPath, "utf8"),
+					) as { name?: string };
+					if (packageJson.name && typeof packageJson.name === "string") {
+						readmeContent = `# ${packageJson.name}\n\n${readmeContent}`;
+					}
+				} catch {
+					// Ignore JSON parse errors
+				}
+			}
+		}
+
+		fs.mkdirSync(this._options.sitePath, { recursive: true });
+		fs.writeFileSync(siteReadmePath, readmeContent, "utf8");
 	}
 
 	public async getGithubData(githubPath: string): Promise<GithubData> {
