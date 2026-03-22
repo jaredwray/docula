@@ -1123,6 +1123,7 @@ export class DoculaBuilder {
 
 	public resolveOpenGraphData(
 		data: DoculaData,
+		pageUrl: string,
 		pageData?: Partial<DoculaDocument> & {
 			previewImage?: string;
 			preview?: string;
@@ -1142,9 +1143,7 @@ export class DoculaBuilder {
 			pageData?.preview ??
 			data.siteDescription;
 		const ogImage = pageData?.ogImage ?? og.image ?? pageData?.previewImage;
-		const ogUrl = pageData?.urlPath
-			? `${data.siteUrl}${data.baseUrl}${pageData.urlPath.replace(/\/index\.html$/, "/")}`
-			: (og.url ?? data.siteUrl);
+		const ogUrl = `${data.siteUrl}${data.baseUrl}${pageUrl}`;
 		const ogType = og.type ?? "website";
 		const ogSiteName = og.siteName ?? data.siteTitle;
 		const ogTwitterCard =
@@ -1371,7 +1370,12 @@ export class DoculaBuilder {
 
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
-				{ ...data, content, announcement, ...this.resolveOpenGraphData(data) },
+				{
+					...data,
+					content,
+					announcement,
+					...this.resolveOpenGraphData(data, "/"),
+				},
 				data.templatePath,
 			);
 			await fs.promises.writeFile(indexPath, indexContent, "utf8");
@@ -1415,7 +1419,7 @@ export class DoculaBuilder {
 				...data,
 				...firstDocument,
 				editPageDocUrl,
-				...this.resolveOpenGraphData(data, firstDocument),
+				...this.resolveOpenGraphData(data, "/", firstDocument),
 			},
 			data.templatePath,
 		);
@@ -1479,7 +1483,11 @@ export class DoculaBuilder {
 						...data,
 						...document,
 						editPageDocUrl,
-						...this.resolveOpenGraphData(data, document),
+						...this.resolveOpenGraphData(
+							data,
+							document.urlPath.replace(/\/index\.html$/, "/"),
+							document,
+						),
 					},
 					data.templatePath,
 				);
@@ -1548,7 +1556,7 @@ export class DoculaBuilder {
 				...data,
 				specUrl: data.openApiUrl,
 				apiSpec,
-				...this.resolveOpenGraphData(data),
+				...this.resolveOpenGraphData(data, `${data.apiUrl}/`),
 			},
 			data.templatePath,
 		);
@@ -1879,7 +1887,12 @@ export class DoculaBuilder {
 							? `${data.changelogUrl}/`
 							: `${data.changelogUrl}/page/${page - 1}/`
 						: "",
-				...this.resolveOpenGraphData(data),
+				...this.resolveOpenGraphData(
+					data,
+					page === 1
+						? `${data.changelogUrl}/`
+						: `${data.changelogUrl}/page/${page}/`,
+				),
 			};
 
 			promises.push(
@@ -1919,7 +1932,11 @@ export class DoculaBuilder {
 					...data,
 					...entry,
 					entries: data.changelogEntries,
-					...this.resolveOpenGraphData(data, entry),
+					...this.resolveOpenGraphData(
+						data,
+						`${data.changelogUrl}/${entry.slug}/`,
+						entry,
+					),
 				},
 				data.templatePath,
 			);

@@ -2461,7 +2461,7 @@ describe("DoculaBuilder", () => {
 				templatePath: "",
 				output: "",
 			};
-			expect(builder.resolveOpenGraphData(data)).toEqual({});
+			expect(builder.resolveOpenGraphData(data, "/")).toEqual({});
 		});
 
 		it("should return resolved OG data with site defaults", () => {
@@ -2476,10 +2476,10 @@ describe("DoculaBuilder", () => {
 				output: "",
 				openGraph: {},
 			};
-			const result = builder.resolveOpenGraphData(data);
+			const result = builder.resolveOpenGraphData(data, "/");
 			expect(result.ogTitle).toBe("Test Site");
 			expect(result.ogDescription).toBe("Test Description");
-			expect(result.ogUrl).toBe("https://example.com");
+			expect(result.ogUrl).toBe("https://example.com/");
 			expect(result.ogType).toBe("website");
 			expect(result.ogSiteName).toBe("Test Site");
 			expect(result.ogTwitterCard).toBe("summary");
@@ -2500,17 +2500,16 @@ describe("DoculaBuilder", () => {
 					title: "OG Title",
 					description: "OG Desc",
 					image: "https://example.com/og.png",
-					url: "https://og.example.com",
 					type: "article",
 					siteName: "OG Site",
 					twitterCard: "summary_large_image",
 				},
 			};
-			const result = builder.resolveOpenGraphData(data);
+			const result = builder.resolveOpenGraphData(data, "/");
 			expect(result.ogTitle).toBe("OG Title");
 			expect(result.ogDescription).toBe("OG Desc");
 			expect(result.ogImage).toBe("https://example.com/og.png");
-			expect(result.ogUrl).toBe("https://og.example.com");
+			expect(result.ogUrl).toBe("https://example.com/");
 			expect(result.ogType).toBe("article");
 			expect(result.ogSiteName).toBe("OG Site");
 			expect(result.ogTwitterCard).toBe("summary_large_image");
@@ -2536,9 +2535,12 @@ describe("DoculaBuilder", () => {
 				ogTitle: "Page OG Title",
 				ogDescription: "Page OG Desc",
 				ogImage: "https://example.com/page-og.png",
-				urlPath: "/docs/test/index.html",
 			};
-			const result = builder.resolveOpenGraphData(data, pageData);
+			const result = builder.resolveOpenGraphData(
+				data,
+				"/docs/test/",
+				pageData,
+			);
 			expect(result.ogTitle).toBe("Page OG Title");
 			expect(result.ogDescription).toBe("Page OG Desc");
 			expect(result.ogImage).toBe("https://example.com/page-og.png");
@@ -2561,7 +2563,11 @@ describe("DoculaBuilder", () => {
 				title: "Page Title",
 				description: "Page Description",
 			};
-			const result = builder.resolveOpenGraphData(data, pageData);
+			const result = builder.resolveOpenGraphData(
+				data,
+				"/docs/page/",
+				pageData,
+			);
 			expect(result.ogTitle).toBe("Page Title");
 			expect(result.ogDescription).toBe("Page Description");
 		});
@@ -2581,7 +2587,11 @@ describe("DoculaBuilder", () => {
 			const pageData = {
 				previewImage: "https://example.com/preview.png",
 			};
-			const result = builder.resolveOpenGraphData(data, pageData);
+			const result = builder.resolveOpenGraphData(
+				data,
+				"/changelog/entry/",
+				pageData,
+			);
 			expect(result.ogImage).toBe("https://example.com/preview.png");
 			expect(result.ogTwitterCard).toBe("summary_large_image");
 		});
@@ -2601,8 +2611,29 @@ describe("DoculaBuilder", () => {
 			const pageData = {
 				preview: "Changelog entry preview text",
 			};
-			const result = builder.resolveOpenGraphData(data, pageData);
+			const result = builder.resolveOpenGraphData(
+				data,
+				"/changelog/entry/",
+				pageData,
+			);
 			expect(result.ogDescription).toBe("Changelog entry preview text");
+		});
+
+		it("should construct ogUrl from siteUrl, baseUrl, and pageUrl", () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				baseUrl: "/docs",
+				openGraph: {},
+			};
+			const result = builder.resolveOpenGraphData(data, "/api/");
+			expect(result.ogUrl).toBe("https://example.com/docs/api/");
 		});
 
 		it("should set twitterCard to summary when no image is present", () => {
@@ -2617,7 +2648,7 @@ describe("DoculaBuilder", () => {
 				output: "",
 				openGraph: {},
 			};
-			const result = builder.resolveOpenGraphData(data);
+			const result = builder.resolveOpenGraphData(data, "/");
 			expect(result.ogTwitterCard).toBe("summary");
 		});
 	});
