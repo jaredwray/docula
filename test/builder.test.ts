@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { CacheableNet } from "@cacheable/net";
+import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	DoculaBuilder,
@@ -9,12 +10,37 @@ import {
 	type DoculaDocument,
 	type DoculaSection,
 } from "../src/builder.js";
+import {
+	getSafeLocalOpenApiSpec,
+	getSafeSiteOverrideFileContent,
+} from "../src/builder-api.js";
+import {
+	hasAssetsChanged,
+	hashFile as hashFileUtil,
+	loadBuildManifest,
+	loadCachedChangelog,
+	recordsEqual,
+	saveBuildManifest,
+} from "../src/builder-cache.js";
+import {
+	copyPublicDirectory,
+	mergeTemplateOverrides,
+} from "../src/builder-files.js";
+import * as builderUtils from "../src/builder-utils.js";
+import { escapeXml } from "../src/builder-utils.js";
 import { DoculaOptions } from "../src/options.js";
+
+const testHash = new Hashery();
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
 const ansiRegex = /\u001B\[[0-9;]*m/g;
 function stripAnsi(str: string): string {
 	return str.replace(ansiRegex, "");
+}
+
+function getConsole(builder: DoculaBuilder) {
+	// biome-ignore lint/suspicious/noExplicitAny: access internal console for testing
+	return (builder as any)._console;
 }
 
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
@@ -218,8 +244,10 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/single-page-site";
 			const builder = new DoculaBuilder(options);
-			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-			const result = (builder as any).mergeTemplateOverrides(
+			const result = mergeTemplateOverrides(
+				options,
+				getConsole(builder),
+				testHash,
 				"templates/modern",
 				options.sitePath,
 				"modern",
@@ -231,8 +259,10 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.templatePath = "test/fixtures/template-example";
 			const builder = new DoculaBuilder(options);
-			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-			const result = (builder as any).mergeTemplateOverrides(
+			const result = mergeTemplateOverrides(
+				options,
+				getConsole(builder),
+				testHash,
 				"test/fixtures/template-example",
 				options.sitePath,
 				"modern",
@@ -244,8 +274,10 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/single-page-site";
 			const builder = new DoculaBuilder(options);
-			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-			const result = (builder as any).mergeTemplateOverrides(
+			const result = mergeTemplateOverrides(
+				options,
+				getConsole(builder),
+				testHash,
 				"templates/modern",
 				options.sitePath,
 				"../../../../etc",
@@ -274,8 +306,10 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const result = (builder as any).mergeTemplateOverrides(
+				const result = mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -367,8 +401,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -383,8 +419,10 @@ describe("DoculaBuilder", () => {
 				messages.length = 0;
 
 				// Second merge should detect changed content and update
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -429,8 +467,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — builds the cache
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -439,8 +479,10 @@ describe("DoculaBuilder", () => {
 				messages.length = 0;
 
 				// Second merge — should reuse cache
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const result = (builder as any).mergeTemplateOverrides(
+				const result = mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -476,8 +518,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — builds cache with two override files
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -492,8 +536,10 @@ describe("DoculaBuilder", () => {
 				};
 
 				// Second merge — should detect removal and update incrementally
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -533,8 +579,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — builds cache
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -549,8 +597,10 @@ describe("DoculaBuilder", () => {
 				};
 
 				// Should rebuild due to corrupt manifest
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -564,8 +614,10 @@ describe("DoculaBuilder", () => {
 				fs.unlinkSync(`${cachePath}/.manifest.json`);
 				messages.length = 0;
 
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -601,8 +653,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — builds cache
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -622,8 +676,10 @@ describe("DoculaBuilder", () => {
 				messages.length = 0;
 
 				// Second merge — should only update footer
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -674,8 +730,10 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -712,8 +770,10 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -749,8 +809,10 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -783,8 +845,10 @@ describe("DoculaBuilder", () => {
 				options.sitePath = sitePath;
 				options.autoUpdateIgnores = false;
 				const builder = new DoculaBuilder(options);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -814,8 +878,10 @@ describe("DoculaBuilder", () => {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -849,8 +915,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — builds cache with one override file
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -868,8 +936,10 @@ describe("DoculaBuilder", () => {
 				};
 
 				// Second merge — should detect the added file
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -914,8 +984,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — builds cache with the custom override
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -933,8 +1005,10 @@ describe("DoculaBuilder", () => {
 				};
 
 				// Second merge — should detect removal and delete from cache
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"templates/modern",
 					sitePath,
 					"modern",
@@ -1241,11 +1315,10 @@ describe("DoculaBuilder", () => {
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
-				const builder = new DoculaBuilder(options);
+				const _builder = new DoculaBuilder(options);
 
 				// No manifest initially
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				expect((builder as any).loadBuildManifest(sitePath)).toBeUndefined();
+				expect(loadBuildManifest(sitePath)).toBeUndefined();
 
 				// Save a manifest
 				const manifest = {
@@ -1256,12 +1329,10 @@ describe("DoculaBuilder", () => {
 					changelog: {},
 					assets: { "favicon.ico": "hash2" },
 				};
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).saveBuildManifest(sitePath, manifest);
+				saveBuildManifest(sitePath, manifest);
 
 				// Load it back
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const loaded = (builder as any).loadBuildManifest(sitePath);
+				const loaded = loadBuildManifest(sitePath);
 				expect(loaded).toBeDefined();
 				expect(loaded.version).toBe(1);
 				expect(loaded.configHash).toBe("abc");
@@ -1277,23 +1348,21 @@ describe("DoculaBuilder", () => {
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
-				const builder = new DoculaBuilder(options);
+				const _builder = new DoculaBuilder(options);
 
 				const dir = `${sitePath}/.cache/build`;
 				fs.mkdirSync(dir, { recursive: true });
 
 				// Corrupt JSON
 				fs.writeFileSync(`${dir}/manifest.json`, "not json");
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				expect((builder as any).loadBuildManifest(sitePath)).toBeUndefined();
+				expect(loadBuildManifest(sitePath)).toBeUndefined();
 
 				// Wrong version
 				fs.writeFileSync(
 					`${dir}/manifest.json`,
 					JSON.stringify({ version: 99 }),
 				);
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				expect((builder as any).loadBuildManifest(sitePath)).toBeUndefined();
+				expect(loadBuildManifest(sitePath)).toBeUndefined();
 			} finally {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
@@ -1351,7 +1420,7 @@ describe("DoculaBuilder", () => {
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
-				const builder = new DoculaBuilder(options);
+				const _builder = new DoculaBuilder(options);
 
 				fs.mkdirSync(sitePath, { recursive: true });
 				fs.writeFileSync(`${sitePath}/favicon.ico`, "icon-data");
@@ -1359,28 +1428,21 @@ describe("DoculaBuilder", () => {
 				const previousAssets: Record<string, string> = {
 					"favicon.ico": "old-hash",
 				};
-				expect(
-					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-					(builder as any).hasAssetsChanged(sitePath, previousAssets),
-				).toBe(true);
+				expect(hasAssetsChanged(testHash, sitePath, previousAssets)).toBe(true);
 
 				// Hash the file and set as previous — should report no change
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const currentHash: string = (builder as any).hashFile(
+				const currentHash: string = hashFileUtil(
+					testHash,
 					`${sitePath}/favicon.ico`,
 				);
 				previousAssets["favicon.ico"] = currentHash;
-				expect(
-					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-					(builder as any).hasAssetsChanged(sitePath, previousAssets),
-				).toBe(false);
+				expect(hasAssetsChanged(testHash, sitePath, previousAssets)).toBe(
+					false,
+				);
 
 				// Test deleted asset detection
 				previousAssets["logo.svg"] = "some-hash";
-				expect(
-					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-					(builder as any).hasAssetsChanged(sitePath, previousAssets),
-				).toBe(true);
+				expect(hasAssetsChanged(testHash, sitePath, previousAssets)).toBe(true);
 			} finally {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
@@ -1435,14 +1497,13 @@ describe("DoculaBuilder", () => {
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
-				const builder = new DoculaBuilder(options);
+				const _builder = new DoculaBuilder(options);
 
 				const dir = `${sitePath}/.cache/build`;
 				fs.mkdirSync(dir, { recursive: true });
 				fs.writeFileSync(`${dir}/changelog.json`, "not json");
 
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const result = (builder as any).loadCachedChangelog(sitePath);
+				const result = loadCachedChangelog(sitePath);
 				expect(result.size).toBe(0);
 			} finally {
 				fs.rmSync(sitePath, { recursive: true, force: true });
@@ -1455,7 +1516,7 @@ describe("DoculaBuilder", () => {
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
-				const builder = new DoculaBuilder(options);
+				const _builder = new DoculaBuilder(options);
 
 				fs.mkdirSync(`${sitePath}/public`, { recursive: true });
 				fs.writeFileSync(`${sitePath}/public/test.txt`, "hello");
@@ -1464,34 +1525,27 @@ describe("DoculaBuilder", () => {
 				const previousAssets: Record<string, string> = {
 					"public/test.txt": "old-hash",
 				};
-				expect(
-					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-					(builder as any).hasAssetsChanged(sitePath, previousAssets),
-				).toBe(true);
+				expect(hasAssetsChanged(testHash, sitePath, previousAssets)).toBe(true);
 
 				// Now set correct hash — should report no change
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const currentHash: string = (builder as any).hashFile(
+				const currentHash: string = hashFileUtil(
+					testHash,
 					`${sitePath}/public/test.txt`,
 				);
 				previousAssets["public/test.txt"] = currentHash;
-				expect(
-					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-					(builder as any).hasAssetsChanged(sitePath, previousAssets),
-				).toBe(false);
+				expect(hasAssetsChanged(testHash, sitePath, previousAssets)).toBe(
+					false,
+				);
 			} finally {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
 
 		it("should return false from recordsEqual when values differ for the same key", () => {
-			const builder = new DoculaBuilder();
+			const _builder = new DoculaBuilder();
 			const a: Record<string, string> = { foo: "abc", bar: "def" };
 			const b: Record<string, string> = { foo: "abc", bar: "xyz" };
-			expect(
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).recordsEqual(a, b),
-			).toBe(false);
+			expect(recordsEqual(a, b)).toBe(false);
 		});
 	});
 
@@ -3011,8 +3065,9 @@ describe("DoculaBuilder", () => {
 
 				// First copy — populates currentAssets and copies the file
 				const currentAssets: Record<string, string> = {};
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).copyPublicDirectory(
+				copyPublicDirectory(
+					getConsole(builder),
+					testHash,
 					publicPath,
 					outputPath,
 					publicPath,
@@ -3033,8 +3088,9 @@ describe("DoculaBuilder", () => {
 				try {
 					// Second copy with same hashes as previousAssets — should skip
 					const secondAssets: Record<string, string> = {};
-					// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-					(builder as any).copyPublicDirectory(
+					copyPublicDirectory(
+						getConsole(builder),
+						testHash,
 						publicPath,
 						outputPath,
 						publicPath,
@@ -5228,12 +5284,6 @@ describe("DoculaBuilder", () => {
 		it("should return undefined when override candidate path fails boundary check", async () => {
 			const builder = new DoculaBuilder();
 			const sitePath = "test/temp/override-boundary-check";
-			const unsafeBuilder = builder as unknown as {
-				isPathWithinBasePath: (
-					candidatePath: string,
-					basePath: string,
-				) => boolean;
-			};
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
@@ -5243,7 +5293,7 @@ describe("DoculaBuilder", () => {
 				"utf8",
 			);
 
-			vi.spyOn(unsafeBuilder, "isPathWithinBasePath").mockReturnValue(false);
+			vi.spyOn(builderUtils, "isPathWithinBasePath").mockReturnValue(false);
 
 			try {
 				const data: DoculaData = {
@@ -5320,29 +5370,18 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should return undefined when override realpath escapes base path", async () => {
-			const builder = new DoculaBuilder();
-			const unsafeBuilder = builder as unknown as {
-				getSafeSiteOverrideFileContent: (
-					sitePath: string,
-					fileName: "llms.txt" | "llms-full.txt",
-				) => Promise<string | undefined>;
-				isPathWithinBasePath: (
-					candidatePath: string,
-					basePath: string,
-				) => boolean;
-			};
 			const sitePath = "test/temp/override-realpath-escape";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
 			await fs.promises.writeFile(`${sitePath}/llms.txt`, "# marker", "utf8");
 
-			vi.spyOn(unsafeBuilder, "isPathWithinBasePath")
+			vi.spyOn(builderUtils, "isPathWithinBasePath")
 				.mockImplementationOnce(() => true)
 				.mockImplementationOnce(() => false);
 
 			try {
-				const content = await unsafeBuilder.getSafeSiteOverrideFileContent(
+				const content = await getSafeSiteOverrideFileContent(
 					sitePath,
 					"llms.txt",
 				);
@@ -5353,12 +5392,6 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should return undefined when OpenAPI realpath lookup fails", async () => {
-			const builder = new DoculaBuilder();
-			const unsafeBuilder = builder as unknown as {
-				getSafeLocalOpenApiSpec: (
-					data: DoculaData,
-				) => Promise<{ sourcePath: string; content: string } | undefined>;
-			};
 			const sitePath = "test/temp/openapi-realpath-fail";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
@@ -5386,7 +5419,7 @@ describe("DoculaBuilder", () => {
 					hasApi: true,
 				};
 
-				const spec = await unsafeBuilder.getSafeLocalOpenApiSpec(data);
+				const spec = await getSafeLocalOpenApiSpec(data);
 				expect(spec).toBeUndefined();
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
@@ -5398,16 +5431,6 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should return undefined when OpenAPI realpath escapes base path", async () => {
-			const builder = new DoculaBuilder();
-			const unsafeBuilder = builder as unknown as {
-				getSafeLocalOpenApiSpec: (
-					data: DoculaData,
-				) => Promise<{ sourcePath: string; content: string } | undefined>;
-				isPathWithinBasePath: (
-					candidatePath: string,
-					basePath: string,
-				) => boolean;
-			};
 			const sitePath = "test/temp/openapi-realpath-escape";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
@@ -5418,7 +5441,7 @@ describe("DoculaBuilder", () => {
 				"utf8",
 			);
 
-			vi.spyOn(unsafeBuilder, "isPathWithinBasePath")
+			vi.spyOn(builderUtils, "isPathWithinBasePath")
 				.mockImplementationOnce(() => true)
 				.mockImplementationOnce(() => false);
 
@@ -5435,7 +5458,7 @@ describe("DoculaBuilder", () => {
 					hasApi: true,
 				};
 
-				const spec = await unsafeBuilder.getSafeLocalOpenApiSpec(data);
+				const spec = await getSafeLocalOpenApiSpec(data);
 				expect(spec).toBeUndefined();
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
@@ -6472,9 +6495,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should handle escapeXml with undefined value", () => {
-			const builder = new DoculaBuilder();
-			// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-			const result = (builder as any).escapeXml(undefined);
+			const _builder = new DoculaBuilder();
+			const result = escapeXml(undefined);
 			expect(result).toBe("");
 		});
 
@@ -6506,8 +6528,10 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 
 				// First merge — creates cache with override
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				const result = (builder as any).mergeTemplateOverrides(
+				const result = mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"test/fixtures/template-example",
 					sitePath,
 					"modern",
@@ -6529,8 +6553,10 @@ describe("DoculaBuilder", () => {
 				};
 
 				// Second merge — should detect removal and restore original
-				// biome-ignore lint/suspicious/noExplicitAny: test access to private method
-				(builder as any).mergeTemplateOverrides(
+				mergeTemplateOverrides(
+					options,
+					getConsole(builder),
+					testHash,
 					"test/fixtures/template-example",
 					sitePath,
 					"modern",
