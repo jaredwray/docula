@@ -44,7 +44,7 @@ describe("DoculaBuilder - API", () => {
 			}
 		}
 
-		// Clean up auto-generated README.md files in fixtures that should not have them
+		// Clean up auto-generated README.md and copied assets in fixtures that should not have them
 		for (const fixture of [
 			"test/fixtures/api-only-site",
 			"test/fixtures/empty-site",
@@ -53,8 +53,9 @@ describe("DoculaBuilder - API", () => {
 		]) {
 			try {
 				fs.rmSync(`${fixture}/README.md`, { force: true });
+				fs.rmSync(`${fixture}/site`, { recursive: true, force: true });
 			} catch {
-				// ignore if file does not exist
+				// ignore if files do not exist
 			}
 		}
 	});

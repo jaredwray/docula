@@ -52,15 +52,16 @@ describe("docula", () => {
 			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
 		}
 
-		// Clean up auto-generated README.md files in fixtures that should not have them
+		// Clean up auto-generated README.md and copied assets in fixtures that should not have them
 		for (const fixture of [
 			"test/fixtures/mega-page-site",
 			"test/fixtures/mega-page-site-no-home-page",
 		]) {
 			try {
 				fs.rmSync(`${fixture}/README.md`, { force: true });
+				fs.rmSync(`${fixture}/site`, { recursive: true, force: true });
 			} catch {
-				// ignore if file does not exist
+				// ignore if files do not exist
 			}
 		}
 	});
