@@ -65,7 +65,7 @@ import type {
 	DoculaDocument,
 	DoculaSection,
 	DoculaTemplates,
-} from "./builder-types.js";
+} from "./types.js";
 import { buildUrlPath } from "./builder-utils.js";
 import { DoculaConsole } from "./console.js";
 import {
@@ -85,7 +85,7 @@ export type {
 	DoculaDocument,
 	DoculaSection,
 	DoculaTemplates,
-} from "./builder-types.js";
+} from "./types.js";
 
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,

@@ -7,7 +7,7 @@ import type {
 	DoculaData,
 	DoculaDocument,
 	DoculaSection,
-} from "./builder-types.js";
+} from "./types.js";
 import type { DoculaOptions } from "./options.js";
 
 const writrOptions: WritrOptions = {

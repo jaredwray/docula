@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { Writr, type WritrOptions } from "writr";
-import type { DoculaData, DoculaDocument } from "./builder-types.js";
+import type { DoculaData, DoculaDocument } from "./types.js";
 import {
 	buildAbsoluteSiteUrl,
 	escapeXml,

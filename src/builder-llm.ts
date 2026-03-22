@@ -5,7 +5,7 @@ import {
 	getSafeSiteOverrideFileContent,
 	resolveOpenApiSpecUrl,
 } from "./builder-api.js";
-import type { DoculaData } from "./builder-types.js";
+import type { DoculaData } from "./types.js";
 import {
 	buildAbsoluteSiteUrl,
 	normalizePathForUrl,

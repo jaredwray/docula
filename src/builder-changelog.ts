@@ -5,7 +5,7 @@ import type { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
 import { hashFile } from "./builder-cache.js";
 import { resolveJsonLd, resolveOpenGraphData } from "./builder-seo.js";
-import type { DoculaChangelogEntry, DoculaData } from "./builder-types.js";
+import type { DoculaChangelogEntry, DoculaData } from "./types.js";
 import { buildAbsoluteSiteUrl } from "./builder-utils.js";
 import type { DoculaOptions } from "./options.js";
 

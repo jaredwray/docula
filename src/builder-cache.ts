@@ -5,7 +5,7 @@ import type {
 	BuildManifest,
 	DoculaChangelogEntry,
 	DoculaDocument,
-} from "./builder-types.js";
+} from "./types.js";
 import type { DoculaConsole } from "./console.js";
 import type { DoculaOptions } from "./options.js";
 

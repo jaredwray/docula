@@ -4,7 +4,7 @@ import type { Ecto } from "ecto";
 import { Writr, type WritrOptions } from "writr";
 import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { resolveJsonLd, resolveOpenGraphData } from "./builder-seo.js";
-import type { DoculaData } from "./builder-types.js";
+import type { DoculaData } from "./types.js";
 import {
 	buildAbsoluteSiteUrl,
 	isPathWithinBasePath,

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Hashery } from "hashery";
 import { hashFile, listFilesRecursive } from "./builder-cache.js";
-import type { DoculaData } from "./builder-types.js";
+import type { DoculaData } from "./types.js";
 import { isPathWithinBasePath } from "./builder-utils.js";
 import type { DoculaConsole } from "./console.js";
 import type { DoculaOptions } from "./options.js";
