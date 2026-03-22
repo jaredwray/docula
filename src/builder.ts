@@ -1666,8 +1666,8 @@ export class DoculaBuilder {
 				...data,
 				specUrl: data.openApiUrl,
 				apiSpec,
-				...this.resolveOpenGraphData(data, `${data.apiUrl}/`),
-				jsonLd: this.resolveJsonLd("api", data, `${data.apiUrl}/`),
+				...this.resolveOpenGraphData(data, `/${data.apiPath}/`),
+				jsonLd: this.resolveJsonLd("api", data, `/${data.apiPath}/`),
 			},
 			data.templatePath,
 		);
@@ -1982,10 +1982,10 @@ export class DoculaBuilder {
 					: `${changelogOutputBase}/page/${page}`;
 			const indexPath = `${outputPath}/index.html`;
 
-			const changelogPageUrl =
+			const changelogPagePath =
 				page === 1
-					? `${data.changelogUrl}/`
-					: `${data.changelogUrl}/page/${page}/`;
+					? `/${data.changelogPath}/`
+					: `/${data.changelogPath}/page/${page}/`;
 
 			const paginationData = {
 				...data,
@@ -2003,8 +2003,8 @@ export class DoculaBuilder {
 							? `${data.changelogUrl}/`
 							: `${data.changelogUrl}/page/${page - 1}/`
 						: "",
-				...this.resolveOpenGraphData(data, changelogPageUrl),
-				jsonLd: this.resolveJsonLd("changelog", data, changelogPageUrl),
+				...this.resolveOpenGraphData(data, changelogPagePath),
+				jsonLd: this.resolveJsonLd("changelog", data, changelogPagePath),
 			};
 
 			promises.push(
@@ -2038,18 +2038,18 @@ export class DoculaBuilder {
 			const entryOutputPath = `${data.output}/${data.changelogPath}/${entry.slug}`;
 			await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
-			const entryPageUrl = `${data.changelogUrl}/${entry.slug}/`;
+			const entryPagePath = `/${data.changelogPath}/${entry.slug}/`;
 			const entryContent = await this._ecto.renderFromFile(
 				entryTemplate,
 				{
 					...data,
 					...entry,
 					entries: data.changelogEntries,
-					...this.resolveOpenGraphData(data, entryPageUrl, entry),
+					...this.resolveOpenGraphData(data, entryPagePath, entry),
 					jsonLd: this.resolveJsonLd(
 						"changelog-entry",
 						data,
-						entryPageUrl,
+						entryPagePath,
 						entry,
 					),
 				},
