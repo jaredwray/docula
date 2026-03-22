@@ -7783,10 +7783,7 @@ describe("DoculaBuilder", () => {
 				"# Project\n\nNo images here.\n",
 			);
 			fs.mkdirSync(`${tempCwdPath}/assets`, { recursive: true });
-			fs.writeFileSync(
-				`${tempCwdPath}/assets/unused.png`,
-				"fake-png-data",
-			);
+			fs.writeFileSync(`${tempCwdPath}/assets/unused.png`, "fake-png-data");
 
 			const options = new DoculaOptions();
 			options.sitePath = tempSitePath;
@@ -7794,9 +7791,7 @@ describe("DoculaBuilder", () => {
 			await builder.autoReadme();
 
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
-			expect(fs.existsSync(`${tempSitePath}/assets/unused.png`)).toBe(
-				false,
-			);
+			expect(fs.existsSync(`${tempSitePath}/assets/unused.png`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
