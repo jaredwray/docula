@@ -1233,10 +1233,14 @@ export class DoculaBuilder {
 			}
 
 			case "changelog-entry": {
+				if (!pageData?.title) {
+					return "";
+				}
+
 				schema = {
 					"@context": "https://schema.org",
 					"@type": "BlogPosting",
-					headline: pageData?.title ?? "",
+					headline: pageData.title,
 					description: pageData?.preview ?? pageData?.description ?? "",
 					url,
 					publisher: {
@@ -1256,6 +1260,11 @@ export class DoculaBuilder {
 			}
 
 			// No default
+		}
+
+		/* v8 ignore next 3 -- @preserve */
+		if (!schema) {
+			return "";
 		}
 
 		return `<script type="application/ld+json">\n${JSON.stringify(schema)}\n</script>`;
@@ -1973,6 +1982,11 @@ export class DoculaBuilder {
 					: `${changelogOutputBase}/page/${page}`;
 			const indexPath = `${outputPath}/index.html`;
 
+			const changelogPageUrl =
+				page === 1
+					? `${data.changelogUrl}/`
+					: `${data.changelogUrl}/page/${page}/`;
+
 			const paginationData = {
 				...data,
 				entries: pageEntries,
@@ -1989,19 +2003,8 @@ export class DoculaBuilder {
 							? `${data.changelogUrl}/`
 							: `${data.changelogUrl}/page/${page - 1}/`
 						: "",
-				...this.resolveOpenGraphData(
-					data,
-					page === 1
-						? `${data.changelogUrl}/`
-						: `${data.changelogUrl}/page/${page}/`,
-				),
-				jsonLd: this.resolveJsonLd(
-					"changelog",
-					data,
-					page === 1
-						? `${data.changelogUrl}/`
-						: `${data.changelogUrl}/page/${page}/`,
-				),
+				...this.resolveOpenGraphData(data, changelogPageUrl),
+				jsonLd: this.resolveJsonLd("changelog", data, changelogPageUrl),
 			};
 
 			promises.push(

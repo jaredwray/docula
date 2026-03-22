@@ -2840,6 +2840,27 @@ describe("DoculaBuilder", () => {
 			expect(json.url).toBe("https://example.com/project/");
 		});
 
+		it("should return empty string for changelog-entry with no title", () => {
+			const builder = new DoculaBuilder();
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/entry/",
+			);
+			expect(result).toBe("");
+		});
+
+		it("should return empty string for changelog-entry with empty title", () => {
+			const builder = new DoculaBuilder();
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/entry/",
+				{ title: "" },
+			);
+			expect(result).toBe("");
+		});
+
 		it("should properly escape special characters in JSON", () => {
 			const builder = new DoculaBuilder();
 			const dataWithSpecialChars = {
