@@ -4,12 +4,12 @@ import type { Ecto } from "ecto";
 import { Writr, type WritrOptions } from "writr";
 import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { resolveJsonLd, resolveOpenGraphData } from "./builder-seo.js";
-import type { DoculaData } from "./types.js";
 import {
 	buildAbsoluteSiteUrl,
 	isPathWithinBasePath,
 	isRemoteUrl,
 } from "./builder-utils.js";
+import type { DoculaData } from "./types.js";
 
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,

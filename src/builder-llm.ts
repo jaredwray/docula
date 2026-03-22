@@ -5,7 +5,6 @@ import {
 	getSafeSiteOverrideFileContent,
 	resolveOpenApiSpecUrl,
 } from "./builder-api.js";
-import type { DoculaData } from "./types.js";
 import {
 	buildAbsoluteSiteUrl,
 	normalizePathForUrl,
@@ -13,6 +12,7 @@ import {
 } from "./builder-utils.js";
 import type { DoculaConsole } from "./console.js";
 import type { DoculaOptions } from "./options.js";
+import type { DoculaData } from "./types.js";
 
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,

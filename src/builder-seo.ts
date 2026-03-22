@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import { Writr, type WritrOptions } from "writr";
-import type { DoculaData, DoculaDocument } from "./types.js";
 import {
 	buildAbsoluteSiteUrl,
 	escapeXml,
@@ -8,6 +7,7 @@ import {
 	summarizeMarkdown,
 } from "./builder-utils.js";
 import type { DoculaOptions } from "./options.js";
+import type { DoculaData, DoculaDocument } from "./types.js";
 
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,

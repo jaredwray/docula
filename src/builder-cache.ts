@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Hashery } from "hashery";
+import type { DoculaConsole } from "./console.js";
+import type { DoculaOptions } from "./options.js";
 import type {
 	BuildManifest,
 	DoculaChangelogEntry,
 	DoculaDocument,
 } from "./types.js";
-import type { DoculaConsole } from "./console.js";
-import type { DoculaOptions } from "./options.js";
 
 export function loadBuildManifest(sitePath: string): BuildManifest | undefined {
 	const manifestPath = path.join(sitePath, ".cache", "build", "manifest.json");

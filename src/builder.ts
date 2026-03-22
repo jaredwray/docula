@@ -58,14 +58,6 @@ import {
 	resolveJsonLd as _resolveJsonLd,
 	resolveOpenGraphData as _resolveOpenGraphData,
 } from "./builder-seo.js";
-import type {
-	BuildManifest,
-	DoculaChangelogEntry,
-	DoculaData,
-	DoculaDocument,
-	DoculaSection,
-	DoculaTemplates,
-} from "./types.js";
 import { buildUrlPath } from "./builder-utils.js";
 import { DoculaConsole } from "./console.js";
 import {
@@ -76,6 +68,14 @@ import {
 } from "./github.js";
 import { DoculaOptions } from "./options.js";
 import { resolveTemplatePath } from "./template-resolver.js";
+import type {
+	BuildManifest,
+	DoculaChangelogEntry,
+	DoculaData,
+	DoculaDocument,
+	DoculaSection,
+	DoculaTemplates,
+} from "./types.js";
 
 // Re-export all types for backward compatibility
 export type {

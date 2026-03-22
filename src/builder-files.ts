@@ -1,11 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Hashery } from "hashery";
-import { hashFile, listFilesRecursive } from "./builder-cache.js";
-import type { DoculaData } from "./types.js";
+import {
+	ensureCacheInGitignore,
+	hashFile,
+	listFilesRecursive,
+} from "./builder-cache.js";
 import { isPathWithinBasePath } from "./builder-utils.js";
 import type { DoculaConsole } from "./console.js";
 import type { DoculaOptions } from "./options.js";
+import type { DoculaData } from "./types.js";
 
 export function copyDirectory(source: string, target: string): void {
 	const files = fs.readdirSync(source);
@@ -475,6 +479,3 @@ export function getChangedOverrides(
 
 	return { added, changed, removed, currentHashes };
 }
-
-// Re-export for use in mergeTemplateOverrides
-import { ensureCacheInGitignore } from "./builder-cache.js";

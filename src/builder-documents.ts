@@ -3,12 +3,8 @@ import path from "node:path";
 import type { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
 import { hashFile } from "./builder-cache.js";
-import type {
-	DoculaData,
-	DoculaDocument,
-	DoculaSection,
-} from "./types.js";
 import type { DoculaOptions } from "./options.js";
+import type { DoculaData, DoculaDocument, DoculaSection } from "./types.js";
 
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,
@@ -275,12 +271,9 @@ export function generateSidebarItems(data: DoculaData): DoculaSection[] {
 	// Sort the sidebarItems children
 	sidebarItems = sidebarItems.map((section) => {
 		if (section.children) {
-			section.children.sort(
-				(a, b) =>
-					// biome-ignore lint/style/noNonNullAssertion: need to fix
-					(a.order ?? section.children!.length) -
-					// biome-ignore lint/style/noNonNullAssertion: need to fix
-					(b.order ?? section.children!.length),
+			const { children } = section;
+			children.sort(
+				(a, b) => (a.order ?? children.length) - (b.order ?? children.length),
 			);
 		}
 
