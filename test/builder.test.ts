@@ -2653,6 +2653,212 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Docula Builder - resolveJsonLd", () => {
+		const baseData: DoculaData = {
+			...defaultPathFields,
+			siteUrl: "https://example.com",
+			siteTitle: "Test Site",
+			siteDescription: "Test Description",
+			sitePath: "",
+			templatePath: "",
+			output: "",
+		};
+
+		it("should generate WebSite schema for home page", () => {
+			const builder = new DoculaBuilder();
+			const result = builder.resolveJsonLd("home", baseData, "/");
+			expect(result).toContain('<script type="application/ld+json">');
+			expect(result).toContain("</script>");
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json["@context"]).toBe("https://schema.org");
+			expect(json["@type"]).toBe("WebSite");
+			expect(json.name).toBe("Test Site");
+			expect(json.description).toBe("Test Description");
+			expect(json.url).toBe("https://example.com/");
+		});
+
+		it("should generate TechArticle schema for docs page", () => {
+			const builder = new DoculaBuilder();
+			const pageData = {
+				title: "Getting Started",
+				description: "Learn how to use the tool",
+				lastModified: "2024-01-15",
+				keywords: "docs, tutorial",
+			};
+			const result = builder.resolveJsonLd(
+				"docs",
+				baseData,
+				"/docs/getting-started/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json["@type"]).toBe("TechArticle");
+			expect(json.headline).toBe("Getting Started");
+			expect(json.description).toBe("Learn how to use the tool");
+			expect(json.dateModified).toBe("2024-01-15");
+			expect(json.keywords).toBe("docs, tutorial");
+			expect(json.url).toBe("https://example.com/docs/getting-started/");
+			expect(json.publisher).toEqual({
+				"@type": "Organization",
+				name: "Test Site",
+			});
+		});
+
+		it("should generate TechArticle without dateModified when lastModified is missing", () => {
+			const builder = new DoculaBuilder();
+			const pageData = {
+				title: "Page",
+				description: "Desc",
+			};
+			const result = builder.resolveJsonLd(
+				"docs",
+				baseData,
+				"/docs/page/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.dateModified).toBeUndefined();
+			expect(json.keywords).toBeUndefined();
+		});
+
+		it("should fall back to site defaults for docs without page data", () => {
+			const builder = new DoculaBuilder();
+			const result = builder.resolveJsonLd("docs", baseData, "/docs/page/");
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.headline).toBe("Test Site");
+			expect(json.description).toBe("Test Description");
+		});
+
+		it("should generate WebPage schema for api page", () => {
+			const builder = new DoculaBuilder();
+			const result = builder.resolveJsonLd("api", baseData, "/api/");
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json["@type"]).toBe("WebPage");
+			expect(json.name).toBe("API Reference - Test Site");
+			expect(json.description).toBe("API Reference for Test Site");
+			expect(json.url).toBe("https://example.com/api/");
+		});
+
+		it("should generate CollectionPage schema for changelog page", () => {
+			const builder = new DoculaBuilder();
+			const result = builder.resolveJsonLd(
+				"changelog",
+				baseData,
+				"/changelog/",
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json["@type"]).toBe("CollectionPage");
+			expect(json.name).toBe("Test Site Changelog");
+			expect(json.description).toBe("Changelog for Test Site");
+			expect(json.url).toBe("https://example.com/changelog/");
+		});
+
+		it("should generate BlogPosting schema for changelog entry", () => {
+			const builder = new DoculaBuilder();
+			const pageData = {
+				title: "v2.0 Release",
+				date: "2024-03-01",
+				preview: "Major release with new features",
+				previewImage: "https://example.com/v2.png",
+			};
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/v2-release/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json["@type"]).toBe("BlogPosting");
+			expect(json.headline).toBe("v2.0 Release");
+			expect(json.description).toBe("Major release with new features");
+			expect(json.datePublished).toBe("2024-03-01");
+			expect(json.image).toBe("https://example.com/v2.png");
+			expect(json.url).toBe("https://example.com/changelog/v2-release/");
+			expect(json.publisher).toEqual({
+				"@type": "Organization",
+				name: "Test Site",
+			});
+		});
+
+		it("should generate BlogPosting without optional fields when missing", () => {
+			const builder = new DoculaBuilder();
+			const pageData = {
+				title: "Update",
+			};
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/update/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.datePublished).toBeUndefined();
+			expect(json.image).toBeUndefined();
+		});
+
+		it("should respect baseUrl in generated URLs", () => {
+			const builder = new DoculaBuilder();
+			const dataWithBase = { ...baseData, baseUrl: "/project" };
+			const result = builder.resolveJsonLd("home", dataWithBase, "/");
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.url).toBe("https://example.com/project/");
+		});
+
+		it("should properly escape special characters in JSON", () => {
+			const builder = new DoculaBuilder();
+			const dataWithSpecialChars = {
+				...baseData,
+				siteTitle: 'Test "Site" <br>',
+				siteDescription: "Description with 'quotes' & ampersands",
+			};
+			const result = builder.resolveJsonLd("home", dataWithSpecialChars, "/");
+			// Should not throw when parsing
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.name).toBe('Test "Site" <br>');
+			expect(json.description).toBe("Description with 'quotes' & ampersands");
+		});
+	});
+
 	describe("Docula Builder - Document Parser", () => {
 		it("should not include TOC heading in generatedHtml for empty markdown", async () => {
 			const builder = new DoculaBuilder();

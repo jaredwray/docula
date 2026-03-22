@@ -1160,6 +1160,107 @@ export class DoculaBuilder {
 		};
 	}
 
+	public resolveJsonLd(
+		pageType: "home" | "docs" | "api" | "changelog" | "changelog-entry",
+		data: DoculaData,
+		pageUrl: string,
+		pageData?: Partial<DoculaDocument> & {
+			date?: string;
+			preview?: string;
+			previewImage?: string;
+		},
+	): string {
+		const url = `${data.siteUrl}${data.baseUrl}${pageUrl}`;
+
+		// biome-ignore lint/suspicious/noExplicitAny: dynamic schema object
+		let schema: any;
+
+		switch (pageType) {
+			case "home": {
+				schema = {
+					"@context": "https://schema.org",
+					"@type": "WebSite",
+					name: data.siteTitle,
+					description: data.siteDescription,
+					url,
+				};
+				break;
+			}
+
+			case "docs": {
+				schema = {
+					"@context": "https://schema.org",
+					"@type": "TechArticle",
+					headline: pageData?.title ?? data.siteTitle,
+					description: pageData?.description ?? data.siteDescription,
+					url,
+					publisher: {
+						"@type": "Organization",
+						name: data.siteTitle,
+					},
+				};
+				if (pageData?.lastModified) {
+					schema.dateModified = pageData.lastModified;
+				}
+
+				if (pageData?.keywords) {
+					schema.keywords = pageData.keywords;
+				}
+
+				break;
+			}
+
+			case "api": {
+				schema = {
+					"@context": "https://schema.org",
+					"@type": "WebPage",
+					name: `API Reference - ${data.siteTitle}`,
+					description: `API Reference for ${data.siteTitle}`,
+					url,
+				};
+				break;
+			}
+
+			case "changelog": {
+				schema = {
+					"@context": "https://schema.org",
+					"@type": "CollectionPage",
+					name: `${data.siteTitle} Changelog`,
+					description: `Changelog for ${data.siteTitle}`,
+					url,
+				};
+				break;
+			}
+
+			case "changelog-entry": {
+				schema = {
+					"@context": "https://schema.org",
+					"@type": "BlogPosting",
+					headline: pageData?.title ?? "",
+					description: pageData?.preview ?? pageData?.description ?? "",
+					url,
+					publisher: {
+						"@type": "Organization",
+						name: data.siteTitle,
+					},
+				};
+				if (pageData?.date) {
+					schema.datePublished = pageData.date;
+				}
+
+				if (pageData?.previewImage) {
+					schema.image = pageData.previewImage;
+				}
+
+				break;
+			}
+
+			// No default
+		}
+
+		return `<script type="application/ld+json">\n${JSON.stringify(schema)}\n</script>`;
+	}
+
 	private buildAbsoluteSiteUrl(siteUrl: string, urlPath: string): string {
 		const normalizedSiteUrl = siteUrl.endsWith("/")
 			? siteUrl.slice(0, -1)
@@ -1375,6 +1476,7 @@ export class DoculaBuilder {
 					content,
 					announcement,
 					...this.resolveOpenGraphData(data, "/"),
+					jsonLd: this.resolveJsonLd("home", data, "/"),
 				},
 				data.templatePath,
 			);
@@ -1420,6 +1522,7 @@ export class DoculaBuilder {
 				...firstDocument,
 				editPageDocUrl,
 				...this.resolveOpenGraphData(data, "/", firstDocument),
+				jsonLd: this.resolveJsonLd("docs", data, "/", firstDocument),
 			},
 			data.templatePath,
 		);
@@ -1477,17 +1580,15 @@ export class DoculaBuilder {
 					editPageDocUrl = `${data.editPageUrl}/${relativeFilePath}`;
 				}
 
+				const docPageUrl = document.urlPath.replace(/\/index\.html$/, "/");
 				const documentContent = await this._ecto.renderFromFile(
 					documentsTemplate,
 					{
 						...data,
 						...document,
 						editPageDocUrl,
-						...this.resolveOpenGraphData(
-							data,
-							document.urlPath.replace(/\/index\.html$/, "/"),
-							document,
-						),
+						...this.resolveOpenGraphData(data, docPageUrl, document),
+						jsonLd: this.resolveJsonLd("docs", data, docPageUrl, document),
 					},
 					data.templatePath,
 				);
@@ -1557,6 +1658,7 @@ export class DoculaBuilder {
 				specUrl: data.openApiUrl,
 				apiSpec,
 				...this.resolveOpenGraphData(data, `${data.apiUrl}/`),
+				jsonLd: this.resolveJsonLd("api", data, `${data.apiUrl}/`),
 			},
 			data.templatePath,
 		);
@@ -1893,6 +1995,13 @@ export class DoculaBuilder {
 						? `${data.changelogUrl}/`
 						: `${data.changelogUrl}/page/${page}/`,
 				),
+				jsonLd: this.resolveJsonLd(
+					"changelog",
+					data,
+					page === 1
+						? `${data.changelogUrl}/`
+						: `${data.changelogUrl}/page/${page}/`,
+				),
 			};
 
 			promises.push(
@@ -1926,15 +2035,18 @@ export class DoculaBuilder {
 			const entryOutputPath = `${data.output}/${data.changelogPath}/${entry.slug}`;
 			await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
+			const entryPageUrl = `${data.changelogUrl}/${entry.slug}/`;
 			const entryContent = await this._ecto.renderFromFile(
 				entryTemplate,
 				{
 					...data,
 					...entry,
 					entries: data.changelogEntries,
-					...this.resolveOpenGraphData(
+					...this.resolveOpenGraphData(data, entryPageUrl, entry),
+					jsonLd: this.resolveJsonLd(
+						"changelog-entry",
 						data,
-						`${data.changelogUrl}/${entry.slug}/`,
+						entryPageUrl,
 						entry,
 					),
 				},
