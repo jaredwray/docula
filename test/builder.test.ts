@@ -17,6 +17,7 @@ import {
 import {
 	hasAssetsChanged,
 	hashFile as hashFileUtil,
+	hashOptions as hashOptionsUtil,
 	loadBuildManifest,
 	loadCachedChangelog,
 	recordsEqual,
@@ -7605,7 +7606,7 @@ describe("DoculaBuilder", () => {
 			fs.rmSync(tempDir, { recursive: true, force: true });
 		});
 
-		it("should copy README.md from cwd to sitePath and prepend package name as title", () => {
+		it("should copy README.md from cwd to sitePath and prepend package name as title", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7619,7 +7620,7 @@ describe("DoculaBuilder", () => {
 			options.sitePath = tempSitePath;
 			options.autoReadme = true;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
 			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
@@ -7629,7 +7630,7 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
-		it("should not copy README when autoReadme is false", () => {
+		it("should not copy README when autoReadme is false", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7639,14 +7640,14 @@ describe("DoculaBuilder", () => {
 			options.sitePath = tempSitePath;
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should not overwrite existing site README", () => {
+		it("should not overwrite existing site README", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7656,7 +7657,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
 			expect(content).toEqual("Existing content");
@@ -7664,7 +7665,7 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
-		it("should do nothing when no README exists in cwd", () => {
+		it("should do nothing when no README exists in cwd", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7672,14 +7673,14 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should not prepend title when README already has a heading", () => {
+		it("should not prepend title when README already has a heading", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7695,7 +7696,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
 			expect(content).toEqual("# Existing Title\n\nSome content");
@@ -7703,7 +7704,7 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
-		it("should copy README as-is when no package.json exists", () => {
+		it("should copy README as-is when no package.json exists", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7712,7 +7713,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
 			expect(content).toEqual("No heading content");
@@ -7720,7 +7721,7 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
-		it("should handle invalid package.json gracefully", () => {
+		it("should handle invalid package.json gracefully", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -7730,10 +7731,70 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			builder.autoReadme();
+			await builder.autoReadme();
 
 			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
 			expect(content).toEqual("Some content");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should copy referenced assets from cwd to sitePath", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+
+			// Create a README referencing an image
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Project\n\n![logo](assets/logo.png)\n",
+			);
+			// Create the referenced image
+			fs.mkdirSync(`${tempCwdPath}/assets`, { recursive: true });
+			fs.writeFileSync(`${tempCwdPath}/assets/logo.png`, "fake-png-data");
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			await builder.autoReadme();
+
+			// README should be copied
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
+			// Referenced asset should also be copied
+			expect(fs.existsSync(`${tempSitePath}/assets/logo.png`)).toBe(true);
+			const assetContent = fs.readFileSync(
+				`${tempSitePath}/assets/logo.png`,
+				"utf8",
+			);
+			expect(assetContent).toEqual("fake-png-data");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should not copy unreferenced assets from cwd", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Project\n\nNo images here.\n",
+			);
+			fs.mkdirSync(`${tempCwdPath}/assets`, { recursive: true });
+			fs.writeFileSync(
+				`${tempCwdPath}/assets/unused.png`,
+				"fake-png-data",
+			);
+
+			const options = new DoculaOptions();
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			await builder.autoReadme();
+
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
+			expect(fs.existsSync(`${tempSitePath}/assets/unused.png`)).toBe(
+				false,
+			);
 
 			cwdSpy.mockRestore();
 		});
@@ -7780,6 +7841,20 @@ describe("DoculaBuilder", () => {
 			}
 
 			cwdSpy.mockRestore();
+		});
+	});
+
+	describe("hashOptions - autoReadme", () => {
+		it("should produce different hashes when autoReadme changes", () => {
+			const optionsA = new DoculaOptions();
+			optionsA.autoReadme = true;
+			const optionsB = new DoculaOptions();
+			optionsB.autoReadme = false;
+
+			const hashA = hashOptionsUtil(testHash, optionsA);
+			const hashB = hashOptionsUtil(testHash, optionsB);
+
+			expect(hashA).not.toEqual(hashB);
 		});
 	});
 });
