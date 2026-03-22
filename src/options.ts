@@ -1,6 +1,6 @@
 import path from "node:path";
 import process from "node:process";
-import type { DoculaSection } from "./builder.js";
+import type { DoculaSection } from "./builder-types.js";
 
 function trimSlashes(value: string): string {
 	let start = 0;
