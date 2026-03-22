@@ -61,6 +61,7 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		headerLinks: options.headerLinks,
 		editPageUrl: options.editPageUrl,
 		openGraph: options.openGraph,
+		autoReadme: options.autoReadme,
 		baseUrl: options.baseUrl,
 		docsPath: options.docsPath,
 		apiPath: options.apiPath,

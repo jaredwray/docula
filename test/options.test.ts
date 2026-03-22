@@ -40,6 +40,7 @@ describe("DoculaOptions", () => {
 			expect(options.changelogPerPage).toEqual(20);
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
+			expect(options.autoReadme).toEqual(true);
 			expect(options.themeMode).toBeUndefined();
 			expect(options.cache).toEqual({ github: { ttl: 3600 } });
 		});
@@ -197,6 +198,21 @@ describe("DoculaOptions", () => {
 		it("should not update autoUpdateIgnores for non-boolean values", () => {
 			options.parseOptions({ autoUpdateIgnores: "yes" });
 			expect(options.autoUpdateIgnores).toEqual(true);
+		});
+
+		it("should parse autoReadme set to false", () => {
+			options.parseOptions({ autoReadme: false });
+			expect(options.autoReadme).toEqual(false);
+		});
+
+		it("should parse autoReadme set to true", () => {
+			options.parseOptions({ autoReadme: true });
+			expect(options.autoReadme).toEqual(true);
+		});
+
+		it("should not update autoReadme for non-boolean values", () => {
+			options.parseOptions({ autoReadme: "yes" });
+			expect(options.autoReadme).toEqual(true);
 		});
 
 		it("should parse themeMode set to light", () => {

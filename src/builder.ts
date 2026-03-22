@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import process from "node:process";
 import { Ecto } from "ecto";
 import { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
@@ -48,6 +49,7 @@ import {
 	copyDirectoryWithHashing,
 	copyDocumentSiblingAssets,
 	copyPublicFolder,
+	listContentAssets,
 	mergeTemplateOverrides,
 } from "./builder-files.js";
 import { buildLlmsFiles as _buildLlmsFiles } from "./builder-llm.js";
@@ -184,6 +186,9 @@ export class DoculaBuilder {
 		const cachedChangelog = validManifest
 			? loadCachedChangelog(this.options.sitePath)
 			: new Map<string, DoculaChangelogEntry>();
+
+		// Auto-copy README.md from project root if not present in site path
+		await this.autoReadme();
 
 		// Set the site options
 		const doculaData: DoculaData = {
@@ -589,6 +594,65 @@ export class DoculaBuilder {
 
 		if (!options.siteUrl) {
 			throw new Error("No site url options provided");
+		}
+	}
+
+	public async autoReadme(): Promise<void> {
+		if (!this._options.autoReadme) {
+			return;
+		}
+
+		const siteReadmePath = path.join(this._options.sitePath, "README.md");
+		if (fs.existsSync(siteReadmePath)) {
+			return;
+		}
+
+		const cwdDir = process.cwd();
+		const cwdReadmePath = path.join(cwdDir, "README.md");
+		if (!fs.existsSync(cwdReadmePath)) {
+			return;
+		}
+
+		let readmeContent = await fs.promises.readFile(cwdReadmePath, "utf8");
+
+		// Check if README already has a title (# heading on the first non-empty line)
+		const firstLine = readmeContent.trimStart().split("\n")[0] ?? "";
+		const hasTitle = /^#\s+/.test(firstLine);
+
+		if (!hasTitle) {
+			const packageJsonPath = path.join(cwdDir, "package.json");
+			if (fs.existsSync(packageJsonPath)) {
+				try {
+					const packageJson = JSON.parse(
+						await fs.promises.readFile(packageJsonPath, "utf8"),
+					) as { name?: string };
+					if (packageJson.name && typeof packageJson.name === "string") {
+						readmeContent = `# ${packageJson.name}\n\n${readmeContent}`;
+					}
+				} catch {
+					// Ignore JSON parse errors
+				}
+			}
+		}
+
+		await fs.promises.mkdir(this._options.sitePath, { recursive: true });
+		await fs.promises.writeFile(siteReadmePath, readmeContent, "utf8");
+
+		// Copy assets referenced by the README from cwd to sitePath
+		const availableAssets = listContentAssets(this._options, cwdDir);
+		for (const assetRelPath of availableAssets) {
+			if (readmeContent.includes(assetRelPath)) {
+				const source = path.join(cwdDir, assetRelPath);
+				const stat = await fs.promises.lstat(source);
+				// Skip symbolic links to prevent copying sensitive files
+				if (stat.isSymbolicLink()) {
+					continue;
+				}
+
+				const target = path.join(this._options.sitePath, assetRelPath);
+				await fs.promises.mkdir(path.dirname(target), { recursive: true });
+				await fs.promises.copyFile(source, target);
+			}
 		}
 	}
 

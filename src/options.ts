@@ -118,6 +118,12 @@ export class DoculaOptions {
 	 */
 	public autoUpdateIgnores = true;
 	/**
+	 * When true, automatically copies the project root README.md into the site
+	 * directory if one does not already exist. The package.json name field is
+	 * used to prepend a title heading when the README lacks one.
+	 */
+	public autoReadme = true;
+	/**
 	 * Base URL path prefix for all generated paths (e.g., "/docs").
 	 * When set, all asset and navigation URLs are prefixed with this path.
 	 */
@@ -302,6 +308,13 @@ export class DoculaOptions {
 			typeof options.autoUpdateIgnores === "boolean"
 		) {
 			this.autoUpdateIgnores = options.autoUpdateIgnores;
+		}
+
+		if (
+			options.autoReadme !== undefined &&
+			typeof options.autoReadme === "boolean"
+		) {
+			this.autoReadme = options.autoReadme;
 		}
 
 		if (
