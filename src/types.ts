@@ -55,7 +55,7 @@ export type DoculaData = {
 	enableLlmsTxt?: boolean;
 	hasFeed?: boolean;
 	lastModified?: string;
-	homeUrl: string;
+	homeUrl?: string;
 	baseUrl: string;
 	docsPath: string;
 	apiPath: string;

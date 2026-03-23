@@ -363,7 +363,7 @@ pre:hover .copy-code-btn { opacity: 1; }
 .copy-code-btn:hover { color: var(--fg); }
 .article__main img, .changelog-entry-body img { cursor: zoom-in; }
 .lightbox-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; cursor: pointer; }
-.lightbox-overlay--visible { display: flex; }
+.lightbox-overlay--visible { display: flex !important; }
 .lightbox-overlay img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4); cursor: default; }
 .lightbox-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: #fff; cursor: pointer; padding: 4px; line-height: 0; }
 .lightbox-close:hover { opacity: 0.7; }

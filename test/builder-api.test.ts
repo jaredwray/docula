@@ -10,7 +10,6 @@ import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 vi.mock("@cacheable/net");
 
 const defaultPathFields = {
-	homeUrl: "/",
 	baseUrl: "",
 	docsPath: "docs",
 	apiPath: "api",
