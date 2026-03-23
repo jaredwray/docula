@@ -311,7 +311,7 @@ describe("builder-ai", () => {
 		it("should use cached metadata when available", async () => {
 			const doculaConsole = new DoculaConsole();
 			const doc = makeDocument();
-			const bodyHash = testHash.toHashSync(doc.markdown);
+			const bodyHash = testHash.toHashSync(doc.content);
 			const cache: AIMetadataCache = {
 				[bodyHash]: {
 					title: "Cached Title",
@@ -361,11 +361,12 @@ describe("builder-ai", () => {
 					...original,
 					Writr: class extends original.Writr {
 						get ai() {
+							// biome-ignore lint/suspicious/noExplicitAny: test mock
 							return {
 								getMetadata: () => {
 									throw new Error("AI API error");
 								},
-							};
+							} as any;
 						}
 					},
 				};
@@ -398,7 +399,7 @@ describe("builder-ai", () => {
 				description: "Existing desc",
 				keywords: [],
 			});
-			const bodyHash = testHash.toHashSync(doc.markdown);
+			const bodyHash = testHash.toHashSync(doc.content);
 			const cache: AIMetadataCache = {
 				[bodyHash]: {
 					title: "AI Title",
@@ -510,11 +511,12 @@ describe("builder-ai", () => {
 					...original,
 					Writr: class extends original.Writr {
 						get ai() {
+							// biome-ignore lint/suspicious/noExplicitAny: test mock
 							return {
 								getMetadata: () => {
 									throw new Error("AI API error");
 								},
-							};
+							} as any;
 						}
 					},
 				};

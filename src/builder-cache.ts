@@ -36,10 +36,7 @@ export function saveBuildManifest(
 	try {
 		const dir = path.join(sitePath, ".cache", "build");
 		fs.mkdirSync(dir, { recursive: true });
-		fs.writeFileSync(
-			path.join(dir, "manifest.json"),
-			JSON.stringify(manifest),
-		);
+		fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
 	} catch {
 		/* v8 ignore next -- @preserve */
 		// Non-critical: cache save failure does not affect build correctness
@@ -226,10 +223,7 @@ export function saveCachedDocuments(
 		}
 
 		fs.mkdirSync(dir, { recursive: true });
-		fs.writeFileSync(
-			path.join(dir, "documents.json"),
-			JSON.stringify(map),
-		);
+		fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
 	} catch {
 		/* v8 ignore next -- @preserve */
 		// Non-critical: cache save failure does not affect build correctness
@@ -268,10 +262,7 @@ export function saveCachedChangelog(
 			map[entry.slug] = entry;
 		}
 
-		fs.writeFileSync(
-			path.join(dir, "changelog.json"),
-			JSON.stringify(map),
-		);
+		fs.writeFileSync(path.join(dir, "changelog.json"), JSON.stringify(map));
 	} catch {
 		/* v8 ignore next -- @preserve */
 		// Non-critical: cache save failure does not affect build correctness
@@ -284,12 +275,6 @@ export function ensureCacheInGitignore(
 	sitePath: string,
 ): void {
 	if (!options.autoUpdateIgnores) {
-		return;
-	}
-
-	// Only act when .cache doesn't exist yet (first creation)
-	const cacheDir = path.join(sitePath, ".cache");
-	if (fs.existsSync(cacheDir)) {
 		return;
 	}
 

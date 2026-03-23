@@ -123,7 +123,7 @@ export async function enrichDocuments(
 		}
 
 		try {
-			const bodyHash = hash.toHashSync(doc.markdown);
+			const bodyHash = hash.toHashSync(doc.content);
 			const cached = cache[bodyHash];
 
 			if (cached) {
@@ -132,7 +132,7 @@ export async function enrichDocuments(
 			}
 
 			// Skip documents with very little content
-			if (doc.markdown.trim().length < 10) {
+			if (doc.content.trim().length < 10) {
 				continue;
 			}
 
