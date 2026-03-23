@@ -36,6 +36,10 @@ When an OpenAPI URL is configured, the Modern template renders a full API refere
 | **Theme toggle** | Built-in light/dark/system toggle stored in localStorage |
 | **Mobile navigation** | Hamburger menu with slide-out sidebar and backdrop overlay |
 | **Sticky header** | Always-visible navigation bar with Documentation, API Reference, and Changelog links |
+| **Site title** | Displays the site title text next to the logo in the header |
+| **Back to Home** | When `homeUrl` is configured, a "Back to Home" link appears in the navigation |
+| **Copy code** | Code blocks show a copy-to-clipboard button on hover with a checkmark confirmation |
+| **Image lightbox** | Clicking images in docs and changelog opens a fullscreen overlay for zoomed viewing |
 | **Collapsible sidebar** | Uses `<details>` elements for expandable section navigation |
 | **System fonts** | No external font dependencies (`system-ui`, `-apple-system`, etc.) |
 | **Syntax highlighting** | Docula code theme with light and dark variants |
