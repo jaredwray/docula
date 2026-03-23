@@ -853,9 +853,17 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Content Assets", () => {
 		it("should copy non-markdown files from docs to output docs", async () => {
+			const tempSitePath = "test/temp/content-assets-docs-site";
+			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-docs";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
@@ -893,6 +901,7 @@ describe("DoculaBuilder - Documents", () => {
 					false,
 				);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
@@ -901,9 +910,17 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should copy non-markdown files from changelog to output changelog", async () => {
+			const tempSitePath = "test/temp/content-assets-changelog-site";
+			fs.cpSync("test/fixtures/mega-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-changelog";
-			options.sitePath = "test/fixtures/mega-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
@@ -932,6 +949,7 @@ describe("DoculaBuilder - Documents", () => {
 					),
 				).toBe(false);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
@@ -1013,9 +1031,17 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should copy sibling assets into non-index document output directories", async () => {
+			const tempSitePath = "test/temp/content-assets-sibling-site";
+			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-sibling";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
@@ -1054,6 +1080,7 @@ describe("DoculaBuilder - Documents", () => {
 					),
 				).toBe(false);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
@@ -1098,9 +1125,17 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should handle docs directory with no non-markdown files", async () => {
+			const tempSitePath = "test/temp/content-assets-no-assets-site";
+			fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-no-assets";
-			options.sitePath = "test/fixtures/single-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
@@ -1112,6 +1147,7 @@ describe("DoculaBuilder - Documents", () => {
 				await builder.build();
 				expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,

@@ -209,7 +209,6 @@ export function saveCachedDocuments(
 	documents: DoculaDocument[],
 ): void {
 	const dir = path.join(sitePath, ".cache", "build");
-	fs.mkdirSync(dir, { recursive: true });
 	const docsRoot = path.join(sitePath, "docs");
 	const map: Record<string, DoculaDocument> = {};
 	for (const doc of documents) {
@@ -217,6 +216,8 @@ export function saveCachedDocuments(
 		map[relativeKey] = doc;
 	}
 
+	// Ensure directory exists immediately before writing to avoid TOCTOU races
+	fs.mkdirSync(dir, { recursive: true });
 	fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
 }
 

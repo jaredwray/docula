@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import { CacheableNet } from "@cacheable/net";
-import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DoculaBuilder, type DoculaData } from "../src/builder.js";
 import {
@@ -9,8 +8,6 @@ import {
 } from "../src/builder-api.js";
 import * as builderUtils from "../src/builder-utils.js";
 import { DoculaOptions } from "../src/options.js";
-
-const _testHash = new Hashery();
 
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
