@@ -46,6 +46,12 @@ export type DoculaCacheOptions = {
 	};
 };
 
+export type DoculaAIOptions = {
+	provider: string;
+	model?: string;
+	apiKey: string;
+};
+
 export class DoculaOptions {
 	/**
 	 * Name of the built-in template to use (e.g., "modern", "classic")
@@ -124,6 +130,10 @@ export class DoculaOptions {
 	 */
 	public autoReadme = true;
 	/**
+	 * When true, suppresses all non-error console output during the build.
+	 */
+	public quiet = false;
+	/**
 	 * Base URL path prefix for all generated paths (e.g., "/docs").
 	 * When set, all asset and navigation URLs are prefixed with this path.
 	 */
@@ -165,9 +175,11 @@ export class DoculaOptions {
 	 */
 	public headerLinks?: DoculaHeaderLink[];
 	/**
-	 * File extensions to copy as assets from docs/ and changelog/ directories.
-	 * Override in docula.config to customize.
+	 * AI-powered metadata enrichment configuration. When set, uses AI to fill
+	 * missing OpenGraph and HTML meta tag fields during the build.
+	 * Requires provider name and API key. Omit to disable AI enrichment.
 	 */
+	public ai?: DoculaAIOptions;
 	/**
 	 * Cache settings. Controls caching of external data (e.g., GitHub API responses)
 	 * in the .cache directory within the site path.
@@ -315,6 +327,19 @@ export class DoculaOptions {
 			typeof options.autoReadme === "boolean"
 		) {
 			this.autoReadme = options.autoReadme;
+		}
+
+		if (options.quiet !== undefined && typeof options.quiet === "boolean") {
+			this.quiet = options.quiet;
+		}
+
+		if (
+			options.ai &&
+			typeof options.ai === "object" &&
+			typeof (options.ai as DoculaAIOptions).provider === "string" &&
+			typeof (options.ai as DoculaAIOptions).apiKey === "string"
+		) {
+			this.ai = options.ai as DoculaAIOptions;
 		}
 
 		if (

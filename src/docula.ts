@@ -25,6 +25,10 @@ export default class Docula {
 	private _server: http.Server | undefined;
 	private _watcher: fs.FSWatcher | undefined;
 
+	public get console(): DoculaConsole {
+		return this._console;
+	}
+
 	/**
 	 * Initialize the Docula class
 	 * @param {DoculaOptions} options
@@ -34,6 +38,10 @@ export default class Docula {
 	constructor(options?: DoculaOptions) {
 		if (options) {
 			this._options = options;
+		}
+
+		if (this._options.quiet) {
+			this._console.quiet = true;
 		}
 	}
 
@@ -140,6 +148,11 @@ export default class Docula {
 				// biome-ignore lint/suspicious/noExplicitAny: need to fix
 				this._configFileModule.options as Record<string, any>,
 			);
+		}
+
+		// Propagate quiet setting to console
+		if (this.options.quiet) {
+			this._console.quiet = true;
 		}
 
 		// Run the onPrepare function
@@ -290,7 +303,9 @@ export default class Docula {
 			this.cleanCache(this.options.sitePath);
 		}
 
-		const builder = new DoculaBuilder(this.options);
+		const builder = new DoculaBuilder(
+			Object.assign(this.options, { console: this._console }),
+		);
 		/* v8 ignore next 4 -- @preserve */
 		if (this._configFileModule.onReleaseChangelog) {
 			builder.onReleaseChangelog = this._configFileModule.onReleaseChangelog;
@@ -589,6 +604,7 @@ export { Writr } from "writr";
 export type { DoculaChangelogEntry } from "./builder.js";
 export { DoculaConsole } from "./console.js";
 export type {
+	DoculaAIOptions,
 	DoculaCacheOptions,
 	DoculaCookieAuth,
 	DoculaHeaderLink,

@@ -33,9 +33,14 @@ export function saveBuildManifest(
 	sitePath: string,
 	manifest: BuildManifest,
 ): void {
-	const dir = path.join(sitePath, ".cache", "build");
-	fs.mkdirSync(dir, { recursive: true });
-	fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+	try {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+	} catch {
+		/* v8 ignore next -- @preserve */
+		// Non-critical: cache save failure does not affect build correctness
+	}
 }
 
 export function hashFile(hash: Hashery, filePath: string): string {
@@ -66,6 +71,7 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		docsPath: options.docsPath,
 		apiPath: options.apiPath,
 		changelogPath: options.changelogPath,
+		ai: options.ai,
 	};
 	return hash.toHashSync(JSON.stringify(relevant));
 }
@@ -207,16 +213,21 @@ export function saveCachedDocuments(
 	sitePath: string,
 	documents: DoculaDocument[],
 ): void {
-	const dir = path.join(sitePath, ".cache", "build");
-	fs.mkdirSync(dir, { recursive: true });
-	const docsRoot = path.join(sitePath, "docs");
-	const map: Record<string, DoculaDocument> = {};
-	for (const doc of documents) {
-		const relativeKey = path.relative(docsRoot, doc.documentPath);
-		map[relativeKey] = doc;
-	}
+	try {
+		const dir = path.join(sitePath, ".cache", "build");
+		const docsRoot = path.join(sitePath, "docs");
+		const map: Record<string, DoculaDocument> = {};
+		for (const doc of documents) {
+			const relativeKey = path.relative(docsRoot, doc.documentPath);
+			map[relativeKey] = doc;
+		}
 
-	fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
+		fs.mkdirSync(dir, { recursive: true });
+		fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
+	} catch {
+		/* v8 ignore next -- @preserve */
+		// Non-critical: cache save failure does not affect build correctness
+	}
 }
 
 export function loadCachedChangelog(
@@ -243,14 +254,19 @@ export function saveCachedChangelog(
 	sitePath: string,
 	entries: DoculaChangelogEntry[],
 ): void {
-	const dir = path.join(sitePath, ".cache", "build");
-	fs.mkdirSync(dir, { recursive: true });
-	const map: Record<string, DoculaChangelogEntry> = {};
-	for (const entry of entries) {
-		map[entry.slug] = entry;
-	}
+	try {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		const map: Record<string, DoculaChangelogEntry> = {};
+		for (const entry of entries) {
+			map[entry.slug] = entry;
+		}
 
-	fs.writeFileSync(path.join(dir, "changelog.json"), JSON.stringify(map));
+		fs.writeFileSync(path.join(dir, "changelog.json"), JSON.stringify(map));
+	} catch {
+		/* v8 ignore next -- @preserve */
+		// Non-critical: cache save failure does not affect build correctness
+	}
 }
 
 export function ensureCacheInGitignore(
@@ -259,12 +275,6 @@ export function ensureCacheInGitignore(
 	sitePath: string,
 ): void {
 	if (!options.autoUpdateIgnores) {
-		return;
-	}
-
-	// Only act when .cache doesn't exist yet (first creation)
-	const cacheDir = path.join(sitePath, ".cache");
-	if (fs.existsSync(cacheDir)) {
 		return;
 	}
 
