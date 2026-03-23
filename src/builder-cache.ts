@@ -33,9 +33,17 @@ export function saveBuildManifest(
 	sitePath: string,
 	manifest: BuildManifest,
 ): void {
-	const dir = path.join(sitePath, ".cache", "build");
-	fs.mkdirSync(dir, { recursive: true });
-	fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+	try {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		fs.writeFileSync(
+			path.join(dir, "manifest.json"),
+			JSON.stringify(manifest),
+		);
+	} catch {
+		/* v8 ignore next -- @preserve */
+		// Non-critical: cache save failure does not affect build correctness
+	}
 }
 
 export function hashFile(hash: Hashery, filePath: string): string {
@@ -208,17 +216,24 @@ export function saveCachedDocuments(
 	sitePath: string,
 	documents: DoculaDocument[],
 ): void {
-	const dir = path.join(sitePath, ".cache", "build");
-	const docsRoot = path.join(sitePath, "docs");
-	const map: Record<string, DoculaDocument> = {};
-	for (const doc of documents) {
-		const relativeKey = path.relative(docsRoot, doc.documentPath);
-		map[relativeKey] = doc;
-	}
+	try {
+		const dir = path.join(sitePath, ".cache", "build");
+		const docsRoot = path.join(sitePath, "docs");
+		const map: Record<string, DoculaDocument> = {};
+		for (const doc of documents) {
+			const relativeKey = path.relative(docsRoot, doc.documentPath);
+			map[relativeKey] = doc;
+		}
 
-	// Ensure directory exists immediately before writing to avoid TOCTOU races
-	fs.mkdirSync(dir, { recursive: true });
-	fs.writeFileSync(path.join(dir, "documents.json"), JSON.stringify(map));
+		fs.mkdirSync(dir, { recursive: true });
+		fs.writeFileSync(
+			path.join(dir, "documents.json"),
+			JSON.stringify(map),
+		);
+	} catch {
+		/* v8 ignore next -- @preserve */
+		// Non-critical: cache save failure does not affect build correctness
+	}
 }
 
 export function loadCachedChangelog(
@@ -245,14 +260,22 @@ export function saveCachedChangelog(
 	sitePath: string,
 	entries: DoculaChangelogEntry[],
 ): void {
-	const dir = path.join(sitePath, ".cache", "build");
-	fs.mkdirSync(dir, { recursive: true });
-	const map: Record<string, DoculaChangelogEntry> = {};
-	for (const entry of entries) {
-		map[entry.slug] = entry;
-	}
+	try {
+		const dir = path.join(sitePath, ".cache", "build");
+		fs.mkdirSync(dir, { recursive: true });
+		const map: Record<string, DoculaChangelogEntry> = {};
+		for (const entry of entries) {
+			map[entry.slug] = entry;
+		}
 
-	fs.writeFileSync(path.join(dir, "changelog.json"), JSON.stringify(map));
+		fs.writeFileSync(
+			path.join(dir, "changelog.json"),
+			JSON.stringify(map),
+		);
+	} catch {
+		/* v8 ignore next -- @preserve */
+		// Non-critical: cache save failure does not affect build correctness
+	}
 }
 
 export function ensureCacheInGitignore(
