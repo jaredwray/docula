@@ -5,7 +5,7 @@ import type { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
 import { hashFile } from "./builder-cache.js";
 import { resolveJsonLd, resolveOpenGraphData } from "./builder-seo.js";
-import { buildAbsoluteSiteUrl } from "./builder-utils.js";
+import { buildAbsoluteSiteUrl, buildUrlPath } from "./builder-utils.js";
 import type { DoculaOptions } from "./options.js";
 import type { DoculaChangelogEntry, DoculaData } from "./types.js";
 
@@ -123,7 +123,7 @@ export function parseChangelogEntry(
 		}),
 		preview: generateChangelogPreview(markdownContent, 500, isMdx),
 		previewImage,
-		urlPath: `/${options.changelogPath}/${slug}/index.html`,
+		urlPath: `${buildUrlPath(options.baseUrl, options.changelogPath, slug)}/index.html`,
 		lastModified: fs.statSync(filePath).mtime.toISOString().split("T")[0],
 	};
 }
@@ -268,7 +268,7 @@ export function convertReleaseToChangelogEntry(
 		content: body,
 		generatedHtml: new Writr(body, writrOptions).renderSync(),
 		preview: generateChangelogPreview(body),
-		urlPath: `/${options.changelogPath}/${slug}/index.html`,
+		urlPath: `${buildUrlPath(options.baseUrl, options.changelogPath, slug)}/index.html`,
 		lastModified: dateString,
 	};
 }
@@ -317,8 +317,8 @@ export async function buildChangelogPage(
 
 		const changelogPagePath =
 			page === 1
-				? `/${data.changelogPath}/`
-				: `/${data.changelogPath}/page/${page}/`;
+				? `${data.changelogUrl}/`
+				: `${data.changelogUrl}/page/${page}/`;
 
 		const paginationData = {
 			...data,
@@ -374,7 +374,7 @@ export async function buildChangelogEntryPages(
 		const entryOutputPath = `${data.output}/${data.changelogPath}/${entry.slug}`;
 		await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
-		const entryPagePath = `/${data.changelogPath}/${entry.slug}/`;
+		const entryPagePath = `${data.changelogUrl}/${entry.slug}/`;
 		const entryContent = await ecto.renderFromFile(
 			entryTemplate,
 			{
