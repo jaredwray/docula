@@ -186,7 +186,13 @@ export function listContentAssets(
 		/* v8 ignore stop */
 
 		const fullPath = `${sourcePath}/${file}`;
-		const stat = fs.lstatSync(fullPath);
+		let stat: fs.Stats;
+		try {
+			stat = fs.lstatSync(fullPath);
+		} catch {
+			/* v8 ignore next -- @preserve */
+			continue;
+		}
 
 		// Skip symbolic links to prevent exposing sensitive files
 		/* v8 ignore next 3 -- @preserve */

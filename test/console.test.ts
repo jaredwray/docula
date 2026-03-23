@@ -428,4 +428,77 @@ describe("DoculaConsole", () => {
 		expect(result.args.downloadTarget).toEqual("template");
 		expect(result.args.sitePath).toContain("docs");
 	});
+
+	it("should default quiet to false", () => {
+		const c = new DoculaConsole();
+		expect(c.quiet).toBe(false);
+	});
+
+	it("should suppress log output when quiet is true", () => {
+		const c = new DoculaConsole();
+		const consoleLog = console.log;
+		let logged = false;
+		console.log = () => {
+			logged = true;
+		};
+		c.quiet = true;
+		c.log("test");
+		expect(logged).toBe(false);
+		console.log = consoleLog;
+	});
+
+	it("should not suppress error output when quiet is true", () => {
+		const c = new DoculaConsole();
+		const consoleError = console.error;
+		let errorMessage = "";
+		console.error = (message) => {
+			errorMessage = message as string;
+		};
+		c.quiet = true;
+		c.error("test error");
+		expect(errorMessage).toContain("test error");
+		console.error = consoleError;
+	});
+
+	it("should suppress warn, success, info, step, fileBuilt, banner when quiet", () => {
+		const c = new DoculaConsole();
+		const consoleLog = console.log;
+		const consoleWarn = console.warn;
+		let called = false;
+		console.log = () => {
+			called = true;
+		};
+		console.warn = () => {
+			called = true;
+		};
+		c.quiet = true;
+		c.warn("test");
+		c.success("test");
+		c.info("test");
+		c.step("test");
+		c.fileBuilt("test");
+		c.fileCopied("test");
+		c.banner("test");
+		c.serverLog("GET", "/", 200);
+		c.printHelp();
+		expect(called).toBe(false);
+		console.log = consoleLog;
+		console.warn = consoleWarn;
+	});
+
+	it("should resume output when quiet is toggled off", () => {
+		const c = new DoculaConsole();
+		const consoleLog = console.log;
+		let message = "";
+		c.quiet = true;
+		console.log = (m) => {
+			message = m as string;
+		};
+		c.log("suppressed");
+		expect(message).toBe("");
+		c.quiet = false;
+		c.log("visible");
+		expect(message).toBe("visible");
+		console.log = consoleLog;
+	});
 });

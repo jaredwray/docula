@@ -78,7 +78,9 @@ describe("DoculaBuilder - API", () => {
 
 	describe("Docula Builder - OpenAPI API Documentation", () => {
 		it("should build the API page when openApiUrl is configured", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -115,7 +117,9 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should not build API page when openApiUrl is not configured", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -144,7 +148,9 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should not build API page when api template is not configured", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -174,7 +180,9 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should include /api in sitemap when openApiUrl and api template are configured", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -210,7 +218,9 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should not include /api in sitemap when openApiUrl is configured but api template is missing", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -244,7 +254,9 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should get api template when template directory has api.hbs", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const templateData = await builder.getTemplates(
 				"templates/classic",
 				false,
@@ -253,7 +265,9 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should not get api template when template directory lacks api.hbs", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const templateData = await builder.getTemplates(
 				"test/fixtures/template-example/",
 				false,
@@ -265,7 +279,8 @@ describe("DoculaBuilder - API", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp/build-api-test";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
-			const builder = new DoculaBuilder(options);
+			const builder = new DoculaBuilder(options, { quiet: true });
+			builder.console.quiet = false;
 			const consoleLog = console.log;
 			let consoleMessage = "";
 			console.log = (message) => {
@@ -288,13 +303,22 @@ describe("DoculaBuilder - API", () => {
 			const templates = ["modern", "classic"] as const;
 
 			for (const template of templates) {
+				const tempSitePath = `test/temp/api-home-button-${template}-site`;
+				fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
+					recursive: true,
+					filter: (src) => {
+						const base = src.split("/").pop() ?? "";
+						return !base.startsWith("dist") && base !== ".cache";
+					},
+				});
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.template = template;
-				options.sitePath = "test/fixtures/multi-page-site";
+				options.sitePath = tempSitePath;
 				options.output = `test/temp/build-api-home-button-${template}`;
 				options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 
-				const builder = new DoculaBuilder(options);
+				const builder = new DoculaBuilder(options, { quiet: true });
 
 				try {
 					await builder.build();
@@ -305,6 +329,7 @@ describe("DoculaBuilder - API", () => {
 					expect(indexHtml).toContain('href="/api"');
 					expect(indexHtml).toContain("API Reference");
 				} finally {
+					fs.rmSync(tempSitePath, { recursive: true, force: true });
 					await fs.promises.rm(options.output, {
 						recursive: true,
 						force: true,
@@ -314,13 +339,22 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should not render API Reference button on home page when api template is missing", async () => {
+			const tempSitePath = "test/temp/api-no-template-button-site";
+			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.templatePath = "test/fixtures/template-example";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.sitePath = tempSitePath;
 			options.output = "test/temp/build-api-home-no-template-button";
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 
-			const builder = new DoculaBuilder(options);
+			const builder = new DoculaBuilder(options, { quiet: true });
 
 			try {
 				await builder.build();
@@ -331,6 +365,7 @@ describe("DoculaBuilder - API", () => {
 				expect(indexHtml).not.toContain("API Reference");
 				expect(indexHtml).not.toContain('href="/api"');
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
@@ -339,12 +374,19 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
+			const tempSitePath = "test/temp/api-autodetect-site";
+			fs.cpSync("test/fixtures/mega-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
-			options.sitePath = "test/fixtures/mega-page-site";
+			options.quiet = true;
+			options.sitePath = tempSitePath;
 			options.output = "test/temp/build-api-autodetect";
-			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			const builder = new DoculaBuilder(options, { quiet: true });
 
 			try {
 				await builder.build();
@@ -356,21 +398,28 @@ describe("DoculaBuilder - API", () => {
 				expect(apiPage).toContain("api-reference");
 				expect(apiPage).toContain("Mock HTTP API");
 			} finally {
-				await fs.promises.rm(options.output, { recursive: true });
-				console.log = consoleLog;
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
+				await fs.promises.rm(options.output, { recursive: true, force: true });
 			}
 		});
 	});
 
 	describe("Docula Builder - buildApiHomePage", () => {
 		it("should render API page as index.html when no README and no docs", async () => {
+			const tempSitePath = "test/temp/api-home-test-site";
+			fs.cpSync("test/fixtures/api-only-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.output = "test/temp/api-home-test";
-			options.sitePath = "test/fixtures/api-only-site";
+			options.sitePath = tempSitePath;
 			options.autoReadme = false;
-			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			const builder = new DoculaBuilder(options, { quiet: true });
 
 			try {
 				await builder.build();
@@ -380,13 +429,15 @@ describe("DoculaBuilder - API", () => {
 				);
 				expect(indexHtml).toContain("Test API");
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, { recursive: true, force: true });
-				console.log = consoleLog;
 			}
 		});
 
 		it("should throw error when no API template or openApiUrl found", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",

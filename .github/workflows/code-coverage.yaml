@@ -12,7 +12,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
+  
 jobs:
   build:
 

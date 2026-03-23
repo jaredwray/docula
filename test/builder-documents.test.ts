@@ -73,7 +73,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Build Docs", () => {
 		it("should build the docs pages", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data = doculaData;
 			data.templates = {
 				home: "home.hbs",
@@ -120,7 +122,9 @@ describe("DoculaBuilder - Documents", () => {
 			}
 		});
 		it("should throw error when template doesnt exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data = doculaData;
 			data.templates = undefined;
 			data.sitePath = "site";
@@ -138,7 +142,9 @@ describe("DoculaBuilder - Documents", () => {
 			}
 		});
 		it("should get top level documents from mega fixtures", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const documentsPath = "test/fixtures/mega-page-site/docs";
 			const documents = builder.getDocumentInDirectory(
 				documentsPath,
@@ -147,7 +153,9 @@ describe("DoculaBuilder - Documents", () => {
 			expect(documents.length).toBe(3);
 		});
 		it("should get all the documents from the mega fixtures", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const doculaData: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -165,8 +173,11 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Sections", () => {
 		it("should merge sections based on what you find in options", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sections = [
 				{ name: "foo snizzle", path: "caching", order: 1 },
 				{ name: "bar", path: "bar", order: 2 },
@@ -182,9 +193,12 @@ describe("DoculaBuilder - Documents", () => {
 			expect(mergedSection.order).toBe(1);
 		});
 		it("should get all the sections from the mega fixtures", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const documentsPath = "test/fixtures/mega-page-site/docs";
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sections = [
 				{ name: "Caching", path: "caching", order: 2 },
 				{ name: "Compression", path: "compression", order: 1 },
@@ -197,20 +211,28 @@ describe("DoculaBuilder - Documents", () => {
 			expect(sections[2].order).toBe(undefined);
 		});
 		it("should not include asset-only directories as sections", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const options = new DoculaOptions();
+			options.quiet = true;
 			const sections = builder.getSections(
 				"test/fixtures/multi-page-site/docs",
-				new DoculaOptions(),
+				options,
 			);
 			const sectionPaths = sections.map((s) => s.path);
 			expect(sectionPaths).not.toContain("images");
 			expect(sectionPaths).not.toContain("assets");
 		});
 		it("should not include directories with only nested markdown as sections", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const options = new DoculaOptions();
+			options.quiet = true;
 			const sections = builder.getSections(
 				"test/fixtures/multi-page-site/docs",
-				new DoculaOptions(),
+				options,
 			);
 			const sectionPaths = sections.map((s) => s.path);
 			// guides/ only has nested/intro.md, no immediate markdown files
@@ -220,7 +242,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Generate Sidebar Items", () => {
 		it("generateSidebarItems should return an empty array if sections and documents does not exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data = doculaData;
 			data.templates = {
 				home: "home.hbs",
@@ -236,7 +260,9 @@ describe("DoculaBuilder - Documents", () => {
 			expect(sidebarItems).toStrictEqual([]);
 		});
 		it("generateSidebarItems should sort sidebarItems children", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const fooChildren = { name: "foo", path: "foo", order: 1 };
 			const barChildren = { name: "bar", path: "bar", order: 2 };
 			const fooChildreNoOrder = { name: "foo", path: "foo" };
@@ -279,7 +305,9 @@ describe("DoculaBuilder - Documents", () => {
 			]);
 		});
 		it("generateSidebarItems should sort sidebarItems children with documents", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const fooChildren = { name: "foo", path: "foo", order: 1 };
 			const barChildren = { name: "bar", path: "bar", order: 2 };
 			const documentChildren = {
@@ -330,7 +358,9 @@ describe("DoculaBuilder - Documents", () => {
 			]);
 		});
 		it("generateSidebarItems should ignore a document if documentPath does not have a valid section", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const documents: DoculaDocument[] = [
 				{
 					title: "Document title",
@@ -368,7 +398,9 @@ describe("DoculaBuilder - Documents", () => {
 			expect(sidebarItems[0].children).toBeUndefined();
 		});
 		it("generateSidebarItems should not duplicate children when called multiple times", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const documents: DoculaDocument[] = [
 				{
 					title: "Document title",
@@ -413,7 +445,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Document Parser", () => {
 		it("should not include TOC heading in generatedHtml for empty markdown", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 
 			const documentsPath = "test/fixtures/empty.md";
 			const parsedDocument = builder.parseDocumentData(documentsPath);
@@ -421,7 +455,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should render inline TOC when markdown already has a table of contents", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 
 			const documentsPath = "test/fixtures/has-toc.md";
 			const parsedDocument = builder.parseDocumentData(documentsPath);
@@ -433,7 +469,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Build Readme Section", async () => {
 		it("should build the readme section", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data = doculaData;
 			data.sitePath = "test/fixtures/single-page-site";
 
@@ -445,7 +483,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Build Announcement Section", async () => {
 		it("should return undefined when announcement.md does not exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data = doculaData;
 			data.sitePath = "test/fixtures/single-page-site";
 
@@ -455,7 +495,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should build the announcement section when announcement.md exists", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data = doculaData;
 			data.sitePath = "test/fixtures/announcement-site";
 
@@ -480,7 +522,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - OpenGraph Frontmatter Parsing", () => {
 		it("should parse ogTitle, ogDescription, ogImage from frontmatter", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const doc = builder.parseDocumentData(
 				"test/fixtures/multi-page-site/docs/opengraph-doc.md",
 			);
@@ -490,7 +534,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should return undefined for og fields when not in frontmatter", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const doc = builder.parseDocumentData(
 				"test/fixtures/multi-page-site/docs/front-matter.md",
 			);
@@ -502,7 +548,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - HTML Entity Handling in Code Blocks", () => {
 		it("should produce correct HTML entities in generatedHtml for code blocks with generics", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const doc = builder.parseDocumentData(
 				"test/fixtures/multi-page-site/docs/generics-doc.md",
 			);
@@ -512,7 +560,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should build docs pages with generics in code blocks without he.decode", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -558,7 +608,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should build changelog entry pages without he.decode", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const generatedHtml =
 				"<pre><code>function identity&lt;T&gt;(arg: T): T { return arg; }</code></pre>";
 			const data: DoculaData = {
@@ -610,7 +662,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should handle non-ASCII characters without he.decode", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -663,7 +717,9 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - buildDocsHomePage", () => {
 		it("should render first document as index.html when no README.md exists", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -676,6 +732,7 @@ describe("DoculaBuilder - Documents", () => {
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -704,7 +761,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should throw error when no docPage template is provided", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -727,7 +786,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should throw error when documents array is empty", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -751,7 +812,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should render docs home page when sidebarItems are precomputed", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -764,6 +827,7 @@ describe("DoculaBuilder - Documents", () => {
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -790,16 +854,23 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Content Assets", () => {
 		it("should copy non-markdown files from docs to output docs", async () => {
+			const tempSitePath = "test/temp/content-assets-docs-site";
+			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-docs";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
@@ -831,25 +902,32 @@ describe("DoculaBuilder - Documents", () => {
 					false,
 				);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
 		it("should copy non-markdown files from changelog to output changelog", async () => {
+			const tempSitePath = "test/temp/content-assets-changelog-site";
+			fs.cpSync("test/fixtures/mega-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-changelog";
-			options.sitePath = "test/fixtures/mega-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
@@ -872,11 +950,11 @@ describe("DoculaBuilder - Documents", () => {
 					),
 				).toBe(false);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -900,9 +978,8 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
@@ -914,7 +991,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -939,9 +1015,8 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			options.allowedAssets = [".xyz"];
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
@@ -953,21 +1028,27 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
 		it("should copy sibling assets into non-index document output directories", async () => {
+			const tempSitePath = "test/temp/content-assets-sibling-site";
+			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-sibling";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
@@ -1000,11 +1081,11 @@ describe("DoculaBuilder - Documents", () => {
 					),
 				).toBe(false);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -1028,9 +1109,8 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
@@ -1042,38 +1122,46 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
 		it("should handle docs directory with no non-markdown files", async () => {
+			const tempSitePath = "test/temp/content-assets-no-assets-site";
+			fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
 			const options = new DoculaOptions();
 			options.output = "test/temp/content-assets-no-assets";
-			options.sitePath = "test/fixtures/single-page-site";
+			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				await builder.build();
 				expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
 			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 	});
 
 	describe("lastModified field", () => {
 		it("should include lastModified in YYYY-MM-DD format for parseDocumentData", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const doc = builder.parseDocumentData(
 				"test/fixtures/multi-page-site/docs/front-matter.md",
 			);
@@ -1082,7 +1170,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should include lastModified in YYYY-MM-DD format for parseChangelogEntry", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entry = builder.parseChangelogEntry(
 				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
 			);
@@ -1091,7 +1181,9 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should include lastModified from release date for GitHub release changelog entries", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				tag_name: "v1.0.0",
 				name: "Release 1.0.0",

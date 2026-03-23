@@ -10,7 +10,8 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  
 jobs:
   setup-build-deploy:
     name: Deploy Website

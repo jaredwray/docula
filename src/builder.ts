@@ -5,6 +5,13 @@ import { Ecto } from "ecto";
 import { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
 import {
+	createAIModel,
+	enrichChangelogEntries,
+	enrichDocuments,
+	loadAIMetadataCache,
+	saveAIMetadataCache,
+} from "./builder-ai.js";
+import {
 	buildApiHomePage as _buildApiHomePage,
 	buildApiPage as _buildApiPage,
 	renderApiContent as _renderApiContent,
@@ -94,20 +101,37 @@ const writrOptions: WritrOptions = {
 	throwOnEmptyListeners: false,
 };
 
+export type DoculaBuilderOptions = {
+	console?: DoculaConsole;
+} & DoculaOptions;
+
 export class DoculaBuilder {
 	private readonly _options: DoculaOptions = new DoculaOptions();
 	private readonly _ecto: Ecto;
-	private readonly _console: DoculaConsole = new DoculaConsole();
+	private readonly _console: DoculaConsole;
 	private readonly _hash = new Hashery();
 	public onReleaseChangelog?: (
 		entries: DoculaChangelogEntry[],
 		console: DoculaConsole,
 	) => Promise<DoculaChangelogEntry[]> | DoculaChangelogEntry[];
 
+	public get console(): DoculaConsole {
+		return this._console;
+	}
+
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
-	constructor(options?: DoculaOptions, engineOptions?: any) {
+	constructor(options?: DoculaBuilderOptions, engineOptions?: any) {
 		if (options) {
 			this._options = options;
+		}
+
+		if (options?.console) {
+			this._console = options?.console;
+		} else {
+			this._console = new DoculaConsole();
+			if (options?.quiet) {
+				this._console.quiet = true;
+			}
 		}
 
 		this._ecto = new Ecto(engineOptions);
@@ -326,6 +350,31 @@ export class DoculaBuilder {
 		doculaData.changelogEntries = allChangelogEntries;
 		doculaData.hasChangelog =
 			allChangelogEntries.length > 0 && hasChangelogTemplate;
+
+		// AI metadata enrichment for OG/meta tags
+		/* v8 ignore next 19 -- @preserve */
+		if (this._options.ai) {
+			const aiModel = await createAIModel(this._options.ai);
+			if (aiModel) {
+				this._console.step("Enriching metadata with AI...");
+				const aiCache = loadAIMetadataCache(this._options.sitePath);
+				doculaData.documents = await enrichDocuments(
+					doculaData.documents,
+					aiModel,
+					this._hash,
+					this._console,
+					aiCache,
+				);
+				doculaData.changelogEntries = await enrichChangelogEntries(
+					doculaData.changelogEntries,
+					aiModel,
+					this._hash,
+					this._console,
+					aiCache,
+				);
+				saveAIMetadataCache(this._options.sitePath, aiCache);
+			}
+		}
 
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(
@@ -646,6 +695,7 @@ export class DoculaBuilder {
 				const source = path.join(cwdDir, assetRelPath);
 				const stat = await fs.promises.lstat(source);
 				// Skip symbolic links to prevent copying sensitive files
+				/* v8 ignore next 3 -- @preserve */
 				if (stat.isSymbolicLink()) {
 					continue;
 				}

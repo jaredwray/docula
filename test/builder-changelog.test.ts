@@ -85,7 +85,9 @@ describe("DoculaBuilder - Changelog", () => {
 
 	describe("Docula Builder - Changelog", () => {
 		it("should return empty array when changelog directory does not exist", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entries = builder.getChangelogEntries(
 				"test/fixtures/single-page-site/changelog",
 			);
@@ -93,7 +95,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should get changelog entries from changelog directory", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entries = builder.getChangelogEntries(
 				"test/fixtures/changelog-site/changelog",
 			);
@@ -112,7 +116,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should include mdx changelog files and ignore non-markdown files", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const changelogPath = "test/temp/changelog-mixed-files";
 			await fs.promises.rm(changelogPath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${changelogPath}/nested`, { recursive: true });
@@ -180,7 +186,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should return cached entry when hashes match", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const changelogPath = "test/fixtures/changelog-site/changelog";
 			const cachedEntry: DoculaChangelogEntry = {
 				title: "Cached Feature",
@@ -219,7 +227,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should parse a changelog entry correctly", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entry = builder.parseChangelogEntry(
 				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
 			);
@@ -235,7 +245,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should handle string dates in changelog entries", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entry = builder.parseChangelogEntry(
 				"test/fixtures/changelog-site/changelog/2024-11-01-string-date.md",
 			);
@@ -245,7 +257,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should fall back to filename title when changelog entry has no front matter", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const changelogPath = "test/temp/changelog-missing-frontmatter";
 			const filePath = `${changelogPath}/2026-03-02-missing-fields.md`;
 			await fs.promises.rm(changelogPath, { recursive: true, force: true });
@@ -270,7 +284,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should build changelog listing page", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -324,7 +340,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should build changelog entry pages", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -380,7 +398,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not build changelog page when hasChangelog is false", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -409,7 +429,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not build changelog entry pages when no entries exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -433,7 +455,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should include /changelog in sitemap when changelog exists", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -485,7 +509,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should include /changelog in sitemap with no changelog entry list", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -520,7 +546,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not include /changelog in sitemap when changelog does not exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -554,7 +582,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should get changelog template when hasChangelog is true", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const templateData = await builder.getTemplates(
 				"test/fixtures/template-example/",
 				false,
@@ -565,7 +595,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not get changelog template when hasChangelog is false", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const templateData = await builder.getTemplates(
 				"test/fixtures/template-example/",
 				false,
@@ -579,7 +611,9 @@ describe("DoculaBuilder - Changelog", () => {
 			const options = new DoculaOptions();
 			options.output = "test/temp/build-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
+			builder.console.quiet = false;
 			const consoleLog = console.log;
 			let consoleMessage = "";
 			console.log = (message) => {
@@ -618,7 +652,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should generate preview from markdown content", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entry = builder.parseChangelogEntry(
 				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
 			);
@@ -628,7 +664,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should generate preview that is shorter than full content for long entries", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			// No paragraph breaks so fallback truncation with "..." is used
 			const preview = builder.generateChangelogPreview(
 				"This is a very long content. ".repeat(30),
@@ -641,7 +679,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should strip markdown headings from preview", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const markdown =
 				"## What's Changed\n\nSome great new features were added to the project.";
 			const preview = builder.generateChangelogPreview(markdown);
@@ -650,7 +690,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should convert markdown links to plain text in preview", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const markdown =
 				"Check out [this link](https://example.com) for more details about the release.";
 			const preview = builder.generateChangelogPreview(markdown);
@@ -659,7 +701,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should remove all images from preview", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const markdown =
 				"![screenshot](https://example.com/img.png)\n\nHere is the content of the release.";
 			const preview = builder.generateChangelogPreview(markdown);
@@ -668,7 +712,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should parse previewImage from frontmatter", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entry = builder.parseChangelogEntry(
 				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
 			);
@@ -677,7 +723,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should split on paragraph boundary without ellipsis", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			// First paragraph is ~350 chars, second is short
 			const para1 =
 				"This is the first paragraph with enough content to exceed the minimum length requirement of three hundred characters. We need to keep writing more content here to make sure it is long enough to pass the threshold that triggers truncation behavior in the preview generator. Adding even more words to ensure this paragraph exceeds three hundred characters in total length.";
@@ -692,7 +740,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should handle list-heavy content by splitting at list item boundaries", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const items = Array.from(
 				{ length: 20 },
 				(_, i) =>
@@ -706,7 +756,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should return full content when markdown is shorter than minLength", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const short = "Just a brief note about this release.";
 			const preview = builder.generateChangelogPreview(short);
 			expect(preview).toContain("brief note");
@@ -714,13 +766,17 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should handle empty input", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const preview = builder.generateChangelogPreview("");
 			expect(preview).toBeDefined();
 		});
 
 		it("should split at early paragraph break when no break exists past minLength", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			// Short first paragraph (~50 chars), then a very long second paragraph with no breaks
 			const para1 = "Short intro paragraph for the release notes.";
 			const para2 =
@@ -735,7 +791,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should use ellipsis only when no clean break is found", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			// Single long paragraph with no breaks — must fallback to word-boundary truncation
 			const longText = "word ".repeat(150);
 			const preview = builder.generateChangelogPreview(longText);
@@ -746,6 +804,7 @@ describe("DoculaBuilder - Changelog", () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
 			options.output = "test/temp/changelog-pagination-test";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			const entries = [];
@@ -829,6 +888,7 @@ describe("DoculaBuilder - Changelog", () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
 			options.output = "test/temp/sitemap-pagination-test";
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			const entries = [];
@@ -888,7 +948,9 @@ describe("DoculaBuilder - Changelog", () => {
 
 	describe("Docula Builder - Release to Changelog Conversion", () => {
 		it("should convert a GitHub release to a DoculaChangelogEntry", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				tag_name: "v1.9.10",
 				name: "v1.9.10",
@@ -909,7 +971,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should mark prerelease entries with Pre-release tag", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				tag_name: "v2.0.0-beta.1",
 				name: "v2.0.0 Beta 1",
@@ -925,7 +989,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should use tag_name as title when name is empty", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				tag_name: "v1.0.0",
 				name: "",
@@ -939,7 +1005,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should handle release with empty body", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				tag_name: "v1.0.0",
 				name: "v1.0.0",
@@ -953,7 +1021,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should handle release with missing published_at", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				tag_name: "v1.0.0",
 				name: "v1.0.0",
@@ -967,7 +1037,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should default missing release fields and ignore invalid published_at", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const release = {
 				published_at: "not-a-date",
 				draft: false,
@@ -982,7 +1054,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should filter out draft releases in getReleasesAsChangelogEntries", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const releases = [
 				{
 					tag_name: "v1.0.0",
@@ -1016,7 +1090,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should return empty array for empty releases", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const entries = builder.getReleasesAsChangelogEntries([]);
 			expect(entries).toStrictEqual([]);
 		});
@@ -1027,6 +1103,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -1057,6 +1134,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.output = "test/temp/build-no-release-changelog-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.enableReleaseChangelog = false;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -1087,6 +1165,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.output = "test/temp/build-no-changelog-pages-test";
 			options.sitePath = "test/fixtures/single-page-site";
 			options.enableReleaseChangelog = false;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -1108,6 +1187,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			let hookCalled = false;
@@ -1151,6 +1231,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			builder.onReleaseChangelog = async (entries, _console) =>
@@ -1175,6 +1256,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			builder.onReleaseChangelog = (_entries, _console) => {
@@ -1201,6 +1283,7 @@ describe("DoculaBuilder - Changelog", () => {
 			options.sitePath = "test/fixtures/changelog-site";
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -1222,7 +1305,9 @@ describe("DoculaBuilder - Changelog", () => {
 
 	describe("Docula Builder - Build Changelog Feed JSON", () => {
 		it("should build changelog.json with valid entries", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1308,7 +1393,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not create file when changelogEntries is empty", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1335,7 +1422,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not create file when changelogEntries is undefined", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1361,7 +1450,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should omit optional fields when not present in entry", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1410,7 +1501,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should build correct URLs with baseUrl prefix", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				baseUrl: "/docs",
@@ -1461,7 +1554,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should include changelog.json in sitemap when entries exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1512,7 +1607,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not include changelog.json in sitemap when no entries", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1545,7 +1642,9 @@ describe("DoculaBuilder - Changelog", () => {
 
 	describe("Docula Builder - Build Changelog Latest Feed JSON", () => {
 		it("should build changelog-latest.json limited to changelogPerPage entries", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			builder.options.changelogPerPage = 2;
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -1618,7 +1717,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should include all entries when fewer than changelogPerPage", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			builder.options.changelogPerPage = 20;
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -1665,7 +1766,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not create file when changelogEntries is empty", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -1694,7 +1797,9 @@ describe("DoculaBuilder - Changelog", () => {
 		});
 
 		it("should not create file when changelogEntries is undefined", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",

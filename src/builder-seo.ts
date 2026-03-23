@@ -22,13 +22,17 @@ export function resolveOpenGraphData(
 		preview?: string;
 	},
 ): Record<string, string | undefined> {
-	if (!data.openGraph) {
+	// When no global openGraph config and no per-page OG data, skip entirely
+	if (!data.openGraph && !pageData?.ogTitle && !pageData?.ogDescription) {
 		return {};
 	}
 
-	const og = data.openGraph;
-	const ogTitle =
+	const og = data.openGraph ?? {};
+	const ogSiteName = og.siteName ?? data.siteTitle;
+	const rawTitle =
 		pageData?.ogTitle ?? og.title ?? pageData?.title ?? data.siteTitle;
+	const ogTitle =
+		rawTitle !== data.siteTitle ? `${ogSiteName} - ${rawTitle}` : rawTitle;
 	const ogDescription =
 		pageData?.ogDescription ??
 		og.description ??
@@ -38,7 +42,6 @@ export function resolveOpenGraphData(
 	const ogImage = pageData?.ogImage ?? og.image ?? pageData?.previewImage;
 	const ogUrl = `${data.siteUrl}${data.baseUrl}${pageUrl}`;
 	const ogType = og.type ?? "website";
-	const ogSiteName = og.siteName ?? data.siteTitle;
 	const ogTwitterCard =
 		og.twitterCard ?? (ogImage ? "summary_large_image" : "summary");
 

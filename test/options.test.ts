@@ -41,6 +41,8 @@ describe("DoculaOptions", () => {
 			expect(options.enableLlmsTxt).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.autoReadme).toEqual(true);
+			expect(options.quiet).toEqual(false);
+			expect(options.ai).toBeUndefined();
 			expect(options.themeMode).toBeUndefined();
 			expect(options.cache).toEqual({ github: { ttl: 3600 } });
 		});
@@ -213,6 +215,61 @@ describe("DoculaOptions", () => {
 		it("should not update autoReadme for non-boolean values", () => {
 			options.parseOptions({ autoReadme: "yes" });
 			expect(options.autoReadme).toEqual(true);
+		});
+
+		it("should parse quiet set to true", () => {
+			options.parseOptions({ quiet: true });
+			expect(options.quiet).toEqual(true);
+		});
+
+		it("should parse quiet set to false", () => {
+			options.parseOptions({ quiet: false });
+			expect(options.quiet).toEqual(false);
+		});
+
+		it("should not update quiet for non-boolean values", () => {
+			options.parseOptions({ quiet: "yes" });
+			expect(options.quiet).toEqual(false);
+		});
+
+		it("should parse ai with provider and apiKey", () => {
+			options.parseOptions({
+				ai: { provider: "anthropic", apiKey: "test-key" },
+			});
+			expect(options.ai).toEqual({
+				provider: "anthropic",
+				apiKey: "test-key",
+			});
+		});
+
+		it("should parse ai with provider, apiKey, and model", () => {
+			options.parseOptions({
+				ai: {
+					provider: "openai",
+					apiKey: "test-key",
+					model: "gpt-4o",
+				},
+			});
+			expect(options.ai).toEqual({
+				provider: "openai",
+				apiKey: "test-key",
+				model: "gpt-4o",
+			});
+		});
+
+		it("should not set ai for invalid values", () => {
+			options.parseOptions({ ai: "yes" });
+			expect(options.ai).toBeUndefined();
+		});
+
+		it("should not set ai for object without provider", () => {
+			options.parseOptions({ ai: { apiKey: "key" } });
+			expect(options.ai).toBeUndefined();
+		});
+
+		it("should not set ai for object without apiKey", () => {
+			options.parseOptions({ ai: { provider: "anthropic" } });
+			expect(options.ai).toBeUndefined();
 		});
 
 		it("should parse themeMode set to light", () => {
