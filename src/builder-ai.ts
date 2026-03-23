@@ -247,7 +247,7 @@ function applyMetadataToChangelog(
 ): DoculaChangelogEntry {
 	return {
 		...entry,
-		title: entry.title || metadata.title || entry.title,
+		title: entry.title || metadata.title || "",
 		preview: entry.preview || metadata.preview || metadata.summary || "",
 	};
 }

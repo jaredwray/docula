@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { LanguageModel } from "ai";
 import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Writr } from "writr";
@@ -19,6 +20,11 @@ import type { DoculaChangelogEntry, DoculaDocument } from "../src/types.js";
 vi.mock("@cacheable/net");
 
 const testHash = new Hashery();
+const mockModel = {
+	specificationVersion: "v3",
+	provider: "test",
+	modelId: "test-model",
+} as unknown as LanguageModel;
 
 function makeDocument(overrides: Partial<DoculaDocument> = {}): DoculaDocument {
 	return {
@@ -261,8 +267,7 @@ describe("builder-ai", () => {
 		it("should return undefined for undefined documents", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichDocuments(
 				undefined,
 				mockModel,
@@ -276,8 +281,7 @@ describe("builder-ai", () => {
 		it("should return empty array for empty documents", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichDocuments(
 				[],
 				mockModel,
@@ -291,8 +295,7 @@ describe("builder-ai", () => {
 		it("should skip documents that do not need enrichment", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const doc = makeDocument({
 				description: "Full desc",
 				keywords: ["k1"],
@@ -320,8 +323,7 @@ describe("builder-ai", () => {
 					keywords: ["cached", "keywords"],
 				},
 			};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichDocuments(
 				[doc],
 				mockModel,
@@ -338,8 +340,7 @@ describe("builder-ai", () => {
 		it("should skip documents with very short content", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const doc = makeDocument({ markdown: "hi", content: "hi" });
 			const result = await enrichDocuments(
 				[doc],
@@ -376,8 +377,6 @@ describe("builder-ai", () => {
 				"../src/builder-ai.js"
 			);
 
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
 			const doc = makeDocument();
 			const result = await enrichDocsMocked(
 				[doc],
@@ -407,8 +406,7 @@ describe("builder-ai", () => {
 					keywords: ["ai", "generated"],
 				},
 			};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichDocuments(
 				[doc],
 				mockModel,
@@ -425,8 +423,7 @@ describe("builder-ai", () => {
 		it("should return undefined for undefined entries", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichChangelogEntries(
 				undefined,
 				mockModel,
@@ -440,8 +437,7 @@ describe("builder-ai", () => {
 		it("should skip entries that do not need enrichment", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const entry = makeChangelogEntry({
 				title: "Has title",
 				preview: "Has preview",
@@ -467,8 +463,7 @@ describe("builder-ai", () => {
 					summary: "Cached summary",
 				},
 			};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichChangelogEntries(
 				[entry],
 				mockModel,
@@ -483,8 +478,7 @@ describe("builder-ai", () => {
 		it("should skip changelog entries with very short content", async () => {
 			const doculaConsole = new DoculaConsole();
 			const cache: AIMetadataCache = {};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const entry = makeChangelogEntry({
 				title: "",
 				preview: "",
@@ -525,8 +519,6 @@ describe("builder-ai", () => {
 				"../src/builder-ai.js"
 			);
 
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
 			const entry = makeChangelogEntry({ title: "", preview: "" });
 			const result = await enrichChangelogMocked(
 				[entry],
@@ -552,8 +544,7 @@ describe("builder-ai", () => {
 					summary: "Summary as fallback preview",
 				},
 			};
-			// biome-ignore lint/suspicious/noExplicitAny: mock model
-			const mockModel = {} as any;
+
 			const result = await enrichChangelogEntries(
 				[entry],
 				mockModel,
