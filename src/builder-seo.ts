@@ -22,11 +22,12 @@ export function resolveOpenGraphData(
 		preview?: string;
 	},
 ): Record<string, string | undefined> {
-	if (!data.openGraph) {
+	// When no global openGraph config and no per-page OG data, skip entirely
+	if (!data.openGraph && !pageData?.ogTitle && !pageData?.ogDescription) {
 		return {};
 	}
 
-	const og = data.openGraph;
+	const og = data.openGraph ?? {};
 	const ogTitle =
 		pageData?.ogTitle ?? og.title ?? pageData?.title ?? data.siteTitle;
 	const ogDescription =

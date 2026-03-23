@@ -37,7 +37,7 @@
     "website:singlepage": "node bin/docula.js dev -s ./test/fixtures/single-page-site --clean",
     "website:nohome": "node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page --watch --clean",
     "website:changelog": "node bin/docula.js serve -s ./test/fixtures/changelog-site --watch --clean",
-    "prepare": "pnpm build"
+    "prepublishOnly": "pnpm build"
   },
   "keywords": [
     "static-site-generator",
@@ -59,7 +59,11 @@
     "docula": "./bin/docula.js"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.63",
+    "@ai-sdk/google": "^3.0.52",
+    "@ai-sdk/openai": "^3.0.47",
     "@cacheable/net": "^2.0.6",
+    "ai": "^6.0.134",
     "colorette": "^2.0.20",
     "ecto": "^4.8.3",
     "feed": "^5.2.0",

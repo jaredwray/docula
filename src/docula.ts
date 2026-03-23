@@ -589,6 +589,7 @@ export { Writr } from "writr";
 export type { DoculaChangelogEntry } from "./builder.js";
 export { DoculaConsole } from "./console.js";
 export type {
+	DoculaAIOptions,
 	DoculaCacheOptions,
 	DoculaCookieAuth,
 	DoculaHeaderLink,

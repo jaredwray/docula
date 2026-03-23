@@ -1,7 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import dotenv from "dotenv";
 import type {DoculaConsole, DoculaOptions} from 'docula';
+
+dotenv.config({ quiet: true });
 
 export const options: Partial<DoculaOptions> = {
 	template: 'modern',
@@ -11,6 +14,12 @@ export const options: Partial<DoculaOptions> = {
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',
 	themeMode: 'light',
+	...(process.env.ANTHROPIC_API_KEY && {
+		ai: {
+			provider: 'anthropic',
+			apiKey: process.env.ANTHROPIC_API_KEY,
+		},
+	}),
 	editPageUrl: "https://github.com/jaredwray/docula/blob/main/site/docs",
 	sections: [
 		{name: 'Project Guidelines', path: 'project-guidelines', order: 21},

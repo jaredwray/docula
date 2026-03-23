@@ -66,6 +66,7 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		docsPath: options.docsPath,
 		apiPath: options.apiPath,
 		changelogPath: options.changelogPath,
+		ai: options.ai,
 	};
 	return hash.toHashSync(JSON.stringify(relevant));
 }

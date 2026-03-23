@@ -5,6 +5,13 @@ import { Ecto } from "ecto";
 import { Hashery } from "hashery";
 import { Writr, type WritrOptions } from "writr";
 import {
+	createAIModel,
+	enrichChangelogEntries,
+	enrichDocuments,
+	loadAIMetadataCache,
+	saveAIMetadataCache,
+} from "./builder-ai.js";
+import {
 	buildApiHomePage as _buildApiHomePage,
 	buildApiPage as _buildApiPage,
 	renderApiContent as _renderApiContent,
@@ -325,6 +332,30 @@ export class DoculaBuilder {
 		doculaData.changelogEntries = allChangelogEntries;
 		doculaData.hasChangelog =
 			allChangelogEntries.length > 0 && hasChangelogTemplate;
+
+		// AI metadata enrichment for OG/meta tags
+		if (this._options.ai) {
+			const aiModel = await createAIModel(this._options.ai);
+			if (aiModel) {
+				this._console.step("Enriching metadata with AI...");
+				const aiCache = loadAIMetadataCache(this._options.sitePath);
+				doculaData.documents = await enrichDocuments(
+					doculaData.documents,
+					aiModel,
+					this._hash,
+					this._console,
+					aiCache,
+				);
+				doculaData.changelogEntries = await enrichChangelogEntries(
+					doculaData.changelogEntries,
+					aiModel,
+					this._hash,
+					this._console,
+					aiCache,
+				);
+				saveAIMetadataCache(this._options.sitePath, aiCache);
+			}
+		}
 
 		// Get the templates to use
 		doculaData.templates = await this.getTemplates(
