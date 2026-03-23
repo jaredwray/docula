@@ -317,8 +317,8 @@ export async function buildChangelogPage(
 
 		const changelogPagePath =
 			page === 1
-				? `${data.changelogUrl}/`
-				: `${data.changelogUrl}/page/${page}/`;
+				? `/${data.changelogPath}/`
+				: `/${data.changelogPath}/page/${page}/`;
 
 		const paginationData = {
 			...data,
@@ -374,7 +374,7 @@ export async function buildChangelogEntryPages(
 		const entryOutputPath = `${data.output}/${data.changelogPath}/${entry.slug}`;
 		await fs.promises.mkdir(entryOutputPath, { recursive: true });
 
-		const entryPagePath = `${data.changelogUrl}/${entry.slug}/`;
+		const entryPagePath = `/${data.changelogPath}/${entry.slug}/`;
 		const entryContent = await ecto.renderFromFile(
 			entryTemplate,
 			{
