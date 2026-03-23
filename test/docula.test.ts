@@ -33,6 +33,22 @@ const defaultOptions: DoculaOptions = new DoculaOptions({
 	siteUrl: "https://custom-url.com",
 });
 
+function cloneDefaultOptions(quiet?: boolean): DoculaOptions {
+	const options = new DoculaOptions({
+		templatePath: defaultOptions.templatePath,
+		output: defaultOptions.output,
+		sitePath: defaultOptions.sitePath,
+		githubPath: defaultOptions.githubPath,
+		siteTitle: defaultOptions.siteTitle,
+		siteDescription: defaultOptions.siteDescription,
+		siteUrl: defaultOptions.siteUrl,
+	});
+	if (quiet !== undefined) {
+		options.quiet = quiet;
+	}
+	return options;
+}
+
 vi.mock("@cacheable/net");
 
 describe("docula", () => {
@@ -83,18 +99,15 @@ describe("docula", () => {
 
 	it("should be able to initialize", () => {
 		const docula = new Docula();
-		docula.console.quiet = true;
 		expect(docula).toBeDefined();
 	});
 	it("should be able to initialize with options", () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
+		const docula = new Docula(cloneDefaultOptions(true));
 		expect(docula).toBeDefined();
 	});
 	it("should be able to get and set options", () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
-		expect(docula.options).toEqual(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
+		expect(docula.options).toEqual(cloneDefaultOptions(true));
 		const newOptions: DoculaOptions = new DoculaOptions({
 			templatePath: "./new-template",
 			output: "./new-dist",
@@ -108,7 +121,8 @@ describe("docula", () => {
 		expect(docula.options).toEqual(newOptions);
 	});
 	it("should generate the site init files and folders", () => {
-		const docula = new Docula(defaultOptions);
+		const options = cloneDefaultOptions(false);
+		const docula = new Docula(options);
 		const consoleLog = console.log;
 		let consoleMessage = "";
 		const temporarySitePath = "./temp-site";
@@ -133,7 +147,8 @@ describe("docula", () => {
 		}
 	});
 	it("should generate the site init files and folders for javascript", () => {
-		const docula = new Docula(defaultOptions);
+		const options = cloneDefaultOptions(false);
+		const docula = new Docula(options);
 		const consoleLog = console.log;
 		let consoleMessage = "";
 		const temporarySitePath = "./temp-site-js";
@@ -158,7 +173,8 @@ describe("docula", () => {
 		}
 	});
 	it("should generate the site init files and folders for typescript", () => {
-		const docula = new Docula(defaultOptions);
+		const options = cloneDefaultOptions(false);
+		const docula = new Docula(options);
 		const consoleLog = console.log;
 		let consoleMessage = "";
 		const temporarySitePath = "./temp-site-ts";
@@ -196,10 +212,9 @@ describe("docula", () => {
 	});
 
 	it("should copy variables.css to site directory from modern template", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions());
 		const temporarySitePath = "./temp-download-vars";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		docula.console.quiet = true;
 
 		try {
 			docula.downloadVariables(temporarySitePath, "", "modern", false);
@@ -212,7 +227,7 @@ describe("docula", () => {
 		}
 	});
 	it("should error if variables.css already exists without --overwrite", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const temporarySitePath = "./temp-download-vars-exists";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const dest = `${temporarySitePath}/variables.css`;
@@ -234,12 +249,11 @@ describe("docula", () => {
 		}
 	});
 	it("should overwrite variables.css when overwrite is true", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-vars-overwrite";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const dest = `${temporarySitePath}/variables.css`;
 		fs.writeFileSync(dest, "/* original */");
-		docula.console.quiet = true;
 
 		try {
 			docula.downloadVariables(temporarySitePath, "", "modern", true);
@@ -252,10 +266,9 @@ describe("docula", () => {
 		}
 	});
 	it("should copy variables.css from classic template", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-vars-classic";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		docula.console.quiet = true;
 
 		try {
 			docula.downloadVariables(temporarySitePath, "", "classic", false);
@@ -265,10 +278,9 @@ describe("docula", () => {
 		}
 	});
 	it("should copy full template to site/templates/<name>/", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-template";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		docula.console.quiet = true;
 
 		try {
 			docula.downloadTemplate(temporarySitePath, "", "modern", false);
@@ -280,7 +292,7 @@ describe("docula", () => {
 		}
 	});
 	it("should error if template directory already exists without --overwrite", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const temporarySitePath = "./temp-download-template-exists";
 		const dest = `${temporarySitePath}/templates/modern`;
 		fs.mkdirSync(dest, { recursive: true });
@@ -300,12 +312,11 @@ describe("docula", () => {
 		}
 	});
 	it("should overwrite template directory when overwrite is true", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-template-overwrite";
 		const dest = `${temporarySitePath}/templates/modern`;
 		fs.mkdirSync(dest, { recursive: true });
 		fs.writeFileSync(`${dest}/sentinel.txt`, "original");
-		docula.console.quiet = true;
 
 		try {
 			docula.downloadTemplate(temporarySitePath, "", "modern", true);
@@ -315,10 +326,9 @@ describe("docula", () => {
 		}
 	});
 	it("should copy classic template to site/templates/classic/", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-template-classic";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		docula.console.quiet = true;
 
 		try {
 			docula.downloadTemplate(temporarySitePath, "", "classic", false);
@@ -330,10 +340,9 @@ describe("docula", () => {
 		}
 	});
 	it("should use basename of custom templatePath for output directory name", () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-template-custom-path";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		docula.console.quiet = true;
 		const customTemplatePath = "templates/modern";
 
 		try {
@@ -346,8 +355,7 @@ describe("docula", () => {
 		}
 	});
 	it("should get the package version", () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
+		const docula = new Docula(cloneDefaultOptions(true));
 		const packageJson = fs.readFileSync("./package.json", "utf8");
 		const packageObject = JSON.parse(packageJson) as { version: string };
 		const packageVersion = docula.getVersion();
@@ -362,6 +370,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = "test/fixtures/single-page-site";
 		buildOptions.output = "test/temp/docula-exec-no-params";
 		buildOptions.templatePath = "test/fixtures/template-example/";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -381,6 +390,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = "test/fixtures/single-page-site-ts";
 		buildOptions.output = "test/temp/docula-exec-ts-config";
 		buildOptions.templatePath = "test/fixtures/template-example/";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -400,6 +410,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = "test/fixtures/single-page-site";
 		buildOptions.output = "test/temp/docula-exec-output-initial";
 		buildOptions.templatePath = "test/fixtures/template-example/";
+		buildOptions.quiet = true;
 		const realOutputPath = "test/temp/docula-exec-output-param";
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
@@ -416,6 +427,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = "test/fixtures/single-page-site";
 		buildOptions.output = "test/temp/docula-exec-clean";
 		buildOptions.templatePath = "test/fixtures/template-example/";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -454,6 +466,7 @@ describe("docula execute", () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = sitePath;
 		buildOptions.output = outputDir;
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -487,6 +500,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = sitePath;
 		buildOptions.output = output;
 		buildOptions.template = "modern";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -523,7 +537,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should init based on the init command with auto-detect", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "./custom-site";
 		let consoleMessage = "";
 		const consoleLog = console.log;
@@ -544,7 +558,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should init with typescript config using --typescript flag", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "./custom-site-ts";
 		let consoleMessage = "";
 		const consoleLog = console.log;
@@ -566,7 +580,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should init with javascript config using --javascript flag", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "./custom-site-js";
 		let consoleMessage = "";
 		const consoleLog = console.log;
@@ -588,7 +602,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should auto-detect typescript when tsconfig.json exists", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "./custom-site-auto-ts";
 		const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
 		const hadTsconfig = fs.existsSync(tsconfigPath);
@@ -620,7 +634,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should --javascript flag override auto-detection", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "./custom-site-js-override";
 		const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
 		const hadTsconfig = fs.existsSync(tsconfigPath);
@@ -651,7 +665,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should error when both --typescript and --javascript flags are used", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "./custom-site-conflict";
 		let errorMessage = "";
 		const consoleError = console.error;
@@ -683,13 +697,12 @@ describe("docula execute", () => {
 		}
 	});
 	it("should detect typescript project", () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
+		const docula = new Docula(cloneDefaultOptions(true));
 		// This project has a tsconfig.json
 		expect(docula.detectTypeScript()).toEqual(true);
 	});
 	it("should print help command", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const consoleLog = console.log;
 		let consoleMessage = "";
 		process.argv = ["node", "docula", "help"];
@@ -704,7 +717,7 @@ describe("docula execute", () => {
 		console.log = consoleLog;
 	});
 	it("should show version by the version command", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const consoleLog = console.log;
 		let consoleMessage = "";
 		process.argv = ["node", "docula", "version"];
@@ -723,6 +736,7 @@ describe("docula execute", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/docula-serve-basic";
 		options.templatePath = "test/fixtures/template-example/";
+		options.quiet = true;
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8181"];
@@ -744,6 +758,7 @@ describe("docula execute", () => {
 			"test/fixtures/single-page-site",
 		);
 		options.output = path.join(process.cwd(), "test/temp/docula-serve-reset");
+		options.quiet = true;
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8182"];
@@ -763,6 +778,7 @@ describe("docula execute", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/docula-serve-port";
+		options.quiet = true;
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8183"];
@@ -785,6 +801,7 @@ describe("docula execute", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/docula-serve-port-flag";
+		options.quiet = true;
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "--port", "8184"];
@@ -833,6 +850,7 @@ describe("docula execute", () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -852,6 +870,7 @@ describe("docula execute", () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -871,6 +890,7 @@ describe("docula execute", () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		docula.console.quiet = true;
 
@@ -890,6 +910,7 @@ describe("docula execute", () => {
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
+		buildOptions.quiet = true;
 		const docula = new Docula(buildOptions);
 		const consoleError = console.error;
 		let errorMessage = "";
@@ -952,6 +973,7 @@ describe("docula watch", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/docula-serve-no-watch";
 		options.templatePath = "test/fixtures/template-example/";
+		options.quiet = true;
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8191"];
@@ -975,6 +997,7 @@ describe("docula watch", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = outputDir;
 		options.templatePath = "test/fixtures/template-example/";
+		options.quiet = true;
 		await fs.promises.mkdir(outputDir, { recursive: true });
 		// Create a marker file to verify it doesn't get deleted
 		fs.writeFileSync(path.join(outputDir, "marker.txt"), "keep");
@@ -1009,6 +1032,7 @@ describe("docula watch", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/docula-serve-build-flag";
 		options.templatePath = "test/fixtures/template-example/";
+		options.quiet = true;
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8192", "--build"];
 		docula.console.quiet = true;
@@ -1091,6 +1115,7 @@ describe("docula watch", () => {
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/docula-watch-close-existing";
 		options.templatePath = "test/fixtures/template-example/";
+		options.quiet = true;
 		const docula = new Docula(options);
 		docula.console.quiet = true;
 
@@ -1408,16 +1433,14 @@ describe("docula dev", () => {
 
 describe("docula config file", () => {
 	it("should be able to load the config file", async () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
+		const docula = new Docula(cloneDefaultOptions(true));
 		const sitePath = "test/fixtures/multi-page-site";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
 		expect(docula.configFileModule.options).toBeDefined();
 	});
 	it("should be able to load a typescript config file", async () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
+		const docula = new Docula(cloneDefaultOptions(true));
 		const sitePath = "test/fixtures/single-page-site-ts";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
@@ -1440,8 +1463,8 @@ describe("docula config file", () => {
 		);
 
 		try {
-			const docula = new Docula(defaultOptions);
-			docula.console.quiet = true;
+			const docula = new Docula(cloneDefaultOptions(true));
+			
 			await docula.loadConfigFile(tempPath);
 			expect(docula.configFileModule).toBeDefined();
 			expect(docula.configFileModule.options.siteTitle).toEqual(
@@ -1452,14 +1475,14 @@ describe("docula config file", () => {
 		}
 	});
 	it("should handle non-existent site path gracefully", async () => {
-		const docula = new Docula(defaultOptions);
-		docula.console.quiet = true;
+		const docula = new Docula(cloneDefaultOptions(true));
+		
 		const sitePath = "test/fixtures/non-existent-path";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toEqual({});
 	});
 	it("should load the config and set the options", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "test/fixtures/multi-page-site";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
@@ -1483,9 +1506,9 @@ describe("docula config file", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 		options.autoReadme = false;
+		options.quiet = true;
 		const docula = new Docula(options);
 		const output = "test/temp/build-mega-no-home-test";
-		docula.console.quiet = true;
 
 		try {
 			process.argv = ["node", "docula", "-o", output];
@@ -1501,7 +1524,7 @@ describe("docula config file", () => {
 		}
 	});
 	it("should load the config and test the onPrepare", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "test/fixtures/single-page-site-onprepare";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
@@ -1521,7 +1544,7 @@ describe("docula config file", () => {
 		console.info = consoleLog;
 	});
 	it("should load typescript config and test the onPrepare", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "test/fixtures/single-page-site-ts-onprepare";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
@@ -1541,7 +1564,7 @@ describe("docula config file", () => {
 		console.info = consoleLog;
 	});
 	it("should throw error onPrepare", async () => {
-		const docula = new Docula(defaultOptions);
+		const docula = new Docula(cloneDefaultOptions(false));
 		docula.options.sitePath = "test/fixtures/single-page-site-error";
 		const consoleLog = console.log;
 		let _consoleMessage = "";
@@ -1575,6 +1598,7 @@ describe("docula config file", () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
 		options.output = "test/temp/templatepath-test";
+		options.quiet = true;
 		const docula = new Docula(options);
 		process.argv = [
 			"node",
@@ -1583,7 +1607,6 @@ describe("docula config file", () => {
 			"-t",
 			"test/fixtures/template-example",
 		];
-		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
