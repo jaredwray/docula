@@ -1339,9 +1339,9 @@ describe("DoculaBuilder", () => {
 				// Load it back
 				const loaded = loadBuildManifest(sitePath);
 				expect(loaded).toBeDefined();
-				expect(loaded.version).toBe(1);
-				expect(loaded.configHash).toBe("abc");
-				expect(loaded.docs["docs/index.md"]).toBe("hash1");
+				expect(loaded?.version).toBe(1);
+				expect(loaded?.configHash).toBe("abc");
+				expect(loaded?.docs["docs/index.md"]).toBe("hash1");
 			} finally {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
@@ -2744,7 +2744,7 @@ describe("DoculaBuilder", () => {
 				title: "Getting Started",
 				description: "Learn how to use the tool",
 				lastModified: "2024-01-15",
-				keywords: "docs, tutorial",
+				keywords: ["docs", "tutorial"],
 			};
 			const result = builder.resolveJsonLd(
 				"docs",
@@ -2761,7 +2761,7 @@ describe("DoculaBuilder", () => {
 			expect(json.headline).toBe("Getting Started");
 			expect(json.description).toBe("Learn how to use the tool");
 			expect(json.dateModified).toBe("2024-01-15");
-			expect(json.keywords).toBe("docs, tutorial");
+			expect(json.keywords).toEqual(["docs", "tutorial"]);
 			expect(json.url).toBe("https://example.com/docs/getting-started/");
 			expect(json.publisher).toEqual({
 				"@type": "Organization",
@@ -5576,6 +5576,7 @@ describe("DoculaBuilder", () => {
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",
@@ -5664,6 +5665,7 @@ describe("DoculaBuilder", () => {
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
 				documents: builder.getDocuments("test/fixtures/multi-page-site/docs", {
+					...defaultPathFields,
 					siteUrl: "http://foo.com",
 					siteTitle: "docula",
 					siteDescription: "Beautiful Website for Your Projects",

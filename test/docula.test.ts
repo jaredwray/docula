@@ -1464,7 +1464,7 @@ describe("docula config file", () => {
 
 		try {
 			const docula = new Docula(cloneDefaultOptions(true));
-			
+
 			await docula.loadConfigFile(tempPath);
 			expect(docula.configFileModule).toBeDefined();
 			expect(docula.configFileModule.options.siteTitle).toEqual(
@@ -1476,7 +1476,7 @@ describe("docula config file", () => {
 	});
 	it("should handle non-existent site path gracefully", async () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		
+
 		const sitePath = "test/fixtures/non-existent-path";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toEqual({});

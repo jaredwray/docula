@@ -303,7 +303,9 @@ export default class Docula {
 			this.cleanCache(this.options.sitePath);
 		}
 
-		const builder = new DoculaBuilder(Object.assign(this.options, { console: this._console }));
+		const builder = new DoculaBuilder(
+			Object.assign(this.options, { console: this._console }),
+		);
 		/* v8 ignore next 4 -- @preserve */
 		if (this._configFileModule.onReleaseChangelog) {
 			builder.onReleaseChangelog = this._configFileModule.onReleaseChangelog;

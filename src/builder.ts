@@ -102,7 +102,7 @@ const writrOptions: WritrOptions = {
 };
 
 export type DoculaBuilderOptions = {
-	console?: DoculaConsole,
+	console?: DoculaConsole;
 } & DoculaOptions;
 
 export class DoculaBuilder {
