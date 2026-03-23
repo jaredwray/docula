@@ -644,7 +644,7 @@ describe("DoculaBuilder - SEO", () => {
 				},
 			};
 			const result = builder.resolveOpenGraphData(data, "/");
-			expect(result.ogTitle).toBe("OG Title");
+			expect(result.ogTitle).toBe("OG Site - OG Title");
 			expect(result.ogDescription).toBe("OG Desc");
 			expect(result.ogImage).toBe("https://example.com/og.png");
 			expect(result.ogUrl).toBe("https://example.com/");
@@ -679,7 +679,7 @@ describe("DoculaBuilder - SEO", () => {
 				"/docs/test/",
 				pageData,
 			);
-			expect(result.ogTitle).toBe("Page OG Title");
+			expect(result.ogTitle).toBe("Test Site - Page OG Title");
 			expect(result.ogDescription).toBe("Page OG Desc");
 			expect(result.ogImage).toBe("https://example.com/page-og.png");
 			expect(result.ogUrl).toBe("https://example.com/docs/test/");
@@ -706,7 +706,7 @@ describe("DoculaBuilder - SEO", () => {
 				"/docs/page/",
 				pageData,
 			);
-			expect(result.ogTitle).toBe("Page Title");
+			expect(result.ogTitle).toBe("Test Site - Page Title");
 			expect(result.ogDescription).toBe("Page Description");
 		});
 
@@ -789,6 +789,47 @@ describe("DoculaBuilder - SEO", () => {
 			const result = builder.resolveOpenGraphData(data, "/");
 			expect(result.ogTwitterCard).toBe("summary");
 		});
+
+		it("should not duplicate site name when title equals siteTitle", () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {},
+			};
+			const result = builder.resolveOpenGraphData(data, "/");
+			expect(result.ogTitle).toBe("Test Site");
+		});
+
+		it("should use ogSiteName as prefix when openGraph.siteName is set", () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "https://example.com",
+				siteTitle: "Test Site",
+				siteDescription: "Test Description",
+				sitePath: "",
+				templatePath: "",
+				output: "",
+				openGraph: {
+					siteName: "Brand",
+				},
+			};
+			const pageData = {
+				title: "Guide",
+			};
+			const result = builder.resolveOpenGraphData(
+				data,
+				"/docs/guide/",
+				pageData,
+			);
+			expect(result.ogTitle).toBe("Brand - Guide");
+		});
 	});
 
 	describe("Docula Builder - resolveJsonLd", () => {
@@ -825,7 +866,7 @@ describe("DoculaBuilder - SEO", () => {
 				title: "Getting Started",
 				description: "Learn how to use the tool",
 				lastModified: "2024-01-15",
-				keywords: "docs, tutorial",
+				keywords: ["docs", "tutorial"],
 			};
 			const result = builder.resolveJsonLd(
 				"docs",
@@ -842,7 +883,7 @@ describe("DoculaBuilder - SEO", () => {
 			expect(json.headline).toBe("Getting Started");
 			expect(json.description).toBe("Learn how to use the tool");
 			expect(json.dateModified).toBe("2024-01-15");
-			expect(json.keywords).toBe("docs, tutorial");
+			expect(json.keywords).toEqual(["docs", "tutorial"]);
 			expect(json.url).toBe("https://example.com/docs/getting-started/");
 			expect(json.publisher).toEqual({
 				"@type": "Organization",

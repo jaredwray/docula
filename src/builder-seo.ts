@@ -28,8 +28,11 @@ export function resolveOpenGraphData(
 	}
 
 	const og = data.openGraph ?? {};
-	const ogTitle =
+	const ogSiteName = og.siteName ?? data.siteTitle;
+	const rawTitle =
 		pageData?.ogTitle ?? og.title ?? pageData?.title ?? data.siteTitle;
+	const ogTitle =
+		rawTitle !== data.siteTitle ? `${ogSiteName} - ${rawTitle}` : rawTitle;
 	const ogDescription =
 		pageData?.ogDescription ??
 		og.description ??
@@ -39,7 +42,6 @@ export function resolveOpenGraphData(
 	const ogImage = pageData?.ogImage ?? og.image ?? pageData?.previewImage;
 	const ogUrl = `${data.siteUrl}${data.baseUrl}${pageUrl}`;
 	const ogType = og.type ?? "website";
-	const ogSiteName = og.siteName ?? data.siteTitle;
 	const ogTwitterCard =
 		og.twitterCard ?? (ogImage ? "summary_large_image" : "summary");
 
