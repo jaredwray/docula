@@ -354,7 +354,10 @@ describe("builder-ai", () => {
 
 		it("should handle AI errors gracefully", async () => {
 			const doculaConsole = new DoculaConsole();
-			const warnSpy = vi.spyOn(doculaConsole, "warn");
+			doculaConsole.quiet = true;
+			const warnSpy = vi
+				.spyOn(doculaConsole, "warn")
+				.mockImplementation(() => {});
 			const cache: AIMetadataCache = {};
 
 			vi.doMock("writr", async (importOriginal) => {
@@ -496,7 +499,10 @@ describe("builder-ai", () => {
 
 		it("should handle AI errors gracefully for changelog", async () => {
 			const doculaConsole = new DoculaConsole();
-			const warnSpy = vi.spyOn(doculaConsole, "warn");
+			doculaConsole.quiet = true;
+			const warnSpy = vi
+				.spyOn(doculaConsole, "warn")
+				.mockImplementation(() => {});
 			const cache: AIMetadataCache = {};
 
 			vi.doMock("writr", async (importOriginal) => {
