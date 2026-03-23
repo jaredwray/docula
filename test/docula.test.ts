@@ -538,7 +538,7 @@ describe("docula execute", () => {
 	});
 	it("should init based on the init command with auto-detect", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const sitePath = "./custom-site";
+		const sitePath = "./test/temp/custom-site";
 		let consoleMessage = "";
 		const consoleLog = console.log;
 		console.log = (message) => {
@@ -559,7 +559,7 @@ describe("docula execute", () => {
 	});
 	it("should init with typescript config using --typescript flag", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const sitePath = "./custom-site-ts";
+		const sitePath = "./test/temp/custom-site-ts";
 		let consoleMessage = "";
 		const consoleLog = console.log;
 		console.log = (message) => {
@@ -581,7 +581,7 @@ describe("docula execute", () => {
 	});
 	it("should init with javascript config using --javascript flag", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const sitePath = "./custom-site-js";
+		const sitePath = "./test/temp/custom-site-js";
 		let consoleMessage = "";
 		const consoleLog = console.log;
 		console.log = (message) => {
@@ -603,7 +603,7 @@ describe("docula execute", () => {
 	});
 	it("should auto-detect typescript when tsconfig.json exists", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const sitePath = "./custom-site-auto-ts";
+		const sitePath = "./test/temp/custom-site-auto-ts";
 		const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
 		const hadTsconfig = fs.existsSync(tsconfigPath);
 		let consoleMessage = "";
@@ -635,7 +635,7 @@ describe("docula execute", () => {
 	});
 	it("should --javascript flag override auto-detection", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const sitePath = "./custom-site-js-override";
+		const sitePath = "./test/temp/custom-site-js-override";
 		const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
 		const hadTsconfig = fs.existsSync(tsconfigPath);
 		let consoleMessage = "";
@@ -666,7 +666,7 @@ describe("docula execute", () => {
 	});
 	it("should error when both --typescript and --javascript flags are used", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const sitePath = "./custom-site-conflict";
+		const sitePath = "./test/temp/custom-site-conflict";
 		let errorMessage = "";
 		const consoleError = console.error;
 		docula.console.quiet = true;
