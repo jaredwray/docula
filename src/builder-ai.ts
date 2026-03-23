@@ -26,19 +26,21 @@ export async function createAIModel(
 			case "anthropic": {
 				const { createAnthropic } = await import("@ai-sdk/anthropic");
 				return createAnthropic({ apiKey: ai.apiKey })(
-					ai.model ?? "claude-haiku-4-5-20251001",
+					ai.model ?? "claude-haiku-4-5",
 				);
 			}
 
 			case "openai": {
 				const { createOpenAI } = await import("@ai-sdk/openai");
-				return createOpenAI({ apiKey: ai.apiKey })(ai.model ?? "gpt-4o-mini");
+				return createOpenAI({ apiKey: ai.apiKey })(
+					ai.model ?? "gpt-4o-mini-latest",
+				);
 			}
 
 			case "google": {
 				const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
 				return createGoogleGenerativeAI({ apiKey: ai.apiKey })(
-					ai.model ?? "gemini-2.5-flash-lite",
+					ai.model ?? "gemini-2.5-flash-lite-latest",
 				);
 			}
 

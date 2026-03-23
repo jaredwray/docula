@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Writr } from "writr";
 import {
 	type AIMetadataCache,
 	createAIModel,
@@ -361,12 +362,11 @@ describe("builder-ai", () => {
 					...original,
 					Writr: class extends original.Writr {
 						get ai() {
-							// biome-ignore lint/suspicious/noExplicitAny: test mock
 							return {
 								getMetadata: () => {
 									throw new Error("AI API error");
 								},
-							} as any;
+							} as unknown as Writr["ai"];
 						}
 					},
 				};
@@ -511,12 +511,11 @@ describe("builder-ai", () => {
 					...original,
 					Writr: class extends original.Writr {
 						get ai() {
-							// biome-ignore lint/suspicious/noExplicitAny: test mock
 							return {
 								getMetadata: () => {
 									throw new Error("AI API error");
 								},
-							} as any;
+							} as unknown as Writr["ai"];
 						}
 					},
 				};

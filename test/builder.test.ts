@@ -883,8 +883,11 @@ describe("DoculaBuilder", () => {
 					"modern",
 				);
 
-				// .gitignore should NOT be created since .cache already existed
-				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(false);
+				// .gitignore should be created with .cache entry even if .cache already existed
+				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(true);
+				expect(fs.readFileSync(`${sitePath}/.gitignore`, "utf8")).toContain(
+					".cache",
+				);
 			} finally {
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}

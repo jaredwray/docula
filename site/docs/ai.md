@@ -53,9 +53,9 @@ export const options = {
 
 | Provider | Default Model |
 |----------|--------------|
-| `anthropic` | `claude-haiku-4-5-20251001` |
-| `openai` | `gpt-4o-mini` |
-| `google` | `gemini-2.5-flash-lite` |
+| `anthropic` | `claude-haiku-4-5` |
+| `openai` | `gpt-4o-mini-latest` |
+| `google` | `gemini-2.5-flash-lite-latest` |
 
 ### Custom Model
 
@@ -66,7 +66,7 @@ export const options = {
   ai: {
     provider: 'anthropic',
     apiKey: process.env.ANTHROPIC_API_KEY,
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6-20250217',
   },
 };
 ```
