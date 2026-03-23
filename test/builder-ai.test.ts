@@ -110,6 +110,23 @@ describe("builder-ai", () => {
 			});
 			expect(result).toBeUndefined();
 		});
+
+		it("should return undefined when provider import throws", async () => {
+			vi.doMock("@ai-sdk/anthropic", () => {
+				throw new Error("Module not found");
+			});
+
+			const { createAIModel: createMocked } = await import(
+				"../src/builder-ai.js"
+			);
+			const result = await createMocked({
+				provider: "anthropic",
+				apiKey: "test-key",
+			});
+			expect(result).toBeUndefined();
+
+			vi.doUnmock("@ai-sdk/anthropic");
+		});
 	});
 
 	describe("needsDocumentEnrichment", () => {

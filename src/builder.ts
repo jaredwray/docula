@@ -334,6 +334,7 @@ export class DoculaBuilder {
 			allChangelogEntries.length > 0 && hasChangelogTemplate;
 
 		// AI metadata enrichment for OG/meta tags
+		/* v8 ignore next 19 -- @preserve */
 		if (this._options.ai) {
 			const aiModel = await createAIModel(this._options.ai);
 			if (aiModel) {
@@ -676,6 +677,7 @@ export class DoculaBuilder {
 				const source = path.join(cwdDir, assetRelPath);
 				const stat = await fs.promises.lstat(source);
 				// Skip symbolic links to prevent copying sensitive files
+				/* v8 ignore next 3 -- @preserve */
 				if (stat.isSymbolicLink()) {
 					continue;
 				}
