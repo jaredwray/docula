@@ -101,10 +101,14 @@ const writrOptions: WritrOptions = {
 	throwOnEmptyListeners: false,
 };
 
+export type DoculaBuilderOptions = {
+	console?: DoculaConsole,
+} & DoculaOptions;
+
 export class DoculaBuilder {
 	private readonly _options: DoculaOptions = new DoculaOptions();
 	private readonly _ecto: Ecto;
-	private readonly _console: DoculaConsole = new DoculaConsole();
+	private readonly _console: DoculaConsole;
 	private readonly _hash = new Hashery();
 	public onReleaseChangelog?: (
 		entries: DoculaChangelogEntry[],
@@ -116,13 +120,15 @@ export class DoculaBuilder {
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
-	constructor(options?: DoculaOptions, engineOptions?: any) {
+	constructor(options?: DoculaBuilderOptions, engineOptions?: any) {
 		if (options) {
 			this._options = options;
 		}
 
-		if (this._options.quiet) {
-			this._console.quiet = true;
+		if (options?.console) {
+			this._console = options?.console;
+		} else {
+			this._console = new DoculaConsole();
 		}
 
 		this._ecto = new Ecto(engineOptions);

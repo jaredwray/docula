@@ -39,6 +39,10 @@ export default class Docula {
 		if (options) {
 			this._options = options;
 		}
+
+		if (this._options.quiet) {
+			this._console.quiet = true;
+		}
 	}
 
 	/**
@@ -299,7 +303,7 @@ export default class Docula {
 			this.cleanCache(this.options.sitePath);
 		}
 
-		const builder = new DoculaBuilder(this.options);
+		const builder = new DoculaBuilder(Object.assign(this.options, { console: this._console }));
 		/* v8 ignore next 4 -- @preserve */
 		if (this._configFileModule.onReleaseChangelog) {
 			builder.onReleaseChangelog = this._configFileModule.onReleaseChangelog;

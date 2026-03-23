@@ -212,7 +212,7 @@ describe("docula", () => {
 	});
 
 	it("should copy variables.css to site directory from modern template", () => {
-		const docula = new Docula(cloneDefaultOptions());
+		const docula = new Docula(cloneDefaultOptions(true));
 		const temporarySitePath = "./temp-download-vars";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 
@@ -1531,7 +1531,7 @@ describe("docula config file", () => {
 		expect(docula.configFileModule.options).toBeDefined();
 		expect(docula.configFileModule.onPrepare).toBeDefined();
 		const doculaConsole = new DoculaConsole();
-		const consoleLog = console.log;
+		doculaConsole.quiet = true;
 		let consoleMessage = "";
 		const originalInfo = doculaConsole.info.bind(doculaConsole);
 		doculaConsole.info = (message: string) => {
@@ -1541,7 +1541,6 @@ describe("docula config file", () => {
 
 		await docula.configFileModule.onPrepare(docula.options, doculaConsole);
 		expect(consoleMessage).toContain("onPrepare");
-		console.info = consoleLog;
 	});
 	it("should load typescript config and test the onPrepare", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
@@ -1551,7 +1550,7 @@ describe("docula config file", () => {
 		expect(docula.configFileModule.options).toBeDefined();
 		expect(docula.configFileModule.onPrepare).toBeDefined();
 		const doculaConsole = new DoculaConsole();
-		const consoleLog = console.log;
+		doculaConsole.quiet = true;
 		let consoleMessage = "";
 		const originalInfo = doculaConsole.info.bind(doculaConsole);
 		doculaConsole.info = (message: string) => {
@@ -1561,7 +1560,6 @@ describe("docula config file", () => {
 
 		await docula.configFileModule.onPrepare(docula.options, doculaConsole);
 		expect(consoleMessage).toContain("onPrepare TypeScript");
-		console.info = consoleLog;
 	});
 	it("should throw error onPrepare", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
