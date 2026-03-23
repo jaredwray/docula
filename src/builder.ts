@@ -129,6 +129,9 @@ export class DoculaBuilder {
 			this._console = options?.console;
 		} else {
 			this._console = new DoculaConsole();
+			if (options?.quiet) {
+				this._console.quiet = true;
+			}
 		}
 
 		this._ecto = new Ecto(engineOptions);

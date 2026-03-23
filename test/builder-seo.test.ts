@@ -74,6 +74,7 @@ describe("DoculaBuilder - SEO", () => {
 		it("should build the robots.txt (/robots.txt)", async () => {
 			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/single-page-site";
 			options.output = "test/temp/robots-test";
 
@@ -97,6 +98,7 @@ describe("DoculaBuilder - SEO", () => {
 		it("should copy the robots.txt (/robots.txt)", async () => {
 			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/robots-test-copy";
 

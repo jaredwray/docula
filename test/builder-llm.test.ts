@@ -772,6 +772,7 @@ describe("DoculaBuilder - LLM", () => {
 
 		it("should skip llms generation when enableLlmsTxt is false", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.enableLlmsTxt = false;
 			const builder = new DoculaBuilder(options, { quiet: true });
 			const output = "test/temp/llms-disabled";

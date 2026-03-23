@@ -289,6 +289,7 @@ describe("DoculaBuilder - API", () => {
 
 			for (const template of templates) {
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.template = template;
 				options.sitePath = "test/fixtures/multi-page-site";
 				options.output = `test/temp/build-api-home-button-${template}`;
@@ -315,6 +316,7 @@ describe("DoculaBuilder - API", () => {
 
 		it("should not render API Reference button on home page when api template is missing", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.templatePath = "test/fixtures/template-example";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-api-home-no-template-button";
@@ -340,6 +342,7 @@ describe("DoculaBuilder - API", () => {
 
 		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/mega-page-site";
 			options.output = "test/temp/build-api-autodetect";
 			const builder = new DoculaBuilder(options, { quiet: true });
@@ -362,6 +365,7 @@ describe("DoculaBuilder - API", () => {
 	describe("Docula Builder - buildApiHomePage", () => {
 		it("should render API page as index.html when no README and no docs", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.output = "test/temp/api-home-test";
 			options.sitePath = "test/fixtures/api-only-site";
 			options.autoReadme = false;

@@ -110,6 +110,7 @@ describe("DoculaBuilder", () => {
 
 		it("should initiate with options", () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 			expect(builder).toBeTruthy();
 			expect(builder.options).toBe(options);
@@ -212,6 +213,7 @@ describe("DoculaBuilder", () => {
 		});
 		it("should not build changelog.json when changelog-entry template is missing", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.output = "test/temp/build-no-changelog-entry-test";
 			options.sitePath = "test/fixtures/changelog-site";
 			options.templatePath = path.join(
@@ -235,6 +237,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Template Overrides", () => {
 		it("should return original path when no override directory exists", () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/single-page-site";
 			const builder = new DoculaBuilder(options);
 			const result = mergeTemplateOverrides(
@@ -250,6 +253,7 @@ describe("DoculaBuilder", () => {
 
 		it("should return original path when templatePath is set", () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.templatePath = "test/fixtures/template-example";
 			const builder = new DoculaBuilder(options);
 			const result = mergeTemplateOverrides(
@@ -265,6 +269,7 @@ describe("DoculaBuilder", () => {
 
 		it("should return original path when templateName contains path traversal", () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/single-page-site";
 			const builder = new DoculaBuilder(options);
 			const result = mergeTemplateOverrides(
@@ -1298,6 +1303,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.sitePath = sitePath;
 				const _builder = new DoculaBuilder(options);
 
@@ -1331,6 +1337,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.sitePath = sitePath;
 				const _builder = new DoculaBuilder(options);
 
@@ -1400,6 +1407,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.sitePath = sitePath;
 				const _builder = new DoculaBuilder(options);
 
@@ -1478,6 +1486,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.sitePath = sitePath;
 				const _builder = new DoculaBuilder(options);
 
@@ -1497,6 +1506,7 @@ describe("DoculaBuilder", () => {
 
 			try {
 				const options = new DoculaOptions();
+				options.quiet = true;
 				options.sitePath = sitePath;
 				const _builder = new DoculaBuilder(options);
 
@@ -1535,12 +1545,14 @@ describe("DoculaBuilder", () => {
 		it("should allow empty githubPath", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.githubPath = "";
 			expect(() => builder.validateOptions(options)).not.toThrow();
 		});
 		it("should reject malformed githubPath without slash", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.githubPath = "invalid";
 			expect(() => builder.validateOptions(options)).toThrow(
 				"githubPath must be in 'owner/repo' format",
@@ -1549,6 +1561,7 @@ describe("DoculaBuilder", () => {
 		it("should validate siteDescription options", async () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
+			options.quiet = true;
 			try {
 				options.siteDescription = "";
 				builder.validateOptions(options);
@@ -1561,6 +1574,7 @@ describe("DoculaBuilder", () => {
 		it("should validate site title options", async () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
+			options.quiet = true;
 			try {
 				options.siteTitle = "";
 				builder.validateOptions(options);
@@ -1571,6 +1585,7 @@ describe("DoculaBuilder", () => {
 		it("should validate site url options", async () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
+			options.quiet = true;
 			try {
 				options.siteUrl = "";
 				builder.validateOptions(options);
@@ -1820,6 +1835,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - cookieAuth", () => {
 		it("should render login button when cookieAuth is configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth";
@@ -1847,6 +1863,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not render login button when cookieAuth is not configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-no-cookie-auth";
@@ -1871,6 +1888,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render logoutUrl redirect script when logoutUrl is configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-logout-url";
@@ -1898,6 +1916,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render mobile login button when cookieAuth is configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-mobile";
@@ -1924,6 +1943,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render header-actions wrapper around cookie auth and theme toggle", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-header-actions";
@@ -1948,6 +1968,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render cached auth state check in head script", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-head-cache";
@@ -1973,6 +1994,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render inline username script after cookie-auth-user element", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-inline-username";
@@ -1998,6 +2020,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not use inline display:none styles on cookie auth elements", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-no-inline-styles";
@@ -2023,6 +2046,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render authCheckUrl in config when configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-cookie-auth-check-url";
@@ -2056,6 +2080,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - headerLinks", () => {
 		it("should render header links when headerLinks is configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-header-links";
@@ -2089,6 +2114,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not render header links when headerLinks is not configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-no-header-links";
@@ -2112,6 +2138,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render custom icon when icon property is provided", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-header-links-icon";
@@ -2143,6 +2170,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render default icon when icon property is not provided", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-header-links-default-icon";
@@ -2171,6 +2199,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render header links in mobile nav", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-header-links-mobile";
@@ -2344,6 +2373,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Configurable Paths", () => {
 		it("should use custom docsPath for document urlPaths", () => {
 			const options = new DoculaOptions({
+				quiet: true,
 				sitePath: "test/fixtures/multi-page-site",
 				docsPath: "guide",
 			});
@@ -2357,6 +2387,7 @@ describe("DoculaBuilder", () => {
 
 		it("should place docs at root when docsPath is empty", () => {
 			const options = new DoculaOptions({
+				quiet: true,
 				sitePath: "test/fixtures/multi-page-site",
 				docsPath: "",
 			});
@@ -2370,6 +2401,7 @@ describe("DoculaBuilder", () => {
 
 		it("should use custom changelogPath for changelog entry urlPaths", () => {
 			const options = new DoculaOptions({
+				quiet: true,
 				sitePath: "test/fixtures/changelog-site",
 				changelogPath: "releases",
 			});
@@ -2383,6 +2415,7 @@ describe("DoculaBuilder", () => {
 
 		it("should build docs pages at output root when docsPath is empty", async () => {
 			const options = new DoculaOptions({
+				quiet: true,
 				sitePath: "test/fixtures/multi-page-site",
 				output: "./test/temp/empty-docspath",
 				docsPath: "",
@@ -2455,6 +2488,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			const options = new DoculaOptions({
+				quiet: true,
 				sitePath: "test/fixtures/multi-page-site",
 			});
 			const builder = new DoculaBuilder(options);
@@ -2491,6 +2525,7 @@ describe("DoculaBuilder", () => {
 			};
 
 			const options = new DoculaOptions({
+				quiet: true,
 				sitePath: "test/fixtures/multi-page-site",
 			});
 			const builder = new DoculaBuilder(options);
@@ -2510,6 +2545,7 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - editPageUrl", () => {
 		it("should render edit page link when editPageUrl is configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-edit-page-url";
@@ -2540,6 +2576,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not render edit page link when editPageUrl is not configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-no-edit-page-url";
@@ -2564,6 +2601,7 @@ describe("DoculaBuilder", () => {
 
 		it("should strip trailing slashes from editPageUrl via parseOptions", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-edit-page-url-slash";
@@ -2592,6 +2630,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render correct edit page URL for nested section documents", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "modern";
 			options.sitePath = "test/fixtures/mega-page-site";
 			options.output = "test/temp/build-edit-page-url-nested";
@@ -2630,6 +2669,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render edit page link in the classic template", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "classic";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-edit-page-url-classic";
@@ -2659,6 +2699,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render edit page link on docs home page when site has no README", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
 			options.output = "test/temp/build-edit-page-url-no-home";
 			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
@@ -2687,6 +2728,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render OpenGraph meta tags when openGraph is configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-opengraph";
 			options.openGraph = {
@@ -2722,6 +2764,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not render OpenGraph meta tags when openGraph is not configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-no-opengraph";
 
@@ -2745,6 +2788,7 @@ describe("DoculaBuilder", () => {
 
 		it("should use document frontmatter ogTitle/ogDescription/ogImage over site defaults", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-opengraph-override";
 			options.openGraph = {
@@ -2774,6 +2818,7 @@ describe("DoculaBuilder", () => {
 
 		it("should render OpenGraph meta tags on the home page when configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-opengraph-home";
 			options.openGraph = {
@@ -2803,6 +2848,7 @@ describe("DoculaBuilder", () => {
 
 		it("should not render edit page link in the classic template when not configured", async () => {
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.template = "classic";
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/build-no-edit-page-url-classic";
@@ -2851,6 +2897,7 @@ describe("DoculaBuilder", () => {
 			);
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			options.autoReadme = true;
 			const builder = new DoculaBuilder(options);
@@ -2871,6 +2918,7 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${tempCwdPath}/README.md`, "Some content");
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
@@ -2889,6 +2937,7 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${tempCwdPath}/README.md`, "Root content");
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -2905,6 +2954,7 @@ describe("DoculaBuilder", () => {
 				.mockReturnValue(path.resolve(tempCwdPath));
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -2928,6 +2978,7 @@ describe("DoculaBuilder", () => {
 			);
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -2945,6 +2996,7 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${tempCwdPath}/README.md`, "No heading content");
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -2963,6 +3015,7 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${tempCwdPath}/package.json`, "not valid json");
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -2988,6 +3041,7 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${tempCwdPath}/assets/logo.png`, "fake-png-data");
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -3018,6 +3072,7 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${tempCwdPath}/assets/unused.png`, "fake-png-data");
 
 			const options = new DoculaOptions();
+			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
@@ -3074,8 +3129,10 @@ describe("DoculaBuilder", () => {
 	describe("hashOptions - autoReadme", () => {
 		it("should produce different hashes when autoReadme changes", () => {
 			const optionsA = new DoculaOptions();
+			optionsA.quiet = true;
 			optionsA.autoReadme = true;
 			const optionsB = new DoculaOptions();
+			optionsB.quiet = true;
 			optionsB.autoReadme = false;
 
 			const hashA = hashOptionsUtil(testHash, optionsA);
