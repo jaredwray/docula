@@ -333,7 +333,8 @@ export class DoculaOptions {
 		}
 
 		if (options.homeUrl !== undefined && typeof options.homeUrl === "string") {
-			this.homeUrl = options.homeUrl === "/" ? "/" : trimTrailingSlashes(options.homeUrl);
+			this.homeUrl =
+				options.homeUrl === "/" ? "/" : trimTrailingSlashes(options.homeUrl);
 		}
 
 		if (options.baseUrl !== undefined && typeof options.baseUrl === "string") {
