@@ -12,6 +12,7 @@ export type DoculaChangelogEntry = {
 	content: string;
 	generatedHtml: string;
 	preview: string;
+	draft?: boolean;
 	previewImage?: string;
 	urlPath: string;
 	lastModified: string;
