@@ -342,8 +342,7 @@ describe("DoculaBuilder - API", () => {
 			options.sitePath = "test/fixtures/mega-page-site";
 			options.output = "test/temp/build-api-autodetect";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -356,7 +355,6 @@ describe("DoculaBuilder - API", () => {
 				expect(apiPage).toContain("Mock HTTP API");
 			} finally {
 				await fs.promises.rm(options.output, { recursive: true });
-				console.log = consoleLog;
 			}
 		});
 	});
@@ -368,8 +366,7 @@ describe("DoculaBuilder - API", () => {
 			options.sitePath = "test/fixtures/api-only-site";
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -380,7 +377,6 @@ describe("DoculaBuilder - API", () => {
 				expect(indexHtml).toContain("Test API");
 			} finally {
 				await fs.promises.rm(options.output, { recursive: true, force: true });
-				console.log = consoleLog;
 			}
 		});
 

@@ -16,7 +16,13 @@ import {
 const ansiRegex = /\u001B\[[0-9;]*m/g;
 
 export class DoculaConsole {
+	public quiet = false;
+
 	log(message: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(message);
 	}
 
@@ -25,22 +31,42 @@ export class DoculaConsole {
 	}
 
 	warn(message: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.warn(yellow(`\u26A0 [warn] ${message}`));
 	}
 
 	success(message: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(green(bold(`\u2714 ${message}`)));
 	}
 
 	info(message: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(cyan(`\u2139 ${message}`));
 	}
 
 	step(message: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(bold(blue(`\u25B6 ${message}`)));
 	}
 
 	fileBuilt(filePath: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(dim(`  \u2192 ${filePath}`));
 	}
 
@@ -54,6 +80,10 @@ export class DoculaConsole {
 		statusCode: number,
 		durationMs?: number,
 	): void {
+		if (this.quiet) {
+			return;
+		}
+
 		let statusColor = green;
 		if (statusCode >= 400) {
 			statusColor = red;
@@ -76,10 +106,18 @@ export class DoculaConsole {
 	}
 
 	banner(message: string): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(bold(magenta(message)));
 	}
 
 	printHelp(): void {
+		if (this.quiet) {
+			return;
+		}
+
 		console.log(
 			bold(
 				magenta(

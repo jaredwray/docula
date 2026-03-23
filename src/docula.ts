@@ -25,6 +25,10 @@ export default class Docula {
 	private _server: http.Server | undefined;
 	private _watcher: fs.FSWatcher | undefined;
 
+	public get console(): DoculaConsole {
+		return this._console;
+	}
+
 	/**
 	 * Initialize the Docula class
 	 * @param {DoculaOptions} options

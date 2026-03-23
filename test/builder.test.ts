@@ -39,11 +39,6 @@ function stripAnsi(str: string): string {
 	return str.replace(ansiRegex, "");
 }
 
-function getConsole(builder: DoculaBuilder) {
-	// biome-ignore lint/suspicious/noExplicitAny: access internal console for testing
-	return (builder as any)._console;
-}
-
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
@@ -196,10 +191,9 @@ describe("DoculaBuilder", () => {
 			options.sitePath = "test/fixtures/empty-site";
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
+			builder.console.quiet = true;
 			const consoleError = console.error;
 			const errors: string[] = [];
-			console.log = (_message) => {};
 			console.error = (message) => {
 				errors.push(message as string);
 			};
@@ -213,7 +207,6 @@ describe("DoculaBuilder", () => {
 				).toBe(true);
 			} finally {
 				await fs.promises.rm(options.output, { recursive: true, force: true });
-				console.log = consoleLog;
 				console.error = consoleError;
 			}
 		});
@@ -267,7 +260,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder(options);
 			const result = mergeTemplateOverrides(
 				options,
-				getConsole(builder),
+				builder.console,
 				testHash,
 				"templates/modern",
 				options.sitePath,
@@ -282,7 +275,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder(options);
 			const result = mergeTemplateOverrides(
 				options,
-				getConsole(builder),
+				builder.console,
 				testHash,
 				"test/fixtures/template-example",
 				options.sitePath,
@@ -297,7 +290,7 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder(options);
 			const result = mergeTemplateOverrides(
 				options,
-				getConsole(builder),
+				builder.console,
 				testHash,
 				"templates/modern",
 				options.sitePath,
@@ -329,7 +322,7 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 				const result = mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -381,21 +374,18 @@ describe("DoculaBuilder", () => {
 				'<footer id="custom-override-footer">Custom Override Footer</footer>',
 			);
 
-			const consoleLog = console.log;
-			console.log = (_message) => {};
-
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				options.output = outputDir;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 				await builder.build();
 
 				// Check the built index.html contains the custom footer
 				const indexHtml = fs.readFileSync(`${outputDir}/index.html`, "utf8");
 				expect(indexHtml).toContain("custom-override-footer");
 			} finally {
-				console.log = consoleLog;
 				fs.rmSync(`${sitePath}/templates`, { recursive: true, force: true });
 				fs.rmSync(cacheDir, { recursive: true, force: true });
 				fs.rmSync(outputDir, { recursive: true, force: true });
@@ -424,7 +414,7 @@ describe("DoculaBuilder", () => {
 				// First merge
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -442,7 +432,7 @@ describe("DoculaBuilder", () => {
 				// Second merge should detect changed content and update
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -490,7 +480,7 @@ describe("DoculaBuilder", () => {
 				// First merge — builds the cache
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -502,7 +492,7 @@ describe("DoculaBuilder", () => {
 				// Second merge — should reuse cache
 				const result = mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -531,17 +521,17 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${overrideDir}/header.hbs`, "<header>B</header>");
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First merge — builds cache with two override files
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -551,6 +541,7 @@ describe("DoculaBuilder", () => {
 				// Delete one override file
 				fs.unlinkSync(`${overrideDir}/header.hbs`);
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -559,7 +550,7 @@ describe("DoculaBuilder", () => {
 				// Second merge — should detect removal and update incrementally
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -592,17 +583,17 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>X</footer>");
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First merge — builds cache
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -612,6 +603,7 @@ describe("DoculaBuilder", () => {
 				// Corrupt the manifest
 				fs.writeFileSync(`${cachePath}/.manifest.json`, "not json");
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -620,7 +612,7 @@ describe("DoculaBuilder", () => {
 				// Should rebuild due to corrupt manifest
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -637,7 +629,7 @@ describe("DoculaBuilder", () => {
 
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -676,7 +668,7 @@ describe("DoculaBuilder", () => {
 				// First merge — builds cache
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -699,7 +691,7 @@ describe("DoculaBuilder", () => {
 				// Second merge — should only update footer
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -753,7 +745,7 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -793,7 +785,7 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -832,7 +824,7 @@ describe("DoculaBuilder", () => {
 				const builder = new DoculaBuilder(options);
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -858,17 +850,15 @@ describe("DoculaBuilder", () => {
 			fs.mkdirSync(overrideDir, { recursive: true });
 			fs.writeFileSync(`${overrideDir}/footer.hbs`, "<footer>test</footer>");
 
-			const consoleLog = console.log;
-			console.log = (_message) => {};
-
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				options.autoUpdateIgnores = false;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -878,7 +868,6 @@ describe("DoculaBuilder", () => {
 				// .gitignore should NOT be created
 				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(false);
 			} finally {
-				console.log = consoleLog;
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
@@ -892,16 +881,14 @@ describe("DoculaBuilder", () => {
 			// Create .cache before merge
 			fs.mkdirSync(`${sitePath}/.cache`, { recursive: true });
 
-			const consoleLog = console.log;
-			console.log = (_message) => {};
-
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -911,7 +898,6 @@ describe("DoculaBuilder", () => {
 				// .gitignore should NOT be created since .cache already existed
 				expect(fs.existsSync(`${sitePath}/.gitignore`)).toBe(false);
 			} finally {
-				console.log = consoleLog;
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
@@ -928,17 +914,17 @@ describe("DoculaBuilder", () => {
 			);
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First merge — builds cache with one override file
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -951,6 +937,7 @@ describe("DoculaBuilder", () => {
 					"<aside>Custom sidebar</aside>",
 				);
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -959,7 +946,7 @@ describe("DoculaBuilder", () => {
 				// Second merge — should detect the added file
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -997,17 +984,17 @@ describe("DoculaBuilder", () => {
 			fs.writeFileSync(`${overrideDir}/custom-widget.hbs`, "<div>Widget</div>");
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First merge — builds cache with the custom override
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -1020,6 +1007,7 @@ describe("DoculaBuilder", () => {
 				// Delete the override file
 				fs.unlinkSync(`${overrideDir}/custom-widget.hbs`);
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -1028,7 +1016,7 @@ describe("DoculaBuilder", () => {
 				// Second merge — should detect removal and delete from cache
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"templates/modern",
 					sitePath,
@@ -1067,15 +1055,13 @@ describe("DoculaBuilder", () => {
 				},
 			});
 
-			const consoleLog = console.log;
-			console.log = () => {};
-
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 				await builder.build();
 
 				const manifestPath = `${sitePath}/.cache/build/manifest.json`;
@@ -1093,7 +1079,6 @@ describe("DoculaBuilder", () => {
 					true,
 				);
 			} finally {
-				console.log = consoleLog;
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
@@ -1111,7 +1096,6 @@ describe("DoculaBuilder", () => {
 			});
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
@@ -1119,11 +1103,13 @@ describe("DoculaBuilder", () => {
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
 
 				// Second build should skip
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -1155,7 +1141,6 @@ describe("DoculaBuilder", () => {
 			});
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
@@ -1163,6 +1148,7 @@ describe("DoculaBuilder", () => {
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build without openGraph
 				await builder.build();
@@ -1200,7 +1186,6 @@ describe("DoculaBuilder", () => {
 			});
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
@@ -1208,6 +1193,7 @@ describe("DoculaBuilder", () => {
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
@@ -1219,6 +1205,7 @@ describe("DoculaBuilder", () => {
 					"---\ntitle: Changed\norder: 1\n---\n# Changed content\nNew text here.",
 				);
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -1245,15 +1232,13 @@ describe("DoculaBuilder", () => {
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, { recursive: true });
 
-			const consoleLog = console.log;
-			console.log = () => {};
-
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
@@ -1276,7 +1261,6 @@ describe("DoculaBuilder", () => {
 				);
 				expect(Object.keys(cachedDocs).length).toBeGreaterThan(1);
 			} finally {
-				console.log = consoleLog;
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
@@ -1294,7 +1278,6 @@ describe("DoculaBuilder", () => {
 			});
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
@@ -1302,6 +1285,7 @@ describe("DoculaBuilder", () => {
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
@@ -1397,15 +1381,13 @@ describe("DoculaBuilder", () => {
 				recursive: true,
 			});
 
-			const consoleLog = console.log;
-			console.log = () => {};
-
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
@@ -1430,7 +1412,6 @@ describe("DoculaBuilder", () => {
 				// Asset should NOT have been re-copied
 				expect(mtime2).toBe(mtime1);
 			} finally {
-				console.log = consoleLog;
 				fs.rmSync(sitePath, { recursive: true, force: true });
 			}
 		});
@@ -1476,7 +1457,6 @@ describe("DoculaBuilder", () => {
 			fs.cpSync("test/fixtures/changelog-site", sitePath, { recursive: true });
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
@@ -1484,6 +1464,7 @@ describe("DoculaBuilder", () => {
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
@@ -1494,6 +1475,7 @@ describe("DoculaBuilder", () => {
 				);
 
 				// Second build — should use cache
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -3087,7 +3069,7 @@ describe("DoculaBuilder", () => {
 				// First copy — populates currentAssets and copies the file
 				const currentAssets: Record<string, string> = {};
 				copyPublicDirectory(
-					getConsole(builder),
+					builder.console,
 					testHash,
 					publicPath,
 					outputPath,
@@ -3110,7 +3092,7 @@ describe("DoculaBuilder", () => {
 					// Second copy with same hashes as previousAssets — should skip
 					const secondAssets: Record<string, string> = {};
 					copyPublicDirectory(
-						getConsole(builder),
+						builder.console,
 						testHash,
 						publicPath,
 						outputPath,
@@ -3481,8 +3463,7 @@ describe("DoculaBuilder", () => {
 			options.sitePath = "test/fixtures/mega-page-site";
 			options.output = "test/temp/build-api-autodetect";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -3495,7 +3476,6 @@ describe("DoculaBuilder", () => {
 				expect(apiPage).toContain("Mock HTTP API");
 			} finally {
 				await fs.promises.rm(options.output, { recursive: true });
-				console.log = consoleLog;
 			}
 		});
 	});
@@ -5715,8 +5695,7 @@ describe("DoculaBuilder", () => {
 			options.sitePath = "test/fixtures/api-only-site";
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -5727,7 +5706,6 @@ describe("DoculaBuilder", () => {
 				expect(indexHtml).toContain("Test API");
 			} finally {
 				await fs.promises.rm(options.output, { recursive: true, force: true });
-				console.log = consoleLog;
 			}
 		});
 
@@ -5759,8 +5737,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -5800,7 +5777,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -5813,8 +5789,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -5843,7 +5818,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -5868,8 +5842,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -5883,7 +5856,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -5910,8 +5882,7 @@ describe("DoculaBuilder", () => {
 			// Only allow .xyz extension
 			options.allowedAssets = [".xyz"];
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -5925,7 +5896,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -5938,8 +5908,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -5981,7 +5950,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -6006,8 +5974,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -6021,7 +5988,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -6034,8 +6000,7 @@ describe("DoculaBuilder", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				// Build should complete without errors
@@ -6046,7 +6011,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 	});
@@ -6478,7 +6442,6 @@ describe("DoculaBuilder", () => {
 			});
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
@@ -6486,6 +6449,7 @@ describe("DoculaBuilder", () => {
 				options.output = output;
 				options.templatePath = "test/fixtures/template-example/";
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First build
 				await builder.build();
@@ -6496,6 +6460,7 @@ describe("DoculaBuilder", () => {
 					":root { --color: red; }",
 				);
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -6542,17 +6507,17 @@ describe("DoculaBuilder", () => {
 			);
 
 			const consoleLog = console.log;
-			console.log = () => {};
 
 			try {
 				const options = new DoculaOptions();
 				options.sitePath = sitePath;
 				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
 
 				// First merge — creates cache with override
 				const result = mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"test/fixtures/template-example",
 					sitePath,
@@ -6569,6 +6534,7 @@ describe("DoculaBuilder", () => {
 				// Remove the override
 				fs.unlinkSync(`${overrideDir}/footer.hbs`);
 
+				builder.console.quiet = false;
 				const messages: string[] = [];
 				console.log = (message) => {
 					messages.push(stripAnsi(message as string));
@@ -6577,7 +6543,7 @@ describe("DoculaBuilder", () => {
 				// Second merge — should detect removal and restore original
 				mergeTemplateOverrides(
 					options,
-					getConsole(builder),
+					builder.console,
 					testHash,
 					"test/fixtures/template-example",
 					sitePath,
@@ -7814,8 +7780,7 @@ describe("DoculaBuilder", () => {
 			options.output = `${tempDir}/output`;
 
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -7834,7 +7799,6 @@ describe("DoculaBuilder", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 
 			cwdSpy.mockRestore();

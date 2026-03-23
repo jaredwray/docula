@@ -111,6 +111,10 @@ export class DoculaBuilder {
 		console: DoculaConsole,
 	) => Promise<DoculaChangelogEntry[]> | DoculaChangelogEntry[];
 
+	public get console(): DoculaConsole {
+		return this._console;
+	}
+
 	// biome-ignore lint/suspicious/noExplicitAny: need to fix
 	constructor(options?: DoculaOptions, engineOptions?: any) {
 		if (options) {

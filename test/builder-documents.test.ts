@@ -797,8 +797,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -834,7 +833,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -847,8 +845,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -875,7 +872,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -900,8 +896,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -913,7 +908,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -939,8 +933,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteUrl = "https://docula.org";
 			options.allowedAssets = [".xyz"];
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -952,7 +945,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -965,8 +957,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -1003,7 +994,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -1028,8 +1018,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -1041,7 +1030,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 
@@ -1054,8 +1042,7 @@ describe("DoculaBuilder - Documents", () => {
 			options.siteDescription = "Beautiful Website for Your Projects";
 			options.siteUrl = "https://docula.org";
 			const builder = new DoculaBuilder(options);
-			const consoleLog = console.log;
-			console.log = () => {};
+			builder.console.quiet = true;
 
 			try {
 				await builder.build();
@@ -1065,7 +1052,6 @@ describe("DoculaBuilder - Documents", () => {
 					recursive: true,
 					force: true,
 				});
-				console.log = consoleLog;
 			}
 		});
 	});

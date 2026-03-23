@@ -196,8 +196,7 @@ describe("docula", () => {
 		const docula = new Docula(defaultOptions);
 		const temporarySitePath = "./temp-download-vars";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			docula.downloadVariables(temporarySitePath, "", "modern", false);
@@ -207,7 +206,6 @@ describe("docula", () => {
 			expect(content).toContain(":root");
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should error if variables.css already exists without --overwrite", () => {
@@ -238,8 +236,7 @@ describe("docula", () => {
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const dest = `${temporarySitePath}/variables.css`;
 		fs.writeFileSync(dest, "/* original */");
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			docula.downloadVariables(temporarySitePath, "", "modern", true);
@@ -249,30 +246,26 @@ describe("docula", () => {
 			expect(content).toContain(":root");
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should copy variables.css from classic template", () => {
 		const docula = new Docula(defaultOptions);
 		const temporarySitePath = "./temp-download-vars-classic";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			docula.downloadVariables(temporarySitePath, "", "classic", false);
 			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should copy full template to site/templates/<name>/", () => {
 		const docula = new Docula(defaultOptions);
 		const temporarySitePath = "./temp-download-template";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			docula.downloadTemplate(temporarySitePath, "", "modern", false);
@@ -281,7 +274,6 @@ describe("docula", () => {
 			expect(fs.statSync(dest).isDirectory()).toEqual(true);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should error if template directory already exists without --overwrite", () => {
@@ -310,23 +302,20 @@ describe("docula", () => {
 		const dest = `${temporarySitePath}/templates/modern`;
 		fs.mkdirSync(dest, { recursive: true });
 		fs.writeFileSync(`${dest}/sentinel.txt`, "original");
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			docula.downloadTemplate(temporarySitePath, "", "modern", true);
 			expect(fs.existsSync(`${dest}/css/variables.css`)).toEqual(true);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should copy classic template to site/templates/classic/", () => {
 		const docula = new Docula(defaultOptions);
 		const temporarySitePath = "./temp-download-template-classic";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			docula.downloadTemplate(temporarySitePath, "", "classic", false);
@@ -335,15 +324,13 @@ describe("docula", () => {
 			);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should use basename of custom templatePath for output directory name", () => {
 		const docula = new Docula(defaultOptions);
 		const temporarySitePath = "./temp-download-template-custom-path";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 		const customTemplatePath = "templates/modern";
 
 		try {
@@ -353,7 +340,6 @@ describe("docula", () => {
 			);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should get the package version", () => {
@@ -373,8 +359,7 @@ describe("docula execute", () => {
 		buildOptions.output = "test/temp/docula-exec-no-params";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			process.argv = ["node", "docula"];
@@ -385,7 +370,6 @@ describe("docula execute", () => {
 				recursive: true,
 				force: true,
 			});
-			console.log = consoleLog;
 		}
 	});
 	it("should be able to build with typescript config", async () => {
@@ -394,8 +378,7 @@ describe("docula execute", () => {
 		buildOptions.output = "test/temp/docula-exec-ts-config";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		process.argv = ["node", "docula"];
 		await docula.execute(process);
@@ -407,7 +390,6 @@ describe("docula execute", () => {
 		);
 
 		await fs.promises.rm(buildOptions.output, { recursive: true });
-		console.log = consoleLog;
 	});
 	it("should be able to execute with output parameter", async () => {
 		const buildOptions = new DoculaOptions();
@@ -416,8 +398,7 @@ describe("docula execute", () => {
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const realOutputPath = "test/temp/docula-exec-output-param";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		process.argv = ["node", "docula", "-o", realOutputPath];
 		await docula.execute(process);
@@ -425,7 +406,6 @@ describe("docula execute", () => {
 		expect(fs.existsSync(realOutputPath)).toEqual(true);
 
 		await fs.promises.rm(realOutputPath, { recursive: true });
-		console.log = consoleLog;
 	});
 	it("should clean the output directory when --clean flag is set", async () => {
 		const buildOptions = new DoculaOptions();
@@ -433,8 +413,7 @@ describe("docula execute", () => {
 		buildOptions.output = "test/temp/docula-exec-clean";
 		buildOptions.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			// First build without clean
@@ -458,7 +437,6 @@ describe("docula execute", () => {
 				recursive: true,
 				force: true,
 			});
-			console.log = consoleLog;
 		}
 	});
 	it("should clean the .cache directory when --clean flag is set", async () => {
@@ -473,8 +451,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = sitePath;
 		buildOptions.output = outputDir;
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		const cachePath = `${sitePath}/.cache`;
 
@@ -495,7 +472,6 @@ describe("docula execute", () => {
 			// But the build manifest is recreated during the build
 			expect(fs.existsSync(`${cachePath}/build/manifest.json`)).toEqual(true);
 		} finally {
-			console.log = consoleLog;
 			fs.rmSync(sitePath, { recursive: true, force: true });
 		}
 	});
@@ -508,8 +484,7 @@ describe("docula execute", () => {
 		buildOptions.output = output;
 		buildOptions.template = "modern";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		fs.rmSync(sitePath, { recursive: true, force: true });
 		fs.cpSync(sourcePath, sitePath, { recursive: true });
@@ -541,7 +516,6 @@ describe("docula execute", () => {
 			expect(llmsFull).toContain('"openapi": "3.0.3"');
 		} finally {
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should init based on the init command with auto-detect", async () => {
@@ -676,9 +650,8 @@ describe("docula execute", () => {
 		const docula = new Docula(defaultOptions);
 		const sitePath = "./custom-site-conflict";
 		let errorMessage = "";
-		const consoleLog = console.log;
 		const consoleError = console.error;
-		console.log = () => {};
+		docula.console.quiet = true;
 		console.error = (message) => {
 			errorMessage = message as string;
 		};
@@ -702,7 +675,6 @@ describe("docula execute", () => {
 				await fs.promises.rm(sitePath, { recursive: true });
 			}
 
-			console.log = consoleLog;
 			console.error = consoleError;
 		}
 	});
@@ -749,8 +721,7 @@ describe("docula execute", () => {
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8181"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -760,8 +731,6 @@ describe("docula execute", () => {
 				docula.server.close();
 			}
 		}
-
-		console.log = consoleLog;
 	});
 	it("should serve the site and reset the server if exists", async () => {
 		const options = new DoculaOptions();
@@ -773,8 +742,7 @@ describe("docula execute", () => {
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8182"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.serve(options);
@@ -785,8 +753,6 @@ describe("docula execute", () => {
 				docula.server.close();
 			}
 		}
-
-		console.log = consoleLog;
 	});
 	it("should serve the site on a specified port", async () => {
 		const options = new DoculaOptions();
@@ -795,8 +761,7 @@ describe("docula execute", () => {
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8183"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -810,8 +775,6 @@ describe("docula execute", () => {
 				docula.server.close();
 			}
 		}
-
-		console.log = consoleLog;
 	});
 	it("should serve the site on a specified port with --port flag", async () => {
 		const options = new DoculaOptions();
@@ -820,8 +783,7 @@ describe("docula execute", () => {
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "--port", "8184"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -835,8 +797,6 @@ describe("docula execute", () => {
 				docula.server.close();
 			}
 		}
-
-		console.log = consoleLog;
 	});
 	it("should run onPrepare method if exists", async () => {
 		const buildOptions = new DoculaOptions();
@@ -869,8 +829,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			process.argv = ["node", "docula", "download", "variables"];
@@ -878,7 +837,6 @@ describe("docula execute", () => {
 			expect(fs.existsSync(`${temporarySitePath}/variables.css`)).toEqual(true);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should execute download variables --overwrite command and overwrite variables.css", async () => {
@@ -890,8 +848,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			process.argv = ["node", "docula", "download", "variables", "--overwrite"];
@@ -901,7 +858,6 @@ describe("docula execute", () => {
 			expect(written).toContain(":root");
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should execute download template command and copy template directory", async () => {
@@ -911,8 +867,7 @@ describe("docula execute", () => {
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			process.argv = ["node", "docula", "download", "template"];
@@ -922,7 +877,6 @@ describe("docula execute", () => {
 			);
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should execute download with no subcommand and print error", async () => {
@@ -932,10 +886,9 @@ describe("docula execute", () => {
 		buildOptions.sitePath = temporarySitePath;
 		buildOptions.template = "modern";
 		const docula = new Docula(buildOptions);
-		const consoleLog = console.log;
 		const consoleError = console.error;
 		let errorMessage = "";
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 		console.error = (message) => {
 			errorMessage = message;
 		};
@@ -946,7 +899,6 @@ describe("docula execute", () => {
 			expect(stripAnsi(errorMessage)).toContain("variables");
 		} finally {
 			fs.rmSync(temporarySitePath, { recursive: true });
-			console.log = consoleLog;
 			console.error = consoleError;
 		}
 	});
@@ -998,8 +950,7 @@ describe("docula watch", () => {
 		await fs.promises.mkdir(options.output, { recursive: true });
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8191"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -1011,7 +962,6 @@ describe("docula watch", () => {
 			}
 
 			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should not clean output directory when serve is called with --clean but without --build or --watch", async () => {
@@ -1034,8 +984,7 @@ describe("docula watch", () => {
 			"-o",
 			"test/temp/docula-serve-clean-no-build",
 		];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -1048,7 +997,6 @@ describe("docula watch", () => {
 			}
 
 			await fs.promises.rm(outputDir, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should build and serve when --build flag is used without --watch", async () => {
@@ -1058,8 +1006,7 @@ describe("docula watch", () => {
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "serve", "-p", "8192", "--build"];
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -1073,7 +1020,6 @@ describe("docula watch", () => {
 			}
 
 			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should rebuild when a file changes in the watched directory", async () => {
@@ -1141,8 +1087,7 @@ describe("docula watch", () => {
 		options.output = "test/temp/docula-watch-close-existing";
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			const { DoculaBuilder } = await import("../src/builder.js");
@@ -1160,7 +1105,6 @@ describe("docula watch", () => {
 			}
 
 			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should ignore changes in the .cache directory", async () => {
@@ -1413,8 +1357,7 @@ describe("docula dev", () => {
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "start", "-p", "8196"];
-		const consoleLog = console.log;
-		console.log = () => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -1427,7 +1370,6 @@ describe("docula dev", () => {
 			}
 
 			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 
@@ -1438,8 +1380,7 @@ describe("docula dev", () => {
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
 		process.argv = ["node", "docula", "start", "-w", "-p", "8197"];
-		const consoleLog = console.log;
-		console.log = () => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -1456,7 +1397,6 @@ describe("docula dev", () => {
 			}
 
 			await fs.promises.rm(options.output, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 });
@@ -1536,8 +1476,7 @@ describe("docula config file", () => {
 		options.autoReadme = false;
 		const docula = new Docula(options);
 		const output = "test/temp/build-mega-no-home-test";
-		const consoleLog = console.log;
-		console.log = (_message) => {};
+		docula.console.quiet = true;
 
 		try {
 			process.argv = ["node", "docula", "-o", output];
@@ -1550,7 +1489,6 @@ describe("docula config file", () => {
 			expect(indexHtml).toContain("<title>docula -");
 		} finally {
 			await fs.promises.rm(output, { recursive: true, force: true });
-			console.log = consoleLog;
 		}
 	});
 	it("should load the config and test the onPrepare", async () => {
@@ -1636,8 +1574,7 @@ describe("docula config file", () => {
 			"-t",
 			"test/fixtures/template-example",
 		];
-		const consoleLog = console.log;
-		console.log = () => {};
+		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
@@ -1646,7 +1583,6 @@ describe("docula config file", () => {
 			);
 			expect(fs.existsSync(path.join(options.output, "index.html"))).toBe(true);
 		} finally {
-			console.log = consoleLog;
 			await fs.promises.rm(options.output, { recursive: true, force: true });
 		}
 	});
