@@ -12,11 +12,6 @@ import { DoculaOptions } from "../src/options.js";
 
 const _testHash = new Hashery();
 
-function _getConsole(builder: DoculaBuilder) {
-	// biome-ignore lint/suspicious/noExplicitAny: access internal console for testing
-	return (builder as any)._console;
-}
-
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
@@ -85,7 +80,9 @@ describe("DoculaBuilder - LLM", () => {
 
 	describe("Docula Builder - LLM Files", () => {
 		it("should generate llms.txt and llms-full.txt for docs-only sites", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-docs-only";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -134,7 +131,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should include API link and local OpenAPI spec text in llms-full.txt", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-api-local-spec";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -168,7 +167,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should fall back to OpenAPI URL and preserve non-index doc URLs", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-openapi-fallback";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -218,7 +219,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should handle API section without openApiUrl", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-api-no-openapi";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -249,7 +252,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should handle openApiUrl with query-only path", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-openapi-query-only";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -279,7 +284,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should not read OpenAPI files outside sitePath", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const sitePath = "test/temp/llms-safe-openapi-site";
 			const output = "test/temp/llms-safe-openapi-output";
 			const externalSpecPath = "test/temp/llms-safe-openapi-external.json";
@@ -328,7 +335,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should not read symbolic linked OpenAPI files", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const sitePath = "test/temp/llms-openapi-symlink-site";
 			const output = "test/temp/llms-openapi-symlink-output";
 			const targetSpecPath = `${sitePath}/api/real-swagger.json`;
@@ -374,7 +383,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should include changelog landing and only latest 20 entries in llms.txt", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-changelog-index";
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
@@ -430,7 +441,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should include all changelog entries in llms-full.txt", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/llms-full-changelog";
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
@@ -476,7 +489,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should copy custom llms files when they exist in site path", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const sitePath = "test/temp/custom-llms-site";
 			const output = "test/temp/custom-llms-output";
 			const customLlms = "# Custom llms.txt";
@@ -519,7 +534,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should ignore symbolic linked llms override files", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const sitePath = "test/temp/custom-llms-symlink-site";
 			const output = "test/temp/custom-llms-symlink-output";
 			const externalLlmsPath = "test/temp/custom-llms-symlink-source.txt";
@@ -583,7 +600,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should return undefined when override candidate path fails boundary check", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const sitePath = "test/temp/override-boundary-check";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
@@ -626,7 +645,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should return undefined when override realpath lookup fails", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const sitePath = "test/temp/override-realpath-fail";
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
@@ -774,7 +795,8 @@ describe("DoculaBuilder - LLM", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.enableLlmsTxt = false;
-			const builder = new DoculaBuilder(options, { quiet: true });
+			options.quiet = true;
+			const builder = new DoculaBuilder(options);
 			const output = "test/temp/llms-disabled";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -798,7 +820,9 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should not include llms files in sitemap.xml", async () => {
-			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
 			const output = "test/temp/sitemap-no-llms";
 			const data: DoculaData = {
 				...defaultPathFields,

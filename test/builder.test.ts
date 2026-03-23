@@ -3,7 +3,7 @@ import path from "node:path";
 import { CacheableNet } from "@cacheable/net";
 import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DoculaBuilder, type DoculaData } from "../src/builder.js";
+import { DoculaBuilder, DoculaBuilderOptions, type DoculaData } from "../src/builder.js";
 import {
 	hasAssetsChanged,
 	hashFile as hashFileUtil,
@@ -1696,7 +1696,7 @@ describe("DoculaBuilder", () => {
 			const outputPath = `${sitePath}/output`;
 
 			try {
-				const builder = new DoculaBuilder();
+				const builder = new DoculaBuilder({ quiet: true } as DoculaBuilderOptions);
 
 				// Create a public folder with a file
 				fs.mkdirSync(publicPath, { recursive: true });
