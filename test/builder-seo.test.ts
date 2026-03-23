@@ -72,7 +72,7 @@ describe("DoculaBuilder - SEO", () => {
 
 	describe("Docula Builder - Build Robots and Sitemap", () => {
 		it("should build the robots.txt (/robots.txt)", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/single-page-site";
 			options.output = "test/temp/robots-test";
@@ -95,7 +95,7 @@ describe("DoculaBuilder - SEO", () => {
 			}
 		});
 		it("should copy the robots.txt (/robots.txt)", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const options = new DoculaOptions();
 			options.sitePath = "test/fixtures/multi-page-site";
 			options.output = "test/temp/robots-test-copy";
@@ -118,7 +118,7 @@ describe("DoculaBuilder - SEO", () => {
 			}
 		});
 		it("should build the sitemap.xml (/sitemap.xml)", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data = doculaData;
 
 			if (fs.existsSync(data.output)) {
@@ -139,7 +139,7 @@ describe("DoculaBuilder - SEO", () => {
 			}
 		});
 		it("should include /feed.xml in sitemap when documents exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -186,7 +186,7 @@ describe("DoculaBuilder - SEO", () => {
 
 	describe("Docula Builder - Build Feed", () => {
 		it("should build the feed.xml (/feed.xml) for documentation pages", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -252,7 +252,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should use a markdown excerpt when document description is empty", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -301,7 +301,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should not include generated table of contents text in feed excerpts", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -351,7 +351,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should preserve hyphenated words in feed excerpts", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -400,7 +400,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should preserve intro content when markdown starts with a thematic break", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -449,7 +449,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should not build feed.xml when no documents exist", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -475,7 +475,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should not include api or changelog urls in feed.xml", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -540,7 +540,7 @@ describe("DoculaBuilder - SEO", () => {
 
 	describe("Docula Builder - Build Index", () => {
 		it("should build the index.html (/index.html)", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data = doculaData;
 			data.templates = {
 				home: "home.hbs",
@@ -567,7 +567,7 @@ describe("DoculaBuilder - SEO", () => {
 			}
 		});
 		it("should throw an error build the index.html (/index.html)", async () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data = doculaData;
 			data.sitePath = "template";
 			data.output = "test/temp/index-test";
@@ -587,7 +587,7 @@ describe("DoculaBuilder - SEO", () => {
 
 	describe("Docula Builder - resolveOpenGraphData", () => {
 		it("should return empty object when openGraph is not configured", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -601,7 +601,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should return resolved OG data with site defaults", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -623,7 +623,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should use openGraph config values over site defaults", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -652,7 +652,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should use document-level ogTitle/ogDescription/ogImage over site openGraph", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -684,7 +684,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should fall back to page title/description when openGraph config fields are not set", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -709,7 +709,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should use previewImage as fallback for ogImage", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -733,7 +733,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should use preview as fallback for ogDescription (changelog entries)", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -756,7 +756,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should construct ogUrl from siteUrl, baseUrl, and pageUrl", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -773,7 +773,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should set twitterCard to summary when no image is present", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "https://example.com",
@@ -801,7 +801,7 @@ describe("DoculaBuilder - SEO", () => {
 		};
 
 		it("should generate WebSite schema for home page", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const result = builder.resolveJsonLd("home", baseData, "/");
 			expect(result).toContain('<script type="application/ld+json">');
 			expect(result).toContain("</script>");
@@ -818,7 +818,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should generate TechArticle schema for docs page", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const pageData = {
 				title: "Getting Started",
 				description: "Learn how to use the tool",
@@ -849,7 +849,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should generate TechArticle without dateModified when lastModified is missing", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const pageData = {
 				title: "Page",
 				description: "Desc",
@@ -870,7 +870,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should fall back to site defaults for docs without page data", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const result = builder.resolveJsonLd("docs", baseData, "/docs/page/");
 			const json = JSON.parse(
 				result
@@ -882,7 +882,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should generate WebPage schema for api page", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const result = builder.resolveJsonLd("api", baseData, "/api/");
 			const json = JSON.parse(
 				result
@@ -896,7 +896,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should generate CollectionPage schema for changelog page", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const result = builder.resolveJsonLd(
 				"changelog",
 				baseData,
@@ -914,7 +914,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should generate BlogPosting schema for changelog entry", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const pageData = {
 				title: "v2.0 Release",
 				date: "2024-03-01",
@@ -945,7 +945,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should generate BlogPosting without optional fields when missing", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const pageData = {
 				title: "Update",
 			};
@@ -965,7 +965,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should respect baseUrl in generated URLs", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const dataWithBase = { ...baseData, baseUrl: "/project" };
 			const result = builder.resolveJsonLd("home", dataWithBase, "/");
 			const json = JSON.parse(
@@ -977,7 +977,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should return empty string for changelog-entry with no title", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const result = builder.resolveJsonLd(
 				"changelog-entry",
 				baseData,
@@ -987,7 +987,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should return empty string for changelog-entry with empty title", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const result = builder.resolveJsonLd(
 				"changelog-entry",
 				baseData,
@@ -998,7 +998,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 
 		it("should properly escape special characters in JSON", () => {
-			const builder = new DoculaBuilder();
+			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const dataWithSpecialChars = {
 				...baseData,
 				siteTitle: 'Test "Site" <br>',

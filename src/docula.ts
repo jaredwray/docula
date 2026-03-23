@@ -146,6 +146,11 @@ export default class Docula {
 			);
 		}
 
+		// Propagate quiet setting to console
+		if (this.options.quiet) {
+			this._console.quiet = true;
+		}
+
 		// Run the onPrepare function
 		if (this._configFileModule.onPrepare) {
 			try {

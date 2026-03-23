@@ -121,6 +121,10 @@ export class DoculaBuilder {
 			this._options = options;
 		}
 
+		if (this._options.quiet) {
+			this._console.quiet = true;
+		}
+
 		this._ecto = new Ecto(engineOptions);
 	}
 

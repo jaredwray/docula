@@ -83,14 +83,17 @@ describe("docula", () => {
 
 	it("should be able to initialize", () => {
 		const docula = new Docula();
+		docula.console.quiet = true;
 		expect(docula).toBeDefined();
 	});
 	it("should be able to initialize with options", () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		expect(docula).toBeDefined();
 	});
 	it("should be able to get and set options", () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		expect(docula.options).toEqual(defaultOptions);
 		const newOptions: DoculaOptions = new DoculaOptions({
 			templatePath: "./new-template",
@@ -344,6 +347,7 @@ describe("docula", () => {
 	});
 	it("should get the package version", () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		const packageJson = fs.readFileSync("./package.json", "utf8");
 		const packageObject = JSON.parse(packageJson) as { version: string };
 		const packageVersion = docula.getVersion();
@@ -680,6 +684,7 @@ describe("docula execute", () => {
 	});
 	it("should detect typescript project", () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		// This project has a tsconfig.json
 		expect(docula.detectTypeScript()).toEqual(true);
 	});
@@ -1404,6 +1409,7 @@ describe("docula dev", () => {
 describe("docula config file", () => {
 	it("should be able to load the config file", async () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		const sitePath = "test/fixtures/multi-page-site";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
@@ -1411,6 +1417,7 @@ describe("docula config file", () => {
 	});
 	it("should be able to load a typescript config file", async () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		const sitePath = "test/fixtures/single-page-site-ts";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
@@ -1434,6 +1441,7 @@ describe("docula config file", () => {
 
 		try {
 			const docula = new Docula(defaultOptions);
+			docula.console.quiet = true;
 			await docula.loadConfigFile(tempPath);
 			expect(docula.configFileModule).toBeDefined();
 			expect(docula.configFileModule.options.siteTitle).toEqual(
@@ -1445,6 +1453,7 @@ describe("docula config file", () => {
 	});
 	it("should handle non-existent site path gracefully", async () => {
 		const docula = new Docula(defaultOptions);
+		docula.console.quiet = true;
 		const sitePath = "test/fixtures/non-existent-path";
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toEqual({});

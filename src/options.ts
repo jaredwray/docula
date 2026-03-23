@@ -130,6 +130,10 @@ export class DoculaOptions {
 	 */
 	public autoReadme = true;
 	/**
+	 * When true, suppresses all non-error console output during the build.
+	 */
+	public quiet = false;
+	/**
 	 * Base URL path prefix for all generated paths (e.g., "/docs").
 	 * When set, all asset and navigation URLs are prefixed with this path.
 	 */
@@ -323,6 +327,10 @@ export class DoculaOptions {
 			typeof options.autoReadme === "boolean"
 		) {
 			this.autoReadme = options.autoReadme;
+		}
+
+		if (options.quiet !== undefined && typeof options.quiet === "boolean") {
+			this.quiet = options.quiet;
 		}
 
 		if (
