@@ -810,6 +810,11 @@ pre:hover .copy-code-btn { opacity: 1; }
   color: var(--muted);
 }
 
+.changelog-entry-preview img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
 .changelog-read-more {
   display: inline-block;
   margin-top: 8px;

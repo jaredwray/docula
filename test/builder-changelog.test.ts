@@ -799,6 +799,27 @@ describe("DoculaBuilder - Changelog", () => {
 			expect(preview).toContain("...");
 		});
 
+		it("should preserve complete HTML blocks in preview", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			const markdown =
+				'<div style="position: relative;">\n  <iframe src="https://example.com/video" loading="lazy"></iframe>\n</div>\n\nThis is the text content after the video.';
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("<iframe");
+			expect(preview).toContain("https://example.com/video");
+			expect(preview).toContain("</div>");
+		});
+
+		it("should not truncate inside an HTML block", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// HTML block larger than 500 chars
+			const longSrc = `https://example.com/${"a".repeat(500)}/video`;
+			const markdown = `<div><iframe src="${longSrc}"></iframe></div>\n\nSome text after.`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("<iframe");
+			expect(preview).toContain("</iframe>");
+			expect(preview).toContain("</div>");
+		});
+
 		it("should build paginated changelog pages", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
