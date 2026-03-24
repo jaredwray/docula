@@ -127,6 +127,50 @@ To style these alerts, add CSS rules targeting the `.markdown-alert` classes in 
 }
 ```
 
+## Copy Code Button
+
+The Modern template adds a copy-to-clipboard button to every code block. The button appears in the top-right corner on hover and shows a checkmark after copying. Override these classes in `variables.css` to customize its appearance:
+
+| Class | Description |
+|-------|-------------|
+| `.copy-code-btn` | The button element (positioned absolute inside `pre`) |
+| `pre:hover .copy-code-btn` | Controls visibility — the button fades in on hover |
+| `.copy-code-btn:hover` | Hover state for the button itself |
+
+```css
+.copy-code-btn {
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 6px;
+  opacity: 0.8;
+}
+
+pre:hover .copy-code-btn {
+  opacity: 1;
+}
+```
+
+## Image Lightbox
+
+Clicking an image in docs or changelog opens a fullscreen lightbox overlay. Override these classes to customize the overlay:
+
+| Class | Description |
+|-------|-------------|
+| `.lightbox-overlay` | The fullscreen backdrop (default `rgba(0,0,0,0.8)`) |
+| `.lightbox-overlay img` | The zoomed image (max 90vw × 90vh, rounded corners, shadow) |
+| `.lightbox-close` | The close button in the top-right corner |
+
+```css
+.lightbox-overlay {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.lightbox-overlay img {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+```
+
 ## Logo and Favicon
 
 Replace the default files in your site directory to use your own branding:
