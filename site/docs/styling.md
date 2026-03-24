@@ -129,7 +129,7 @@ To style these alerts, add CSS rules targeting the `.markdown-alert` classes in 
 
 ## Copy Code Button
 
-The Modern template adds a copy-to-clipboard button to every code block. The button appears in the top-right corner on hover and shows a checkmark after copying. Override these classes in `variables.css` to customize its appearance:
+The Modern template adds a copy-to-clipboard button to every code block. The button appears in the top-right corner on hover and shows a checkmark after copying. Because `variables.css` loads before the template stylesheet, these class overrides require a [partial template override](/docs/partial-templates) of `css/styles.css` to take effect:
 
 | Class | Description |
 |-------|-------------|
@@ -140,19 +140,23 @@ The Modern template adds a copy-to-clipboard button to every code block. The but
 ```css
 .copy-code-btn {
   background: var(--surface);
-  color: var(--fg);
+  color: var(--muted);
   border-radius: 6px;
-  opacity: 0.8;
+  opacity: 0;
 }
 
 pre:hover .copy-code-btn {
   opacity: 1;
 }
+
+.copy-code-btn:hover {
+  color: var(--fg);
+}
 ```
 
 ## Image Lightbox
 
-Clicking an image in docs or changelog opens a fullscreen lightbox overlay. Override these classes to customize the overlay:
+Clicking an image in docs or changelog opens a fullscreen lightbox overlay. Like the copy code button, these overrides require a [partial template override](/docs/partial-templates) of `css/styles.css`:
 
 | Class | Description |
 |-------|-------------|
@@ -168,6 +172,14 @@ Clicking an image in docs or changelog opens a fullscreen lightbox overlay. Over
 .lightbox-overlay img {
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.lightbox-close {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lightbox-close:hover {
+  color: #fff;
 }
 ```
 
