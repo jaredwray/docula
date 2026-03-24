@@ -157,6 +157,33 @@ describe("DoculaBuilder - Changelog", () => {
 			}
 		});
 
+		it("should exclude changelog entries with draft: true in front matter", () => {
+			const builder = new DoculaBuilder();
+			const entries = builder.getChangelogEntries(
+				"test/fixtures/changelog-site/changelog",
+			);
+			const slugs = entries.map((e) => e.slug);
+			expect(slugs).not.toContain("2025-03-01-draft-entry");
+			expect(entries.length).toBe(5);
+		});
+
+		it("should set draft field on parsed changelog entry", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-03-01-draft-entry.md",
+			);
+			expect(entry.draft).toBe(true);
+			expect(entry.title).toBe("Upcoming Feature");
+		});
+
+		it("should set draft to false when not specified in front matter", () => {
+			const builder = new DoculaBuilder();
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.draft).toBe(false);
+		});
+
 		it("should return cached entry when hashes match", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),

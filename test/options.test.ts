@@ -563,6 +563,26 @@ describe("DoculaOptions", () => {
 			expect(options.baseUrl).toEqual("");
 		});
 
+		it("should have homeUrl undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.homeUrl).toBeUndefined();
+		});
+
+		it("should parse homeUrl", () => {
+			options.parseOptions({ homeUrl: "/" });
+			expect(options.homeUrl).toEqual("/");
+		});
+
+		it("should strip trailing slashes from homeUrl", () => {
+			options.parseOptions({ homeUrl: "https://example.com/" });
+			expect(options.homeUrl).toEqual("https://example.com");
+		});
+
+		it("should not update homeUrl for non-string values", () => {
+			options.parseOptions({ homeUrl: 123 });
+			expect(options.homeUrl).toBeUndefined();
+		});
+
 		it("should not update docsPath for non-string values", () => {
 			options.parseOptions({ docsPath: 123 });
 			expect(options.docsPath).toEqual("docs");

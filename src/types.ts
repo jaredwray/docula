@@ -12,6 +12,7 @@ export type DoculaChangelogEntry = {
 	content: string;
 	generatedHtml: string;
 	preview: string;
+	draft?: boolean;
 	previewImage?: string;
 	urlPath: string;
 	lastModified: string;
@@ -54,6 +55,7 @@ export type DoculaData = {
 	enableLlmsTxt?: boolean;
 	hasFeed?: boolean;
 	lastModified?: string;
+	homeUrl?: string;
 	baseUrl: string;
 	docsPath: string;
 	apiPath: string;

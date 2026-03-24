@@ -47,6 +47,25 @@ We're excited to announce the initial release! Here's what's included:
 | `title` | No | Display title for the entry. Defaults to the filename if not provided. |
 | `date` | Yes | Date of the entry (`YYYY-MM-DD`). Used for sorting (newest first). |
 | `tag` | No | A label displayed as a badge (e.g., `Release`, `Bug Fix`, `Feature`). Gets a CSS class based on its value for styling. |
+| `draft` | No | When `true`, the entry is excluded from the build output. Useful for work-in-progress entries. |
+| `previewImage` | No | Image URL displayed above the preview on the changelog listing page. |
+
+## Draft Entries
+
+To hide a changelog entry from the build output, add `draft: true` to the front matter:
+
+```md
+---
+title: "Upcoming Feature"
+date: 2025-04-01
+tag: "Feature"
+draft: true
+---
+
+This entry won't appear on the site until `draft` is removed or set to `false`.
+```
+
+Draft entries are still parsed but excluded from the changelog listing, individual entry pages, sitemaps, and feeds. This is useful for preparing entries ahead of a release.
 
 ## File Naming
 

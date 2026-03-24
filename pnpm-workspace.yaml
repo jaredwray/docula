@@ -2,3 +2,5 @@ onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
 minimumReleaseAge: 2880
+minimumReleaseAgeExclude:
+  - writr

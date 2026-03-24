@@ -68,10 +68,12 @@ body {
   gap: 12px;
 }
 
+.logo-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--fg); }
 .logo__img {
   height: 75px;
   width: auto;
 }
+.logo__text { font-size: 18px; font-weight: 600; }
 
 .theme-button {
   border: 1px solid transparent;
@@ -354,8 +356,17 @@ body {
 .article__main li, .release-body li, .changelog-entry-body li, .home-content li { margin-bottom: 6px; list-style: disc; }
 .article__main ol li, .release-body ol li, .changelog-entry-body ol li, .home-content ol li { list-style: decimal; }
 .article__main a, .release-body a, .changelog-entry-body a, .home-content a { color: var(--link); text-decoration: underline; }
-.article__main pre, .release-body pre, .changelog-entry-body pre, .home-content pre { background: var(--pre-bg); border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; overflow-x: auto; }
+.article__main pre, .release-body pre, .changelog-entry-body pre, .home-content pre { background: var(--pre-bg); border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; overflow-x: auto; position: relative; }
 .article__main pre code, .release-body pre code, .changelog-entry-body pre code, .home-content pre code { background: none; padding: 0; font-size: 13.5px; line-height: 1.5; }
+.copy-code-btn { position: absolute; top: 8px; right: 8px; padding: 4px; line-height: 0; border-radius: 4px; background: transparent; color: var(--muted); border: none; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
+pre:hover .copy-code-btn { opacity: 1; }
+.copy-code-btn:hover { color: var(--fg); }
+.article__main img, .changelog-entry-body img { cursor: zoom-in; }
+.lightbox-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; cursor: pointer; }
+.lightbox-overlay--visible { display: flex !important; }
+.lightbox-overlay img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4); cursor: default; }
+.lightbox-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: #fff; cursor: pointer; padding: 4px; line-height: 0; }
+.lightbox-close:hover { opacity: 0.7; }
 .article__main blockquote, .release-body blockquote, .changelog-entry-body blockquote, .home-content blockquote { border-left: 3px solid var(--border-strong); padding: 10px 16px; margin-bottom: 15px; color: var(--muted); }
 .article__main img, .release-body img, .changelog-entry-body img, .home-content img { max-width: 100%; border-radius: 6px; }
 .article__main table, .release-body table, .changelog-entry-body table, .home-content table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }

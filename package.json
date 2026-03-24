@@ -1,6 +1,6 @@
 {
   "name": "docula",
-  "version": "1.9.1",
+  "version": "1.10.0",
   "description": "Beautiful Website for Your Projects",
   "type": "module",
   "main": "./dist/docula.js",
@@ -67,14 +67,14 @@
     "colorette": "^2.0.20",
     "ecto": "^4.8.3",
     "feed": "^5.2.0",
-    "hashery": "^1.5.0",
+    "hashery": "^1.5.1",
     "jiti": "^2.6.1",
     "serve-handler": "^6.1.7",
     "update-notifier": "^7.3.1",
-    "writr": "^6.0.1"
+    "writr": "^6.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.7",
+    "@biomejs/biome": "^2.4.8",
     "@playwright/test": "^1.58.2",
     "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",

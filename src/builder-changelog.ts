@@ -46,6 +46,10 @@ export function getChangelogEntries(
 			}
 
 			const entry = parseChangelogEntry(filePath, options);
+			if (entry.draft) {
+				continue;
+			}
+
 			entries.push(entry);
 		}
 	}
@@ -109,6 +113,7 @@ export function parseChangelogEntry(
 	}
 
 	const previewImage = matterData.previewImage as string | undefined;
+	const draft = matterData.draft === true;
 
 	return {
 		title: matterData.title ?? fileName,
@@ -122,6 +127,7 @@ export function parseChangelogEntry(
 			mdx: isMdx,
 		}),
 		preview: generateChangelogPreview(markdownContent, 500, isMdx),
+		draft,
 		previewImage,
 		urlPath: `${buildUrlPath(options.baseUrl, options.changelogPath, slug)}/index.html`,
 		lastModified: fs.statSync(filePath).mtime.toISOString().split("T")[0],

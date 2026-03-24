@@ -230,6 +230,7 @@ export class DoculaBuilder {
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
 			enableLlmsTxt: this.options.enableLlmsTxt,
+			homeUrl: this.options.homeUrl,
 			baseUrl: this.options.baseUrl,
 			docsPath: this.options.docsPath,
 			apiPath: this.options.apiPath,

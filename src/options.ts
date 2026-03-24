@@ -134,6 +134,11 @@ export class DoculaOptions {
 	 */
 	public quiet = false;
 	/**
+	 * URL for the logo/home link in the header. Defaults to baseUrl or "/".
+	 * Useful when hosting docs under a subpath but the logo should link to the parent site.
+	 */
+	public homeUrl?: string;
+	/**
 	 * Base URL path prefix for all generated paths (e.g., "/docs").
 	 * When set, all asset and navigation URLs are prefixed with this path.
 	 */
@@ -350,6 +355,11 @@ export class DoculaOptions {
 			typeof (options.cache as DoculaCacheOptions).github.ttl === "number"
 		) {
 			this.cache = options.cache as DoculaCacheOptions;
+		}
+
+		if (options.homeUrl !== undefined && typeof options.homeUrl === "string") {
+			this.homeUrl =
+				options.homeUrl === "/" ? "/" : trimTrailingSlashes(options.homeUrl);
 		}
 
 		if (options.baseUrl !== undefined && typeof options.baseUrl === "string") {
