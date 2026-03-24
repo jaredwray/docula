@@ -164,8 +164,38 @@ export function generateChangelogPreview(
 		return new Writr(cleaned, writrOptions).renderSync({ mdx });
 	}
 
-	// Step 4: Split on paragraph boundaries within the target range
-	const searchArea = cleaned.slice(0, maxLength);
+	// Step 4: Extend maxLength to avoid truncating inside HTML blocks.
+	// Collect all top-level HTML block ranges, then ensure we never cut inside one.
+	const htmlBlocks: Array<{ start: number; end: number }> = [];
+	const htmlBlockPattern = /<(\w+)\b[^>]*>[\s\S]*?<\/\1>/g;
+	for (
+		let match = htmlBlockPattern.exec(cleaned);
+		match !== null;
+		match = htmlBlockPattern.exec(cleaned)
+	) {
+		htmlBlocks.push({ start: match.index, end: match.index + match[0].length });
+	}
+
+	let effectiveMax = maxLength;
+	let extended = true;
+	while (extended) {
+		extended = false;
+		for (const block of htmlBlocks) {
+			if (effectiveMax > block.start && effectiveMax <= block.end) {
+				// Extend past the block and any trailing whitespace
+				let end = block.end;
+				while (end < cleaned.length && cleaned[end] === "\n") {
+					end++;
+				}
+
+				effectiveMax = end;
+				extended = true;
+			}
+		}
+	}
+
+	// Step 5: Split on paragraph boundaries within the target range
+	const searchArea = cleaned.slice(0, effectiveMax);
 	let splitIndex = -1;
 
 	// Look for last paragraph break (\n\n) that is >= minLength
@@ -203,7 +233,7 @@ export function generateChangelogPreview(
 			for (const line of lines) {
 				const lineEnd = charCount + line.length;
 				if (
-					lineEnd <= maxLength &&
+					lineEnd <= effectiveMax &&
 					(/^[-*]\s/.test(line) || /^\d+\.\s/.test(line))
 				) {
 					// The end of the previous line is a valid split point
@@ -221,14 +251,14 @@ export function generateChangelogPreview(
 		}
 	}
 
-	// Step 5: Truncate and apply ellipsis only when force-truncated
+	// Step 6: Truncate and apply ellipsis only when force-truncated
 	if (splitIndex > 0) {
 		const truncated = cleaned.slice(0, splitIndex).trim();
 		return new Writr(truncated, writrOptions).renderSync({ mdx });
 	}
 
 	// Fallback: truncate at word boundary with ellipsis
-	let truncated = cleaned.slice(0, maxLength);
+	let truncated = cleaned.slice(0, effectiveMax);
 	const lastSpace = truncated.lastIndexOf(" ");
 	if (lastSpace > 0) {
 		truncated = truncated.slice(0, lastSpace);
