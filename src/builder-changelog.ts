@@ -12,6 +12,9 @@ import type { DoculaChangelogEntry, DoculaData } from "./types.js";
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,
 	throwOnEmptyListeners: false,
+	renderOptions: {
+		rawHtml: true,
+	},
 };
 
 export function getChangelogEntries(
