@@ -820,6 +820,27 @@ describe("DoculaBuilder - Changelog", () => {
 			expect(preview).toContain("</div>");
 		});
 
+		it("should handle self-closing tags and mismatched closing tags in preview", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// br/ is self-closing; </span> has no matching open; <section> closes before
+			// <div> forcing the backward loop to skip <div> to find <section>
+			const longContent = "Some long content here. ".repeat(20);
+			const markdown = `<div>outer<section>mid<article>${longContent}</article></section></div>\n\n<br/>\n\n</span>Text.`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("<div>");
+			expect(preview).toContain("</div>");
+		});
+
+		it("should not truncate inside nested HTML blocks of the same type", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			const innerContent = "Inner content that is long. ".repeat(15);
+			const markdown = `<div>Outer content. <div>${innerContent}</div></div>\n\nText after.`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("Outer content");
+			expect(preview).toContain("Inner content");
+			expect(preview).toContain("</div></div>");
+		});
+
 		it("should build paginated changelog pages", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;

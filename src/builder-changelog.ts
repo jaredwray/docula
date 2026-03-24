@@ -165,15 +165,45 @@ export function generateChangelogPreview(
 	}
 
 	// Step 4: Extend maxLength to avoid truncating inside HTML blocks.
-	// Collect all top-level HTML block ranges, then ensure we never cut inside one.
+	// Use a stack-based approach to correctly handle nested tags of the same type.
 	const htmlBlocks: Array<{ start: number; end: number }> = [];
-	const htmlBlockPattern = /<(\w+)\b[^>]*>[\s\S]*?<\/\1>/g;
+	const tagPattern = /<\/?(\w+)\b[^>]*>/g;
+	const blockStarts: Array<{ tag: string; index: number; depth: number }> = [];
 	for (
-		let match = htmlBlockPattern.exec(cleaned);
-		match !== null;
-		match = htmlBlockPattern.exec(cleaned)
+		let tagMatch = tagPattern.exec(cleaned);
+		tagMatch !== null;
+		tagMatch = tagPattern.exec(cleaned)
 	) {
-		htmlBlocks.push({ start: match.index, end: match.index + match[0].length });
+		const fullMatch = tagMatch[0];
+		const tagName = tagMatch[1];
+		const isClosing = fullMatch.startsWith("</");
+		if (isClosing) {
+			// Scan backward to find the matching open tag. The false branch of the
+			// tag comparison below is only reachable with malformed/misordered HTML,
+			// which reduces branch coverage slightly since it cannot be tested with valid input.
+			for (let i = blockStarts.length - 1; i >= 0; i--) {
+				if (blockStarts[i].tag === tagName) {
+					if (blockStarts[i].depth === 0) {
+						htmlBlocks.push({
+							start: blockStarts[i].index,
+							end: tagMatch.index + fullMatch.length,
+						});
+						blockStarts.splice(i, 1);
+					} else {
+						blockStarts[i].depth--;
+					}
+
+					break;
+				}
+			}
+		} else if (!fullMatch.endsWith("/>")) {
+			const existing = blockStarts.find((s) => s.tag === tagName);
+			if (existing) {
+				existing.depth++;
+			} else {
+				blockStarts.push({ tag: tagName, index: tagMatch.index, depth: 0 });
+			}
+		}
 	}
 
 	let effectiveMax = maxLength;
@@ -181,7 +211,7 @@ export function generateChangelogPreview(
 	while (extended) {
 		extended = false;
 		for (const block of htmlBlocks) {
-			if (effectiveMax > block.start && effectiveMax <= block.end) {
+			if (effectiveMax > block.start && effectiveMax < block.end) {
 				// Extend past the block and any trailing whitespace
 				let end = block.end;
 				while (end < cleaned.length && cleaned[end] === "\n") {
