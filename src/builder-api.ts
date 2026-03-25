@@ -33,19 +33,11 @@ export function resolveOpenApiSpecUrl(data: DoculaData): string | undefined {
 }
 
 export function resolveLocalOpenApiPath(data: DoculaData): string | undefined {
-	if (!data.openApiUrl || isRemoteUrl(data.openApiUrl)) {
+	if (!data.openApiUrl) {
 		return undefined;
 	}
 
-	const openApiPathWithoutQuery = data.openApiUrl.split(/[?#]/)[0];
-	if (!openApiPathWithoutQuery) {
-		return undefined;
-	}
-
-	const normalizedPath = openApiPathWithoutQuery.startsWith("/")
-		? openApiPathWithoutQuery.slice(1)
-		: openApiPathWithoutQuery;
-	return path.join(data.sitePath, normalizedPath);
+	return resolveLocalOpenApiPathForSpec(data, data.openApiUrl);
 }
 
 export async function getSafeSiteOverrideFileContent(
@@ -90,50 +82,11 @@ export async function getSafeSiteOverrideFileContent(
 export async function getSafeLocalOpenApiSpec(
 	data: DoculaData,
 ): Promise<{ sourcePath: string; content: string } | undefined> {
-	const localOpenApiPath = resolveLocalOpenApiPath(data);
-	if (!localOpenApiPath) {
+	if (!data.openApiUrl) {
 		return undefined;
 	}
 
-	const resolvedSitePath = path.resolve(data.sitePath);
-	const resolvedLocalOpenApiPath = path.resolve(localOpenApiPath);
-
-	if (!isPathWithinBasePath(resolvedLocalOpenApiPath, resolvedSitePath)) {
-		return undefined;
-	}
-
-	let localOpenApiStats: fs.Stats;
-	try {
-		localOpenApiStats = await fs.promises.lstat(resolvedLocalOpenApiPath);
-	} catch {
-		return undefined;
-	}
-
-	// Do not follow symbolic links for local OpenAPI spec ingestion.
-	if (!localOpenApiStats.isFile() || localOpenApiStats.isSymbolicLink()) {
-		return undefined;
-	}
-
-	let realSitePath: string;
-	let realLocalOpenApiPath: string;
-	try {
-		realSitePath = await fs.promises.realpath(resolvedSitePath);
-		realLocalOpenApiPath = await fs.promises.realpath(resolvedLocalOpenApiPath);
-	} catch {
-		return undefined;
-	}
-
-	if (!isPathWithinBasePath(realLocalOpenApiPath, realSitePath)) {
-		return undefined;
-	}
-
-	const localOpenApiContent = (
-		await fs.promises.readFile(realLocalOpenApiPath, "utf8")
-	).trim();
-	return {
-		sourcePath: realLocalOpenApiPath,
-		content: localOpenApiContent,
-	};
+	return getSafeLocalOpenApiSpecForSpec(data, data.openApiUrl);
 }
 
 export function resolveLocalOpenApiPathForSpec(
@@ -253,10 +206,14 @@ async function copySpecSourceFile(
 	specUrl: string,
 	outputDir: string,
 ): Promise<void> {
-	const localPath = resolveLocalOpenApiPathForSpec(data, specUrl);
-	if (localPath && fs.existsSync(localPath)) {
+	// Use the safe spec resolver to validate the path (prevents traversal/symlink attacks)
+	const safeSpec = await getSafeLocalOpenApiSpecForSpec(data, specUrl);
+	if (safeSpec) {
 		await fs.promises.mkdir(outputDir, { recursive: true });
-		await fs.promises.copyFile(localPath, `${outputDir}/swagger.json`);
+		await fs.promises.copyFile(
+			safeSpec.sourcePath,
+			`${outputDir}/swagger.json`,
+		);
 	}
 }
 
@@ -282,12 +239,9 @@ export async function renderApiContentForSpec(
 
 	const resolvedSpecUrl = resolveSpecUrl(data, spec.url);
 
-	const allApiSpecs = (data.openApiSpecs ?? []).map((s) => ({
+	const allApiSpecs = (data.allApiSpecs ?? []).map((s) => ({
 		...s,
 		active: s.path === spec.path,
-		href: s.path
-			? buildUrlPath(data.baseUrl, data.apiPath, s.path)
-			: buildUrlPath(data.baseUrl, data.apiPath),
 	}));
 
 	const apiTemplate = `${data.templatePath}/${data.templates.api}`;

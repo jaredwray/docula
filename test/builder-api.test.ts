@@ -2,6 +2,11 @@ import fs from "node:fs";
 import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DoculaBuilder, type DoculaData } from "../src/builder.js";
+import {
+	buildAllApiPages,
+	resolveLocalOpenApiPathForSpec,
+	resolveSpecUrl,
+} from "../src/builder-api.js";
 import { DoculaOptions } from "../src/options.js";
 
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
@@ -635,6 +640,133 @@ describe("DoculaBuilder - API", () => {
 			} finally {
 				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, { recursive: true, force: true });
+			}
+		});
+
+		it("should return undefined for remote URL in resolveLocalOpenApiPathForSpec", () => {
+			const data = {
+				...defaultPathFields,
+				sitePath: "test/fixtures/multi-api-site",
+			} as DoculaData;
+			expect(
+				resolveLocalOpenApiPathForSpec(data, "https://example.com/api.json"),
+			).toBeUndefined();
+		});
+
+		it("should resolve local path for resolveLocalOpenApiPathForSpec", () => {
+			const data = {
+				...defaultPathFields,
+				sitePath: "test/fixtures/multi-api-site",
+			} as DoculaData;
+			const result = resolveLocalOpenApiPathForSpec(
+				data,
+				"api/petstore/swagger.json",
+			);
+			expect(result).toContain("test/fixtures/multi-api-site");
+			expect(result).toContain("api/petstore/swagger.json");
+		});
+
+		it("should return remote URL as-is from resolveSpecUrl", () => {
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+			} as DoculaData;
+			expect(resolveSpecUrl(data, "https://example.com/api.json")).toBe(
+				"https://example.com/api.json",
+			);
+		});
+
+		it("should resolve local URL in resolveSpecUrl", () => {
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+			} as DoculaData;
+			expect(resolveSpecUrl(data, "api/swagger.json")).toBe(
+				"http://foo.com/api/swagger.json",
+			);
+		});
+
+		it("should early-return from buildAllApiPages when no specs", async () => {
+			const { Ecto } = await import("ecto");
+			const ecto = new Ecto();
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "test",
+				siteDescription: "test",
+				sitePath: "test/fixtures/multi-api-site",
+				templatePath: "templates/modern",
+				output: "test/temp/build-api-noop",
+				templates: { home: "home.hbs", api: "api.hbs" },
+			} as DoculaData;
+
+			// No openApiSpecs set — should return without error
+			await buildAllApiPages(ecto, data);
+
+			// Empty array
+			data.openApiSpecs = [];
+			await buildAllApiPages(ecto, data);
+
+			// No template
+			data.openApiSpecs = [{ name: "Test", url: "api/swagger.json", path: "" }];
+			data.templates = { home: "home.hbs" };
+			await buildAllApiPages(ecto, data);
+		});
+
+		it("should generate multi-spec llms.txt content", async () => {
+			const tempSitePath = "test/temp/multi-api-llms-site";
+			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.output = "test/temp/build-multi-api-llms";
+			options.enableLlmsTxt = true;
+			options.openApiSpecs = [
+				{
+					name: "Petstore API",
+					url: "api/petstore/swagger.json",
+					path: "petstore",
+				},
+				{
+					name: "Users API",
+					url: "api/users/swagger.json",
+					path: "users",
+				},
+			];
+
+			const builder = new DoculaBuilder(options, { quiet: true });
+
+			try {
+				await builder.build();
+				const llms = await fs.promises.readFile(
+					`${options.output}/llms.txt`,
+					"utf8",
+				);
+				expect(llms).toContain("Petstore API");
+				expect(llms).toContain("Users API");
+				expect(llms).toContain("/api/petstore");
+				expect(llms).toContain("/api/users");
+
+				const llmsFull = await fs.promises.readFile(
+					`${options.output}/llms-full.txt`,
+					"utf8",
+				);
+				expect(llmsFull).toContain("### Petstore API");
+				expect(llmsFull).toContain("### Users API");
+				expect(llmsFull).toContain("Petstore API");
+				expect(llmsFull).toContain("Users API");
+			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
 			}
 		});
 	});

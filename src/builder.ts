@@ -287,7 +287,7 @@ export class DoculaBuilder {
 			const apiDir = `${doculaData.sitePath}/api`;
 			if (fs.existsSync(apiDir)) {
 				try {
-					const entries = fs.readdirSync(apiDir, {
+					const entries = await fs.promises.readdir(apiDir, {
 						withFileTypes: true,
 					});
 					for (const entry of entries) {
@@ -665,7 +665,7 @@ export class DoculaBuilder {
 		const apiDirPath = `${siteRelativePath}/api`;
 		if (fs.existsSync(apiDirPath)) {
 			try {
-				const apiEntries = fs.readdirSync(apiDirPath, {
+				const apiEntries = await fs.promises.readdir(apiDirPath, {
 					withFileTypes: true,
 				});
 				for (const entry of apiEntries) {
