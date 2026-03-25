@@ -12,6 +12,9 @@ import type { DoculaChangelogEntry, DoculaData } from "./types.js";
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,
 	throwOnEmptyListeners: false,
+	renderOptions: {
+		rawHtml: true,
+	},
 };
 
 export function getChangelogEntries(
@@ -161,8 +164,64 @@ export function generateChangelogPreview(
 		return new Writr(cleaned, writrOptions).renderSync({ mdx });
 	}
 
-	// Step 4: Split on paragraph boundaries within the target range
-	const searchArea = cleaned.slice(0, maxLength);
+	// Step 4: Extend maxLength to avoid truncating inside HTML blocks.
+	// Use a stack-based approach to correctly handle nested tags of the same type.
+	const htmlBlocks: Array<{ start: number; end: number }> = [];
+	const tagPattern = /<\/?(\w+)\b[^>]*>/g;
+	const blockStarts: Array<{ tag: string; index: number; depth: number }> = [];
+	for (const tagMatch of cleaned.matchAll(tagPattern)) {
+		const fullMatch = tagMatch[0];
+		const tagName = tagMatch[1];
+		const isClosing = fullMatch.startsWith("</");
+		if (isClosing) {
+			// Scan backward to find the matching open tag. The false branch of the
+			// tag comparison below is only reachable with malformed/misordered HTML,
+			// which reduces branch coverage slightly since it cannot be tested with valid input.
+			for (let i = blockStarts.length - 1; i >= 0; i--) {
+				if (blockStarts[i].tag === tagName) {
+					if (blockStarts[i].depth === 0) {
+						htmlBlocks.push({
+							start: blockStarts[i].index,
+							end: tagMatch.index + fullMatch.length,
+						});
+						blockStarts.splice(i, 1);
+					} else {
+						blockStarts[i].depth--;
+					}
+
+					break;
+				}
+			}
+		} else if (!fullMatch.endsWith("/>")) {
+			const existing = blockStarts.find((s) => s.tag === tagName);
+			if (existing) {
+				existing.depth++;
+			} else {
+				blockStarts.push({ tag: tagName, index: tagMatch.index, depth: 0 });
+			}
+		}
+	}
+
+	let effectiveMax = maxLength;
+	let extended = true;
+	while (extended) {
+		extended = false;
+		for (const block of htmlBlocks) {
+			if (effectiveMax > block.start && effectiveMax < block.end) {
+				// Extend past the block and any trailing whitespace
+				let end = block.end;
+				while (end < cleaned.length && cleaned[end] === "\n") {
+					end++;
+				}
+
+				effectiveMax = end;
+				extended = true;
+			}
+		}
+	}
+
+	// Step 5: Split on paragraph boundaries within the target range
+	const searchArea = cleaned.slice(0, effectiveMax);
 	let splitIndex = -1;
 
 	// Look for last paragraph break (\n\n) that is >= minLength
@@ -200,7 +259,7 @@ export function generateChangelogPreview(
 			for (const line of lines) {
 				const lineEnd = charCount + line.length;
 				if (
-					lineEnd <= maxLength &&
+					lineEnd <= effectiveMax &&
 					(/^[-*]\s/.test(line) || /^\d+\.\s/.test(line))
 				) {
 					// The end of the previous line is a valid split point
@@ -218,14 +277,14 @@ export function generateChangelogPreview(
 		}
 	}
 
-	// Step 5: Truncate and apply ellipsis only when force-truncated
+	// Step 6: Truncate and apply ellipsis only when force-truncated
 	if (splitIndex > 0) {
 		const truncated = cleaned.slice(0, splitIndex).trim();
 		return new Writr(truncated, writrOptions).renderSync({ mdx });
 	}
 
 	// Fallback: truncate at word boundary with ellipsis
-	let truncated = cleaned.slice(0, maxLength);
+	let truncated = cleaned.slice(0, effectiveMax);
 	const lastSpace = truncated.lastIndexOf(" ");
 	if (lastSpace > 0) {
 		truncated = truncated.slice(0, lastSpace);
