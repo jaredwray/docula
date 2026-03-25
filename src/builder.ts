@@ -56,7 +56,6 @@ import {
 	copyDirectoryWithHashing,
 	copyDocumentSiblingAssets,
 	copyPublicFolder,
-	listContentAssets,
 	mergeTemplateOverrides,
 } from "./builder-files.js";
 import { buildLlmsFiles as _buildLlmsFiles } from "./builder-llm.js";
@@ -687,24 +686,6 @@ export class DoculaBuilder {
 
 		await fs.promises.mkdir(this._options.sitePath, { recursive: true });
 		await fs.promises.writeFile(siteReadmePath, readmeContent, "utf8");
-
-		// Copy assets referenced by the README from cwd to sitePath
-		const availableAssets = listContentAssets(this._options, cwdDir);
-		for (const assetRelPath of availableAssets) {
-			if (readmeContent.includes(assetRelPath)) {
-				const source = path.join(cwdDir, assetRelPath);
-				const stat = await fs.promises.lstat(source);
-				// Skip symbolic links to prevent copying sensitive files
-				/* v8 ignore next 3 -- @preserve */
-				if (stat.isSymbolicLink()) {
-					continue;
-				}
-
-				const target = path.join(this._options.sitePath, assetRelPath);
-				await fs.promises.mkdir(path.dirname(target), { recursive: true });
-				await fs.promises.copyFile(source, target);
-			}
-		}
 	}
 
 	public async getGithubData(githubPath: string): Promise<GithubData> {
