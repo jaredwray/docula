@@ -799,6 +799,48 @@ describe("DoculaBuilder - Changelog", () => {
 			expect(preview).toContain("...");
 		});
 
+		it("should preserve complete HTML blocks in preview", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			const markdown =
+				'<div style="position: relative;">\n  <iframe src="https://example.com/video" loading="lazy"></iframe>\n</div>\n\nThis is the text content after the video.';
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("<iframe");
+			expect(preview).toContain("https://example.com/video");
+			expect(preview).toContain("</div>");
+		});
+
+		it("should not truncate inside an HTML block", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// HTML block larger than 500 chars
+			const longSrc = `https://example.com/${"a".repeat(500)}/video`;
+			const markdown = `<div><iframe src="${longSrc}"></iframe></div>\n\nSome text after.`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("<iframe");
+			expect(preview).toContain("</iframe>");
+			expect(preview).toContain("</div>");
+		});
+
+		it("should handle self-closing tags and mismatched closing tags in preview", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// br/ is self-closing; </span> has no matching open; <section> closes before
+			// <div> forcing the backward loop to skip <div> to find <section>
+			const longContent = "Some long content here. ".repeat(20);
+			const markdown = `<div>outer<section>mid<article>${longContent}</article></section></div>\n\n<br/>\n\n</span>Text.`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("<div>");
+			expect(preview).toContain("</div>");
+		});
+
+		it("should not truncate inside nested HTML blocks of the same type", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			const innerContent = "Inner content that is long. ".repeat(15);
+			const markdown = `<div>Outer content. <div>${innerContent}</div></div>\n\nText after.`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("Outer content");
+			expect(preview).toContain("Inner content");
+			expect(preview).toContain("</div></div>");
+		});
+
 		it("should build paginated changelog pages", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
