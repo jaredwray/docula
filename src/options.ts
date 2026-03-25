@@ -30,6 +30,12 @@ export type DoculaHeaderLink = {
 	icon?: string;
 };
 
+export type DoculaOpenApiSpec = {
+	name: string;
+	url: string;
+	path: string;
+};
+
 export type DoculaOpenGraph = {
 	title?: string;
 	description?: string;
@@ -99,6 +105,11 @@ export class DoculaOptions {
 	 * Supports both external URLs (https://...) and relative paths (/openapi.json)
 	 */
 	public openApiUrl?: string;
+	/**
+	 * Multiple OpenAPI specifications. Each entry generates a separate API page.
+	 * When provided, overrides openApiUrl. Each spec needs a name, url, and path slug.
+	 */
+	public openApiSpecs?: DoculaOpenApiSpec[];
 	/**
 	 * When true, GitHub releases are converted to changelog entries and merged
 	 * with file-based changelog entries. Requires a changelog template to exist.
@@ -289,6 +300,24 @@ export class DoculaOptions {
 		/* v8 ignore next -- @preserve */
 		if (options.openApiUrl) {
 			this.openApiUrl = options.openApiUrl as string;
+		}
+
+		if (options.openApiSpecs && Array.isArray(options.openApiSpecs)) {
+			const validSpecs = (options.openApiSpecs as DoculaOpenApiSpec[]).filter(
+				(spec) =>
+					typeof spec === "object" &&
+					spec !== null &&
+					typeof spec.name === "string" &&
+					typeof spec.url === "string" &&
+					typeof spec.path === "string",
+			);
+			if (validSpecs.length > 0) {
+				this.openApiSpecs = validSpecs.map((spec) => ({
+					name: spec.name,
+					url: spec.url,
+					path: trimSlashes(spec.path),
+				}));
+			}
 		}
 
 		if (

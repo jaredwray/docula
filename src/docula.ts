@@ -608,5 +608,6 @@ export type {
 	DoculaCacheOptions,
 	DoculaCookieAuth,
 	DoculaHeaderLink,
+	DoculaOpenApiSpec,
 } from "./options.js";
 export { DoculaOptions } from "./options.js";

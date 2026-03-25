@@ -36,6 +36,7 @@ describe("DoculaBuilder - API", () => {
 			"test/fixtures/api-only-site",
 			"test/fixtures/empty-site",
 			"test/fixtures/mega-page-site-no-home-page",
+			"test/fixtures/multi-api-site",
 		]) {
 			try {
 				fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
@@ -450,6 +451,191 @@ describe("DoculaBuilder - API", () => {
 			await expect(builder.renderApiContent(data)).rejects.toThrow(
 				"No API template or openApiUrl found",
 			);
+		});
+	});
+
+	describe("Docula Builder - Multiple OpenAPI Specs", () => {
+		beforeEach(() => {
+			// biome-ignore lint/suspicious/noExplicitAny: test file
+			(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
+				if (url.includes("releases")) {
+					return { data: githubMockReleases };
+				}
+
+				if (url.includes("contributors")) {
+					return { data: githubMockContributors };
+				}
+			});
+		});
+
+		it("should build multiple API pages from openApiSpecs config", async () => {
+			const tempSitePath = "test/temp/multi-api-specs-site";
+			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.output = "test/temp/build-multi-api-specs";
+			options.openApiSpecs = [
+				{
+					name: "Petstore API",
+					url: "api/petstore/swagger.json",
+					path: "petstore",
+				},
+				{ name: "Users API", url: "api/users/swagger.json", path: "users" },
+			];
+
+			const builder = new DoculaBuilder(options, { quiet: true });
+
+			try {
+				await builder.build();
+				// Each spec should have its own page
+				expect(fs.existsSync(`${options.output}/api/petstore/index.html`)).toBe(
+					true,
+				);
+				expect(fs.existsSync(`${options.output}/api/users/index.html`)).toBe(
+					true,
+				);
+
+				const petstorePage = await fs.promises.readFile(
+					`${options.output}/api/petstore/index.html`,
+					"utf8",
+				);
+				expect(petstorePage).toContain("Petstore API");
+				expect(petstorePage).toContain("List pets");
+
+				const usersPage = await fs.promises.readFile(
+					`${options.output}/api/users/index.html`,
+					"utf8",
+				);
+				expect(usersPage).toContain("Users API");
+				expect(usersPage).toContain("List users");
+
+				// Both pages should have spec switcher links
+				expect(petstorePage).toContain("api-spec-switcher");
+				expect(petstorePage).toContain("Users API");
+				expect(usersPage).toContain("api-spec-switcher");
+				expect(usersPage).toContain("Petstore API");
+			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
+				await fs.promises.rm(options.output, { recursive: true, force: true });
+			}
+		});
+
+		it("should auto-detect multiple api/*/swagger.json files", async () => {
+			const tempSitePath = "test/temp/multi-api-autodetect-site";
+			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.output = "test/temp/build-multi-api-autodetect";
+
+			const builder = new DoculaBuilder(options, { quiet: true });
+
+			try {
+				await builder.build();
+				// Auto-detected specs should generate pages
+				expect(fs.existsSync(`${options.output}/api/petstore/index.html`)).toBe(
+					true,
+				);
+				expect(fs.existsSync(`${options.output}/api/users/index.html`)).toBe(
+					true,
+				);
+			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
+				await fs.promises.rm(options.output, { recursive: true, force: true });
+			}
+		});
+
+		it("should parse openApiSpecs from options", () => {
+			const options = new DoculaOptions({
+				openApiSpecs: [
+					{
+						name: "Petstore",
+						url: "/api/petstore/swagger.json",
+						path: "petstore",
+					},
+					{
+						name: "Users",
+						url: "https://example.com/api.json",
+						path: "users/",
+					},
+				],
+			});
+			expect(options.openApiSpecs).toHaveLength(2);
+			expect(options.openApiSpecs?.[0].name).toBe("Petstore");
+			expect(options.openApiSpecs?.[0].path).toBe("petstore");
+			// Should trim trailing slashes from path
+			expect(options.openApiSpecs?.[1].path).toBe("users");
+		});
+
+		it("should ignore invalid openApiSpecs entries", () => {
+			const options = new DoculaOptions({
+				openApiSpecs: [
+					{ name: "Valid", url: "/api.json", path: "valid" },
+					{ name: 123, url: "/api.json", path: "invalid" }, // name is not string
+					{ name: "NoUrl", path: "nope" }, // missing url
+				],
+			});
+			expect(options.openApiSpecs).toHaveLength(1);
+			expect(options.openApiSpecs?.[0].name).toBe("Valid");
+		});
+
+		it("should not set openApiSpecs when array is empty", () => {
+			const options = new DoculaOptions({
+				openApiSpecs: [],
+			});
+			expect(options.openApiSpecs).toBeUndefined();
+		});
+
+		it("should copy swagger.json to each spec output directory", async () => {
+			const tempSitePath = "test/temp/multi-api-copy-site";
+			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.output = "test/temp/build-multi-api-copy";
+			options.openApiSpecs = [
+				{
+					name: "Petstore API",
+					url: "api/petstore/swagger.json",
+					path: "petstore",
+				},
+				{ name: "Users API", url: "api/users/swagger.json", path: "users" },
+			];
+
+			const builder = new DoculaBuilder(options, { quiet: true });
+
+			try {
+				await builder.build();
+				// swagger.json should be copied to each output directory
+				expect(
+					fs.existsSync(`${options.output}/api/petstore/swagger.json`),
+				).toBe(true);
+				expect(fs.existsSync(`${options.output}/api/users/swagger.json`)).toBe(
+					true,
+				);
+			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
+				await fs.promises.rm(options.output, { recursive: true, force: true });
+			}
 		});
 	});
 });

@@ -2,8 +2,10 @@ import fs from "node:fs";
 import { Writr, type WritrOptions } from "writr";
 import {
 	getSafeLocalOpenApiSpec,
+	getSafeLocalOpenApiSpecForSpec,
 	getSafeSiteOverrideFileContent,
 	resolveOpenApiSpecUrl,
+	resolveSpecUrl,
 } from "./builder-api.js";
 import {
 	buildAbsoluteSiteUrl,
@@ -96,7 +98,14 @@ export function generateLlmsIndexContent(data: DoculaData): string {
 
 	lines.push("");
 	lines.push("## API Reference");
-	if (data.hasApi) {
+	if (data.openApiSpecs && data.openApiSpecs.length > 1) {
+		for (const spec of data.openApiSpecs) {
+			const specUrl = spec.path ? `${data.apiUrl}/${spec.path}` : data.apiUrl;
+			lines.push(
+				`- [${spec.name}](${buildAbsoluteSiteUrl(data.siteUrl, specUrl)})`,
+			);
+		}
+	} else if (data.hasApi) {
 		lines.push(
 			`- [API Documentation](${buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)})`,
 		);
@@ -170,7 +179,27 @@ export async function generateLlmsFullContent(
 
 	lines.push("");
 	lines.push("## API Reference");
-	if (data.hasApi) {
+	if (data.openApiSpecs && data.openApiSpecs.length > 1) {
+		for (const spec of data.openApiSpecs) {
+			const specPageUrl = spec.path
+				? `${data.apiUrl}/${spec.path}`
+				: data.apiUrl;
+			lines.push("");
+			lines.push(`### ${spec.name}`);
+			lines.push(`URL: ${buildAbsoluteSiteUrl(data.siteUrl, specPageUrl)}`);
+			lines.push("");
+
+			const localSpec = await getSafeLocalOpenApiSpecForSpec(data, spec.url);
+			if (localSpec) {
+				lines.push(`OpenAPI Spec Source: ${toPosixPath(localSpec.sourcePath)}`);
+				lines.push("");
+				/* v8 ignore next -- @preserve */
+				lines.push(localSpec.content || "_No content_");
+			} else {
+				lines.push(`OpenAPI Spec URL: ${resolveSpecUrl(data, spec.url)}`);
+			}
+		}
+	} else if (data.hasApi) {
 		lines.push(`URL: ${buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)}`);
 		lines.push("");
 

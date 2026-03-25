@@ -4,8 +4,8 @@
 <head>
   {{> header }}
   <link rel="stylesheet" href="/css/api.css" />
-  <title>API Reference - {{ siteTitle }}</title>
-  <meta name="description" content="API Reference for {{ siteTitle }}" />
+  <title>{{#if specName}}{{specName}}{{else}}API Reference{{/if}} - {{ siteTitle }}</title>
+  <meta name="description" content="{{#if specName}}{{specName}}{{else}}API Reference{{/if}} for {{ siteTitle }}" />
   {{{jsonLd}}}
 </head>
 
@@ -27,6 +27,14 @@
     @keyframes octocat-wave { 0%,100% { transform: rotate(0) } 20%,60% { transform: rotate(-25deg) } 40%,80% { transform: rotate(10deg) } }
     @media (max-width:500px) { .github-corner:hover .octo-arm { animation: none } .github-corner .octo-arm { animation: octocat-wave 560ms ease-in-out } }
   </style>
+  {{/if}}
+
+  {{#if multipleApiSpecs}}
+  <nav class="api-spec-switcher">
+    {{#each allApiSpecs}}
+    <a href="{{this.href}}" class="api-spec-switcher__link{{#if this.active}} api-spec-switcher__link--active{{/if}}">{{this.name}}</a>
+    {{/each}}
+  </nav>
   {{/if}}
 
   {{#if apiSpec}}

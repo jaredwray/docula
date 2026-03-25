@@ -12,6 +12,7 @@ import {
 	saveAIMetadataCache,
 } from "./builder-ai.js";
 import {
+	buildAllApiPages as _buildAllApiPages,
 	buildApiHomePage as _buildApiHomePage,
 	buildApiPage as _buildApiPage,
 	renderApiContent as _renderApiContent,
@@ -251,16 +252,82 @@ export class DoculaBuilder {
 			currentAssetHashes["README.md"] = hashFile(this._hash, readmePath);
 		}
 
-		// Auto-detect swagger.json if openApiUrl is not set
+		// Normalize API specs into openApiSpecs array
+		if (this.options.openApiSpecs && this.options.openApiSpecs.length > 0) {
+			doculaData.openApiSpecs = this.options.openApiSpecs.map((spec) => ({
+				name: spec.name,
+				url: spec.url,
+				path: spec.path,
+			}));
+		} else if (doculaData.openApiUrl) {
+			doculaData.openApiSpecs = [
+				{ name: "API Reference", url: doculaData.openApiUrl, path: "" },
+			];
+		} else {
+			const detectedSpecs: Array<{
+				name: string;
+				url: string;
+				path: string;
+			}> = [];
+			// Auto-detect root swagger.json
+			if (fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)) {
+				const rootUrl = buildUrlPath(
+					this.options.baseUrl,
+					this.options.apiPath,
+					"swagger.json",
+				);
+				detectedSpecs.push({
+					name: "API Reference",
+					url: rootUrl,
+					path: "",
+				});
+			}
+
+			// Auto-detect subdirectory swagger.json files (api/*/swagger.json)
+			const apiDir = `${doculaData.sitePath}/api`;
+			if (fs.existsSync(apiDir)) {
+				try {
+					const entries = fs.readdirSync(apiDir, {
+						withFileTypes: true,
+					});
+					for (const entry of entries) {
+						if (
+							entry.isDirectory() &&
+							fs.existsSync(`${apiDir}/${entry.name}/swagger.json`)
+						) {
+							const specUrl = buildUrlPath(
+								this.options.baseUrl,
+								this.options.apiPath,
+								entry.name,
+								"swagger.json",
+							);
+							const displayName = entry.name
+								.replace(/[-_]/g, " ")
+								.replace(/\b\w/g, (c) => c.toUpperCase());
+							detectedSpecs.push({
+								name: displayName,
+								url: specUrl,
+								path: entry.name,
+							});
+						}
+					}
+				} catch {
+					// Ignore errors reading api directory
+				}
+			}
+
+			if (detectedSpecs.length > 0) {
+				doculaData.openApiSpecs = detectedSpecs;
+			}
+		}
+
+		// Backward compat: set openApiUrl from first spec
 		if (
-			!doculaData.openApiUrl &&
-			fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)
+			doculaData.openApiSpecs &&
+			doculaData.openApiSpecs.length > 0 &&
+			!doculaData.openApiUrl
 		) {
-			doculaData.openApiUrl = buildUrlPath(
-				this.options.baseUrl,
-				this.options.apiPath,
-				"swagger.json",
-			);
+			doculaData.openApiUrl = doculaData.openApiSpecs[0].url;
 		}
 
 		// Get data from github
@@ -383,8 +450,23 @@ export class DoculaBuilder {
 			doculaData.hasChangelog,
 		);
 		doculaData.hasApi = Boolean(
-			doculaData.openApiUrl && doculaData.templates?.api,
+			doculaData.openApiSpecs &&
+				doculaData.openApiSpecs.length > 0 &&
+				doculaData.templates?.api,
 		);
+
+		// Compute allApiSpecs for template navigation
+		if (doculaData.openApiSpecs && doculaData.openApiSpecs.length > 0) {
+			doculaData.allApiSpecs = doculaData.openApiSpecs.map((spec) => ({
+				name: spec.name,
+				url: spec.url,
+				path: spec.path,
+				href: spec.path
+					? buildUrlPath(this.options.baseUrl, this.options.apiPath, spec.path)
+					: buildUrlPath(this.options.baseUrl, this.options.apiPath),
+			}));
+			doculaData.multipleApiSpecs = doculaData.openApiSpecs.length > 1;
+		}
 
 		// Set lastModified for pages without a specific source file (home, changelog listing, API)
 		doculaData.lastModified = new Date().toISOString().split("T")[0];
@@ -439,11 +521,16 @@ export class DoculaBuilder {
 			}
 		}
 
-		// Build the API documentation page (/api/index.html)
+		// Build the API documentation page(s)
 		if (doculaData.hasApi) {
-			this._console.step("Building API page...");
-			await this.buildApiPage(doculaData);
-			this._console.fileBuilt(`${this.options.apiPath}/index.html`);
+			this._console.step("Building API page(s)...");
+			await this.buildAllApiPages(doculaData);
+			for (const spec of doculaData.openApiSpecs ?? []) {
+				const specSubPath = spec.path
+					? `${this.options.apiPath}/${spec.path}`
+					: this.options.apiPath;
+				this._console.fileBuilt(`${specSubPath}/index.html`);
+			}
 		}
 
 		// Build changelog pages (/changelog/index.html and /changelog/{slug}/index.html)
@@ -565,13 +652,37 @@ export class DoculaBuilder {
 			this._console.fileCopied("css/variables.css");
 		}
 
-		// Record swagger.json hash for change detection
+		// Record swagger.json hash(es) for change detection
 		const swaggerPath = `${siteRelativePath}/api/swagger.json`;
 		if (fs.existsSync(swaggerPath)) {
 			currentAssetHashes["api/swagger.json"] = hashFile(
 				this._hash,
 				swaggerPath,
 			);
+		}
+
+		// Also track swagger.json in api subdirectories
+		const apiDirPath = `${siteRelativePath}/api`;
+		if (fs.existsSync(apiDirPath)) {
+			try {
+				const apiEntries = fs.readdirSync(apiDirPath, {
+					withFileTypes: true,
+				});
+				for (const entry of apiEntries) {
+					if (entry.isDirectory()) {
+						const subSwaggerPath = `${apiDirPath}/${entry.name}/swagger.json`;
+						if (fs.existsSync(subSwaggerPath)) {
+							const hashKey = `api/${entry.name}/swagger.json`;
+							currentAssetHashes[hashKey] = hashFile(
+								this._hash,
+								subSwaggerPath,
+							);
+						}
+					}
+				}
+			} catch {
+				// Ignore errors reading api subdirectories
+			}
 		}
 
 		// Copy over public folder contents (differential) and record their hashes
@@ -996,6 +1107,10 @@ export class DoculaBuilder {
 
 	public async buildApiPage(data: DoculaData): Promise<void> {
 		return _buildApiPage(this._ecto, data);
+	}
+
+	public async buildAllApiPages(data: DoculaData): Promise<void> {
+		return _buildAllApiPages(this._ecto, data);
 	}
 
 	public async buildApiHomePage(data: DoculaData): Promise<void> {
