@@ -134,11 +134,7 @@
     function setAuthUI(loggedIn, displayName) {
       window.__doculaAuth = { loggedIn: loggedIn, displayName: displayName };
       try { localStorage.setItem('docula-auth-state', JSON.stringify(window.__doculaAuth)); } catch(e) {}
-      if (loggedIn) {
-        document.documentElement.classList.add('docula-auth-logged-in');
-      } else {
-        document.documentElement.classList.remove('docula-auth-logged-in');
-      }
+      document.documentElement.classList.toggle('docula-auth-logged-in', loggedIn);
       document.dispatchEvent(new CustomEvent('docula-auth-change'));
       var els = [
         { login: document.getElementById('cookie-auth-login'), logout: document.getElementById('cookie-auth-logout'), user: document.getElementById('cookie-auth-user') },

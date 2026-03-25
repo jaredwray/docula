@@ -169,11 +169,7 @@ export function generateChangelogPreview(
 	const htmlBlocks: Array<{ start: number; end: number }> = [];
 	const tagPattern = /<\/?(\w+)\b[^>]*>/g;
 	const blockStarts: Array<{ tag: string; index: number; depth: number }> = [];
-	for (
-		let tagMatch = tagPattern.exec(cleaned);
-		tagMatch !== null;
-		tagMatch = tagPattern.exec(cleaned)
-	) {
+	for (const tagMatch of cleaned.matchAll(tagPattern)) {
 		const fullMatch = tagMatch[0];
 		const tagName = tagMatch[1];
 		const isClosing = fullMatch.startsWith("</");
