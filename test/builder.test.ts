@@ -3037,7 +3037,7 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
-		it("should copy referenced assets from cwd to sitePath", async () => {
+		it("should not copy referenced images from cwd to sitePath", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -3059,37 +3059,8 @@ describe("DoculaBuilder", () => {
 
 			// README should be copied
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
-			// Referenced asset should also be copied
-			expect(fs.existsSync(`${tempSitePath}/assets/logo.png`)).toBe(true);
-			const assetContent = fs.readFileSync(
-				`${tempSitePath}/assets/logo.png`,
-				"utf8",
-			);
-			expect(assetContent).toEqual("fake-png-data");
-
-			cwdSpy.mockRestore();
-		});
-
-		it("should not copy unreferenced assets from cwd", async () => {
-			const cwdSpy = vi
-				.spyOn(process, "cwd")
-				.mockReturnValue(path.resolve(tempCwdPath));
-
-			fs.writeFileSync(
-				`${tempCwdPath}/README.md`,
-				"# Project\n\nNo images here.\n",
-			);
-			fs.mkdirSync(`${tempCwdPath}/assets`, { recursive: true });
-			fs.writeFileSync(`${tempCwdPath}/assets/unused.png`, "fake-png-data");
-
-			const options = new DoculaOptions();
-			options.quiet = true;
-			options.sitePath = tempSitePath;
-			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
-
-			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
-			expect(fs.existsSync(`${tempSitePath}/assets/unused.png`)).toBe(false);
+			// Referenced image should NOT be copied
+			expect(fs.existsSync(`${tempSitePath}/assets/logo.png`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
