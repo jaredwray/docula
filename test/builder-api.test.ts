@@ -489,10 +489,9 @@ describe("DoculaBuilder - API", () => {
 			options.openApiSpecs = [
 				{
 					name: "Petstore API",
-					url: "api/petstore/swagger.json",
-					path: "petstore",
+					url: "petstore/swagger.json",
 				},
-				{ name: "Users API", url: "api/users/swagger.json", path: "users" },
+				{ name: "Users API", url: "users/swagger.json" },
 			];
 
 			const builder = new DoculaBuilder(options, { quiet: true });
@@ -559,32 +558,28 @@ describe("DoculaBuilder - API", () => {
 					{
 						name: "Petstore",
 						url: "/api/petstore/swagger.json",
-						path: "petstore",
 						order: 2,
 					},
 					{
 						name: "Users",
 						url: "https://example.com/api.json",
-						path: "users/",
 						order: 1,
 					},
 				],
 			});
 			expect(options.openApiSpecs).toHaveLength(2);
 			expect(options.openApiSpecs?.[0].name).toBe("Petstore");
-			expect(options.openApiSpecs?.[0].path).toBe("petstore");
 			expect(options.openApiSpecs?.[0].order).toBe(2);
-			// Should trim trailing slashes from path
-			expect(options.openApiSpecs?.[1].path).toBe("users");
+			expect(options.openApiSpecs?.[1].name).toBe("Users");
 			expect(options.openApiSpecs?.[1].order).toBe(1);
 		});
 
 		it("should ignore invalid openApiSpecs entries", () => {
 			const options = new DoculaOptions({
 				openApiSpecs: [
-					{ name: "Valid", url: "/api.json", path: "valid" },
-					{ name: 123, url: "/api.json", path: "invalid" }, // name is not string
-					{ name: "NoUrl", path: "nope" }, // missing url
+					{ name: "Valid", url: "/api.json" },
+					{ name: 123, url: "/api.json" }, // name is not string
+					{ name: "NoUrl" }, // missing url
 				],
 			});
 			expect(options.openApiSpecs).toHaveLength(1);
@@ -614,10 +609,9 @@ describe("DoculaBuilder - API", () => {
 			options.openApiSpecs = [
 				{
 					name: "Petstore API",
-					url: "api/petstore/swagger.json",
-					path: "petstore",
+					url: "petstore/swagger.json",
 				},
-				{ name: "Users API", url: "api/users/swagger.json", path: "users" },
+				{ name: "Users API", url: "users/swagger.json" },
 			];
 
 			const builder = new DoculaBuilder(options, { quiet: true });
@@ -702,7 +696,7 @@ describe("DoculaBuilder - API", () => {
 			await buildAllApiPages(ecto, data);
 
 			// No template
-			data.openApiSpecs = [{ name: "Test", url: "api/swagger.json", path: "" }];
+			data.openApiSpecs = [{ name: "Test", url: "swagger.json" }];
 			data.templates = { home: "home.hbs" };
 			await buildAllApiPages(ecto, data);
 		});
@@ -724,13 +718,11 @@ describe("DoculaBuilder - API", () => {
 			options.openApiSpecs = [
 				{
 					name: "Petstore API",
-					url: "api/petstore/swagger.json",
-					path: "petstore",
+					url: "petstore/swagger.json",
 				},
 				{
 					name: "Users API",
-					url: "api/users/swagger.json",
-					path: "users",
+					url: "users/swagger.json",
 				},
 			];
 
@@ -780,14 +772,12 @@ describe("DoculaBuilder - API", () => {
 			options.openApiSpecs = [
 				{
 					name: "Users API",
-					url: "api/users/swagger.json",
-					path: "users",
+					url: "users/swagger.json",
 					order: 2,
 				},
 				{
 					name: "Petstore API",
-					url: "api/petstore/swagger.json",
-					path: "petstore",
+					url: "petstore/swagger.json",
 					order: 1,
 				},
 			];

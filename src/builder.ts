@@ -68,7 +68,7 @@ import {
 	resolveJsonLd as _resolveJsonLd,
 	resolveOpenGraphData as _resolveOpenGraphData,
 } from "./builder-seo.js";
-import { buildUrlPath } from "./builder-utils.js";
+import { buildUrlPath, isRemoteUrl } from "./builder-utils.js";
 import { DoculaConsole } from "./console.js";
 import {
 	Github,
@@ -256,19 +256,19 @@ export class DoculaBuilder {
 		if (this.options.openApiSpecs && this.options.openApiSpecs.length > 0) {
 			doculaData.openApiSpecs = this.options.openApiSpecs.map((spec) => ({
 				name: spec.name,
-				url: spec.url,
-				path: spec.path,
+				url: isRemoteUrl(spec.url)
+					? spec.url
+					: buildUrlPath(this.options.apiPath, spec.url),
 				...(typeof spec.order === "number" && { order: spec.order }),
 			}));
 		} else if (doculaData.openApiUrl) {
 			doculaData.openApiSpecs = [
-				{ name: "API Reference", url: doculaData.openApiUrl, path: "" },
+				{ name: "API Reference", url: doculaData.openApiUrl },
 			];
 		} else {
 			const detectedSpecs: Array<{
 				name: string;
 				url: string;
-				path: string;
 			}> = [];
 			// Auto-detect root swagger.json
 			if (fs.existsSync(`${doculaData.sitePath}/api/swagger.json`)) {
@@ -280,7 +280,6 @@ export class DoculaBuilder {
 				detectedSpecs.push({
 					name: "API Reference",
 					url: rootUrl,
-					path: "",
 				});
 			}
 
@@ -308,7 +307,6 @@ export class DoculaBuilder {
 							detectedSpecs.push({
 								name: displayName,
 								url: specUrl,
-								path: entry.name,
 							});
 						}
 					}

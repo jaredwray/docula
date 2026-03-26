@@ -230,7 +230,6 @@ export async function renderCombinedApiContent(
 	}
 
 	const specs = data.openApiSpecs ?? [];
-	const apiOutputDir = `${data.output}/${data.apiPath}`;
 
 	// Parse all specs and copy swagger files
 	const apiSpecs: Array<{
@@ -239,9 +238,9 @@ export async function renderCombinedApiContent(
 		specUrl: string;
 	}> = [];
 	for (const spec of specs) {
-		const specOutputDir = spec.path
-			? `${apiOutputDir}/${spec.path}`
-			: apiOutputDir;
+		// Derive the output directory from the URL's parent path
+		const urlDir = spec.url.replace(/[?#].*$/, "").replace(/\/[^/]+$/, "");
+		const specOutputDir = `${data.output}/${urlDir}`;
 		await copySpecSourceFile(data, spec.url, specOutputDir);
 		const apiSpec = await parseAndRenderSpec(data, spec.url);
 		apiSpecs.push({

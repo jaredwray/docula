@@ -184,18 +184,7 @@ export async function buildSiteMapPage(
 		});
 	}
 
-	if (
-		data.openApiSpecs &&
-		data.openApiSpecs.length > 0 &&
-		data.templates?.api
-	) {
-		for (const spec of data.openApiSpecs) {
-			const specUrl = spec.path ? `${data.apiUrl}/${spec.path}` : data.apiUrl;
-			urls.push({
-				url: `${data.siteUrl}${specUrl}`,
-			});
-		}
-	} else if (data.openApiUrl && data.templates?.api) {
+	if (data.hasApi || (data.openApiUrl && data.templates?.api)) {
 		urls.push({
 			url: `${data.siteUrl}${data.apiUrl}`,
 		});

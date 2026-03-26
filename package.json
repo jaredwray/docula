@@ -33,7 +33,7 @@
     "website:build": "node bin/docula.js build -s ./site -o ./site/dist",
     "website:serve": "pnpm build && node bin/docula.js dev -s ./site -p 3333",
     "website:mapi": "pnpm build && node bin/docula.js dev -s ./test/fixtures/multi-api-site -p 3333",
-    "website:mega": "node bin/docula.js serve -s ./test/fixtures/mega-page-site --watch --clean",
+    "website:mega": "node bin/docula.js dev -s ./test/fixtures/mega-page-site",
     "website:mega:custom": "node bin/docula.js serve -s ./test/fixtures/mega-custom-template --watch",
     "website:singlepage": "node bin/docula.js dev -s ./test/fixtures/single-page-site --clean",
     "website:nohome": "node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page --watch --clean",

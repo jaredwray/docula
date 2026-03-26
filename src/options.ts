@@ -33,7 +33,6 @@ export type DoculaHeaderLink = {
 export type DoculaOpenApiSpec = {
 	name: string;
 	url: string;
-	path: string;
 	order?: number;
 };
 
@@ -309,14 +308,12 @@ export class DoculaOptions {
 					typeof spec === "object" &&
 					spec !== null &&
 					typeof spec.name === "string" &&
-					typeof spec.url === "string" &&
-					typeof spec.path === "string",
+					typeof spec.url === "string",
 			);
 			if (validSpecs.length > 0) {
 				this.openApiSpecs = validSpecs.map((spec) => ({
 					name: spec.name,
 					url: spec.url,
-					path: trimSlashes(spec.path),
 					...(typeof spec.order === "number" && { order: spec.order }),
 				}));
 			}

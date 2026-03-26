@@ -100,9 +100,8 @@ export function generateLlmsIndexContent(data: DoculaData): string {
 	lines.push("## API Reference");
 	if (data.openApiSpecs && data.openApiSpecs.length > 1) {
 		for (const spec of data.openApiSpecs) {
-			const specUrl = spec.path ? `${data.apiUrl}/${spec.path}` : data.apiUrl;
 			lines.push(
-				`- [${spec.name}](${buildAbsoluteSiteUrl(data.siteUrl, specUrl)})`,
+				`- [${spec.name}](${buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)})`,
 			);
 		}
 	} else if (data.hasApi) {

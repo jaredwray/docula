@@ -9,18 +9,8 @@ export const options: Partial<DoculaOptions> = {
 	siteUrl: "https://docula.org",
 	themeMode: "light",
 	openApiSpecs: [
-		{
-			name: "Petstore API",
-			url: "api/petstore/swagger.json",
-			path: "petstore",
-			order: 1,
-		},
-		{
-			name: "Users API",
-			url: "api/users/swagger.json",
-			path: "users",
-			order: 2,
-		},
+		{ name: "Petstore API", url: "petstore/swagger.json", order: 1 },
+		{ name: "Users API", url: "users/swagger.json", order: 2 },
 	],
 	editPageUrl: "https://github.com/jaredwray/docula/blob/main/site/docs",
 	sections: [

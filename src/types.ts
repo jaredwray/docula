@@ -5,7 +5,6 @@ import type { DoculaOpenGraph } from "./options.js";
 export type DoculaOpenApiSpecEntry = {
 	name: string;
 	url: string;
-	path: string;
 	order?: number;
 	apiSpec?: ApiSpecData;
 };

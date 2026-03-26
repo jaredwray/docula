@@ -59,8 +59,8 @@ import type { DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
   openApiSpecs: [
-    { name: 'Petstore API', url: 'api/petstore/swagger.json', path: 'petstore', order: 1 },
-    { name: 'Users API', url: 'api/users/swagger.json', path: 'users', order: 2 },
+    { name: 'Petstore API', url: 'petstore/swagger.json', order: 1 },
+    { name: 'Users API', url: 'users/swagger.json', order: 2 },
   ],
 };
 ```
@@ -71,7 +71,6 @@ Each entry has the following fields:
 |-------|------|-------------|
 | `name` | `string` | Display name shown as the section heading |
 | `url` | `string` | Path to the spec file (local path or remote URL) |
-| `path` | `string` | URL slug used for the swagger.json output directory |
 | `order` | `number?` | Sort order — lower numbers appear first. Specs without `order` appear last. |
 
 ## Priority
