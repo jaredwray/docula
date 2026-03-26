@@ -100,16 +100,11 @@ export class DoculaOptions {
 	 */
 	public sections?: DoculaSection[];
 	/**
-	 * OpenAPI specification URL for API documentation.
-	 * When provided, creates a dedicated /api page
-	 * Supports both external URLs (https://...) and relative paths (/openapi.json)
+	 * OpenAPI specification for API documentation.
+	 * Pass a string URL for a single spec, or an array of DoculaOpenApiSpec for multiple specs.
+	 * When provided, creates a dedicated /api page.
 	 */
-	public openApiUrl?: string;
-	/**
-	 * Multiple OpenAPI specifications. Each entry generates a separate API page.
-	 * When provided, overrides openApiUrl. Each spec needs a name, url, and path slug.
-	 */
-	public openApiSpecs?: DoculaOpenApiSpec[];
+	public openApiUrl?: string | DoculaOpenApiSpec[];
 	/**
 	 * When true, GitHub releases are converted to changelog entries and merged
 	 * with file-based changelog entries. Requires a changelog template to exist.
@@ -297,25 +292,24 @@ export class DoculaOptions {
 			this.port = options.port as number;
 		}
 
-		/* v8 ignore next -- @preserve */
 		if (options.openApiUrl) {
-			this.openApiUrl = options.openApiUrl as string;
-		}
-
-		if (options.openApiSpecs && Array.isArray(options.openApiSpecs)) {
-			const validSpecs = (options.openApiSpecs as DoculaOpenApiSpec[]).filter(
-				(spec) =>
-					typeof spec === "object" &&
-					spec !== null &&
-					typeof spec.name === "string" &&
-					typeof spec.url === "string",
-			);
-			if (validSpecs.length > 0) {
-				this.openApiSpecs = validSpecs.map((spec) => ({
-					name: spec.name,
-					url: spec.url,
-					...(typeof spec.order === "number" && { order: spec.order }),
-				}));
+			if (typeof options.openApiUrl === "string") {
+				this.openApiUrl = options.openApiUrl;
+			} else if (Array.isArray(options.openApiUrl)) {
+				const validSpecs = (options.openApiUrl as DoculaOpenApiSpec[]).filter(
+					(spec) =>
+						typeof spec === "object" &&
+						spec !== null &&
+						typeof spec.name === "string" &&
+						typeof spec.url === "string",
+				);
+				if (validSpecs.length > 0) {
+					this.openApiUrl = validSpecs.map((spec) => ({
+						name: spec.name,
+						url: spec.url,
+						...(typeof spec.order === "number" && { order: spec.order }),
+					}));
+				}
 			}
 		}
 

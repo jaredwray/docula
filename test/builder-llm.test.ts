@@ -140,7 +140,7 @@ describe("DoculaBuilder - LLM", () => {
 				sitePath: "test/fixtures/mega-page-site-no-home-page",
 				templatePath: "templates/modern",
 				output,
-				openApiUrl: "/api/swagger.json",
+				openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 				hasApi: true,
 			};
 
@@ -176,7 +176,7 @@ describe("DoculaBuilder - LLM", () => {
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
 				output,
-				openApiUrl: "openapi.json?raw=1",
+				openApiSpecs: [{ name: "API Reference", url: "openapi.json?raw=1" }],
 				hasApi: true,
 				documents: [
 					{
@@ -261,7 +261,7 @@ describe("DoculaBuilder - LLM", () => {
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
 				output,
-				openApiUrl: "?raw=1",
+				openApiSpecs: [{ name: "API Reference", url: "?raw=1" }],
 				hasApi: true,
 			};
 
@@ -296,7 +296,12 @@ describe("DoculaBuilder - LLM", () => {
 				sitePath,
 				templatePath: "test/fixtures/template-example",
 				output,
-				openApiUrl: "../temp-llms-safe-openapi-external.json",
+				openApiSpecs: [
+					{
+						name: "API Reference",
+						url: "../temp-llms-safe-openapi-external.json",
+					},
+				],
 				hasApi: true,
 			};
 
@@ -348,7 +353,9 @@ describe("DoculaBuilder - LLM", () => {
 				sitePath,
 				templatePath: "test/fixtures/template-example",
 				output,
-				openApiUrl: "/api/swagger-link.json",
+				openApiSpecs: [
+					{ name: "API Reference", url: "/api/swagger-link.json" },
+				],
 				hasApi: true,
 			};
 
@@ -734,7 +741,7 @@ describe("DoculaBuilder - LLM", () => {
 					sitePath,
 					templatePath: "test/fixtures/template-example",
 					output: "test/temp/openapi-realpath-fail-output",
-					openApiUrl: "/api/swagger.json",
+					openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 					hasApi: true,
 				};
 
@@ -773,7 +780,7 @@ describe("DoculaBuilder - LLM", () => {
 					sitePath,
 					templatePath: "test/fixtures/template-example",
 					output: "test/temp/openapi-realpath-escape-output",
-					openApiUrl: "/api/swagger.json",
+					openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 					hasApi: true,
 				};
 
@@ -829,7 +836,7 @@ describe("DoculaBuilder - LLM", () => {
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
 				output,
-				openApiUrl: "/api/swagger.json",
+				openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 				hasApi: true,
 				hasChangelog: true,
 				changelogEntries: [

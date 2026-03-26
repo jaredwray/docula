@@ -8,7 +8,7 @@ export const options: Partial<DoculaOptions> = {
 	siteDescription: "Beautiful Website for Your Projects",
 	siteUrl: "https://docula.org",
 	themeMode: "light",
-	openApiSpecs: [
+	openApiUrl: [
 		{ name: "Petstore API", url: "petstore/swagger.json", order: 1 },
 		{ name: "Users API", url: "users/swagger.json", order: 2 },
 	],

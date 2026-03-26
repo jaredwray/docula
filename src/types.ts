@@ -41,7 +41,6 @@ export type DoculaData = {
 	documents?: DoculaDocument[];
 	sidebarItems?: DoculaSection[];
 	announcement?: string;
-	openApiUrl?: string;
 	hasApi?: boolean;
 	apiSpec?: ApiSpecData;
 	openApiSpecs?: DoculaOpenApiSpecEntry[];

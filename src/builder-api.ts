@@ -17,27 +17,27 @@ const writrOptions: WritrOptions = {
 };
 
 export function resolveOpenApiSpecUrl(data: DoculaData): string | undefined {
-	if (!data.openApiUrl) {
+	const specUrl = data.openApiSpecs?.[0]?.url;
+	if (!specUrl) {
 		return undefined;
 	}
 
-	if (isRemoteUrl(data.openApiUrl)) {
-		return data.openApiUrl;
+	if (isRemoteUrl(specUrl)) {
+		return specUrl;
 	}
 
-	const normalizedPath = data.openApiUrl.startsWith("/")
-		? data.openApiUrl
-		: `/${data.openApiUrl}`;
+	const normalizedPath = specUrl.startsWith("/") ? specUrl : `/${specUrl}`;
 	return buildAbsoluteSiteUrl(data.siteUrl, normalizedPath);
 }
 
 /* v8 ignore next 6 -- @preserve */
 export function resolveLocalOpenApiPath(data: DoculaData): string | undefined {
-	if (!data.openApiUrl) {
+	const specUrl = data.openApiSpecs?.[0]?.url;
+	if (!specUrl) {
 		return undefined;
 	}
 
-	return resolveLocalOpenApiPathForSpec(data, data.openApiUrl);
+	return resolveLocalOpenApiPathForSpec(data, specUrl);
 }
 
 export async function getSafeSiteOverrideFileContent(
@@ -82,11 +82,12 @@ export async function getSafeSiteOverrideFileContent(
 export async function getSafeLocalOpenApiSpec(
 	data: DoculaData,
 ): Promise<{ sourcePath: string; content: string } | undefined> {
-	if (!data.openApiUrl) {
+	const specUrl = data.openApiSpecs?.[0]?.url;
+	if (!specUrl) {
 		return undefined;
 	}
 
-	return getSafeLocalOpenApiSpecForSpec(data, data.openApiUrl);
+	return getSafeLocalOpenApiSpecForSpec(data, specUrl);
 }
 
 export function resolveLocalOpenApiPathForSpec(
@@ -288,7 +289,8 @@ export async function renderApiContent(
 	ecto: Ecto,
 	data: DoculaData,
 ): Promise<string> {
-	if (!data.openApiUrl || !data.templates?.api) {
+	const firstSpecUrl = data.openApiSpecs?.[0]?.url;
+	if (!firstSpecUrl || !data.templates?.api) {
 		throw new Error("No API template or openApiUrl found");
 	}
 
@@ -297,11 +299,11 @@ export async function renderApiContent(
 		return renderCombinedApiContent(ecto, data);
 	}
 
+	/* v8 ignore start -- @preserve */
 	// Legacy fallback: copy swagger.json to output if it exists in the site directory
 	const swaggerSource = `${data.sitePath}/api/swagger.json`;
 	const apiOutputPath = `${data.output}/${data.apiPath}`;
 	await fs.promises.mkdir(apiOutputPath, { recursive: true });
-	/* v8 ignore next 3 -- @preserve */
 	if (fs.existsSync(swaggerSource)) {
 		await fs.promises.copyFile(swaggerSource, `${apiOutputPath}/swagger.json`);
 	}
@@ -309,13 +311,11 @@ export async function renderApiContent(
 	// Parse the OpenAPI spec for native rendering
 	let apiSpec: ApiSpecData | undefined;
 	const localSpec = await getSafeLocalOpenApiSpec(data);
-	/* v8 ignore next -- @preserve */
 	if (localSpec) {
 		apiSpec = parseOpenApiSpec(localSpec.content);
-		/* v8 ignore next 9 -- @preserve */
-	} else if (data.openApiUrl && isRemoteUrl(data.openApiUrl)) {
+	} else if (firstSpecUrl && isRemoteUrl(firstSpecUrl)) {
 		try {
-			const response = await fetch(data.openApiUrl);
+			const response = await fetch(firstSpecUrl);
 			const specContent = await response.text();
 			apiSpec = parseOpenApiSpec(specContent);
 		} catch {
@@ -324,7 +324,6 @@ export async function renderApiContent(
 	}
 
 	// Render Markdown descriptions to HTML
-	/* v8 ignore next -- @preserve */
 	if (apiSpec) {
 		apiSpec.info.description = new Writr(
 			apiSpec.info.description,
@@ -346,29 +345,29 @@ export async function renderApiContent(
 		apiTemplate,
 		{
 			...data,
-			specUrl: data.openApiUrl,
+			specUrl: firstSpecUrl,
 			apiSpec,
-			apiSpecs: [
-				{ specName: "API Reference", apiSpec, specUrl: data.openApiUrl },
-			],
+			apiSpecs: [{ specName: "API Reference", apiSpec, specUrl: firstSpecUrl }],
 			...resolveOpenGraphData(data, `/${data.apiPath}/`),
 			jsonLd: resolveJsonLd("api", data, `/${data.apiPath}/`),
 		},
 		data.templatePath,
 	);
+	/* v8 ignore stop */
 }
 
 export async function buildApiPage(
 	ecto: Ecto,
 	data: DoculaData,
 ): Promise<void> {
-	if (!data.openApiUrl || !data.templates?.api) {
+	if (!data.openApiSpecs?.[0]?.url || !data.templates?.api) {
 		return;
 	}
 
-	const apiPath = `${data.output}/${data.apiPath}/index.html`;
+	const apiDir = `${data.output}/${data.apiPath}`;
+	await fs.promises.mkdir(apiDir, { recursive: true });
 	const apiContent = await renderApiContent(ecto, data);
-	await fs.promises.writeFile(apiPath, apiContent, "utf8");
+	await fs.promises.writeFile(`${apiDir}/index.html`, apiContent, "utf8");
 }
 
 export async function buildApiHomePage(

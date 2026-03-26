@@ -40,7 +40,7 @@ When multiple subdirectories are detected, each spec becomes a section on the AP
 
 ## Explicit Configuration
 
-For a single spec, set the `openApiUrl` option to point to any OpenAPI spec (local path or remote URL):
+Set the `openApiUrl` option to point to an OpenAPI spec. For a single spec, pass a string (local path or remote URL):
 
 ```js
 export const options = {
@@ -52,13 +52,13 @@ export const options = {
 
 ## Multiple API Specs
 
-Use the `openApiSpecs` option to configure multiple OpenAPI specs. All specs render as sections on a single `/api/` page, each with its own title, endpoints, and sidebar grouping:
+For multiple specs, pass an array to `openApiUrl`. All specs render as sections on a single `/api/` page, each with its own title, endpoints, and sidebar grouping:
 
 ```typescript
 import type { DoculaOptions } from 'docula';
 
 export const options: Partial<DoculaOptions> = {
-  openApiSpecs: [
+  openApiUrl: [
     { name: 'Petstore API', url: 'petstore/swagger.json', order: 1 },
     { name: 'Users API', url: 'users/swagger.json', order: 2 },
   ],
@@ -70,15 +70,15 @@ Each entry has the following fields:
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | `string` | Display name shown as the section heading |
-| `url` | `string` | Path to the spec file (local path or remote URL) |
+| `url` | `string` | Path to the spec file relative to the api directory, or a remote URL |
 | `order` | `number?` | Sort order — lower numbers appear first. Specs without `order` appear last. |
 
 ## Priority
 
 When multiple configuration methods are used, Docula applies them in this order (first match wins):
 
-1. `openApiSpecs` — explicit multi-spec configuration
-2. `openApiUrl` — explicit single-spec configuration
+1. `openApiUrl` (array) — explicit multi-spec configuration
+2. `openApiUrl` (string) — explicit single-spec configuration
 3. Auto-detection — `api/swagger.json` or `api/*/swagger.json`
 
 ## Spec Requirements

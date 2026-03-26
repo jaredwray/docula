@@ -225,7 +225,6 @@ export class DoculaBuilder {
 			output: this.options.output,
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
-			openApiUrl: this.options.openApiUrl,
 			hasReadme: fs.existsSync(`${this.options.sitePath}/README.md`),
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
@@ -253,17 +252,17 @@ export class DoculaBuilder {
 		}
 
 		// Normalize API specs into openApiSpecs array
-		if (this.options.openApiSpecs && this.options.openApiSpecs.length > 0) {
-			doculaData.openApiSpecs = this.options.openApiSpecs.map((spec) => ({
+		if (Array.isArray(this.options.openApiUrl)) {
+			doculaData.openApiSpecs = this.options.openApiUrl.map((spec) => ({
 				name: spec.name,
 				url: isRemoteUrl(spec.url)
 					? spec.url
 					: buildUrlPath(this.options.apiPath, spec.url),
 				...(typeof spec.order === "number" && { order: spec.order }),
 			}));
-		} else if (doculaData.openApiUrl) {
+		} else if (typeof this.options.openApiUrl === "string") {
 			doculaData.openApiSpecs = [
-				{ name: "API Reference", url: doculaData.openApiUrl },
+				{ name: "API Reference", url: this.options.openApiUrl },
 			];
 		} else {
 			const detectedSpecs: Array<{
@@ -327,15 +326,6 @@ export class DoculaBuilder {
 				const bOrder = b.order ?? Number.MAX_SAFE_INTEGER;
 				return aOrder - bOrder;
 			});
-		}
-
-		// Backward compat: set openApiUrl from first spec
-		if (
-			doculaData.openApiSpecs &&
-			doculaData.openApiSpecs.length > 0 &&
-			!doculaData.openApiUrl
-		) {
-			doculaData.openApiUrl = doculaData.openApiSpecs[0].url;
 		}
 
 		// Get data from github
