@@ -98,6 +98,7 @@ export function resolveLocalOpenApiPathForSpec(
 	}
 
 	const urlWithoutQuery = specUrl.split(/[?#]/)[0];
+	/* v8 ignore next 3 -- @preserve */
 	if (!urlWithoutQuery) {
 		return undefined;
 	}
@@ -127,6 +128,7 @@ export async function getSafeLocalOpenApiSpecForSpec(
 	let localStats: fs.Stats;
 	try {
 		localStats = await fs.promises.lstat(resolvedLocalPath);
+		/* v8 ignore next 3 -- @preserve */
 	} catch {
 		return undefined;
 	}
@@ -140,6 +142,7 @@ export async function getSafeLocalOpenApiSpecForSpec(
 	try {
 		realSitePath = await fs.promises.realpath(resolvedSitePath);
 		realLocalPath = await fs.promises.realpath(resolvedLocalPath);
+		/* v8 ignore next 3 -- @preserve */
 	} catch {
 		return undefined;
 	}

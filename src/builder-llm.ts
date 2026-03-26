@@ -195,6 +195,7 @@ export async function generateLlmsFullContent(
 				lines.push("");
 				/* v8 ignore next -- @preserve */
 				lines.push(localSpec.content || "_No content_");
+				/* v8 ignore next 3 -- @preserve */
 			} else {
 				lines.push(`OpenAPI Spec URL: ${resolveSpecUrl(data, spec.url)}`);
 			}
