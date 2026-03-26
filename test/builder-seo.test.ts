@@ -486,7 +486,7 @@ describe("DoculaBuilder - SEO", () => {
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
 				output: "test/temp/feed-scope-test",
-				openApiUrl: "/api/swagger.json",
+				openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 				hasApi: true,
 				hasChangelog: true,
 				changelogEntries: [

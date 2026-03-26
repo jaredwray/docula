@@ -184,7 +184,7 @@ export async function buildSiteMapPage(
 		});
 	}
 
-	if (data.openApiUrl && data.templates?.api) {
+	if (data.hasApi || (data.openApiSpecs?.[0] && data.templates?.api)) {
 		urls.push({
 			url: `${data.siteUrl}${data.apiUrl}`,
 		});

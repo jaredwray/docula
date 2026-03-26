@@ -2529,7 +2529,9 @@ describe("DoculaBuilder", () => {
 				apiUrl: "/docs/reference",
 				changelogPath: "changelog",
 				changelogUrl: "/docs/changelog",
-				openApiUrl: "/reference/swagger.json",
+				openApiSpecs: [
+					{ name: "API Reference", url: "/reference/swagger.json" },
+				],
 				templates: { home: "home.hbs", api: "api.hbs" },
 			};
 

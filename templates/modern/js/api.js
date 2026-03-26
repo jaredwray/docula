@@ -99,9 +99,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Collapse all sidebar groups by default
+  // Collapse sidebar groups that have a toggle button (named groups only)
   document.querySelectorAll('.api-sidebar__group').forEach(function(group) {
-    group.classList.add('api-sidebar__group--collapsed');
+    if (group.querySelector('.api-sidebar__group-toggle')) {
+      group.classList.add('api-sidebar__group--collapsed');
+    }
   });
 
   // Auth type selector: show/hide value input based on OpenAPI securitySchemes

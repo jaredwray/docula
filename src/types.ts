@@ -2,6 +2,13 @@ import type { ApiSpecData } from "./api-parser.js";
 import type { GithubData } from "./github.js";
 import type { DoculaOpenGraph } from "./options.js";
 
+export type DoculaOpenApiSpecEntry = {
+	name: string;
+	url: string;
+	order?: number;
+	apiSpec?: ApiSpecData;
+};
+
 export type DoculaChangelogEntry = {
 	title: string;
 	date: string;
@@ -34,9 +41,9 @@ export type DoculaData = {
 	documents?: DoculaDocument[];
 	sidebarItems?: DoculaSection[];
 	announcement?: string;
-	openApiUrl?: string;
 	hasApi?: boolean;
 	apiSpec?: ApiSpecData;
+	openApiSpecs?: DoculaOpenApiSpecEntry[];
 	changelogEntries?: DoculaChangelogEntry[];
 	hasReadme?: boolean;
 	themeMode?: string;

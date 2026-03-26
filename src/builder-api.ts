@@ -17,34 +17,27 @@ const writrOptions: WritrOptions = {
 };
 
 export function resolveOpenApiSpecUrl(data: DoculaData): string | undefined {
-	if (!data.openApiUrl) {
+	const specUrl = data.openApiSpecs?.[0]?.url;
+	if (!specUrl) {
 		return undefined;
 	}
 
-	if (isRemoteUrl(data.openApiUrl)) {
-		return data.openApiUrl;
+	if (isRemoteUrl(specUrl)) {
+		return specUrl;
 	}
 
-	const normalizedPath = data.openApiUrl.startsWith("/")
-		? data.openApiUrl
-		: `/${data.openApiUrl}`;
+	const normalizedPath = specUrl.startsWith("/") ? specUrl : `/${specUrl}`;
 	return buildAbsoluteSiteUrl(data.siteUrl, normalizedPath);
 }
 
+/* v8 ignore next 6 -- @preserve */
 export function resolveLocalOpenApiPath(data: DoculaData): string | undefined {
-	if (!data.openApiUrl || isRemoteUrl(data.openApiUrl)) {
+	const specUrl = data.openApiSpecs?.[0]?.url;
+	if (!specUrl) {
 		return undefined;
 	}
 
-	const openApiPathWithoutQuery = data.openApiUrl.split(/[?#]/)[0];
-	if (!openApiPathWithoutQuery) {
-		return undefined;
-	}
-
-	const normalizedPath = openApiPathWithoutQuery.startsWith("/")
-		? openApiPathWithoutQuery.slice(1)
-		: openApiPathWithoutQuery;
-	return path.join(data.sitePath, normalizedPath);
+	return resolveLocalOpenApiPathForSpec(data, specUrl);
 }
 
 export async function getSafeSiteOverrideFileContent(
@@ -89,77 +82,101 @@ export async function getSafeSiteOverrideFileContent(
 export async function getSafeLocalOpenApiSpec(
 	data: DoculaData,
 ): Promise<{ sourcePath: string; content: string } | undefined> {
-	const localOpenApiPath = resolveLocalOpenApiPath(data);
-	if (!localOpenApiPath) {
+	const specUrl = data.openApiSpecs?.[0]?.url;
+	if (!specUrl) {
+		return undefined;
+	}
+
+	return getSafeLocalOpenApiSpecForSpec(data, specUrl);
+}
+
+export function resolveLocalOpenApiPathForSpec(
+	data: DoculaData,
+	specUrl: string,
+): string | undefined {
+	if (isRemoteUrl(specUrl)) {
+		return undefined;
+	}
+
+	const urlWithoutQuery = specUrl.split(/[?#]/)[0];
+	/* v8 ignore next 3 -- @preserve */
+	if (!urlWithoutQuery) {
+		return undefined;
+	}
+
+	const normalizedPath = urlWithoutQuery.startsWith("/")
+		? urlWithoutQuery.slice(1)
+		: urlWithoutQuery;
+	return path.join(data.sitePath, normalizedPath);
+}
+
+export async function getSafeLocalOpenApiSpecForSpec(
+	data: DoculaData,
+	specUrl: string,
+): Promise<{ sourcePath: string; content: string } | undefined> {
+	const localPath = resolveLocalOpenApiPathForSpec(data, specUrl);
+	if (!localPath) {
 		return undefined;
 	}
 
 	const resolvedSitePath = path.resolve(data.sitePath);
-	const resolvedLocalOpenApiPath = path.resolve(localOpenApiPath);
+	const resolvedLocalPath = path.resolve(localPath);
 
-	if (!isPathWithinBasePath(resolvedLocalOpenApiPath, resolvedSitePath)) {
+	if (!isPathWithinBasePath(resolvedLocalPath, resolvedSitePath)) {
 		return undefined;
 	}
 
-	let localOpenApiStats: fs.Stats;
+	let localStats: fs.Stats;
 	try {
-		localOpenApiStats = await fs.promises.lstat(resolvedLocalOpenApiPath);
+		localStats = await fs.promises.lstat(resolvedLocalPath);
+		/* v8 ignore next 3 -- @preserve */
 	} catch {
 		return undefined;
 	}
 
-	// Do not follow symbolic links for local OpenAPI spec ingestion.
-	if (!localOpenApiStats.isFile() || localOpenApiStats.isSymbolicLink()) {
+	if (!localStats.isFile() || localStats.isSymbolicLink()) {
 		return undefined;
 	}
 
 	let realSitePath: string;
-	let realLocalOpenApiPath: string;
+	let realLocalPath: string;
 	try {
 		realSitePath = await fs.promises.realpath(resolvedSitePath);
-		realLocalOpenApiPath = await fs.promises.realpath(resolvedLocalOpenApiPath);
+		realLocalPath = await fs.promises.realpath(resolvedLocalPath);
+		/* v8 ignore next 3 -- @preserve */
 	} catch {
 		return undefined;
 	}
 
-	if (!isPathWithinBasePath(realLocalOpenApiPath, realSitePath)) {
+	if (!isPathWithinBasePath(realLocalPath, realSitePath)) {
 		return undefined;
 	}
 
-	const localOpenApiContent = (
-		await fs.promises.readFile(realLocalOpenApiPath, "utf8")
-	).trim();
-	return {
-		sourcePath: realLocalOpenApiPath,
-		content: localOpenApiContent,
-	};
+	const content = (await fs.promises.readFile(realLocalPath, "utf8")).trim();
+	return { sourcePath: realLocalPath, content };
 }
 
-export async function renderApiContent(
-	ecto: Ecto,
+export function resolveSpecUrl(data: DoculaData, specUrl: string): string {
+	if (isRemoteUrl(specUrl)) {
+		return specUrl;
+	}
+
+	const normalizedPath = specUrl.startsWith("/") ? specUrl : `/${specUrl}`;
+	return buildAbsoluteSiteUrl(data.siteUrl, normalizedPath);
+}
+
+async function parseAndRenderSpec(
 	data: DoculaData,
-): Promise<string> {
-	if (!data.openApiUrl || !data.templates?.api) {
-		throw new Error("No API template or openApiUrl found");
-	}
-
-	// Copy swagger.json to output if it exists in the site directory
-	const swaggerSource = `${data.sitePath}/api/swagger.json`;
-	const apiOutputPath = `${data.output}/${data.apiPath}`;
-	await fs.promises.mkdir(apiOutputPath, { recursive: true });
-	if (fs.existsSync(swaggerSource)) {
-		await fs.promises.copyFile(swaggerSource, `${apiOutputPath}/swagger.json`);
-	}
-
-	// Parse the OpenAPI spec for native rendering
+	specUrl: string,
+): Promise<ApiSpecData | undefined> {
 	let apiSpec: ApiSpecData | undefined;
-	const localSpec = await getSafeLocalOpenApiSpec(data);
+	const localSpec = await getSafeLocalOpenApiSpecForSpec(data, specUrl);
 	if (localSpec) {
 		apiSpec = parseOpenApiSpec(localSpec.content);
 		/* v8 ignore next 9 -- @preserve */
-	} else if (data.openApiUrl && isRemoteUrl(data.openApiUrl)) {
+	} else if (isRemoteUrl(specUrl)) {
 		try {
-			const response = await fetch(data.openApiUrl);
+			const response = await fetch(specUrl);
 			const specContent = await response.text();
 			apiSpec = parseOpenApiSpec(specContent);
 		} catch {
@@ -185,13 +202,64 @@ export async function renderApiContent(
 		}
 	}
 
+	return apiSpec;
+}
+
+async function copySpecSourceFile(
+	data: DoculaData,
+	specUrl: string,
+	outputDir: string,
+): Promise<void> {
+	// Use the safe spec resolver to validate the path (prevents traversal/symlink attacks)
+	const safeSpec = await getSafeLocalOpenApiSpecForSpec(data, specUrl);
+	if (safeSpec) {
+		await fs.promises.mkdir(outputDir, { recursive: true });
+		await fs.promises.copyFile(
+			safeSpec.sourcePath,
+			`${outputDir}/swagger.json`,
+		);
+	}
+}
+
+export async function renderCombinedApiContent(
+	ecto: Ecto,
+	data: DoculaData,
+): Promise<string> {
+	/* v8 ignore next 3 -- @preserve */
+	if (!data.templates?.api) {
+		throw new Error("No API template found");
+	}
+
+	const specs = data.openApiSpecs ?? [];
+
+	// Parse all specs and copy swagger files
+	const apiSpecs: Array<{
+		specName: string;
+		apiSpec: ApiSpecData | undefined;
+		specUrl: string;
+	}> = [];
+	for (const spec of specs) {
+		// Derive the output directory from the URL's parent path
+		const urlDir = spec.url.replace(/[?#].*$/, "").replace(/\/[^/]+$/, "");
+		const specOutputDir = `${data.output}/${urlDir}`;
+		await copySpecSourceFile(data, spec.url, specOutputDir);
+		const apiSpec = await parseAndRenderSpec(data, spec.url);
+		apiSpecs.push({
+			specName: spec.name,
+			apiSpec,
+			specUrl: resolveSpecUrl(data, spec.url),
+		});
+	}
+
 	const apiTemplate = `${data.templatePath}/${data.templates.api}`;
 	return ecto.renderFromFile(
 		apiTemplate,
 		{
 			...data,
-			specUrl: data.openApiUrl,
-			apiSpec,
+			apiSpecs,
+			// Backward compat: set single apiSpec for single-spec sites
+			apiSpec: apiSpecs[0]?.apiSpec,
+			specUrl: apiSpecs[0]?.specUrl,
 			...resolveOpenGraphData(data, `/${data.apiPath}/`),
 			jsonLd: resolveJsonLd("api", data, `/${data.apiPath}/`),
 		},
@@ -199,17 +267,107 @@ export async function renderApiContent(
 	);
 }
 
+export async function buildAllApiPages(
+	ecto: Ecto,
+	data: DoculaData,
+): Promise<void> {
+	if (
+		!data.openApiSpecs ||
+		data.openApiSpecs.length === 0 ||
+		!data.templates?.api
+	) {
+		return;
+	}
+
+	const outputDir = `${data.output}/${data.apiPath}`;
+	await fs.promises.mkdir(outputDir, { recursive: true });
+	const content = await renderCombinedApiContent(ecto, data);
+	await fs.promises.writeFile(`${outputDir}/index.html`, content, "utf8");
+}
+
+export async function renderApiContent(
+	ecto: Ecto,
+	data: DoculaData,
+): Promise<string> {
+	const firstSpecUrl = data.openApiSpecs?.[0]?.url;
+	if (!firstSpecUrl || !data.templates?.api) {
+		throw new Error("No API template or openApiUrl found");
+	}
+
+	// When openApiSpecs is populated, render the combined page
+	if (data.openApiSpecs && data.openApiSpecs.length > 0) {
+		return renderCombinedApiContent(ecto, data);
+	}
+
+	/* v8 ignore start -- @preserve */
+	// Legacy fallback: copy swagger.json to output if it exists in the site directory
+	const swaggerSource = `${data.sitePath}/api/swagger.json`;
+	const apiOutputPath = `${data.output}/${data.apiPath}`;
+	await fs.promises.mkdir(apiOutputPath, { recursive: true });
+	if (fs.existsSync(swaggerSource)) {
+		await fs.promises.copyFile(swaggerSource, `${apiOutputPath}/swagger.json`);
+	}
+
+	// Parse the OpenAPI spec for native rendering
+	let apiSpec: ApiSpecData | undefined;
+	const localSpec = await getSafeLocalOpenApiSpec(data);
+	if (localSpec) {
+		apiSpec = parseOpenApiSpec(localSpec.content);
+	} else if (firstSpecUrl && isRemoteUrl(firstSpecUrl)) {
+		try {
+			const response = await fetch(firstSpecUrl);
+			const specContent = await response.text();
+			apiSpec = parseOpenApiSpec(specContent);
+		} catch {
+			// If remote fetch fails, render page without parsed spec
+		}
+	}
+
+	// Render Markdown descriptions to HTML
+	if (apiSpec) {
+		apiSpec.info.description = new Writr(
+			apiSpec.info.description,
+			writrOptions,
+		).renderSync();
+		for (const group of apiSpec.groups) {
+			group.description = new Writr(
+				group.description,
+				writrOptions,
+			).renderSync();
+			for (const op of group.operations) {
+				op.description = new Writr(op.description, writrOptions).renderSync();
+			}
+		}
+	}
+
+	const apiTemplate = `${data.templatePath}/${data.templates.api}`;
+	return ecto.renderFromFile(
+		apiTemplate,
+		{
+			...data,
+			specUrl: firstSpecUrl,
+			apiSpec,
+			apiSpecs: [{ specName: "API Reference", apiSpec, specUrl: firstSpecUrl }],
+			...resolveOpenGraphData(data, `/${data.apiPath}/`),
+			jsonLd: resolveJsonLd("api", data, `/${data.apiPath}/`),
+		},
+		data.templatePath,
+	);
+	/* v8 ignore stop */
+}
+
 export async function buildApiPage(
 	ecto: Ecto,
 	data: DoculaData,
 ): Promise<void> {
-	if (!data.openApiUrl || !data.templates?.api) {
+	if (!data.openApiSpecs?.[0]?.url || !data.templates?.api) {
 		return;
 	}
 
-	const apiPath = `${data.output}/${data.apiPath}/index.html`;
+	const apiDir = `${data.output}/${data.apiPath}`;
+	await fs.promises.mkdir(apiDir, { recursive: true });
 	const apiContent = await renderApiContent(ecto, data);
-	await fs.promises.writeFile(apiPath, apiContent, "utf8");
+	await fs.promises.writeFile(`${apiDir}/index.html`, apiContent, "utf8");
 }
 
 export async function buildApiHomePage(

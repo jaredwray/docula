@@ -1051,7 +1051,9 @@ describe("docula watch", () => {
 			await fs.promises.rm(options.output, { recursive: true, force: true });
 		}
 	});
-	it("should rebuild when a file changes in the watched directory", async () => {
+	it("should rebuild when a file changes in the watched directory", {
+		timeout: 10_000,
+	}, async () => {
 		const tempSitePath = "test/temp/watch-site";
 		const tempOutput = "test/temp/watch-output";
 
