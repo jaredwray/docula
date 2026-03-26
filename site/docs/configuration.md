@@ -134,6 +134,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `port` | `number` | `3000` | Port for local development server |
 | `sections` | `DoculaSection[]` | - | Documentation sections |
 | `openApiUrl` | `string` | - | OpenAPI spec URL for API documentation (auto-detected if `api/swagger.json` exists) |
+| `openApiSpecs` | `Array<{ name: string; url: string; path: string; order?: number }>` | - | Multiple OpenAPI specs rendered as sections on a single API page. Overrides `openApiUrl`. See [API Reference](/docs/api-reference). |
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 | `changelogPerPage` | `number` | `20` | Number of changelog entries to display per page |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |

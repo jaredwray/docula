@@ -9,7 +9,9 @@ Docula can generate an API Reference page from an OpenAPI (Swagger) specificatio
 
 ## Auto-Detection
 
-If your site directory contains an `api/swagger.json` file, Docula will automatically detect it and generate the API Reference page — no configuration needed:
+Docula automatically detects OpenAPI specs in your site directory — no configuration needed.
+
+**Single spec** — place a `swagger.json` at `api/swagger.json`:
 
 ```
 site
@@ -21,9 +23,24 @@ site
 └───docula.config.mjs
 ```
 
+**Multiple specs** — place each spec in its own subdirectory under `api/`:
+
+```
+site
+├───api
+│   ├───petstore
+│   │   └───swagger.json
+│   └───users
+│       └───swagger.json
+├───docs
+└───docula.config.mjs
+```
+
+When multiple subdirectories are detected, each spec becomes a section on the API Reference page. The directory name is used as the display name (e.g., `petstore` becomes "Petstore").
+
 ## Explicit Configuration
 
-You can also set the `openApiUrl` option in your config to point to any OpenAPI spec, either a local path or a remote URL:
+For a single spec, set the `openApiUrl` option to point to any OpenAPI spec (local path or remote URL):
 
 ```js
 export const options = {
@@ -33,7 +50,37 @@ export const options = {
 };
 ```
 
-When `openApiUrl` is set explicitly, it takes priority over auto-detection.
+## Multiple API Specs
+
+Use the `openApiSpecs` option to configure multiple OpenAPI specs. All specs render as sections on a single `/api/` page, each with its own title, endpoints, and sidebar grouping:
+
+```typescript
+import type { DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  openApiSpecs: [
+    { name: 'Petstore API', url: 'api/petstore/swagger.json', path: 'petstore', order: 1 },
+    { name: 'Users API', url: 'api/users/swagger.json', path: 'users', order: 2 },
+  ],
+};
+```
+
+Each entry has the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Display name shown as the section heading |
+| `url` | `string` | Path to the spec file (local path or remote URL) |
+| `path` | `string` | URL slug used for the swagger.json output directory |
+| `order` | `number?` | Sort order — lower numbers appear first. Specs without `order` appear last. |
+
+## Priority
+
+When multiple configuration methods are used, Docula applies them in this order (first match wins):
+
+1. `openApiSpecs` — explicit multi-spec configuration
+2. `openApiUrl` — explicit single-spec configuration
+3. Auto-detection — `api/swagger.json` or `api/*/swagger.json`
 
 ## Spec Requirements
 
