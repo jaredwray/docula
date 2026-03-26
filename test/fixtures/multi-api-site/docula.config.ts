@@ -1,4 +1,4 @@
-import type { DoculaOptions } from "docula";
+import type { DoculaOptions } from "../../../src/docula.js";
 
 export const options: Partial<DoculaOptions> = {
 	template: "modern",

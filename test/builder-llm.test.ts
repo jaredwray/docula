@@ -888,5 +888,44 @@ describe("DoculaBuilder - LLM", () => {
 				await fs.promises.rm(output, { recursive: true, force: true });
 			}
 		});
+
+		it("should include remote spec URL in llms-full.txt for multi-spec with remote URL", async () => {
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const output = "test/temp/llms-remote-multi-spec";
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Beautiful Website for Your Projects",
+				sitePath: "test/fixtures/multi-api-site",
+				templatePath: "test/fixtures/template-example",
+				output,
+				openApiSpecs: [
+					{ name: "Local API", url: "/api/petstore/swagger.json" },
+					{ name: "Remote API", url: "https://mockhttp.org/docs/json" },
+				],
+				hasApi: true,
+			};
+
+			await fs.promises.rm(output, { recursive: true, force: true });
+
+			try {
+				await builder.buildLlmsFiles(data);
+
+				const llmsFull = await fs.promises.readFile(
+					`${output}/llms-full.txt`,
+					"utf8",
+				);
+				expect(llmsFull).toContain("### Local API");
+				expect(llmsFull).toContain("### Remote API");
+				expect(llmsFull).toContain(
+					"OpenAPI Spec URL: https://mockhttp.org/docs/json",
+				);
+			} finally {
+				await fs.promises.rm(output, { recursive: true, force: true });
+			}
+		});
 	});
 });
