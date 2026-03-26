@@ -75,7 +75,7 @@ describe("API Parser", () => {
 
 			const result = parseOpenApiSpec(spec);
 			expect(result.groups).toHaveLength(1);
-			expect(result.groups[0].name).toBe("Default");
+			expect(result.groups[0].name).toBe("");
 		});
 
 		it("should parse all HTTP methods", () => {
@@ -895,7 +895,7 @@ describe("API Parser", () => {
 			});
 
 			const result = parseOpenApiSpec(spec);
-			expect(result.groups[0].name).toBe("Default");
+			expect(result.groups[0].name).toBe("");
 		});
 
 		it("should handle non-object path items", () => {

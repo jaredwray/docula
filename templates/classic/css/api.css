@@ -1,5 +1,19 @@
 /* API Reference - Classic Template */
 
+.api-sidebar__spec-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary, #333);
+  padding: 10px 10px 4px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.api-sidebar__spec-heading:first-child {
+  margin-top: 0;
+  border-top: none;
+}
+
 .api-reference {
   display: flex;
   max-width: 90%;

@@ -152,7 +152,7 @@ export function parseOpenApiSpec(specJson: string): ApiSpecData {
 			const tags: string[] =
 				Array.isArray(operation.tags) && operation.tags.length > 0
 					? operation.tags
-					: ["Default"];
+					: [""];
 
 			const parameters = extractParameters(operation, pathItem, spec);
 			const requestBody = extractRequestBody(operation, spec);

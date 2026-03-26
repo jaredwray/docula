@@ -50,6 +50,20 @@
   color: var(--muted-fg);
 }
 
+.api-sidebar__spec-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fg);
+  padding: 10px 10px 4px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.api-sidebar__spec-heading:first-child {
+  margin-top: 0;
+  border-top: none;
+}
+
 .api-sidebar__group {
   margin-bottom: 4px;
 }
