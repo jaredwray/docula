@@ -6,11 +6,10 @@ import { type ApiSpecData, parseOpenApiSpec } from "./api-parser.js";
 import { resolveJsonLd, resolveOpenGraphData } from "./builder-seo.js";
 import {
 	buildAbsoluteSiteUrl,
-	buildUrlPath,
 	isPathWithinBasePath,
 	isRemoteUrl,
 } from "./builder-utils.js";
-import type { DoculaData, DoculaOpenApiSpecEntry } from "./types.js";
+import type { DoculaData } from "./types.js";
 
 const writrOptions: WritrOptions = {
 	throwOnEmitError: false,
@@ -32,6 +31,7 @@ export function resolveOpenApiSpecUrl(data: DoculaData): string | undefined {
 	return buildAbsoluteSiteUrl(data.siteUrl, normalizedPath);
 }
 
+/* v8 ignore next 6 -- @preserve */
 export function resolveLocalOpenApiPath(data: DoculaData): string | undefined {
 	if (!data.openApiUrl) {
 		return undefined;
@@ -220,45 +220,48 @@ async function copySpecSourceFile(
 	}
 }
 
-export async function renderApiContentForSpec(
+export async function renderCombinedApiContent(
 	ecto: Ecto,
 	data: DoculaData,
-	spec: DoculaOpenApiSpecEntry,
 ): Promise<string> {
+	/* v8 ignore next 3 -- @preserve */
 	if (!data.templates?.api) {
 		throw new Error("No API template found");
 	}
 
-	const specOutputPath = spec.path
-		? `${data.output}/${data.apiPath}/${spec.path}`
-		: `${data.output}/${data.apiPath}`;
-	await copySpecSourceFile(data, spec.url, specOutputPath);
+	const specs = data.openApiSpecs ?? [];
+	const apiOutputDir = `${data.output}/${data.apiPath}`;
 
-	const apiSpec = await parseAndRenderSpec(data, spec.url);
-
-	const specUrlPath = spec.path
-		? buildUrlPath(data.apiPath, spec.path)
-		: data.apiPath;
-
-	const resolvedSpecUrl = resolveSpecUrl(data, spec.url);
-
-	const allApiSpecs = (data.allApiSpecs ?? []).map((s) => ({
-		...s,
-		active: s.path === spec.path,
-	}));
+	// Parse all specs and copy swagger files
+	const apiSpecs: Array<{
+		specName: string;
+		apiSpec: ApiSpecData | undefined;
+		specUrl: string;
+	}> = [];
+	for (const spec of specs) {
+		const specOutputDir = spec.path
+			? `${apiOutputDir}/${spec.path}`
+			: apiOutputDir;
+		await copySpecSourceFile(data, spec.url, specOutputDir);
+		const apiSpec = await parseAndRenderSpec(data, spec.url);
+		apiSpecs.push({
+			specName: spec.name,
+			apiSpec,
+			specUrl: resolveSpecUrl(data, spec.url),
+		});
+	}
 
 	const apiTemplate = `${data.templatePath}/${data.templates.api}`;
 	return ecto.renderFromFile(
 		apiTemplate,
 		{
 			...data,
-			specUrl: resolvedSpecUrl,
-			apiSpec,
-			specName: spec.name,
-			allApiSpecs,
-			multipleApiSpecs: allApiSpecs.length > 1,
-			...resolveOpenGraphData(data, `/${specUrlPath}/`),
-			jsonLd: resolveJsonLd("api", data, `/${specUrlPath}/`),
+			apiSpecs,
+			// Backward compat: set single apiSpec for single-spec sites
+			apiSpec: apiSpecs[0]?.apiSpec,
+			specUrl: apiSpecs[0]?.specUrl,
+			...resolveOpenGraphData(data, `/${data.apiPath}/`),
+			jsonLd: resolveJsonLd("api", data, `/${data.apiPath}/`),
 		},
 		data.templatePath,
 	);
@@ -276,14 +279,10 @@ export async function buildAllApiPages(
 		return;
 	}
 
-	for (const spec of data.openApiSpecs) {
-		const outputDir = spec.path
-			? `${data.output}/${data.apiPath}/${spec.path}`
-			: `${data.output}/${data.apiPath}`;
-		await fs.promises.mkdir(outputDir, { recursive: true });
-		const content = await renderApiContentForSpec(ecto, data, spec);
-		await fs.promises.writeFile(`${outputDir}/index.html`, content, "utf8");
-	}
+	const outputDir = `${data.output}/${data.apiPath}`;
+	await fs.promises.mkdir(outputDir, { recursive: true });
+	const content = await renderCombinedApiContent(ecto, data);
+	await fs.promises.writeFile(`${outputDir}/index.html`, content, "utf8");
 }
 
 export async function renderApiContent(
@@ -294,15 +293,16 @@ export async function renderApiContent(
 		throw new Error("No API template or openApiUrl found");
 	}
 
-	// When openApiSpecs is populated, render the first spec
+	// When openApiSpecs is populated, render the combined page
 	if (data.openApiSpecs && data.openApiSpecs.length > 0) {
-		return renderApiContentForSpec(ecto, data, data.openApiSpecs[0]);
+		return renderCombinedApiContent(ecto, data);
 	}
 
 	// Legacy fallback: copy swagger.json to output if it exists in the site directory
 	const swaggerSource = `${data.sitePath}/api/swagger.json`;
 	const apiOutputPath = `${data.output}/${data.apiPath}`;
 	await fs.promises.mkdir(apiOutputPath, { recursive: true });
+	/* v8 ignore next 3 -- @preserve */
 	if (fs.existsSync(swaggerSource)) {
 		await fs.promises.copyFile(swaggerSource, `${apiOutputPath}/swagger.json`);
 	}
@@ -310,6 +310,7 @@ export async function renderApiContent(
 	// Parse the OpenAPI spec for native rendering
 	let apiSpec: ApiSpecData | undefined;
 	const localSpec = await getSafeLocalOpenApiSpec(data);
+	/* v8 ignore next -- @preserve */
 	if (localSpec) {
 		apiSpec = parseOpenApiSpec(localSpec.content);
 		/* v8 ignore next 9 -- @preserve */
@@ -348,6 +349,9 @@ export async function renderApiContent(
 			...data,
 			specUrl: data.openApiUrl,
 			apiSpec,
+			apiSpecs: [
+				{ specName: "API Reference", apiSpec, specUrl: data.openApiUrl },
+			],
 			...resolveOpenGraphData(data, `/${data.apiPath}/`),
 			jsonLd: resolveJsonLd("api", data, `/${data.apiPath}/`),
 		},

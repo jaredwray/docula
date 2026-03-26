@@ -6,6 +6,7 @@ export type DoculaOpenApiSpecEntry = {
 	name: string;
 	url: string;
 	path: string;
+	order?: number;
 	apiSpec?: ApiSpecData;
 };
 
@@ -45,14 +46,6 @@ export type DoculaData = {
 	hasApi?: boolean;
 	apiSpec?: ApiSpecData;
 	openApiSpecs?: DoculaOpenApiSpecEntry[];
-	allApiSpecs?: Array<{
-		name: string;
-		url: string;
-		path: string;
-		href: string;
-		active?: boolean;
-	}>;
-	multipleApiSpecs?: boolean;
 	changelogEntries?: DoculaChangelogEntry[];
 	hasReadme?: boolean;
 	themeMode?: string;

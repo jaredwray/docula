@@ -258,6 +258,7 @@ export class DoculaBuilder {
 				name: spec.name,
 				url: spec.url,
 				path: spec.path,
+				...(typeof spec.order === "number" && { order: spec.order }),
 			}));
 		} else if (doculaData.openApiUrl) {
 			doculaData.openApiSpecs = [
@@ -319,6 +320,15 @@ export class DoculaBuilder {
 			if (detectedSpecs.length > 0) {
 				doculaData.openApiSpecs = detectedSpecs;
 			}
+		}
+
+		// Sort specs by order (ascending, undefined last)
+		if (doculaData.openApiSpecs && doculaData.openApiSpecs.length > 1) {
+			doculaData.openApiSpecs.sort((a, b) => {
+				const aOrder = a.order ?? Number.MAX_SAFE_INTEGER;
+				const bOrder = b.order ?? Number.MAX_SAFE_INTEGER;
+				return aOrder - bOrder;
+			});
 		}
 
 		// Backward compat: set openApiUrl from first spec
@@ -455,19 +465,6 @@ export class DoculaBuilder {
 				doculaData.templates?.api,
 		);
 
-		// Compute allApiSpecs for template navigation
-		if (doculaData.openApiSpecs && doculaData.openApiSpecs.length > 0) {
-			doculaData.allApiSpecs = doculaData.openApiSpecs.map((spec) => ({
-				name: spec.name,
-				url: spec.url,
-				path: spec.path,
-				href: spec.path
-					? buildUrlPath(this.options.baseUrl, this.options.apiPath, spec.path)
-					: buildUrlPath(this.options.baseUrl, this.options.apiPath),
-			}));
-			doculaData.multipleApiSpecs = doculaData.openApiSpecs.length > 1;
-		}
-
 		// Set lastModified for pages without a specific source file (home, changelog listing, API)
 		doculaData.lastModified = new Date().toISOString().split("T")[0];
 
@@ -521,16 +518,11 @@ export class DoculaBuilder {
 			}
 		}
 
-		// Build the API documentation page(s)
+		// Build the API documentation page
 		if (doculaData.hasApi) {
-			this._console.step("Building API page(s)...");
+			this._console.step("Building API page...");
 			await this.buildAllApiPages(doculaData);
-			for (const spec of doculaData.openApiSpecs ?? []) {
-				const specSubPath = spec.path
-					? `${this.options.apiPath}/${spec.path}`
-					: this.options.apiPath;
-				this._console.fileBuilt(`${specSubPath}/index.html`);
-			}
+			this._console.fileBuilt(`${this.options.apiPath}/index.html`);
 		}
 
 		// Build changelog pages (/changelog/index.html and /changelog/{slug}/index.html)

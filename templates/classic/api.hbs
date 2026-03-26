@@ -4,8 +4,8 @@
 <head>
   {{> header }}
   <link rel="stylesheet" href="/css/api.css" />
-  <title>{{#if specName}}{{specName}}{{else}}API Reference{{/if}} - {{ siteTitle }}</title>
-  <meta name="description" content="{{#if specName}}{{specName}}{{else}}API Reference{{/if}} for {{ siteTitle }}" />
+  <title>API Reference - {{ siteTitle }}</title>
+  <meta name="description" content="API Reference for {{ siteTitle }}" />
   {{{jsonLd}}}
 </head>
 
@@ -29,15 +29,7 @@
   </style>
   {{/if}}
 
-  {{#if multipleApiSpecs}}
-  <nav class="api-spec-switcher">
-    {{#each allApiSpecs}}
-    <a href="{{this.href}}" class="api-spec-switcher__link{{#if this.active}} api-spec-switcher__link--active{{/if}}">{{this.name}}</a>
-    {{/each}}
-  </nav>
-  {{/if}}
-
-  {{#if apiSpec}}
+  {{#if apiSpecs}}
   <div class="api-mobile-toggle">
     <button id="api-sidebar-toggle">
       <span>API Navigation</span>
@@ -49,12 +41,17 @@
     <aside class="api-sidebar" id="api-sidebar">
       <input type="text" class="api-search" id="api-search" placeholder="Search endpoints..." />
 
-      {{#each apiSpec.groups}}
+      {{#each apiSpecs}}
+      {{#if this.apiSpec}}
+      <div class="api-sidebar__spec-heading">{{this.specName}}</div>
+      {{#each this.apiSpec.groups}}
       <div class="api-sidebar__group" data-group="{{this.id}}">
+        {{#if this.name}}
         <button class="api-sidebar__group-toggle">
           <span>{{this.name}}</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
+        {{/if}}
         <div class="api-sidebar__group-items">
           {{#each this.operations}}
           <a href="#{{this.id}}" class="api-sidebar__item" data-method="{{this.method}}" data-path="{{this.path}}">
@@ -65,21 +62,25 @@
         </div>
       </div>
       {{/each}}
+      {{/if}}
+      {{/each}}
     </aside>
 
     <main class="api-content">
+      {{#each apiSpecs}}
+      {{#if this.apiSpec}}
       <section class="api-info">
-        <h1 class="api-info__title">{{apiSpec.info.title}}</h1>
-        {{#if apiSpec.info.version}}
-        <span class="api-info__version">v{{apiSpec.info.version}}</span>
+        <h1 class="api-info__title">{{this.apiSpec.info.title}}</h1>
+        {{#if this.apiSpec.info.version}}
+        <span class="api-info__version">v{{this.apiSpec.info.version}}</span>
         {{/if}}
-        {{#if apiSpec.info.description}}
-        <div class="api-info__description">{{{apiSpec.info.description}}}</div>
+        {{#if this.apiSpec.info.description}}
+        <div class="api-info__description">{{{this.apiSpec.info.description}}}</div>
         {{/if}}
-        {{#if apiSpec.servers}}
+        {{#if this.apiSpec.servers}}
         <div class="api-info__servers">
           <div class="api-info__server-label">Server</div>
-          {{#each apiSpec.servers}}
+          {{#each this.apiSpec.servers}}
           <code class="api-info__server-url">{{this.url}}</code>
           {{/each}}
         </div>
@@ -87,24 +88,26 @@
         <div class="api-auth">
           <div class="api-auth__label">Authorization</div>
           <div class="api-auth__controls">
-            <select class="api-auth__type" id="api-auth-type">
+            <select class="api-auth__type" id="api-auth-type-{{@index}}">
               <option value="none">None</option>
               <option value="apikey">API Key (x-api-key)</option>
               <option value="bearer">Bearer Token</option>
             </select>
-            <input type="password" class="api-auth__value api-auth__value--hidden" id="api-auth-value" placeholder="Enter value..." />
+            <input type="password" class="api-auth__value api-auth__value--hidden" id="api-auth-value-{{@index}}" placeholder="Enter value..." />
           </div>
         </div>
       </section>
 
-      {{#each apiSpec.groups}}
+      {{#each this.apiSpec.groups}}
       <div class="api-group" id="group-{{this.id}}">
+        {{#if this.name}}
         <div class="api-group__header">
           <h2 class="api-group__title">{{this.name}}</h2>
           {{#if this.description}}
           <div class="api-group__description">{{{this.description}}}</div>
           {{/if}}
         </div>
+        {{/if}}
 
         {{#each this.operations}}
         <div class="api-operation api-operation--collapsed" id="{{this.id}}">
@@ -209,6 +212,8 @@
         </div>
         {{/each}}
       </div>
+      {{/each}}
+      {{/if}}
       {{/each}}
     </main>
   </div>

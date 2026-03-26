@@ -473,7 +473,7 @@ describe("DoculaBuilder - API", () => {
 			});
 		});
 
-		it("should build multiple API pages from openApiSpecs config", async () => {
+		it("should build a single API page with all specs as sections", async () => {
 			const tempSitePath = "test/temp/multi-api-specs-site";
 			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
 				recursive: true,
@@ -499,33 +499,21 @@ describe("DoculaBuilder - API", () => {
 
 			try {
 				await builder.build();
-				// Each spec should have its own page
-				expect(fs.existsSync(`${options.output}/api/petstore/index.html`)).toBe(
-					true,
-				);
-				expect(fs.existsSync(`${options.output}/api/users/index.html`)).toBe(
-					true,
-				);
+				// Single combined API page at /api/index.html
+				expect(fs.existsSync(`${options.output}/api/index.html`)).toBe(true);
 
-				const petstorePage = await fs.promises.readFile(
-					`${options.output}/api/petstore/index.html`,
+				const apiPage = await fs.promises.readFile(
+					`${options.output}/api/index.html`,
 					"utf8",
 				);
-				expect(petstorePage).toContain("Petstore API");
-				expect(petstorePage).toContain("List pets");
+				// Both specs should appear as sections on the same page
+				expect(apiPage).toContain("Petstore API");
+				expect(apiPage).toContain("List pets");
+				expect(apiPage).toContain("Users API");
+				expect(apiPage).toContain("List users");
 
-				const usersPage = await fs.promises.readFile(
-					`${options.output}/api/users/index.html`,
-					"utf8",
-				);
-				expect(usersPage).toContain("Users API");
-				expect(usersPage).toContain("List users");
-
-				// Both pages should have spec switcher links
-				expect(petstorePage).toContain("api-spec-switcher");
-				expect(petstorePage).toContain("Users API");
-				expect(usersPage).toContain("api-spec-switcher");
-				expect(usersPage).toContain("Petstore API");
+				// Sidebar should have spec headings
+				expect(apiPage).toContain("api-sidebar__spec-heading");
 			} finally {
 				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, { recursive: true, force: true });
@@ -550,13 +538,15 @@ describe("DoculaBuilder - API", () => {
 
 			try {
 				await builder.build();
-				// Auto-detected specs should generate pages
-				expect(fs.existsSync(`${options.output}/api/petstore/index.html`)).toBe(
-					true,
+				// Auto-detected specs should generate a single combined page
+				expect(fs.existsSync(`${options.output}/api/index.html`)).toBe(true);
+				const apiPage = await fs.promises.readFile(
+					`${options.output}/api/index.html`,
+					"utf8",
 				);
-				expect(fs.existsSync(`${options.output}/api/users/index.html`)).toBe(
-					true,
-				);
+				// Should contain content from both detected specs
+				expect(apiPage).toContain("Petstore");
+				expect(apiPage).toContain("Users");
 			} finally {
 				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, { recursive: true, force: true });
@@ -570,19 +560,23 @@ describe("DoculaBuilder - API", () => {
 						name: "Petstore",
 						url: "/api/petstore/swagger.json",
 						path: "petstore",
+						order: 2,
 					},
 					{
 						name: "Users",
 						url: "https://example.com/api.json",
 						path: "users/",
+						order: 1,
 					},
 				],
 			});
 			expect(options.openApiSpecs).toHaveLength(2);
 			expect(options.openApiSpecs?.[0].name).toBe("Petstore");
 			expect(options.openApiSpecs?.[0].path).toBe("petstore");
+			expect(options.openApiSpecs?.[0].order).toBe(2);
 			// Should trim trailing slashes from path
 			expect(options.openApiSpecs?.[1].path).toBe("users");
+			expect(options.openApiSpecs?.[1].order).toBe(1);
 		});
 
 		it("should ignore invalid openApiSpecs entries", () => {
@@ -750,8 +744,8 @@ describe("DoculaBuilder - API", () => {
 				);
 				expect(llms).toContain("Petstore API");
 				expect(llms).toContain("Users API");
-				expect(llms).toContain("/api/petstore");
-				expect(llms).toContain("/api/users");
+				// Single API page URL
+				expect(llms).toContain("/api");
 
 				const llmsFull = await fs.promises.readFile(
 					`${options.output}/llms-full.txt`,
@@ -767,6 +761,52 @@ describe("DoculaBuilder - API", () => {
 					recursive: true,
 					force: true,
 				});
+			}
+		});
+
+		it("should sort specs by order field", async () => {
+			const tempSitePath = "test/temp/multi-api-order-site";
+			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
+				recursive: true,
+				filter: (src) => {
+					const base = src.split("/").pop() ?? "";
+					return !base.startsWith("dist") && base !== ".cache";
+				},
+			});
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.output = "test/temp/build-multi-api-order";
+			options.openApiSpecs = [
+				{
+					name: "Users API",
+					url: "api/users/swagger.json",
+					path: "users",
+					order: 2,
+				},
+				{
+					name: "Petstore API",
+					url: "api/petstore/swagger.json",
+					path: "petstore",
+					order: 1,
+				},
+			];
+
+			const builder = new DoculaBuilder(options, { quiet: true });
+
+			try {
+				await builder.build();
+				const apiPage = await fs.promises.readFile(
+					`${options.output}/api/index.html`,
+					"utf8",
+				);
+				// Petstore (order: 1) should appear before Users (order: 2)
+				const petstoreIndex = apiPage.indexOf("Petstore API");
+				const usersIndex = apiPage.indexOf("Users API");
+				expect(petstoreIndex).toBeLessThan(usersIndex);
+			} finally {
+				fs.rmSync(tempSitePath, { recursive: true, force: true });
+				await fs.promises.rm(options.output, { recursive: true, force: true });
 			}
 		});
 	});

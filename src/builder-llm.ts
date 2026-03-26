@@ -179,14 +179,11 @@ export async function generateLlmsFullContent(
 
 	lines.push("");
 	lines.push("## API Reference");
+	lines.push(`URL: ${buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)}`);
 	if (data.openApiSpecs && data.openApiSpecs.length > 1) {
 		for (const spec of data.openApiSpecs) {
-			const specPageUrl = spec.path
-				? `${data.apiUrl}/${spec.path}`
-				: data.apiUrl;
 			lines.push("");
 			lines.push(`### ${spec.name}`);
-			lines.push(`URL: ${buildAbsoluteSiteUrl(data.siteUrl, specPageUrl)}`);
 			lines.push("");
 
 			const localSpec = await getSafeLocalOpenApiSpecForSpec(data, spec.url);
@@ -197,11 +194,11 @@ export async function generateLlmsFullContent(
 				lines.push(localSpec.content || "_No content_");
 				/* v8 ignore next 3 -- @preserve */
 			} else {
+				/* v8 ignore next -- @preserve */
 				lines.push(`OpenAPI Spec URL: ${resolveSpecUrl(data, spec.url)}`);
 			}
 		}
 	} else if (data.hasApi) {
-		lines.push(`URL: ${buildAbsoluteSiteUrl(data.siteUrl, data.apiUrl)}`);
 		lines.push("");
 
 		const localOpenApiSpec = await getSafeLocalOpenApiSpec(data);

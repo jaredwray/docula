@@ -34,6 +34,7 @@ export type DoculaOpenApiSpec = {
 	name: string;
 	url: string;
 	path: string;
+	order?: number;
 };
 
 export type DoculaOpenGraph = {
@@ -316,6 +317,7 @@ export class DoculaOptions {
 					name: spec.name,
 					url: spec.url,
 					path: trimSlashes(spec.path),
+					...(typeof spec.order === "number" && { order: spec.order }),
 				}));
 			}
 		}
