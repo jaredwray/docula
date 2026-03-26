@@ -4,17 +4,11 @@
       <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
-      <a href="{{baseUrl}}/" class="logo-link">
+      <a href="{{#if homeUrl}}{{homeUrl}}{{else}}{{baseUrl}}/{{/if}}" class="logo-link">
         <img alt="{{siteTitle}}" class="logo__img" src="{{baseUrl}}/logo.svg">
         <span class="logo__text">{{siteTitle}}</span>
       </a>
       <nav class="header-bottom__nav">
-        {{#if homeUrl}}
-        <a class="header-bottom__item header-bottom__item--home" href="{{homeUrl}}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-          <span>Back to Home</span>
-        </a>
-        {{/if}}
         {{#if hasDocuments}}
         <a class="header-bottom__item" href="{{docsUrl}}/" id="nav-docs">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -74,12 +68,6 @@
 </header>
 <aside class="mobile-sidebar" id="mobile-sidebar">
   <nav class="mobile-nav">
-    {{#if homeUrl}}
-    <a class="mobile-nav__item" href="{{homeUrl}}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-      <span>Back to Home</span>
-    </a>
-    {{/if}}
     {{#if hasDocuments}}
     <a class="mobile-nav__item" href="{{docsUrl}}/">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>

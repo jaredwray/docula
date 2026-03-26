@@ -2,7 +2,7 @@
   <div class="header-content">
     <nav class="nav">
       <div class="header-menu hide-d">
-        <a class="header-logo" href="/">
+        <a class="header-logo" href="{{#if homeUrl}}{{homeUrl}}{{else}}/{{/if}}">
           <img src="/logo.svg" alt="logo" />
         </a>
         {{#if headerLinks}}
