@@ -107,9 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Auth type selector: show/hide value input based on OpenAPI securitySchemes
-  var authTypeSelect = document.getElementById('api-auth-type');
-  var authValueInput = document.getElementById('api-auth-value');
-  var cookieStatusEl = document.getElementById('api-auth-cookie-status');
+  // IDs are indexed for multi-spec (e.g. api-auth-type-0), so find by class
+  var authTypeSelect = document.querySelector('.api-auth__type');
+  var authValueInput = document.querySelector('.api-auth__value');
+  var cookieStatusEl = document.querySelector('.api-auth__cookie-status');
   if (authTypeSelect && authValueInput) {
     function getSelectedSchemeData() {
       var option = authTypeSelect.options[authTypeSelect.selectedIndex];
@@ -273,8 +274,8 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       // Inject global auth header from selected security scheme
-      var authType = document.getElementById('api-auth-type');
-      var authValue = document.getElementById('api-auth-value');
+      var authType = document.querySelector('.api-auth__type');
+      var authValue = document.querySelector('.api-auth__value');
       var useCookieAuth = false;
       if (authType && authType.value !== 'none') {
         var authOption = authType.options[authType.selectedIndex];
