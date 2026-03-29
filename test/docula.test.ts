@@ -125,11 +125,12 @@ describe("docula", () => {
 		const docula = new Docula(options);
 		const consoleLog = console.log;
 		let consoleMessage = "";
-		const temporarySitePath = "./temp-site";
+		const temporarySitePath = "test/temp/docula-site";
 		console.log = (message) => {
 			consoleMessage = message;
 		};
 
+		fs.mkdirSync(path.dirname(temporarySitePath), { recursive: true });
 		try {
 			docula.generateInit(temporarySitePath);
 
@@ -143,7 +144,7 @@ describe("docula", () => {
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
 		} finally {
-			fs.rmSync(temporarySitePath, { recursive: true });
+			fs.rmSync(temporarySitePath, { recursive: true, force: true });
 		}
 	});
 	it("should generate the site init files and folders for javascript", () => {
@@ -151,11 +152,12 @@ describe("docula", () => {
 		const docula = new Docula(options);
 		const consoleLog = console.log;
 		let consoleMessage = "";
-		const temporarySitePath = "./temp-site-js";
+		const temporarySitePath = "test/temp/docula-site-js";
 		console.log = (message) => {
 			consoleMessage = message;
 		};
 
+		fs.mkdirSync(path.dirname(temporarySitePath), { recursive: true });
 		try {
 			docula.generateInit(temporarySitePath);
 
@@ -169,7 +171,7 @@ describe("docula", () => {
 			expect(fs.existsSync(`${temporarySitePath}/logo.png`)).toEqual(true);
 			expect(fs.existsSync(`${temporarySitePath}/favicon.ico`)).toEqual(true);
 		} finally {
-			fs.rmSync(temporarySitePath, { recursive: true });
+			fs.rmSync(temporarySitePath, { recursive: true, force: true });
 		}
 	});
 	it("should generate the site init files and folders for typescript", () => {
@@ -177,11 +179,12 @@ describe("docula", () => {
 		const docula = new Docula(options);
 		const consoleLog = console.log;
 		let consoleMessage = "";
-		const temporarySitePath = "./temp-site-ts";
+		const temporarySitePath = "test/temp/docula-site-ts";
 		console.log = (message) => {
 			consoleMessage = message;
 		};
 
+		fs.mkdirSync(path.dirname(temporarySitePath), { recursive: true });
 		try {
 			docula.generateInit(temporarySitePath, true);
 
@@ -207,13 +210,13 @@ describe("docula", () => {
 			expect(configContent).toContain("import type");
 			expect(configContent).toContain("DoculaOptions");
 		} finally {
-			fs.rmSync(temporarySitePath, { recursive: true });
+			fs.rmSync(temporarySitePath, { recursive: true, force: true });
 		}
 	});
 
 	it("should copy variables.css to site directory from modern template", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-vars";
+		const temporarySitePath = "test/temp/download-vars";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 
 		try {
@@ -228,7 +231,7 @@ describe("docula", () => {
 	});
 	it("should error if variables.css already exists without --overwrite", () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const temporarySitePath = "./temp-download-vars-exists";
+		const temporarySitePath = "test/temp/download-vars-exists";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const dest = `${temporarySitePath}/variables.css`;
 		fs.writeFileSync(dest, "/* original */");
@@ -250,7 +253,7 @@ describe("docula", () => {
 	});
 	it("should overwrite variables.css when overwrite is true", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-vars-overwrite";
+		const temporarySitePath = "test/temp/download-vars-overwrite";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const dest = `${temporarySitePath}/variables.css`;
 		fs.writeFileSync(dest, "/* original */");
@@ -267,7 +270,7 @@ describe("docula", () => {
 	});
 	it("should copy variables.css from classic template", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-vars-classic";
+		const temporarySitePath = "test/temp/download-vars-classic";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 
 		try {
@@ -279,7 +282,7 @@ describe("docula", () => {
 	});
 	it("should copy full template to site/templates/<name>/", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-template";
+		const temporarySitePath = "test/temp/download-template";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 
 		try {
@@ -293,7 +296,7 @@ describe("docula", () => {
 	});
 	it("should error if template directory already exists without --overwrite", () => {
 		const docula = new Docula(cloneDefaultOptions(false));
-		const temporarySitePath = "./temp-download-template-exists";
+		const temporarySitePath = "test/temp/download-template-exists";
 		const dest = `${temporarySitePath}/templates/modern`;
 		fs.mkdirSync(dest, { recursive: true });
 		const consoleError = console.error;
@@ -313,7 +316,7 @@ describe("docula", () => {
 	});
 	it("should overwrite template directory when overwrite is true", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-template-overwrite";
+		const temporarySitePath = "test/temp/download-template-overwrite";
 		const dest = `${temporarySitePath}/templates/modern`;
 		fs.mkdirSync(dest, { recursive: true });
 		fs.writeFileSync(`${dest}/sentinel.txt`, "original");
@@ -327,7 +330,7 @@ describe("docula", () => {
 	});
 	it("should copy classic template to site/templates/classic/", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-template-classic";
+		const temporarySitePath = "test/temp/download-template-classic";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 
 		try {
@@ -341,7 +344,7 @@ describe("docula", () => {
 	});
 	it("should use basename of custom templatePath for output directory name", () => {
 		const docula = new Docula(cloneDefaultOptions(true));
-		const temporarySitePath = "./temp-download-template-custom-path";
+		const temporarySitePath = "test/temp/download-template-custom-path";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const customTemplatePath = "templates/modern";
 
@@ -845,7 +848,7 @@ describe("docula execute", () => {
 		console.log = consoleLog;
 	});
 	it("should execute download variables command and copy variables.css", async () => {
-		const temporarySitePath = "./temp-exec-download-vars";
+		const temporarySitePath = "test/temp/exec-download-vars";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
@@ -863,7 +866,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should execute download variables --overwrite command and overwrite variables.css", async () => {
-		const temporarySitePath = "./temp-exec-download-vars-overwrite";
+		const temporarySitePath = "test/temp/exec-download-vars-overwrite";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const dest = `${temporarySitePath}/variables.css`;
 		fs.writeFileSync(dest, "/* original */");
@@ -885,7 +888,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should execute download template command and copy template directory", async () => {
-		const temporarySitePath = "./temp-exec-download-template";
+		const temporarySitePath = "test/temp/exec-download-template";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
@@ -905,7 +908,7 @@ describe("docula execute", () => {
 		}
 	});
 	it("should execute download with no subcommand and print error", async () => {
-		const temporarySitePath = "./temp-exec-download-noarg";
+		const temporarySitePath = "test/temp/exec-download-noarg";
 		fs.mkdirSync(temporarySitePath, { recursive: true });
 		const buildOptions = new DoculaOptions();
 		buildOptions.sitePath = temporarySitePath;
@@ -1453,7 +1456,7 @@ describe("docula config file", () => {
 	});
 	it("should prefer typescript config over mjs config", async () => {
 		// Create a temporary fixture with both config files
-		const tempPath = "./temp-both-configs";
+		const tempPath = "test/temp/both-configs";
 		fs.mkdirSync(tempPath, { recursive: true });
 		fs.writeFileSync(
 			`${tempPath}/docula.config.ts`,
