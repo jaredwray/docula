@@ -1,27 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DoculaConsole } from "../src/console.js";
 import Docula from "../src/docula.js";
 import { DoculaOptions } from "../src/options.js";
+import {
+	cleanupAfterEach,
+	cleanupAfterEachBuildOnly,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
 const ansiRegex = /\u001B\[[0-9;]*m/g;
 function stripAnsi(str: string): string {
 	return str.replace(ansiRegex, "");
 }
-
-const githubMockContributors = JSON.parse(
-	fs.readFileSync(
-		"./test/fixtures/data-mocks/github-contributors.json",
-		"utf8",
-	),
-);
-const githubMockReleases = JSON.parse(
-	fs.readFileSync("./test/fixtures/data-mocks/github-releases.json", "utf8"),
-);
 
 const defaultOptions: DoculaOptions = new DoculaOptions({
 	templatePath: "./custom-template",
@@ -53,48 +47,10 @@ vi.mock("@cacheable/net");
 
 describe("docula", () => {
 	afterEach(() => {
-		// Reset the mock after each test
-		vi.resetAllMocks();
-		// Clean build manifests to prevent differential build interference between tests
-		for (const fixture of [
-			"test/fixtures/single-page-site",
-			"test/fixtures/single-page-site-ts",
-			"test/fixtures/single-page-site-onprepare",
-			"test/fixtures/single-page-site-ts-onprepare",
-			"test/fixtures/multi-page-site",
-			"test/fixtures/mega-page-site",
-			"test/fixtures/mega-page-site-no-home-page",
-		]) {
-			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
-		}
-
-		// Clean up auto-generated README.md and copied assets in fixtures that should not have them
-		for (const fixture of [
-			"test/fixtures/mega-page-site",
-			"test/fixtures/mega-page-site-no-home-page",
-		]) {
-			try {
-				fs.rmSync(`${fixture}/README.md`, { force: true });
-				fs.rmSync(`${fixture}/site`, { recursive: true, force: true });
-			} catch {
-				// ignore if files do not exist
-			}
-		}
+		cleanupAfterEach();
 	});
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			// Default response or throw an error if you prefer
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	it("should be able to initialize", () => {
@@ -1324,24 +1280,10 @@ describe("docula watch", () => {
 
 describe("docula dev", () => {
 	afterEach(() => {
-		vi.resetAllMocks();
-		for (const fixture of ["test/fixtures/single-page-site"]) {
-			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
-		}
+		cleanupAfterEachBuildOnly();
 	});
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	it("should build, watch, and serve when dev command is used", async () => {
