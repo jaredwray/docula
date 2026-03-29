@@ -7,15 +7,10 @@ const TEMP_DIR = "test/temp";
  * and removed after all tests complete.
  */
 export function setup(): void {
-	if (fs.existsSync(TEMP_DIR)) {
-		fs.rmSync(TEMP_DIR, { recursive: true, force: true });
-	}
-
+	fs.rmSync(TEMP_DIR, { recursive: true, force: true });
 	fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
 
 export function teardown(): void {
-	if (fs.existsSync(TEMP_DIR)) {
-		fs.rmSync(TEMP_DIR, { recursive: true, force: true });
-	}
+	fs.rmSync(TEMP_DIR, { recursive: true, force: true });
 }

@@ -111,18 +111,14 @@ export function setupGithubMock(): void {
  * Recursively remove a temporary directory, tolerating non-existence.
  */
 export function removeTempDir(dirPath: string): void {
-	if (fs.existsSync(dirPath)) {
-		fs.rmSync(dirPath, { recursive: true, force: true });
-	}
+	fs.rmSync(dirPath, { recursive: true, force: true });
 }
 
 /**
  * Recursively remove a temporary directory (async), tolerating non-existence.
  */
 export async function removeTempDirAsync(dirPath: string): Promise<void> {
-	if (fs.existsSync(dirPath)) {
-		await fs.promises.rm(dirPath, { recursive: true, force: true });
-	}
+	await fs.promises.rm(dirPath, { recursive: true, force: true });
 }
 
 /**
