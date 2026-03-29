@@ -11,6 +11,7 @@ import {
 } from "../src/github.js";
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
+import { removeTempDir, setupGithubMock } from "./test-helpers.js";
 
 const defaultOptions: GithubOptions = {
 	api: "https://api.github.com",
@@ -22,23 +23,10 @@ vi.mock("@cacheable/net");
 
 describe("Github", () => {
 	afterEach(() => {
-		// Reset the mock after each test
 		vi.resetAllMocks();
 	});
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			// Default response or throw an error if you prefer
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	it("should be able to initialize", () => {
@@ -201,24 +189,11 @@ describe("Github file caching", () => {
 
 	afterEach(() => {
 		vi.resetAllMocks();
-		if (fs.existsSync(testCachePath)) {
-			fs.rmSync(testCachePath, { recursive: true, force: true });
-		}
+		removeTempDir(testCachePath);
 	});
 
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	it("should initialize with cache config", () => {

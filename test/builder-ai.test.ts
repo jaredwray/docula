@@ -16,6 +16,7 @@ import {
 } from "../src/builder-ai.js";
 import { DoculaConsole } from "../src/console.js";
 import type { DoculaChangelogEntry, DoculaDocument } from "../src/types.js";
+import { ensureTempDir, removeTempDir } from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -66,14 +67,12 @@ const tempDir = "test/temp/ai-test";
 
 describe("builder-ai", () => {
 	beforeEach(() => {
-		fs.mkdirSync(tempDir, { recursive: true });
+		ensureTempDir("ai-test");
 	});
 
 	afterEach(() => {
 		vi.resetAllMocks();
-		if (fs.existsSync(tempDir)) {
-			fs.rmSync(tempDir, { recursive: true, force: true });
-		}
+		removeTempDir(tempDir);
 	});
 
 	describe("createAIModel", () => {

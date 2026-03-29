@@ -1,11 +1,8 @@
 import fs from "node:fs";
-import { CacheableNet } from "@cacheable/net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DoculaBuilder, type DoculaData } from "../src/builder.js";
 import { DoculaOptions } from "../src/options.js";
-
-import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
-import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
+import { cleanupAfterEachBuildOnly, setupGithubMock } from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -31,43 +28,10 @@ describe("DoculaBuilder - SEO", () => {
 	};
 
 	afterEach(() => {
-		// Reset the mock after each test
-		vi.resetAllMocks();
-		// Clean build manifests to prevent differential build interference between tests.
-		// Wrapped in try/catch because docula.test.ts runs in parallel and may be
-		// writing to .cache/build at the same time, causing ENOTEMPTY races.
-		for (const fixture of [
-			"test/fixtures/single-page-site",
-			"test/fixtures/multi-page-site",
-			"test/fixtures/mega-page-site",
-			"test/fixtures/changelog-site",
-			"test/fixtures/announcement-site",
-			"test/fixtures/mega-custom-template",
-			"test/fixtures/api-only-site",
-			"test/fixtures/empty-site",
-			"test/fixtures/mega-page-site-no-home-page",
-		]) {
-			try {
-				fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
-			} catch {
-				// ignore race conditions with parallel test files
-			}
-		}
+		cleanupAfterEachBuildOnly();
 	});
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			// Default response or throw an error if you prefer
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	describe("Docula Builder - Build Robots and Sitemap", () => {

@@ -8,9 +8,9 @@ import {
 	resolveSpecUrl,
 } from "../src/builder-api.js";
 import { DoculaOptions } from "../src/options.js";
-
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
+import { cleanupAfterEach, setupGithubMock } from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -26,59 +26,10 @@ const defaultPathFields = {
 
 describe("DoculaBuilder - API", () => {
 	afterEach(() => {
-		// Reset the mock after each test
-		vi.resetAllMocks();
-		// Clean build manifests to prevent differential build interference between tests.
-		// Wrapped in try/catch because docula.test.ts runs in parallel and may be
-		// writing to .cache/build at the same time, causing ENOTEMPTY races.
-		for (const fixture of [
-			"test/fixtures/single-page-site",
-			"test/fixtures/multi-page-site",
-			"test/fixtures/mega-page-site",
-			"test/fixtures/changelog-site",
-			"test/fixtures/announcement-site",
-			"test/fixtures/mega-custom-template",
-			"test/fixtures/api-only-site",
-			"test/fixtures/empty-site",
-			"test/fixtures/mega-page-site-no-home-page",
-			"test/fixtures/multi-api-site",
-		]) {
-			try {
-				fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
-			} catch {
-				// ignore race conditions with parallel test files
-			}
-		}
-
-		// Clean up auto-generated README.md and copied assets in fixtures that should not have them
-		for (const fixture of [
-			"test/fixtures/api-only-site",
-			"test/fixtures/empty-site",
-			"test/fixtures/mega-page-site",
-			"test/fixtures/mega-page-site-no-home-page",
-		]) {
-			try {
-				fs.rmSync(`${fixture}/README.md`, { force: true });
-				fs.rmSync(`${fixture}/site`, { recursive: true, force: true });
-			} catch {
-				// ignore if files do not exist
-			}
-		}
+		cleanupAfterEach();
 	});
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			// Default response or throw an error if you prefer
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	describe("Docula Builder - OpenAPI API Documentation", () => {

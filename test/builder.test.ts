@@ -23,6 +23,11 @@ import {
 } from "../src/builder-files.js";
 import { escapeXml } from "../src/builder-utils.js";
 import { DoculaOptions } from "../src/options.js";
+import {
+	cleanupAfterEach,
+	removeTempDir,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 const testHash = new Hashery();
 
@@ -31,9 +36,6 @@ const ansiRegex = /\u001B\[[0-9;]*m/g;
 function stripAnsi(str: string): string {
 	return str.replace(ansiRegex, "");
 }
-
-import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
-import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
 vi.mock("@cacheable/net");
 
@@ -49,61 +51,10 @@ const defaultPathFields = {
 
 describe("DoculaBuilder", () => {
 	afterEach(() => {
-		// Reset the mock after each test
-		vi.resetAllMocks();
-		// Clean build manifests to prevent differential build interference between tests.
-		// Wrapped in try/catch because docula.test.ts runs in parallel and may be
-		// writing to .cache/build at the same time, causing ENOTEMPTY races.
-		for (const fixture of [
-			"test/fixtures/single-page-site",
-			"test/fixtures/multi-page-site",
-			"test/fixtures/mega-page-site",
-			"test/fixtures/changelog-site",
-			"test/fixtures/announcement-site",
-			"test/fixtures/mega-custom-template",
-			"test/fixtures/auto-readme-site",
-			"test/fixtures/api-only-site",
-			"test/fixtures/empty-site",
-			"test/fixtures/mega-page-site-no-home-page",
-		]) {
-			try {
-				fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
-			} catch {
-				// ignore race conditions with parallel test files
-			}
-		}
-
-		// Clean up auto-generated README.md and copied assets in fixtures that should not have them
-		for (const fixture of [
-			"test/fixtures/api-only-site",
-			"test/fixtures/auto-readme-site",
-			"test/fixtures/empty-site",
-			"test/fixtures/mega-page-site",
-			"test/fixtures/mega-page-site-no-home-page",
-		]) {
-			try {
-				fs.rmSync(`${fixture}/README.md`, { force: true });
-				// Remove asset directories that autoReadme may have copied
-				fs.rmSync(`${fixture}/site`, { recursive: true, force: true });
-			} catch {
-				// ignore if files do not exist
-			}
-		}
+		cleanupAfterEach();
 	});
 	beforeEach(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: test file
-		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
-			if (url.endsWith("releases")) {
-				return { data: githubMockReleases };
-			}
-
-			if (url.endsWith("contributors")) {
-				return { data: githubMockContributors };
-			}
-
-			// Default response or throw an error if you prefer
-			return { data: {} };
-		});
+		setupGithubMock();
 	});
 
 	describe("Docula Builder", () => {
@@ -2893,8 +2844,8 @@ describe("DoculaBuilder", () => {
 			await fs.promises.mkdir(tempCwdPath, { recursive: true });
 		});
 
-		afterEach(async () => {
-			fs.rmSync(tempDir, { recursive: true, force: true });
+		afterEach(() => {
+			removeTempDir(tempDir);
 		});
 
 		it("should copy README.md from cwd to sitePath and prepend package name as title", async () => {
