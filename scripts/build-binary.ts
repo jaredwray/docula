@@ -37,27 +37,13 @@ function main() {
 	console.log("\nStep 2: Generating init file...");
 	run("npx tsx scripts/generate-init-file.ts");
 
-	// Step 3: Bundle into a single CJS file with all dependencies
+	// Step 3: Bundle everything into a single self-contained CJS file
 	console.log("\nStep 3: Bundling into single CJS file...");
 	run(
-		"npx tsup src/docula.ts src/embedded-templates.ts --format cjs --out-dir dist/sea-build --no-splitting --bundle --target node20",
+		"npx tsup src/sea-entry.ts --format cjs --out-dir dist --no-splitting --bundle --target node20",
 	);
-
-	// Create the CJS entry point that imports the bundle
-	const seaEntry = `
-const { default: Docula } = require("./sea-build/docula.cjs");
-
-async function main() {
-	const docula = new Docula();
-	await docula.execute(process);
-}
-
-main().catch((error) => {
-	console.error(error);
-	process.exit(1);
-});
-`;
-	fs.writeFileSync("dist/docula-sea.cjs", seaEntry);
+	// Rename to .cjs so sea-config.json can reference it with the correct extension
+	fs.renameSync("dist/sea-entry.cjs", "dist/docula-sea.cjs");
 
 	// Step 4: Generate the SEA blob
 	console.log("\nStep 4: Generating SEA blob...");
