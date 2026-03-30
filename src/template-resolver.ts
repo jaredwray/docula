@@ -2,6 +2,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+let embeddedTemplates: Record<string, string> | undefined;
+
+/**
+ * Registers embedded template data for use in SEA builds.
+ * Must be called before any template resolution occurs.
+ */
+export function setEmbeddedTemplates(templates: Record<string, string>): void {
+	embeddedTemplates = templates;
+}
+
 /**
  * Returns true when running as a single-executable application (SEA).
  */
@@ -23,6 +33,18 @@ function getExtractedTemplatesPath(): string {
 }
 
 /**
+ * Cleans up extracted template files from the temp directory.
+ */
+function cleanupExtractedTemplates(): void {
+	try {
+		const tmpDir = getExtractedTemplatesPath();
+		fs.rmSync(tmpDir, { recursive: true, force: true });
+	} catch {
+		// Best effort cleanup
+	}
+}
+
+/**
  * Extracts embedded templates to a temporary directory and returns the path.
  * Uses a deterministic path based on process.pid, so repeated calls
  * return the same directory without module-level state.
@@ -35,11 +57,11 @@ function getExtractedTemplatesDir(): string {
 		return tmpDir;
 	}
 
-	// Dynamic import to avoid bundling in non-SEA builds
-	// eslint-disable-next-line @typescript-eslint/no-require-imports
-	const { embeddedTemplates } = require("./embedded-templates.js") as {
-		embeddedTemplates: Record<string, string>;
-	};
+	if (!embeddedTemplates) {
+		throw new Error(
+			"Embedded templates not registered. Call setEmbeddedTemplates() before resolving templates in SEA mode.",
+		);
+	}
 
 	fs.mkdirSync(tmpDir, { recursive: true });
 
@@ -51,13 +73,15 @@ function getExtractedTemplatesDir(): string {
 		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
 	}
 
-	// Clean up on exit
-	process.on("exit", () => {
-		try {
-			fs.rmSync(tmpDir, { recursive: true, force: true });
-		} catch {
-			// Best effort cleanup
-		}
+	// Clean up on exit and common termination signals
+	process.on("exit", cleanupExtractedTemplates);
+	process.on("SIGINT", () => {
+		cleanupExtractedTemplates();
+		process.exit(130);
+	});
+	process.on("SIGTERM", () => {
+		cleanupExtractedTemplates();
+		process.exit(143);
 	});
 
 	return tmpDir;

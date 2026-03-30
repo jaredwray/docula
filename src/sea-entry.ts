@@ -1,9 +1,15 @@
 import process from "node:process";
 import Docula from "./docula.js";
+import { embeddedTemplates } from "./embedded-templates.js";
+import { setEmbeddedTemplates } from "./template-resolver.js";
 
-const docula = new Docula();
+async function main() {
+	setEmbeddedTemplates(embeddedTemplates);
+	const docula = new Docula();
+	await docula.execute(process);
+}
 
-docula.execute(process).catch((error: unknown) => {
+main().catch((error: unknown) => {
 	console.error(error);
 	process.exit(1);
 });
