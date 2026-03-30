@@ -2,8 +2,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-let extractedTemplatesDir: string | undefined;
-
 /**
  * Returns true when running as a single-executable application (SEA).
  */
@@ -18,12 +16,23 @@ function isSEA(): boolean {
 }
 
 /**
+ * Returns the deterministic temp directory path for extracted templates.
+ */
+function getExtractedTemplatesPath(): string {
+	return path.join(os.tmpdir(), `docula-templates-${process.pid}`);
+}
+
+/**
  * Extracts embedded templates to a temporary directory and returns the path.
- * Templates are only extracted once per process lifetime.
+ * Uses a deterministic path based on process.pid, so repeated calls
+ * return the same directory without module-level state.
  */
 function getExtractedTemplatesDir(): string {
-	if (extractedTemplatesDir && fs.existsSync(extractedTemplatesDir)) {
-		return extractedTemplatesDir;
+	const tmpDir = getExtractedTemplatesPath();
+
+	// Already extracted in a previous call
+	if (fs.existsSync(tmpDir)) {
+		return tmpDir;
 	}
 
 	// Dynamic import to avoid bundling in non-SEA builds
@@ -32,7 +41,6 @@ function getExtractedTemplatesDir(): string {
 		embeddedTemplates: Record<string, string>;
 	};
 
-	const tmpDir = path.join(os.tmpdir(), `docula-templates-${process.pid}`);
 	fs.mkdirSync(tmpDir, { recursive: true });
 
 	for (const [relativePath, base64Content] of Object.entries(
@@ -42,8 +50,6 @@ function getExtractedTemplatesDir(): string {
 		fs.mkdirSync(path.dirname(fullPath), { recursive: true });
 		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
 	}
-
-	extractedTemplatesDir = tmpDir;
 
 	// Clean up on exit
 	process.on("exit", () => {
