@@ -15,12 +15,13 @@ export function setEmbeddedTemplates(templates: Record<string, string>): void {
 /**
  * Returns true when running as a single-executable application (SEA).
  */
-function isSEA(): boolean {
+export function isSEA(): boolean {
 	try {
 		// Node.js SEA sets this flag at compile time
 		// @ts-expect-error -- only exists in SEA builds
 		return Boolean(process.sea);
 	} catch {
+		/* v8 ignore next -- @preserve */
 		return false;
 	}
 }
@@ -28,14 +29,14 @@ function isSEA(): boolean {
 /**
  * Returns the deterministic temp directory path for extracted templates.
  */
-function getExtractedTemplatesPath(): string {
+export function getExtractedTemplatesPath(): string {
 	return path.join(os.tmpdir(), `docula-templates-${process.pid}`);
 }
 
 /**
  * Cleans up extracted template files from the temp directory.
  */
-function cleanupExtractedTemplates(): void {
+export function cleanupExtractedTemplates(): void {
 	try {
 		const tmpDir = getExtractedTemplatesPath();
 		fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -49,7 +50,7 @@ function cleanupExtractedTemplates(): void {
  * Uses a deterministic path based on process.pid, so repeated calls
  * return the same directory without module-level state.
  */
-function getExtractedTemplatesDir(): string {
+export function getExtractedTemplatesDir(): string {
 	const tmpDir = getExtractedTemplatesPath();
 
 	// Already extracted in a previous call
@@ -75,6 +76,7 @@ function getExtractedTemplatesDir(): string {
 
 	// Clean up on exit and common termination signals
 	process.on("exit", cleanupExtractedTemplates);
+	/* v8 ignore start -- @preserve */
 	process.on("SIGINT", () => {
 		cleanupExtractedTemplates();
 		process.exit(130);
@@ -83,6 +85,7 @@ function getExtractedTemplatesDir(): string {
 		cleanupExtractedTemplates();
 		process.exit(143);
 	});
+	/* v8 ignore stop */
 
 	return tmpDir;
 }
