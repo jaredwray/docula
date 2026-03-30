@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 /**
  * Build a standalone docula binary using Node.js Single Executable Application (SEA).
@@ -12,7 +12,7 @@
  * 4. Copy the node binary and inject the blob
  */
 
-import { execSync } from "node:child_process";
+import { execSync, type ExecSyncOptions } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -21,7 +21,7 @@ const platform = os.platform();
 const binaryName = platform === "win32" ? "docula.exe" : "docula";
 const binaryPath = path.join("dist", binaryName);
 
-function run(cmd, options = {}) {
+function run(cmd: string, options: ExecSyncOptions = {}) {
 	console.log(`> ${cmd}`);
 	execSync(cmd, { stdio: "inherit", ...options });
 }
@@ -85,7 +85,7 @@ main().catch((error) => {
 	// Step 6: Inject the blob using postject
 	console.log("\nStep 6: Injecting SEA blob into binary...");
 	const sentinelFuse = "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2";
-	const postjectArgs = [
+	const postjectArgs: string[] = [
 		binaryPath,
 		"NODE_SEA_BLOB",
 		"dist/sea-prep.blob",

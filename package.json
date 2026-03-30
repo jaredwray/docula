@@ -23,7 +23,7 @@
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/dist",
     "build": "pnpm generate-init-file && rimraf ./dist && tsup src/docula.ts --format esm --dts --clean",
-    "build:binary": "node scripts/build-binary.mjs",
+    "build:binary": "tsx scripts/build-binary.ts",
     "generate-embedded-templates": "tsx scripts/generate-embedded-templates.ts",
     "lint": "biome check --write --error-on-warnings",
     "lint:ci": "biome check --error-on-warnings",
