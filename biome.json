@@ -7,7 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["src/**/*", "test/**/*.ts", "!src/init.ts"]
+		"includes": [
+			"src/**/*",
+			"test/**/*.ts",
+			"!src/init.ts",
+			"!src/embedded-templates.ts"
+		]
 	},
 	"formatter": {
 		"enabled": true,

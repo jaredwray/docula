@@ -1,11 +1,80 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+
+let extractedTemplatesDir: string | undefined;
+
+/**
+ * Returns true when running as a single-executable application (SEA).
+ */
+function isSEA(): boolean {
+	try {
+		// Node.js SEA sets this flag at compile time
+		// @ts-expect-error -- only exists in SEA builds
+		return Boolean(process.sea);
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Extracts embedded templates to a temporary directory and returns the path.
+ * Templates are only extracted once per process lifetime.
+ */
+function getExtractedTemplatesDir(): string {
+	if (extractedTemplatesDir && fs.existsSync(extractedTemplatesDir)) {
+		return extractedTemplatesDir;
+	}
+
+	// Dynamic import to avoid bundling in non-SEA builds
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
+	const { embeddedTemplates } = require("./embedded-templates.js") as {
+		embeddedTemplates: Record<string, string>;
+	};
+
+	const tmpDir = path.join(os.tmpdir(), `docula-templates-${process.pid}`);
+	fs.mkdirSync(tmpDir, { recursive: true });
+
+	for (const [relativePath, base64Content] of Object.entries(
+		embeddedTemplates,
+	)) {
+		const fullPath = path.join(tmpDir, relativePath);
+		fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
+	}
+
+	extractedTemplatesDir = tmpDir;
+
+	// Clean up on exit
+	process.on("exit", () => {
+		try {
+			fs.rmSync(tmpDir, { recursive: true, force: true });
+		} catch {
+			// Best effort cleanup
+		}
+	});
+
+	return tmpDir;
+}
 
 /**
  * Returns the base directory for built-in templates.
  */
 export function getBuiltInTemplatesDir(): string {
-	return path.join(import.meta.url, "../../templates").replace("file:", "");
+	const normalDir = path
+		.join(import.meta.url, "../../templates")
+		.replace("file:", "");
+
+	if (fs.existsSync(normalDir)) {
+		return normalDir;
+	}
+
+	// When running as SEA or when templates dir is missing, use embedded templates
+	if (isSEA()) {
+		return getExtractedTemplatesDir();
+	}
+
+	return normalDir;
 }
 
 /**
