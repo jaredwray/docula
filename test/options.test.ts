@@ -310,6 +310,26 @@ describe("DoculaOptions", () => {
 			expect(options.allowedAssets).toContain(".svg");
 		});
 
+		it("should parse googleTagManager with valid string", () => {
+			options.parseOptions({ googleTagManager: "GTM-XXXXXX" });
+			expect(options.googleTagManager).toEqual("GTM-XXXXXX");
+		});
+
+		it("should not set googleTagManager for non-string values", () => {
+			options.parseOptions({ googleTagManager: 123 });
+			expect(options.googleTagManager).toBeUndefined();
+		});
+
+		it("should not set googleTagManager for empty string", () => {
+			options.parseOptions({ googleTagManager: "" });
+			expect(options.googleTagManager).toBeUndefined();
+		});
+
+		it("should have googleTagManager undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.googleTagManager).toBeUndefined();
+		});
+
 		it("should parse cookieAuth with loginUrl", () => {
 			options.parseOptions({
 				cookieAuth: { loginUrl: "/login" },

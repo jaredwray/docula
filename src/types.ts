@@ -59,6 +59,7 @@ export type DoculaData = {
 		url: string;
 		icon?: string;
 	}>;
+	googleTagManager?: string;
 	enableLlmsTxt?: boolean;
 	hasFeed?: boolean;
 	lastModified?: string;
