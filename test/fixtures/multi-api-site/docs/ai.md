@@ -55,7 +55,7 @@ export const options = {
 |----------|--------------|
 | `anthropic` | `claude-haiku-4-5` |
 | `openai` | `gpt-4o-mini-latest` |
-| `google` | `gemini-2.5-flash-lite-latest` |
+| `google` | `gemini-2.5-flash-lite` |
 
 ### Custom Model
 
