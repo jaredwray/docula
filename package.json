@@ -22,8 +22,8 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/dist",
-    "build": "pnpm generate-init-file && rimraf ./dist && tsdown",
-    "build:binary": "pnpm generate-init-file && pnpm generate-embedded-templates && rimraf ./dist && tsdown --config tsdown.config.binary.ts",
+    "build": "pnpm generate-init-file && tsdown",
+    "build:binary": "pnpm generate-init-file && pnpm generate-embedded-templates && tsdown --config tsdown.config.binary.ts",
     "generate-embedded-templates": "tsx scripts/generate-embedded-templates.ts",
     "lint": "biome check --write --error-on-warnings",
     "lint:ci": "biome check --error-on-warnings",
