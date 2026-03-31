@@ -40,7 +40,7 @@ export async function createAIModel(
 			case "google": {
 				const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
 				return createGoogleGenerativeAI({ apiKey: ai.apiKey })(
-					ai.model ?? "gemini-2.5-flash-lite-latest",
+					ai.model ?? "gemini-2.5-flash-lite",
 				);
 			}
 
