@@ -22,8 +22,8 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/dist",
-    "build": "pnpm generate-init-file && rimraf ./dist && tsup src/docula.ts --format esm --dts --clean",
-    "build:binary": "tsx scripts/build-binary.ts",
+    "build": "pnpm generate-init-file && rimraf ./dist && tsdown",
+    "build:binary": "pnpm generate-init-file && pnpm generate-embedded-templates && rimraf ./dist && tsdown --config tsdown.config.binary.ts",
     "generate-embedded-templates": "tsx scripts/generate-embedded-templates.ts",
     "lint": "biome check --write --error-on-warnings",
     "lint:ci": "biome check --error-on-warnings",
@@ -86,9 +86,8 @@
     "@types/update-notifier": "^6.0.8",
     "@vitest/coverage-v8": "^4.1.0",
     "dotenv": "^17.3.1",
-    "postject": "^1.0.0-alpha.6",
     "rimraf": "^6.1.3",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.21.7",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
