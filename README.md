@@ -45,9 +45,62 @@
 - [Caching](https://docula.org/docs/caching)
 - [Cookie Auth](https://docula.org/docs/cookie-auth)
 - [Robots & Sitemap](https://docula.org/docs/robots-and-sitemap)
+- [Standalone Binary](#standalone-binary)
 - [Open Source Examples](#open-source-examples)
 - [Code of Conduct and Contributing](#code-of-conduct-and-contributing)
 - [License - MIT](#license)
+
+# Standalone Binary
+
+You can build Docula as a standalone binary that runs without Node.js installed. This uses [Node.js Single Executable Applications (SEA)](https://nodejs.org/api/single-executable-applications.html) to embed the runtime and all dependencies into a single executable.
+
+## Building the Binary
+
+Requires Node.js >= 20 to build (the resulting binary does not need Node.js to run).
+
+```bash
+pnpm install
+pnpm build:binary
+```
+
+This produces a platform-specific binary at `dist/docula` (or `dist/docula.exe` on Windows).
+
+## What the Build Does
+
+1. Embeds all built-in templates (modern, classic) into the bundle as base64
+2. Bundles all source code and dependencies into a single CJS file via tsup
+3. Creates a Node.js SEA blob and injects it into a copy of the Node binary
+
+## Testing the Binary
+
+After building, test it locally:
+
+```bash
+# Show help
+./dist/docula help
+
+# Show version
+./dist/docula version
+
+# Initialize a new project
+./dist/docula init -s ./my-site
+
+# Build a site
+./dist/docula build -s ./my-site -o ./my-site/dist
+```
+
+## Cross-Platform Binaries
+
+Node.js SEA cannot cross-compile — the binary matches the OS and architecture it was built on. The CI workflow (`.github/workflows/build-binaries.yaml`) builds for all platforms using a matrix strategy:
+
+| Platform | Runner | Artifact |
+|---|---|---|
+| Linux x64 | `ubuntu-latest` | `docula-linux-x64` |
+| macOS ARM64 | `macos-latest` | `docula-macos-arm64` |
+| macOS x64 | `macos-13` | `docula-macos-x64` |
+| Windows x64 | `windows-latest` | `docula-windows-x64` |
+
+Binaries are uploaded as build artifacts on every run and attached to GitHub releases automatically.
 
 # Open Source Examples
 

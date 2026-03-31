@@ -1,0 +1,60 @@
+name: build-binaries
+
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+permissions:
+  contents: write
+
+jobs:
+  build-binary:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: docula-linux-x64
+            binary: docula
+          - os: macos-latest
+            artifact: docula-macos-arm64
+            binary: docula
+          - os: macos-13
+            artifact: docula-macos-x64
+            binary: docula
+          - os: windows-latest
+            artifact: docula-windows-x64
+            binary: docula.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Binary
+        run: pnpm build:binary
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.binary }}
+
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} dist/${{ matrix.binary }}#${{ matrix.artifact }}
