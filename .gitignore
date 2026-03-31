@@ -64,6 +64,9 @@ yarn.lock
 
 # build
 dist
+
+# Generated files
+src/embedded-templates.ts
 .DS_Store
 
 # IDE

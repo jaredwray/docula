@@ -1,11 +1,113 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+
+let embeddedTemplates: Record<string, string> | undefined;
+
+/**
+ * Registers embedded template data for use in SEA builds.
+ * Must be called before any template resolution occurs.
+ */
+export function setEmbeddedTemplates(templates: Record<string, string>): void {
+	embeddedTemplates = templates;
+}
+
+/**
+ * Returns true when running as a single-executable application (SEA).
+ */
+export function isSEA(): boolean {
+	try {
+		// Node.js SEA sets this flag at compile time
+		// @ts-expect-error -- only exists in SEA builds
+		return Boolean(process.sea);
+	} catch {
+		/* v8 ignore next -- @preserve */
+		return false;
+	}
+}
+
+/**
+ * Returns the deterministic temp directory path for extracted templates.
+ */
+export function getExtractedTemplatesPath(): string {
+	return path.join(os.tmpdir(), `docula-templates-${process.pid}`);
+}
+
+/**
+ * Cleans up extracted template files from the temp directory.
+ */
+export function cleanupExtractedTemplates(): void {
+	try {
+		const tmpDir = getExtractedTemplatesPath();
+		fs.rmSync(tmpDir, { recursive: true, force: true });
+	} catch {
+		// Best effort cleanup
+	}
+}
+
+/**
+ * Extracts embedded templates to a temporary directory and returns the path.
+ * Uses a deterministic path based on process.pid, so repeated calls
+ * return the same directory without module-level state.
+ */
+export function getExtractedTemplatesDir(): string {
+	const tmpDir = getExtractedTemplatesPath();
+
+	// Already extracted in a previous call
+	if (fs.existsSync(tmpDir)) {
+		return tmpDir;
+	}
+
+	if (!embeddedTemplates) {
+		throw new Error(
+			"Embedded templates not registered. Call setEmbeddedTemplates() before resolving templates in SEA mode.",
+		);
+	}
+
+	fs.mkdirSync(tmpDir, { recursive: true });
+
+	for (const [relativePath, base64Content] of Object.entries(
+		embeddedTemplates,
+	)) {
+		const fullPath = path.join(tmpDir, relativePath);
+		fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
+	}
+
+	// Clean up on exit and common termination signals
+	process.on("exit", cleanupExtractedTemplates);
+	/* v8 ignore start -- @preserve */
+	process.on("SIGINT", () => {
+		cleanupExtractedTemplates();
+		process.exit(130);
+	});
+	process.on("SIGTERM", () => {
+		cleanupExtractedTemplates();
+		process.exit(143);
+	});
+	/* v8 ignore stop */
+
+	return tmpDir;
+}
 
 /**
  * Returns the base directory for built-in templates.
  */
 export function getBuiltInTemplatesDir(): string {
-	return path.join(import.meta.url, "../../templates").replace("file:", "");
+	const normalDir = path
+		.join(import.meta.url, "../../templates")
+		.replace("file:", "");
+
+	if (fs.existsSync(normalDir)) {
+		return normalDir;
+	}
+
+	// When running as SEA or when templates dir is missing, use embedded templates
+	if (isSEA()) {
+		return getExtractedTemplatesDir();
+	}
+
+	return normalDir;
 }
 
 /**
