@@ -68,8 +68,8 @@ This produces a platform-specific binary at `dist/docula` (or `dist/docula.exe` 
 ## What the Build Does
 
 1. Embeds all built-in templates (modern, classic) into the bundle as base64
-2. Bundles all source code and dependencies into a single CJS file via tsup
-3. Creates a Node.js SEA blob and injects it into a copy of the Node binary
+2. Bundles all source code and dependencies into a single CJS file via [tsdown](https://tsdown.dev/)
+3. Uses tsdown's built-in `exe` option to create a Node.js SEA binary (blob generation, injection, and code signing are handled automatically)
 
 ## Testing the Binary
 
