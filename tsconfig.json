@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ESNext", // Compile down to a version of ECMAScript that supports ES Modules natively
-    "module": "ESNext", // Use native ECMAScript modules
-    "moduleResolution": "node", // Use Node.js module resolution mechanism
-    "strict": true, // Enable all strict type-checking options
-    "esModuleInterop": true, // Enables compatibility with CommonJS modules for default exports
-    "forceConsistentCasingInFileNames": true, // Ensure case sensitivity for filenames
-    "skipLibCheck": true, // Skip type checking of declaration files
-    "outDir": "./dist", // Output directory for compiled files
-    "declaration": true, // Generates corresponding '.d.ts' file.
-    "sourceMap": true, // Generates corresponding '.map' file for debugging
-    "resolveJsonModule": true // Enable importing JSON files as modules
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"], // Specify which files to include in compilation
-  "exclude": ["node_modules", "dist"] // Exclude directories from compilation
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -3,7 +3,6 @@ import http from "node:http";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-import { createJiti } from "jiti";
 import handler from "serve-handler";
 import updateNotifier from "update-notifier";
 import { DoculaBuilder } from "./builder.js";
@@ -15,7 +14,7 @@ import {
 	logopng,
 } from "./init.js";
 import { DoculaOptions } from "./options.js";
-import { resolveTemplatePath } from "./template-resolver.js";
+import { isSEA, resolveTemplatePath } from "./template-resolver.js";
 
 export default class Docula {
 	private _options: DoculaOptions = new DoculaOptions();
@@ -133,6 +132,17 @@ export default class Docula {
 		this.checkForUpdates();
 
 		const consoleProcess = this._console.parseProcessArgv(process.argv);
+
+		// Short-circuit for commands that don't need config
+		if (consoleProcess.command === "help") {
+			this._console.printHelp();
+			return;
+		}
+
+		if (consoleProcess.command === "version") {
+			this._console.log(this.getVersion());
+			return;
+		}
 
 		// Update options
 		if (consoleProcess.args.sitePath) {
@@ -453,10 +463,20 @@ export default class Docula {
 		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(tsConfigFile)) {
 			const absolutePath = path.resolve(tsConfigFile);
-			const jiti = createJiti(import.meta.url, {
-				interopDefault: true,
-			});
-			this._configFileModule = await jiti.import(absolutePath);
+			const fileUrl = pathToFileURL(absolutePath).href;
+			// In SEA mode, use native import() which supports .ts on Node 22.6+
+			// Outside SEA, use jiti for broader compatibility
+			if (isSEA()) {
+				const mod = await import(fileUrl);
+				this._configFileModule = mod.default ?? mod;
+			} else {
+				const { createJiti } = await import("jiti");
+				const jiti = createJiti(import.meta.url, {
+					interopDefault: true,
+				});
+				this._configFileModule = await jiti.import(absolutePath);
+			}
+
 			return;
 		}
 
