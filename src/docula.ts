@@ -133,14 +133,9 @@ export default class Docula {
 
 		const consoleProcess = this._console.parseProcessArgv(process.argv);
 
-		// Short-circuit for commands that don't need config
+		// Short-circuit for help — no config needed
 		if (consoleProcess.command === "help") {
 			this._console.printHelp();
-			return;
-		}
-
-		if (consoleProcess.command === "version") {
-			this._console.log(this.getVersion());
 			return;
 		}
 
@@ -163,6 +158,12 @@ export default class Docula {
 		// Propagate quiet setting to console
 		if (this.options.quiet) {
 			this._console.quiet = true;
+		}
+
+		// Short-circuit for version — after config but before onPrepare
+		if (consoleProcess.command === "version") {
+			this._console.log(this.getVersion());
+			return;
 		}
 
 		// Run the onPrepare function
