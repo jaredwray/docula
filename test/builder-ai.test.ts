@@ -10,9 +10,12 @@ import {
 	enrichChangelogEntries,
 	enrichDocuments,
 	loadAIMetadataCache,
+	logChangelogMetadata,
+	logDocumentMetadata,
 	needsChangelogEnrichment,
 	needsDocumentEnrichment,
 	saveAIMetadataCache,
+	truncate,
 } from "../src/builder-ai.js";
 import { DoculaConsole } from "../src/console.js";
 import type { DoculaChangelogEntry, DoculaDocument } from "../src/types.js";
@@ -73,6 +76,24 @@ describe("builder-ai", () => {
 	afterEach(() => {
 		vi.resetAllMocks();
 		removeTempDir(tempDir);
+	});
+
+	describe("truncate", () => {
+		it("should return the string unchanged when within limit", () => {
+			expect(truncate("short string")).toBe("short string");
+		});
+
+		it("should truncate and add ellipsis when exceeding default limit", () => {
+			const long = "A".repeat(100);
+			const result = truncate(long);
+			expect(result).toBe("A".repeat(60) + "...");
+			expect(result.length).toBe(63);
+		});
+
+		it("should respect a custom max length", () => {
+			const result = truncate("Hello World", 5);
+			expect(result).toBe("Hello...");
+		});
 	});
 
 	describe("createAIModel", () => {
@@ -394,6 +415,63 @@ describe("builder-ai", () => {
 			vi.doUnmock("writr");
 		});
 
+		it("should log generated metadata when AI returns results", () => {
+			const doculaConsole = new DoculaConsole();
+			const infoSpy = vi
+				.spyOn(doculaConsole, "info")
+				.mockImplementation(() => {});
+			const logSpy = vi
+				.spyOn(doculaConsole, "log")
+				.mockImplementation(() => {});
+
+			logDocumentMetadata(
+				doculaConsole,
+				"Test Doc",
+				{
+					title: "Generated Title",
+					description: "Generated description for the document",
+					keywords: ["gen", "keywords"],
+				},
+				false,
+			);
+
+			expect(infoSpy).toHaveBeenCalledWith(
+				expect.stringContaining("AI enriched:"),
+			);
+			expect(logSpy).toHaveBeenCalledWith(
+				expect.stringContaining("description:"),
+			);
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("keywords:"));
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("ogTitle:"));
+		});
+
+		it("should truncate long metadata values", () => {
+			const doculaConsole = new DoculaConsole();
+			const logSpy = vi
+				.spyOn(doculaConsole, "log")
+				.mockImplementation(() => {});
+			vi.spyOn(doculaConsole, "info").mockImplementation(() => {});
+
+			const longDescription = "A".repeat(100);
+
+			logDocumentMetadata(
+				doculaConsole,
+				"Test Doc",
+				{
+					title: "T",
+					description: longDescription,
+					keywords: ["k"],
+				},
+				false,
+			);
+
+			const descriptionCall = logSpy.mock.calls.find((c) =>
+				String(c[0]).includes("description:"),
+			);
+			expect(descriptionCall).toBeDefined();
+			expect(String(descriptionCall?.[0])).toContain("...");
+		});
+
 		it("should preserve existing doc fields when enriching", async () => {
 			const doculaConsole = new DoculaConsole();
 			const doc = makeDocument({
@@ -537,6 +615,32 @@ describe("builder-ai", () => {
 			expect(warnSpy).toHaveBeenCalled();
 
 			vi.doUnmock("writr");
+		});
+
+		it("should log generated metadata for changelog entries", () => {
+			const doculaConsole = new DoculaConsole();
+			const infoSpy = vi
+				.spyOn(doculaConsole, "info")
+				.mockImplementation(() => {});
+			const logSpy = vi
+				.spyOn(doculaConsole, "log")
+				.mockImplementation(() => {});
+
+			logChangelogMetadata(
+				doculaConsole,
+				"test-entry",
+				{
+					title: "Changelog Generated Title",
+					preview: "Generated preview text",
+				},
+				false,
+			);
+
+			expect(infoSpy).toHaveBeenCalledWith(
+				expect.stringContaining("AI enriched changelog:"),
+			);
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("title:"));
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("preview:"));
 		});
 
 		it("should use summary as fallback for preview", async () => {
