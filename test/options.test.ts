@@ -310,9 +310,14 @@ describe("DoculaOptions", () => {
 			expect(options.allowedAssets).toContain(".svg");
 		});
 
-		it("should parse googleTagManager with valid string", () => {
+		it("should parse googleTagManager with valid GTM string", () => {
 			options.parseOptions({ googleTagManager: "GTM-XXXXXX" });
 			expect(options.googleTagManager).toEqual("GTM-XXXXXX");
+		});
+
+		it("should parse googleTagManager with valid GA4 string", () => {
+			options.parseOptions({ googleTagManager: "G-XXXXXXXXXX" });
+			expect(options.googleTagManager).toEqual("G-XXXXXXXXXX");
 		});
 
 		it("should not set googleTagManager for non-string values", () => {

@@ -186,9 +186,9 @@ export class DoculaOptions {
 	 */
 	public headerLinks?: DoculaHeaderLink[];
 	/**
-	 * Google Tag Manager container ID (e.g., "GTM-XXXXXX").
-	 * When set, injects the GTM script in the head and a noscript
-	 * fallback iframe at the start of the body on every page.
+	 * Google Tag Manager container ID (e.g., "GTM-XXXXXX") or
+	 * Google Analytics 4 measurement ID (e.g., "G-XXXXXXXXXX").
+	 * When set, injects the appropriate tracking script on every page.
 	 */
 	public googleTagManager?: string;
 	/**
@@ -369,7 +369,7 @@ export class DoculaOptions {
 		if (
 			options.googleTagManager !== undefined &&
 			typeof options.googleTagManager === "string" &&
-			/^GTM-[A-Z0-9]+$/i.test(options.googleTagManager)
+			/^G[A-Z]*-[A-Z0-9]+$/i.test(options.googleTagManager)
 		) {
 			this.googleTagManager = options.googleTagManager;
 		}

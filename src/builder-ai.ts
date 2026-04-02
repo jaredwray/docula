@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { LanguageModel } from "ai";
+import { white } from "colorette";
 import type { Hashery } from "hashery";
 import { Writr, type WritrMetadata, type WritrOptions } from "writr";
 import type { DoculaConsole } from "./console.js";
@@ -130,6 +131,12 @@ export async function enrichDocuments(
 
 			if (cached) {
 				enriched[i] = applyMetadataToDocument(doc, cached);
+				logDocumentMetadata(
+					console,
+					doc.title || doc.documentPath,
+					cached,
+					true,
+				);
 				continue;
 			}
 
@@ -150,7 +157,12 @@ export async function enrichDocuments(
 
 			cache[bodyHash] = metadata;
 			enriched[i] = applyMetadataToDocument(doc, metadata);
-			console.info(`AI enriched: ${doc.title || doc.documentPath}`);
+			logDocumentMetadata(
+				console,
+				doc.title || doc.documentPath,
+				metadata,
+				false,
+			);
 			/* v8 ignore stop */
 		} catch (error) {
 			console.warn(
@@ -189,6 +201,7 @@ export async function enrichChangelogEntries(
 
 			if (cached) {
 				enriched[i] = applyMetadataToChangelog(entry, cached);
+				logChangelogMetadata(console, entry.title || entry.slug, cached, true);
 				continue;
 			}
 
@@ -209,7 +222,7 @@ export async function enrichChangelogEntries(
 
 			cache[bodyHash] = metadata;
 			enriched[i] = applyMetadataToChangelog(entry, metadata);
-			console.info(`AI enriched changelog: ${entry.title || entry.slug}`);
+			logChangelogMetadata(console, entry.title || entry.slug, metadata, false);
 			/* v8 ignore stop */
 		} catch (error) {
 			console.warn(
@@ -219,6 +232,68 @@ export async function enrichChangelogEntries(
 	}
 
 	return enriched;
+}
+
+/**
+ * Log AI-generated metadata for a document.
+ */
+function truncate(value: string, max = 60): string {
+	return value.length > max ? `${value.slice(0, max)}...` : value;
+}
+
+function logDocumentMetadata(
+	console: DoculaConsole,
+	name: string,
+	metadata: WritrMetadata,
+	fromCache: boolean,
+): void {
+	if (fromCache) {
+		console.info(`AI enriched: ${name} - using cached version as no changes`);
+		return;
+	}
+
+	console.info(`AI enriched: ${name}`);
+	if (metadata.description) {
+		console.log(white(`  description: ${truncate(metadata.description)}`));
+	}
+
+	if (metadata.keywords?.length) {
+		console.log(white(`  keywords: ${truncate(metadata.keywords.join(", "))}`));
+	}
+
+	if (metadata.title) {
+		console.log(white(`  ogTitle: ${truncate(metadata.title)}`));
+	}
+}
+
+/**
+ * Log AI-generated metadata for a changelog entry.
+ */
+function logChangelogMetadata(
+	console: DoculaConsole,
+	name: string,
+	metadata: WritrMetadata,
+	fromCache: boolean,
+): void {
+	if (fromCache) {
+		console.info(
+			`AI enriched changelog: ${name} - using cached version as no changes`,
+		);
+		return;
+	}
+
+	console.info(`AI enriched changelog: ${name}`);
+	if (metadata.title) {
+		console.log(white(`  title: ${truncate(metadata.title)}`));
+	}
+
+	if (metadata.preview || metadata.summary) {
+		console.log(
+			white(
+				`  preview: ${truncate(metadata.preview || metadata.summary || "")}`,
+			),
+		);
+	}
 }
 
 /**

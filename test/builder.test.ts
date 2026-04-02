@@ -2116,6 +2116,33 @@ describe("DoculaBuilder", () => {
 				});
 			}
 		});
+
+		it("should render GA4 gtag.js scripts when G- prefix is used", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-gtag";
+			options.googleTagManager = "G-XXXXXXXXXX";
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("<!-- Google tag (gtag.js) -->");
+				expect(indexHtml).toContain("gtag/js?id=G-XXXXXXXXXX");
+				expect(indexHtml).toContain("gtag('config','G-XXXXXXXXXX')");
+				expect(indexHtml).not.toContain("ns.html?id=");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
 	});
 
 	describe("Docula Builder - headerLinks", () => {
