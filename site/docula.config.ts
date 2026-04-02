@@ -35,6 +35,7 @@ export const options: Partial<DoculaOptions> = {
 			url: 'https://www.npmjs.com/package/docula',
 		},
 	],
+	googleTagManager: 'GTM-W55QFKGG',
 };
 
 async function copyWithFrontMatter(sourcePath: string, destPath: string, title: string, order: number) {

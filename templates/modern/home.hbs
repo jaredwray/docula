@@ -9,12 +9,7 @@
 </head>
 
 <body>
-{{#if googleTagManager}}
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{googleTagManager}}"
-height="0" width="0" style="display:none !important;visibility:hidden !important"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-{{/if}}
+{{> body-scripts }}
   {{#if githubPath}}
   <a href="https://github.com/{{ githubPath }}" class="github-corner" aria-label="View source on GitHub">
     <svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true">

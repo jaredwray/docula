@@ -229,6 +229,7 @@ export class DoculaBuilder {
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
 			googleTagManager: this.options.googleTagManager,
+			isGtag: this.options.googleTagManager?.startsWith("G-") ?? false,
 			enableLlmsTxt: this.options.enableLlmsTxt,
 			homeUrl: this.options.homeUrl,
 			baseUrl: this.options.baseUrl,
