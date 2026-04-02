@@ -166,9 +166,11 @@ export default class Docula {
 		if (this._configFileModule.onPrepare) {
 			try {
 				await this._configFileModule.onPrepare(this.options, this._console);
+				/* v8 ignore start -- @preserve */
 			} catch (error) {
 				this._console.error((error as Error).message);
 			}
+			/* v8 ignore stop */
 		}
 
 		/* v8 ignore next -- @preserve */
@@ -218,16 +220,6 @@ export default class Docula {
 				}
 
 				this.generateInit(this.options.sitePath, useTypeScript);
-				break;
-			}
-
-			case "help": {
-				this._console.printHelp();
-				break;
-			}
-
-			case "version": {
-				this._console.log(this.getVersion());
 				break;
 			}
 
@@ -467,8 +459,8 @@ export default class Docula {
 					this._configFileModule = mod.default ?? mod;
 				} catch {
 					throw new Error(
-						"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. "
-						+ "Please upgrade Node.js or use docula.config.mjs instead.",
+						"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. " +
+							"Please upgrade Node.js or use docula.config.mjs instead.",
 					);
 				}
 			} else {
