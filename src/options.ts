@@ -186,6 +186,12 @@ export class DoculaOptions {
 	 */
 	public headerLinks?: DoculaHeaderLink[];
 	/**
+	 * Google Tag Manager container ID (e.g., "GTM-XXXXXX").
+	 * When set, injects the GTM script in the head and a noscript
+	 * fallback iframe at the start of the body on every page.
+	 */
+	public googleTagManager?: string;
+	/**
 	 * AI-powered metadata enrichment configuration. When set, uses AI to fill
 	 * missing OpenGraph and HTML meta tag fields during the build.
 	 * Requires provider name and API key. Omit to disable AI enrichment.
@@ -358,6 +364,14 @@ export class DoculaOptions {
 
 		if (options.quiet !== undefined && typeof options.quiet === "boolean") {
 			this.quiet = options.quiet;
+		}
+
+		if (
+			options.googleTagManager !== undefined &&
+			typeof options.googleTagManager === "string" &&
+			/^GTM-[A-Z0-9]+$/i.test(options.googleTagManager)
+		) {
+			this.googleTagManager = options.googleTagManager;
 		}
 
 		if (

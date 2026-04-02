@@ -2037,6 +2037,87 @@ describe("DoculaBuilder", () => {
 		});
 	});
 
+	describe("Docula Builder - googleTagManager", () => {
+		it("should render GTM scripts when googleTagManager is configured", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-gtm";
+			options.googleTagManager = "GTM-TEST123";
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("<!-- Google Tag Manager -->");
+				expect(indexHtml).toContain("'GTM-TEST123'");
+				expect(indexHtml).toContain(
+					"googletagmanager.com/ns.html?id=GTM-TEST123",
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should not render GTM scripts when googleTagManager is not configured", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.template = "modern";
+			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = "test/temp/build-no-gtm";
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).not.toContain("googletagmanager.com");
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
+		it("should render GTM scripts in classic template", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.template = "classic";
+			options.sitePath = "test/fixtures/single-page-site";
+			options.output = "test/temp/build-gtm-classic";
+			options.googleTagManager = "GTM-CLASSIC1";
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain("<!-- Google Tag Manager -->");
+				expect(indexHtml).toContain("'GTM-CLASSIC1'");
+				expect(indexHtml).toContain(
+					"googletagmanager.com/ns.html?id=GTM-CLASSIC1",
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+	});
+
 	describe("Docula Builder - headerLinks", () => {
 		it("should render header links when headerLinks is configured", async () => {
 			const options = new DoculaOptions();

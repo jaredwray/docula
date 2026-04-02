@@ -72,6 +72,7 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		apiPath: options.apiPath,
 		changelogPath: options.changelogPath,
 		ai: options.ai,
+		googleTagManager: options.googleTagManager,
 	};
 	return hash.toHashSync(JSON.stringify(relevant));
 }

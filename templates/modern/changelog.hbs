@@ -8,6 +8,12 @@
 </head>
 
 <body>
+{{#if googleTagManager}}
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{googleTagManager}}"
+height="0" width="0" style="display:none !important;visibility:hidden !important"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+{{/if}}
   {{> header-bar }}
   <div class="content">
     <main class="versions-container">

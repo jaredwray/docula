@@ -228,6 +228,7 @@ export class DoculaBuilder {
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
+			googleTagManager: this.options.googleTagManager,
 			enableLlmsTxt: this.options.enableLlmsTxt,
 			homeUrl: this.options.homeUrl,
 			baseUrl: this.options.baseUrl,
