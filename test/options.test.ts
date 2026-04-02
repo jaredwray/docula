@@ -325,6 +325,11 @@ describe("DoculaOptions", () => {
 			expect(options.googleTagManager).toBeUndefined();
 		});
 
+		it("should not set googleTagManager for invalid format", () => {
+			options.parseOptions({ googleTagManager: "INVALID-123" });
+			expect(options.googleTagManager).toBeUndefined();
+		});
+
 		it("should have googleTagManager undefined by default", () => {
 			const freshOptions = new DoculaOptions();
 			expect(freshOptions.googleTagManager).toBeUndefined();

@@ -369,7 +369,7 @@ export class DoculaOptions {
 		if (
 			options.googleTagManager !== undefined &&
 			typeof options.googleTagManager === "string" &&
-			options.googleTagManager.length > 0
+			/^GTM-[A-Z0-9]+$/i.test(options.googleTagManager)
 		) {
 			this.googleTagManager = options.googleTagManager;
 		}
