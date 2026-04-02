@@ -237,11 +237,11 @@ export async function enrichChangelogEntries(
 /**
  * Log AI-generated metadata for a document.
  */
-function truncate(value: string, max = 60): string {
+export function truncate(value: string, max = 60): string {
 	return value.length > max ? `${value.slice(0, max)}...` : value;
 }
 
-function logDocumentMetadata(
+export function logDocumentMetadata(
 	console: DoculaConsole,
 	name: string,
 	metadata: WritrMetadata,
@@ -269,7 +269,7 @@ function logDocumentMetadata(
 /**
  * Log AI-generated metadata for a changelog entry.
  */
-function logChangelogMetadata(
+export function logChangelogMetadata(
 	console: DoculaConsole,
 	name: string,
 	metadata: WritrMetadata,
