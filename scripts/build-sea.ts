@@ -1,4 +1,4 @@
-import {execSync} from "node:child_process";
+import {execFileSync} from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -12,20 +12,20 @@ const binaryPath = path.join(distDir, binaryName);
 const seaConfigPath = path.resolve("sea-config.json");
 const blobPath = path.join(distDir, "sea-prep.blob");
 
-function run(cmd: string) {
-	console.log(`> ${cmd}`);
-	execSync(cmd, {stdio: "inherit"});
+function run(cmd: string, args: string[]) {
+	console.log(`> ${cmd} ${args.join(" ")}`);
+	execFileSync(cmd, args, {stdio: "inherit"});
 }
 
 // Generate the SEA blob from the bundled JS
-run(`node --experimental-sea-config ${seaConfigPath}`);
+run(process.execPath, ["--experimental-sea-config", seaConfigPath]);
 
 // Copy the current Node.js binary
 fs.copyFileSync(process.execPath, binaryPath);
 
 // On macOS, remove the existing signature before injection
 if (isMacOS) {
-	run(`codesign --remove-signature ${binaryPath}`);
+	run("codesign", ["--remove-signature", binaryPath]);
 }
 
 // Inject the blob using postject
@@ -42,11 +42,11 @@ if (isMacOS) {
 	postjectArgs.push("--macho-segment-name", "NODE_SEA");
 }
 
-run(`npx postject ${postjectArgs.join(" ")}`);
+run("npx", ["postject", ...postjectArgs]);
 
 // On macOS, re-sign the binary with ad-hoc signature
 if (isMacOS) {
-	run(`codesign --sign - ${binaryPath}`);
+	run("codesign", ["--sign", "-", binaryPath]);
 }
 
 // Clean up the blob file

@@ -5,6 +5,7 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import handler from "serve-handler";
 import updateNotifier from "update-notifier";
+import doculaPkg from "../package.json" with { type: "json" };
 import { DoculaBuilder } from "./builder.js";
 import { DoculaConsole } from "./console.js";
 import {
@@ -113,13 +114,8 @@ export default class Docula {
 	 * @returns {void}
 	 */
 	public checkForUpdates(): void {
-		const packageJsonPath = path.join(process.cwd(), "package.json");
 		/* v8 ignore next -- @preserve */
-		if (fs.existsSync(packageJsonPath)) {
-			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-
-			updateNotifier({ pkg: packageJson }).notify();
-		}
+		updateNotifier({ pkg: doculaPkg }).notify();
 	}
 
 	/**
@@ -441,9 +437,7 @@ export default class Docula {
 	 * @returns {string}
 	 */
 	public getVersion(): string {
-		const packageJson = fs.readFileSync("./package.json", "utf8");
-		const packageObject = JSON.parse(packageJson) as { version: string };
-		return packageObject.version;
+		return doculaPkg.version;
 	}
 
 	/**
@@ -468,8 +462,15 @@ export default class Docula {
 			// In SEA mode, use native import() which supports .ts on Node 22.6+
 			// Outside SEA, use jiti for broader compatibility
 			if (isSEA()) {
-				const mod = await import(fileUrl);
-				this._configFileModule = mod.default ?? mod;
+				try {
+					const mod = await import(fileUrl);
+					this._configFileModule = mod.default ?? mod;
+				} catch {
+					throw new Error(
+						"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. "
+						+ "Please upgrade Node.js or use docula.config.mjs instead.",
+					);
+				}
 			} else {
 				const { createJiti } = await import("jiti");
 				const jiti = createJiti(import.meta.url, {
