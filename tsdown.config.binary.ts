@@ -4,5 +4,11 @@ export default defineConfig({
 	entry: ["src/sea-entry.ts"],
 	format: ["cjs"],
 	clean: true,
-	exe: true,
+	deps: {
+		alwaysBundle: [/.*/],
+		neverBundle: ["jiti"],
+	},
+	outputOptions: {
+		codeSplitting: false,
+	},
 });
