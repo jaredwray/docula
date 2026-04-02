@@ -32,6 +32,7 @@ export const options: Partial<DoculaOptions> = {
   siteDescription: 'Project description',
   siteUrl: 'https://your-site.com',
   themeMode: 'light', // or 'dark' — defaults to system preference if omitted
+  googleTagManager: 'GTM-XXXXXX', // Google Tag Manager container ID
   homeUrl: '/', // logo links to this URL instead of baseUrl
   baseUrl: '/docs', // host under a subpath
   docsPath: '', // place docs at the output root
@@ -145,4 +146,5 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `docsPath` | `string` | `'docs'` | Output subdirectory and URL segment for documentation pages. Set to `''` to place docs at the output root — useful with `baseUrl` to avoid `/docs/docs/` nesting. |
 | `apiPath` | `string` | `'api'` | Output subdirectory and URL segment for API reference pages. |
 | `changelogPath` | `string` | `'changelog'` | Output subdirectory and URL segment for changelog pages. |
+| `googleTagManager` | `string` | - | Google Tag Manager container ID (e.g., `'GTM-XXXXXX'`). When set, the GTM script is injected into the `<head>` and a `<noscript>` fallback is added to the `<body>` of every page. |
 | `allowedAssets` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |
