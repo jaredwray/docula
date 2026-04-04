@@ -68,12 +68,11 @@ body {
   gap: 12px;
 }
 
-.logo-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--fg); }
+.logo-link { display: flex !important; align-items: center !important; text-decoration: none !important; color: var(--fg) !important; font-size: 18px !important; font-weight: 600 !important; }
 .logo__img {
   height: 75px;
   width: auto;
 }
-.logo__text { font-size: 18px; font-weight: 600; }
 
 .theme-button {
   border: 1px solid transparent;
