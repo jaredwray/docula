@@ -19,6 +19,7 @@ export default defineConfig({
 				'dist/**',
 				'test/**',
 				'.git/**',
+				'package.json',
 			],
 		},
 	},

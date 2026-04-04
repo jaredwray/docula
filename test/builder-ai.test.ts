@@ -86,7 +86,7 @@ describe("builder-ai", () => {
 		it("should truncate and add ellipsis when exceeding default limit", () => {
 			const long = "A".repeat(100);
 			const result = truncate(long);
-			expect(result).toBe("A".repeat(60) + "...");
+			expect(result).toBe(`${"A".repeat(60)}...`);
 			expect(result.length).toBe(63);
 		});
 
