@@ -549,6 +549,80 @@ describe("DoculaBuilder - SEO", () => {
 				}
 			}
 		});
+
+		it("should render readmeMetadata description and keywords meta tags", async () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Site fallback description",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "templates/modern",
+				output: "test/temp/index-readme-meta",
+				templates: { home: "home.hbs" },
+				readmeMetadata: {
+					description: "Enriched README description",
+					keywords: ["alpha", "beta"],
+					ogTitle: "Enriched README title",
+					ogDescription: "Enriched README description",
+				},
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildIndexPage(data);
+				const index = await fs.promises.readFile(
+					`${data.output}/index.html`,
+					"utf8",
+				);
+				expect(index).toContain(
+					'<meta name="description" content="Enriched README description">',
+				);
+				expect(index).toContain('<meta name="keywords" content="alpha, beta">');
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
+		});
+
+		it("should fall back to siteDescription when readmeMetadata is not set", async () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "docula",
+				siteDescription: "Site fallback description",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "templates/modern",
+				output: "test/temp/index-readme-meta-fallback",
+				templates: { home: "home.hbs" },
+			};
+
+			if (fs.existsSync(data.output)) {
+				await fs.promises.rm(data.output, { recursive: true });
+			}
+
+			try {
+				await builder.buildIndexPage(data);
+				const index = await fs.promises.readFile(
+					`${data.output}/index.html`,
+					"utf8",
+				);
+				expect(index).toContain(
+					'<meta name="description" content="Site fallback description">',
+				);
+				expect(index).not.toContain('<meta name="keywords"');
+			} finally {
+				if (fs.existsSync(data.output)) {
+					await fs.promises.rm(data.output, { recursive: true });
+				}
+			}
+		});
 	});
 
 	describe("Docula Builder - resolveOpenGraphData", () => {

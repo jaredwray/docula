@@ -234,6 +234,76 @@ export async function enrichChangelogEntries(
 	return enriched;
 }
 
+export type ReadmeMetadata = {
+	description?: string;
+	keywords?: string[];
+	ogTitle?: string;
+	ogDescription?: string;
+};
+
+/**
+ * Enrich the site README with AI-generated metadata for OG/meta tags.
+ * Accepts the README content directly (from doculaData.readmeContent or
+ * by reading sitePath/README.md). Returns mapped metadata or undefined
+ * if content is missing, too small, or enrichment fails.
+ */
+export async function enrichReadme(
+	content: string | undefined,
+	model: LanguageModel,
+	hash: Hashery,
+	console: DoculaConsole,
+	cache: AIMetadataCache,
+): Promise<ReadmeMetadata | undefined> {
+	if (!content) {
+		return undefined;
+	}
+
+	try {
+		// Skip very small content
+		if (content.trim().length < 10) {
+			return undefined;
+		}
+
+		const bodyHash = hash.toHashSync(content);
+		const cached = cache[bodyHash];
+
+		if (cached) {
+			logDocumentMetadata(console, "README", cached, true);
+			return {
+				description: cached.description,
+				keywords: cached.keywords,
+				ogTitle: cached.title,
+				ogDescription: cached.description,
+			};
+		}
+
+		/* v8 ignore start -- @preserve */
+		const writr = new Writr(content, {
+			...writrOptions,
+			ai: { model },
+		});
+		const metadata = await writr.ai?.getMetadata();
+		if (!metadata) {
+			return undefined;
+		}
+
+		cache[bodyHash] = metadata;
+		logDocumentMetadata(console, "README", metadata, false);
+		return {
+			description: metadata.description,
+			keywords: metadata.keywords,
+			ogTitle: metadata.title,
+			ogDescription: metadata.description,
+		};
+		/* v8 ignore stop */
+	} catch (error) {
+		console.warn(
+			`AI enrichment failed for README: ${(error as Error).message}`,
+		);
+		return undefined;
+	}
+}
+
 /**
  * Log AI-generated metadata for a document.
  */

@@ -47,6 +47,12 @@ export type DoculaData = {
 	changelogEntries?: DoculaChangelogEntry[];
 	hasReadme?: boolean;
 	readmeContent?: string;
+	readmeMetadata?: {
+		description?: string;
+		keywords?: string[];
+		ogTitle?: string;
+		ogDescription?: string;
+	};
 	themeMode?: string;
 	cookieAuth?: {
 		loginUrl: string;
