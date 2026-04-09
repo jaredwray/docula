@@ -132,6 +132,7 @@ export function hasAssetsChanged(
 	hash: Hashery,
 	sitePath: string,
 	previousAssets: Record<string, string>,
+	autoReadme?: boolean,
 ): boolean {
 	const assetFiles = [
 		"favicon.ico",
@@ -149,6 +150,24 @@ export function hasAssetsChanged(
 				return true;
 			}
 		} else if (previousAssets[file]) {
+			return true;
+		}
+	}
+
+	// Track the project root README that autoReadme renders in place. The
+	// source lives outside sitePath, so we hash it separately under a
+	// dedicated key and fall back to detecting newly-added or removed files
+	// when the option is enabled and no site README is present.
+	const siteReadmeExists = fs.existsSync(path.join(sitePath, "README.md"));
+	const shouldTrackRootReadme = autoReadme === true && !siteReadmeExists;
+	if (shouldTrackRootReadme || previousAssets.__autoReadme !== undefined) {
+		const rootReadmePath = path.join(process.cwd(), "README.md");
+		if (fs.existsSync(rootReadmePath)) {
+			const currentRootHash = hashFile(hash, rootReadmePath);
+			if (previousAssets.__autoReadme !== currentRootHash) {
+				return true;
+			}
+		} else if (previousAssets.__autoReadme !== undefined) {
 			return true;
 		}
 	}

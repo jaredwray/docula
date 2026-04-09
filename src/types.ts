@@ -46,6 +46,7 @@ export type DoculaData = {
 	openApiSpecs?: DoculaOpenApiSpecEntry[];
 	changelogEntries?: DoculaChangelogEntry[];
 	hasReadme?: boolean;
+	readmeContent?: string;
 	themeMode?: string;
 	cookieAuth?: {
 		loginUrl: string;

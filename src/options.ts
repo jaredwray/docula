@@ -130,9 +130,10 @@ export class DoculaOptions {
 	 */
 	public autoUpdateIgnores = true;
 	/**
-	 * When true, automatically copies the project root README.md into the site
-	 * directory if one does not already exist. The package.json name field is
-	 * used to prepend a title heading when the README lacks one.
+	 * When true, automatically renders the project root README.md as the home
+	 * page if no README exists in the site directory. The README is read in
+	 * place and never copied into the site directory. The package.json name
+	 * field is used to prepend a title heading when the README lacks one.
 	 */
 	public autoReadme = true;
 	/**
