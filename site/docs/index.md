@@ -23,7 +23,7 @@ If your project has a `tsconfig.json`, docula will automatically generate a Type
 
 ## Add your content
 
-Simply replace the logo, favicon, and css file with your own. The readme is your root project readme and you just need to at build time move it over to the site folder. If you have it at the root of the project and this is a folder inside just delete the README.md file in the site folder and docula will copy it over for you automatically.
+Simply replace the logo, favicon, and css file with your own. For the README, docula will automatically read your project root `README.md` at build time and render it as the home page — no copying required. If you want to use a different README just for the site, place one in the site folder and docula will use that instead. This behavior is controlled by the `autoReadme` option (enabled by default).
 
 ## Build your site
 
@@ -81,6 +81,6 @@ Subdirectories inside `docs/` automatically become sections in the sidebar navig
 
 Docula automatically detects what content exists and picks the starting view for your site:
 
-- **README.md exists** — A dedicated landing page renders at `/` using `home.hbs`, and docs are available at `/docs/`.
+- **README.md exists** — A dedicated landing page renders at `/` using `home.hbs`, and docs are available at `/docs/`. Docula looks for a `README.md` in your site folder first, then falls back to your project root `README.md` via the `autoReadme` option.
 - **No README.md, but docs exist** — The first doc page renders directly as `/index.html`.
 - **No README.md, no docs, but `api/swagger.json` exists** — The API page renders as `/index.html`.
