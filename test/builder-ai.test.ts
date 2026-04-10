@@ -9,6 +9,7 @@ import {
 	createAIModel,
 	enrichChangelogEntries,
 	enrichDocuments,
+	enrichReadme,
 	loadAIMetadataCache,
 	logChangelogMetadata,
 	logDocumentMetadata,
@@ -662,6 +663,125 @@ describe("builder-ai", () => {
 				cache,
 			);
 			expect(result?.[0].preview).toBe("Summary as fallback preview");
+		});
+	});
+
+	describe("enrichReadme", () => {
+		it("should return undefined when content is undefined", async () => {
+			const doculaConsole = new DoculaConsole();
+			const cache: AIMetadataCache = {};
+
+			const result = await enrichReadme(
+				undefined,
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result).toBeUndefined();
+			expect(cache).toEqual({});
+		});
+
+		it("should return undefined for very short README content", async () => {
+			const doculaConsole = new DoculaConsole();
+			const cache: AIMetadataCache = {};
+
+			const result = await enrichReadme(
+				"hi",
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result).toBeUndefined();
+			expect(cache).toEqual({});
+		});
+
+		it("should return mapped metadata from cache when available", async () => {
+			const doculaConsole = new DoculaConsole();
+			const infoSpy = vi
+				.spyOn(doculaConsole, "info")
+				.mockImplementation(() => {});
+			const content =
+				"# My Project\n\nA helpful README that describes what the project does.";
+			const bodyHash = testHash.toHashSync(content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "My Project",
+					description: "A helpful README description",
+					keywords: ["project", "readme"],
+				},
+			};
+
+			const result = await enrichReadme(
+				content,
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result).toEqual({
+				description: "A helpful README description",
+				keywords: ["project", "readme"],
+				ogTitle: "My Project",
+				ogDescription: "A helpful README description",
+			});
+			expect(infoSpy).toHaveBeenCalledWith(
+				expect.stringContaining("using cached version"),
+			);
+		});
+
+		it("should map partial cached metadata leaving missing fields undefined", async () => {
+			const doculaConsole = new DoculaConsole();
+			vi.spyOn(doculaConsole, "info").mockImplementation(() => {});
+			const content =
+				"# Partial\n\nThis README only has a description in the cache.";
+			const bodyHash = testHash.toHashSync(content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					description: "Only description here",
+				},
+			};
+
+			const result = await enrichReadme(
+				content,
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result).toEqual({
+				description: "Only description here",
+				keywords: undefined,
+				ogTitle: undefined,
+				ogDescription: "Only description here",
+			});
+		});
+
+		it("should handle errors gracefully and return undefined", async () => {
+			const doculaConsole = new DoculaConsole();
+			doculaConsole.quiet = true;
+			const warnSpy = vi
+				.spyOn(doculaConsole, "warn")
+				.mockImplementation(() => {});
+			const cache: AIMetadataCache = {};
+			const content =
+				"# Real README\n\nWith enough content to pass the size check.";
+			vi.spyOn(testHash, "toHashSync").mockImplementationOnce(() => {
+				throw new Error("boom");
+			});
+
+			const result = await enrichReadme(
+				content,
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result).toBeUndefined();
+			expect(warnSpy).toHaveBeenCalledWith(
+				expect.stringContaining("AI enrichment failed for README"),
+			);
 		});
 	});
 });

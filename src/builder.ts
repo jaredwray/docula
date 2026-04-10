@@ -8,6 +8,7 @@ import {
 	createAIModel,
 	enrichChangelogEntries,
 	enrichDocuments,
+	enrichReadme,
 	loadAIMetadataCache,
 	saveAIMetadataCache,
 } from "./builder-ai.js";
@@ -434,7 +435,7 @@ export class DoculaBuilder {
 			allChangelogEntries.length > 0 && hasChangelogTemplate;
 
 		// AI metadata enrichment for OG/meta tags
-		/* v8 ignore next 19 -- @preserve */
+		/* v8 ignore next 40 -- @preserve */
 		if (this._options.ai) {
 			const aiModel = await createAIModel(this._options.ai);
 			if (aiModel) {
@@ -454,6 +455,21 @@ export class DoculaBuilder {
 					this._console,
 					aiCache,
 				);
+				if (doculaData.hasReadme && !doculaData.hasDocuments) {
+					const readmeForEnrichment =
+						doculaData.readmeContent ??
+						(siteReadmeExists
+							? fs.readFileSync(`${this._options.sitePath}/README.md`, "utf8")
+							: undefined);
+					doculaData.readmeMetadata = await enrichReadme(
+						readmeForEnrichment,
+						aiModel,
+						this._hash,
+						this._console,
+						aiCache,
+					);
+				}
+
 				saveAIMetadataCache(this._options.sitePath, aiCache);
 			}
 		}
@@ -950,13 +966,16 @@ export class DoculaBuilder {
 
 			const announcement = await this.buildAnnouncementSection(data);
 
+			const readmeMeta = data.readmeMetadata;
 			const indexContent = await this._ecto.renderFromFile(
 				indexTemplate,
 				{
 					...data,
 					content,
 					announcement,
-					...this.resolveOpenGraphData(data, "/"),
+					description: readmeMeta?.description ?? data.siteDescription,
+					keywords: readmeMeta?.keywords,
+					...this.resolveOpenGraphData(data, "/", readmeMeta),
 					jsonLd: this.resolveJsonLd("home", data, "/"),
 				},
 				data.templatePath,
