@@ -1497,6 +1497,80 @@ describe("DoculaBuilder", () => {
 			const b: Record<string, string> = { foo: "abc", bar: "xyz" };
 			expect(recordsEqual(a, b)).toBe(false);
 		});
+
+		it("should detect root README changes tracked by autoReadme", () => {
+			const sitePath = "test/temp/diff-auto-readme";
+			const tempCwd = "test/temp/diff-auto-readme-cwd";
+
+			try {
+				fs.mkdirSync(sitePath, { recursive: true });
+				fs.mkdirSync(tempCwd, { recursive: true });
+
+				const cwdSpy = vi
+					.spyOn(process, "cwd")
+					.mockReturnValue(path.resolve(tempCwd));
+
+				// Case 1: autoReadme on, no site README, no root README, nothing tracked
+				// → no change
+				expect(hasAssetsChanged(testHash, sitePath, {}, true)).toBe(false);
+
+				// Case 2: autoReadme on, no site README, new root README appeared
+				// (not yet tracked) → change detected
+				fs.writeFileSync(`${tempCwd}/README.md`, "Root content");
+				expect(hasAssetsChanged(testHash, sitePath, {}, true)).toBe(true);
+
+				// Case 3: root README hash recorded previously, still matches → no change
+				const rootHash = hashFileUtil(testHash, `${tempCwd}/README.md`);
+				expect(
+					hasAssetsChanged(
+						testHash,
+						sitePath,
+						{ __autoReadme: rootHash },
+						true,
+					),
+				).toBe(false);
+
+				// Case 4: root README hash changed since last build → change detected
+				fs.writeFileSync(`${tempCwd}/README.md`, "New root content");
+				expect(
+					hasAssetsChanged(
+						testHash,
+						sitePath,
+						{ __autoReadme: rootHash },
+						true,
+					),
+				).toBe(true);
+
+				// Case 5: root README was tracked last build but now removed → change
+				fs.rmSync(`${tempCwd}/README.md`);
+				expect(
+					hasAssetsChanged(
+						testHash,
+						sitePath,
+						{ __autoReadme: rootHash },
+						true,
+					),
+				).toBe(true);
+
+				// Case 6: autoReadme off and nothing previously tracked → root README
+				// is ignored even if it exists
+				fs.writeFileSync(`${tempCwd}/README.md`, "Root content");
+				expect(hasAssetsChanged(testHash, sitePath, {}, false)).toBe(false);
+
+				// Case 7: site README exists → root README is not tracked even when
+				// autoReadme is on
+				fs.writeFileSync(`${sitePath}/README.md`, "# Site README");
+				const siteHash = hashFileUtil(testHash, `${sitePath}/README.md`);
+				expect(
+					hasAssetsChanged(testHash, sitePath, { "README.md": siteHash }, true),
+				).toBe(false);
+
+				cwdSpy.mockRestore();
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+				fs.rmSync(tempCwd, { recursive: true, force: true });
+			}
+		});
 	});
 
 	describe("Docula Builder - Validate Options", () => {
@@ -2956,10 +3030,9 @@ describe("DoculaBuilder", () => {
 			removeTempDir(tempDir);
 		});
 
-		it("should copy README.md from cwd to sitePath and prepend package name as title", async () => {
-			const cwdSpy = vi
-				.spyOn(process, "cwd")
-				.mockReturnValue(path.resolve(tempCwdPath));
+		it("should resolve README from cwd and prepend package name as title", async () => {
+			const resolvedCwd = path.resolve(tempCwdPath);
+			const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(resolvedCwd);
 			fs.writeFileSync(`${tempCwdPath}/README.md`, "Some content here");
 			fs.writeFileSync(
 				`${tempCwdPath}/package.json`,
@@ -2971,17 +3044,19 @@ describe("DoculaBuilder", () => {
 			options.sitePath = tempSitePath;
 			options.autoReadme = true;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
-			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
-			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
-			expect(content).toContain("# test-pkg");
-			expect(content).toContain("Some content here");
+			expect(result).toBeDefined();
+			expect(result?.content).toContain("# test-pkg");
+			expect(result?.content).toContain("Some content here");
+			expect(result?.sourcePath).toEqual(path.join(resolvedCwd, "README.md"));
+			// Site README should not be created
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should not copy README when autoReadme is false", async () => {
+		it("should return undefined when autoReadme is false", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -2992,14 +3067,15 @@ describe("DoculaBuilder", () => {
 			options.sitePath = tempSitePath;
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
+			expect(result).toBeUndefined();
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should not overwrite existing site README", async () => {
+		it("should return undefined when site README already exists", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -3010,15 +3086,17 @@ describe("DoculaBuilder", () => {
 			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
+			expect(result).toBeUndefined();
+			// Existing site README is untouched
 			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
 			expect(content).toEqual("Existing content");
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should do nothing when no README exists in cwd", async () => {
+		it("should return undefined when no README exists in cwd", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -3027,8 +3105,9 @@ describe("DoculaBuilder", () => {
 			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
+			expect(result).toBeUndefined();
 			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
 
 			cwdSpy.mockRestore();
@@ -3051,15 +3130,14 @@ describe("DoculaBuilder", () => {
 			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
-			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
-			expect(content).toEqual("# Existing Title\n\nSome content");
+			expect(result?.content).toEqual("# Existing Title\n\nSome content");
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should copy README as-is when no package.json exists", async () => {
+		it("should resolve README as-is when no package.json exists", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -3069,10 +3147,9 @@ describe("DoculaBuilder", () => {
 			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
-			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
-			expect(content).toEqual("No heading content");
+			expect(result?.content).toEqual("No heading content");
 
 			cwdSpy.mockRestore();
 		});
@@ -3088,15 +3165,14 @@ describe("DoculaBuilder", () => {
 			options.quiet = true;
 			options.sitePath = tempSitePath;
 			const builder = new DoculaBuilder(options);
-			await builder.autoReadme();
+			const result = await builder.autoReadme();
 
-			const content = fs.readFileSync(`${tempSitePath}/README.md`, "utf8");
-			expect(content).toEqual("Some content");
+			expect(result?.content).toEqual("Some content");
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should not copy referenced images from cwd to sitePath", async () => {
+		it("should not copy README or referenced images into sitePath", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -3116,15 +3192,15 @@ describe("DoculaBuilder", () => {
 			const builder = new DoculaBuilder(options);
 			await builder.autoReadme();
 
-			// README should be copied
-			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(true);
+			// README should NOT be copied into sitePath
+			expect(fs.existsSync(`${tempSitePath}/README.md`)).toBe(false);
 			// Referenced image should NOT be copied
 			expect(fs.existsSync(`${tempSitePath}/assets/logo.png`)).toBe(false);
 
 			cwdSpy.mockRestore();
 		});
 
-		it("should auto-copy README during build and produce index.html", async () => {
+		it("should render root README during build and produce index.html", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
 				.mockReturnValue(path.resolve(tempCwdPath));
@@ -3152,11 +3228,12 @@ describe("DoculaBuilder", () => {
 					"utf8",
 				);
 				expect(indexHtml).toContain("My Project");
+				// The root README should NOT have been copied into the site path
+				expect(fs.existsSync("test/fixtures/auto-readme-site/README.md")).toBe(
+					false,
+				);
 			} finally {
 				fs.rmSync(options.output, { recursive: true, force: true });
-				fs.rmSync("test/fixtures/auto-readme-site/README.md", {
-					force: true,
-				});
 				fs.rmSync("test/fixtures/auto-readme-site/.cache", {
 					recursive: true,
 					force: true,

@@ -27,4 +27,4 @@ title: Getting Started
 order: 2
 ```
 
-If you want your docs to be the root home page (`/`) instead of the template landing page, simply remove the `README.md` file from your site directory. Docula will automatically use the first doc as `/index.html`.
+If you want your docs to be the root home page (`/`) instead of the template landing page, remove any `README.md` from your site directory and set `autoReadme: false` in `docula.config.mjs` so docula does not fall back to your project root `README.md`. Docula will then automatically use the first doc as `/index.html`.

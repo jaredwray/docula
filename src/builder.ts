@@ -196,6 +196,7 @@ export class DoculaBuilder {
 				this._hash,
 				this.options.sitePath,
 				validManifest.assets,
+				this.options.autoReadme,
 			);
 			if (!assetsChanged) {
 				this._console.success("No changes detected, skipping build");
@@ -211,8 +212,13 @@ export class DoculaBuilder {
 			? loadCachedChangelog(this.options.sitePath)
 			: new Map<string, DoculaChangelogEntry>();
 
-		// Auto-copy README.md from project root if not present in site path
-		await this.autoReadme();
+		// Resolve project root README.md for the home page when not already
+		// present in the site path. The README is rendered in place without
+		// being copied into sitePath.
+		const autoReadmeResult = await this.autoReadme();
+		const siteReadmeExists = fs.existsSync(
+			`${this.options.sitePath}/README.md`,
+		);
 
 		// Set the site options
 		const doculaData: DoculaData = {
@@ -224,7 +230,8 @@ export class DoculaBuilder {
 			output: this.options.output,
 			githubPath: this.options.githubPath,
 			sections: this.options.sections,
-			hasReadme: fs.existsSync(`${this.options.sitePath}/README.md`),
+			hasReadme: siteReadmeExists || autoReadmeResult !== undefined,
+			readmeContent: autoReadmeResult?.content,
 			themeMode: this.options.themeMode,
 			cookieAuth: this.options.cookieAuth,
 			headerLinks: this.options.headerLinks,
@@ -246,10 +253,19 @@ export class DoculaBuilder {
 			openGraph: this.options.openGraph,
 		};
 
-		// Track README.md in asset hashes for change detection
-		const readmePath = `${this.options.sitePath}/README.md`;
-		if (doculaData.hasReadme) {
-			currentAssetHashes["README.md"] = hashFile(this._hash, readmePath);
+		// Track README.md in asset hashes for change detection. Prefer the
+		// site README when it exists; otherwise track the root README that
+		// autoReadme resolved so edits to it still invalidate the cache.
+		if (siteReadmeExists) {
+			currentAssetHashes["README.md"] = hashFile(
+				this._hash,
+				`${this.options.sitePath}/README.md`,
+			);
+		} else if (autoReadmeResult) {
+			currentAssetHashes.__autoReadme = hashFile(
+				this._hash,
+				autoReadmeResult.sourcePath,
+			);
 		}
 
 		// Normalize API specs into openApiSpecs array
@@ -739,20 +755,22 @@ export class DoculaBuilder {
 		}
 	}
 
-	public async autoReadme(): Promise<void> {
+	public async autoReadme(): Promise<
+		{ sourcePath: string; content: string } | undefined
+	> {
 		if (!this._options.autoReadme) {
-			return;
+			return undefined;
 		}
 
 		const siteReadmePath = path.join(this._options.sitePath, "README.md");
 		if (fs.existsSync(siteReadmePath)) {
-			return;
+			return undefined;
 		}
 
 		const cwdDir = process.cwd();
 		const cwdReadmePath = path.join(cwdDir, "README.md");
 		if (!fs.existsSync(cwdReadmePath)) {
-			return;
+			return undefined;
 		}
 
 		let readmeContent = await fs.promises.readFile(cwdReadmePath, "utf8");
@@ -777,8 +795,7 @@ export class DoculaBuilder {
 			}
 		}
 
-		await fs.promises.mkdir(this._options.sitePath, { recursive: true });
-		await fs.promises.writeFile(siteReadmePath, readmeContent, "utf8");
+		return { sourcePath: cwdReadmePath, content: readmeContent };
 	}
 
 	public async getGithubData(githubPath: string): Promise<GithubData> {
@@ -995,7 +1012,9 @@ export class DoculaBuilder {
 
 	public async buildReadmeSection(data: DoculaData): Promise<string> {
 		let htmlReadme = "";
-		if (fs.existsSync(`${data.sitePath}/README.md`)) {
+		if (data.readmeContent !== undefined) {
+			htmlReadme = await new Writr(data.readmeContent, writrOptions).render();
+		} else if (fs.existsSync(`${data.sitePath}/README.md`)) {
 			const readmeContent = fs.readFileSync(
 				`${data.sitePath}/README.md`,
 				"utf8",
