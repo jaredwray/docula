@@ -137,14 +137,20 @@ export async function enrichDocuments(
 			const cached = cache[bodyHash];
 
 			if (cached) {
-				enriched[i] = applyMetadataToDocument(doc, cached);
-				logDocumentMetadata(
-					console,
-					doc.title || doc.documentPath,
-					cached,
-					true,
-				);
-				continue;
+				const applied = applyMetadataToDocument(doc, cached);
+				if (!needsDocumentEnrichment(applied)) {
+					enriched[i] = applied;
+					logDocumentMetadata(
+						console,
+						doc.title || doc.documentPath,
+						cached,
+						true,
+					);
+					continue;
+				}
+
+				// Cached metadata is incomplete for current requirements; re-query
+				delete cache[bodyHash];
 			}
 
 			// Skip documents with very little content
@@ -208,9 +214,20 @@ export async function enrichChangelogEntries(
 			const cached = cache[bodyHash];
 
 			if (cached) {
-				enriched[i] = applyMetadataToChangelog(entry, cached);
-				logChangelogMetadata(console, entry.title || entry.slug, cached, true);
-				continue;
+				const applied = applyMetadataToChangelog(entry, cached);
+				if (!needsChangelogEnrichment(applied)) {
+					enriched[i] = applied;
+					logChangelogMetadata(
+						console,
+						entry.title || entry.slug,
+						cached,
+						true,
+					);
+					continue;
+				}
+
+				// Cached metadata is incomplete for current requirements; re-query
+				delete cache[bodyHash];
 			}
 
 			// Skip entries with very little content
@@ -414,7 +431,7 @@ function applyMetadataToChangelog(
 		...entry,
 		title: entry.title || metadata.title || "",
 		preview: entry.preview || metadata.preview || metadata.summary || "",
-		description: entry.description || metadata.description || "",
+		description: entry.description || metadata.description || undefined,
 		keywords: entry.keywords?.length
 			? entry.keywords
 			: (metadata.keywords ?? []),

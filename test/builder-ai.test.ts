@@ -544,6 +544,29 @@ describe("builder-ai", () => {
 			expect(result?.[0].description).toBe("Existing desc");
 			expect(result?.[0].keywords).toEqual(["ai", "generated"]);
 		});
+
+		it("should invalidate incomplete document cache entries", async () => {
+			const doculaConsole = new DoculaConsole();
+			const doc = makeDocument({ content: "tiny", markdown: "tiny" });
+			const bodyHash = testHash.toHashSync(doc.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Stale Title",
+					// Missing description, keywords — incomplete cache
+				},
+			};
+
+			const result = await enrichDocuments(
+				[doc],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			// Cache was invalidated; content is too short for AI, so doc stays unenriched
+			expect(cache[bodyHash]).toBeUndefined();
+			expect(result?.[0].description).toBe("");
+		});
 	});
 
 	describe("enrichChangelogEntries", () => {
@@ -568,6 +591,10 @@ describe("builder-ai", () => {
 			const entry = makeChangelogEntry({
 				title: "Has title",
 				preview: "Has preview",
+				description: "Has description",
+				keywords: ["k1"],
+				ogTitle: "OG Title",
+				ogDescription: "OG Desc",
 			});
 			const result = await enrichChangelogEntries(
 				[entry],
@@ -710,6 +737,8 @@ describe("builder-ai", () => {
 			const cache: AIMetadataCache = {
 				[bodyHash]: {
 					title: "AI Title",
+					description: "AI description",
+					keywords: ["k1"],
 					summary: "Summary as fallback preview",
 				},
 			};
@@ -739,6 +768,7 @@ describe("builder-ai", () => {
 					title: "AI Title",
 					description: "AI description",
 					keywords: ["ai", "generated"],
+					preview: "AI preview",
 				},
 			};
 
@@ -750,10 +780,38 @@ describe("builder-ai", () => {
 				cache,
 			);
 			expect(result?.[0].title).toBe("AI Title");
+			expect(result?.[0].preview).toBe("AI preview");
 			expect(result?.[0].description).toBe("Existing desc");
 			expect(result?.[0].keywords).toEqual(["existing"]);
 			expect(result?.[0].ogTitle).toBe("Existing OG");
 			expect(result?.[0].ogDescription).toBe("AI description");
+		});
+
+		it("should invalidate incomplete cache entries and skip short content", async () => {
+			const doculaConsole = new DoculaConsole();
+			const entry = makeChangelogEntry({
+				title: "",
+				preview: "",
+				content: "short",
+			});
+			const bodyHash = testHash.toHashSync(entry.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Stale Title",
+					// Missing description, keywords, preview — incomplete cache
+				},
+			};
+
+			const result = await enrichChangelogEntries(
+				[entry],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			// Cache was invalidated; content is too short for AI, so entry stays unenriched
+			expect(cache[bodyHash]).toBeUndefined();
+			expect(result?.[0].title).toBe("");
 		});
 	});
 
