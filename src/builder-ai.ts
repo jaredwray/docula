@@ -88,12 +88,7 @@ export function saveAIMetadataCache(
  * Check if a document needs AI enrichment for OG/meta fields.
  */
 export function needsDocumentEnrichment(doc: DoculaDocument): boolean {
-	return (
-		!doc.description ||
-		doc.keywords.length === 0 ||
-		!doc.ogTitle ||
-		!doc.ogDescription
-	);
+	return !doc.description || doc.keywords.length === 0 || !doc.ogDescription;
 }
 
 /**
@@ -104,7 +99,6 @@ export function needsChangelogEnrichment(entry: DoculaChangelogEntry): boolean {
 		!entry.preview ||
 		!entry.description ||
 		!entry.keywords?.length ||
-		!entry.ogTitle ||
 		!entry.ogDescription
 	);
 }
@@ -354,10 +348,6 @@ export function logDocumentMetadata(
 	if (metadata.keywords?.length) {
 		console.log(white(`  keywords: ${truncate(metadata.keywords.join(", "))}`));
 	}
-
-	if (metadata.title) {
-		console.log(white(`  ogTitle: ${truncate(metadata.title)}`));
-	}
 }
 
 /**
@@ -407,7 +397,7 @@ function applyMetadataToDocument(
 		description: doc.description || metadata.description || "",
 		keywords:
 			doc.keywords.length > 0 ? doc.keywords : (metadata.keywords ?? []),
-		ogTitle: doc.ogTitle ?? metadata.title,
+		ogTitle: doc.ogTitle ?? (doc.title || undefined),
 		ogDescription: doc.ogDescription ?? metadata.description,
 	};
 }
@@ -426,7 +416,7 @@ function applyMetadataToChangelog(
 		keywords: entry.keywords?.length
 			? entry.keywords
 			: (metadata.keywords ?? []),
-		ogTitle: entry.ogTitle ?? (entry.title || metadata.title),
+		ogTitle: entry.ogTitle ?? (entry.title || undefined),
 		ogDescription: entry.ogDescription ?? metadata.description,
 	};
 }
