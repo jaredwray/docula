@@ -3227,7 +3227,10 @@ describe("DoculaBuilder", () => {
 					`${options.output}/index.html`,
 					"utf8",
 				);
-				expect(indexHtml).toContain("My Project");
+				expect(indexHtml).toContain("Welcome to the project");
+				// The h1 title from the README should be stripped to avoid
+				// duplicating the site title already in the <title> tag.
+				expect(indexHtml).not.toContain("<h1>My Project</h1>");
 				// The root README should NOT have been copied into the site path
 				expect(fs.existsSync("test/fixtures/auto-readme-site/README.md")).toBe(
 					false,
