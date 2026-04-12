@@ -267,7 +267,10 @@ describe("DoculaBuilder - API", () => {
 				await builder.build();
 				expect(fs.existsSync(`${options.output}/api/index.html`)).toBe(true);
 			} finally {
-				await fs.promises.rm(builder.options.output, { recursive: true });
+				await fs.promises.rm(builder.options.output, {
+					recursive: true,
+					force: true,
+				});
 			}
 
 			expect(consoleMessage).toContain("Build");

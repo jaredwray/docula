@@ -35,6 +35,7 @@ export const options: Partial<DoculaOptions> = {
   googleTagManager: 'GTM-XXXXXX', // or 'G-XXXXXXXXXX' for GA4
   homeUrl: '/', // logo links to this URL instead of baseUrl
   baseUrl: '/docs', // host under a subpath
+  autoReadme: true, // use project root README.md as the home page
   docsPath: '', // place docs at the output root
   apiPath: 'api',
   changelogPath: 'changelog',
@@ -99,6 +100,10 @@ Each `DoculaChangelogEntry` has these fields you can read or modify:
 | `preview` | `string` | Auto-generated preview HTML for the changelog index (300-500 chars, paragraph-aware, headings and images stripped) |
 | `previewImage` | `string?` | Image URL displayed above the preview on the changelog listing page (set via front matter) |
 | `urlPath` | `string` | Output file path |
+| `description` | `string?` | SEO description for the entry page (set via front matter or AI enrichment) |
+| `keywords` | `string[]?` | SEO keywords for the entry page (set via front matter or AI enrichment) |
+| `ogTitle` | `string?` | OpenGraph title override (set via front matter or AI enrichment) |
+| `ogDescription` | `string?` | OpenGraph description override (set via front matter or AI enrichment) |
 
 The hook can be synchronous or async. If the hook throws an error, it is logged and the unmodified entries are used.
 
@@ -147,4 +152,5 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `apiPath` | `string` | `'api'` | Output subdirectory and URL segment for API reference pages. |
 | `changelogPath` | `string` | `'changelog'` | Output subdirectory and URL segment for changelog pages. |
 | `googleTagManager` | `string` | - | Google Tag Manager container ID (e.g., `'GTM-XXXXXX'`) or Google Analytics 4 measurement ID (e.g., `'G-XXXXXXXXXX'`). Injects the appropriate tracking script on every page. |
+| `autoReadme` | `boolean` | `true` | Automatically use the project root `README.md` as the home page when no `README.md` exists in the site directory. Set to `false` to disable this fallback. |
 | `allowedAssets` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |

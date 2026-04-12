@@ -213,13 +213,16 @@ export class DoculaBuilder {
 			? loadCachedChangelog(this.options.sitePath)
 			: new Map<string, DoculaChangelogEntry>();
 
+		// Ensure sitePath exists before any operations that depend on it
+		await fs.promises.mkdir(this.options.sitePath, { recursive: true });
+
 		// Resolve project root README.md for the home page when not already
 		// present in the site path. The README is rendered in place without
 		// being copied into sitePath.
 		const autoReadmeResult = await this.autoReadme();
-		const siteReadmeExists = fs.existsSync(
-			`${this.options.sitePath}/README.md`,
-		);
+		const siteReadmeExists =
+			!autoReadmeResult &&
+			fs.existsSync(path.join(this.options.sitePath, "README.md"));
 
 		// Set the site options
 		const doculaData: DoculaData = {
@@ -260,7 +263,7 @@ export class DoculaBuilder {
 		if (siteReadmeExists) {
 			currentAssetHashes["README.md"] = hashFile(
 				this._hash,
-				`${this.options.sitePath}/README.md`,
+				path.join(this.options.sitePath, "README.md"),
 			);
 		} else if (autoReadmeResult) {
 			currentAssetHashes.__autoReadme = hashFile(
