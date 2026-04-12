@@ -377,9 +377,6 @@ export function logChangelogMetadata(
 	}
 
 	console.info(`AI enriched changelog: ${name}`);
-	if (metadata.title) {
-		console.log(white(`  title: ${truncate(metadata.title)}`));
-	}
 
 	if (metadata.preview || metadata.summary) {
 		console.log(
@@ -395,10 +392,6 @@ export function logChangelogMetadata(
 
 	if (metadata.keywords?.length) {
 		console.log(white(`  keywords: ${truncate(metadata.keywords.join(", "))}`));
-	}
-
-	if (metadata.title) {
-		console.log(white(`  ogTitle: ${truncate(metadata.title)}`));
 	}
 }
 
@@ -433,7 +426,7 @@ function applyMetadataToChangelog(
 		keywords: entry.keywords?.length
 			? entry.keywords
 			: (metadata.keywords ?? []),
-		ogTitle: entry.ogTitle ?? metadata.title,
+		ogTitle: entry.ogTitle ?? (entry.title || metadata.title),
 		ogDescription: entry.ogDescription ?? metadata.description,
 	};
 }
