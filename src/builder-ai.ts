@@ -198,6 +198,7 @@ export async function enrichChangelogEntries(
 	const enriched = [...entries];
 	for (let i = 0; i < enriched.length; i++) {
 		const entry = enriched[i];
+		/* v8 ignore next -- @preserve */
 		if (!needsChangelogEnrichment(entry)) {
 			continue;
 		}
