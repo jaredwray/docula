@@ -137,7 +137,7 @@ export function resolveJsonLd(
 				"@context": "https://schema.org",
 				"@type": "BlogPosting",
 				headline: pageData.title,
-				description: pageData?.preview ?? pageData?.description ?? "",
+				description: pageData?.description ?? pageData?.preview ?? "",
 				url,
 				publisher: {
 					"@type": "Organization",
@@ -150,6 +150,10 @@ export function resolveJsonLd(
 
 			if (pageData?.previewImage) {
 				schema.image = pageData.previewImage;
+			}
+
+			if (pageData?.keywords) {
+				schema.keywords = pageData.keywords;
 			}
 
 			break;

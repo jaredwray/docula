@@ -23,6 +23,10 @@ export type DoculaChangelogEntry = {
 	previewImage?: string;
 	urlPath: string;
 	lastModified: string;
+	description?: string;
+	keywords?: string[];
+	ogTitle?: string;
+	ogDescription?: string;
 };
 
 export type DoculaData = {

@@ -64,16 +64,18 @@ describe("DoculaBuilder - Changelog", () => {
 			const entries = builder.getChangelogEntries(
 				"test/fixtures/changelog-site/changelog",
 			);
-			expect(entries.length).toBe(5);
+			expect(entries.length).toBe(6);
 			// Should be sorted by date descending, invalid dates last
-			expect(entries[0].title).toBe("Critical Bug Fix");
-			expect(entries[0].date).toBe("2025-02-01");
-			expect(entries[0].tag).toBe("Fixed");
-			expect(entries[0].slug).toBe("2025-02-01-bug-fix");
-			expect(entries[1].title).toBe("New Feature Released");
-			expect(entries[2].title).toBe("Performance Improvements");
+			expect(entries[0].title).toBe("SEO Enhanced Entry");
+			expect(entries[0].date).toBe("2025-04-01");
+			expect(entries[1].title).toBe("Critical Bug Fix");
+			expect(entries[1].date).toBe("2025-02-01");
+			expect(entries[1].tag).toBe("Fixed");
+			expect(entries[1].slug).toBe("2025-02-01-bug-fix");
+			expect(entries[2].title).toBe("New Feature Released");
+			expect(entries[3].title).toBe("Performance Improvements");
 			// Invalid dates should be at the end
-			const lastTwo = entries.slice(3).map((e) => e.title);
+			const lastTwo = entries.slice(4).map((e) => e.title);
 			expect(lastTwo).toContain("String Date Entry");
 			expect(lastTwo).toContain("No Date Entry");
 		});
@@ -128,7 +130,7 @@ describe("DoculaBuilder - Changelog", () => {
 			);
 			const slugs = entries.map((e) => e.slug);
 			expect(slugs).not.toContain("2025-03-01-draft-entry");
-			expect(entries.length).toBe(5);
+			expect(entries.length).toBe(6);
 		});
 
 		it("should set draft field on parsed changelog entry", () => {
@@ -217,6 +219,34 @@ describe("DoculaBuilder - Changelog", () => {
 			expect(entry.title).toBe("String Date Entry");
 			expect(entry.date).toBe("Q1 2025");
 			expect(entry.slug).toBe("2024-11-01-string-date");
+		});
+
+		it("should parse SEO frontmatter fields from changelog entry", () => {
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-04-01-seo-entry.md",
+			);
+			expect(entry.description).toBe(
+				"A changelog entry with full SEO metadata",
+			);
+			expect(entry.keywords).toEqual(["seo", "metadata"]);
+			expect(entry.ogTitle).toBe("OG Title for SEO Entry");
+			expect(entry.ogDescription).toBe("OG Description for SEO Entry");
+		});
+
+		it("should have undefined SEO fields when not in frontmatter", () => {
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const entry = builder.parseChangelogEntry(
+				"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+			);
+			expect(entry.description).toBeUndefined();
+			expect(entry.keywords).toBeUndefined();
+			expect(entry.ogTitle).toBeUndefined();
+			expect(entry.ogDescription).toBeUndefined();
 		});
 
 		it("should fall back to filename title when changelog entry has no front matter", async () => {

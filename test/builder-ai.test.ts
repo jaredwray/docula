@@ -215,10 +215,56 @@ describe("builder-ai", () => {
 			expect(needsChangelogEnrichment(entry)).toBe(true);
 		});
 
-		it("should return false when title and preview are present", () => {
+		it("should return true when description is empty", () => {
 			const entry = makeChangelogEntry({
 				title: "Title",
 				preview: "Preview text",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return true when keywords is empty or missing", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: [],
+				ogTitle: "OG",
+				ogDescription: "OG Desc",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return true when ogTitle is missing", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: ["k1"],
+				ogDescription: "OG Desc",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return true when ogDescription is missing", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: ["k1"],
+				ogTitle: "OG Title",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return false when all fields are present", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: ["k1"],
+				ogTitle: "OG Title",
+				ogDescription: "OG Desc",
 			});
 			expect(needsChangelogEnrichment(entry)).toBe(false);
 		});
@@ -540,6 +586,8 @@ describe("builder-ai", () => {
 			const cache: AIMetadataCache = {
 				[bodyHash]: {
 					title: "Cached Changelog Title",
+					description: "Cached description",
+					keywords: ["cached", "keyword"],
 					preview: "Cached preview text",
 					summary: "Cached summary",
 				},
@@ -554,6 +602,10 @@ describe("builder-ai", () => {
 			);
 			expect(result?.[0].title).toBe("Cached Changelog Title");
 			expect(result?.[0].preview).toBe("Cached preview text");
+			expect(result?.[0].description).toBe("Cached description");
+			expect(result?.[0].keywords).toEqual(["cached", "keyword"]);
+			expect(result?.[0].ogTitle).toBe("Cached Changelog Title");
+			expect(result?.[0].ogDescription).toBe("Cached description");
 		});
 
 		it("should skip changelog entries with very short content", async () => {
@@ -632,6 +684,8 @@ describe("builder-ai", () => {
 				"test-entry",
 				{
 					title: "Changelog Generated Title",
+					description: "Generated description",
+					keywords: ["gen", "keywords"],
 					preview: "Generated preview text",
 				},
 				false,
@@ -642,6 +696,11 @@ describe("builder-ai", () => {
 			);
 			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("title:"));
 			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("preview:"));
+			expect(logSpy).toHaveBeenCalledWith(
+				expect.stringContaining("description:"),
+			);
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("keywords:"));
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("ogTitle:"));
 		});
 
 		it("should use summary as fallback for preview", async () => {
@@ -663,6 +722,38 @@ describe("builder-ai", () => {
 				cache,
 			);
 			expect(result?.[0].preview).toBe("Summary as fallback preview");
+		});
+
+		it("should preserve existing changelog fields when enriching", async () => {
+			const doculaConsole = new DoculaConsole();
+			const entry = makeChangelogEntry({
+				title: "",
+				preview: "",
+				description: "Existing desc",
+				keywords: ["existing"],
+				ogTitle: "Existing OG",
+			});
+			const bodyHash = testHash.toHashSync(entry.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "AI Title",
+					description: "AI description",
+					keywords: ["ai", "generated"],
+				},
+			};
+
+			const result = await enrichChangelogEntries(
+				[entry],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result?.[0].title).toBe("AI Title");
+			expect(result?.[0].description).toBe("Existing desc");
+			expect(result?.[0].keywords).toEqual(["existing"]);
+			expect(result?.[0].ogTitle).toBe("Existing OG");
+			expect(result?.[0].ogDescription).toBe("AI description");
 		});
 	});
 

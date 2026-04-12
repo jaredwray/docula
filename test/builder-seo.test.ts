@@ -1045,6 +1045,67 @@ describe("DoculaBuilder - SEO", () => {
 			expect(json.image).toBeUndefined();
 		});
 
+		it("should prefer description over preview for changelog-entry schema", () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const pageData = {
+				title: "v3.0 Release",
+				date: "2024-05-01",
+				description: "SEO optimized description",
+				preview: "Raw preview content",
+			};
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/v3/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.description).toBe("SEO optimized description");
+		});
+
+		it("should include keywords in changelog-entry BlogPosting schema", () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const pageData = {
+				title: "v3.0 Release",
+				keywords: ["release", "changelog"],
+			};
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/v3/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.keywords).toEqual(["release", "changelog"]);
+		});
+
+		it("should omit keywords from changelog-entry when not provided", () => {
+			const builder = new DoculaBuilder(undefined, { quiet: true });
+			const pageData = {
+				title: "v3.0 Release",
+			};
+			const result = builder.resolveJsonLd(
+				"changelog-entry",
+				baseData,
+				"/changelog/v3/",
+				pageData,
+			);
+			const json = JSON.parse(
+				result
+					.replace('<script type="application/ld+json">\n', "")
+					.replace("\n</script>", ""),
+			);
+			expect(json.keywords).toBeUndefined();
+		});
+
 		it("should respect baseUrl in generated URLs", () => {
 			const builder = new DoculaBuilder(undefined, { quiet: true });
 			const dataWithBase = { ...baseData, baseUrl: "/project" };

@@ -100,7 +100,14 @@ export function needsDocumentEnrichment(doc: DoculaDocument): boolean {
  * Check if a changelog entry needs AI enrichment.
  */
 export function needsChangelogEnrichment(entry: DoculaChangelogEntry): boolean {
-	return !entry.title || !entry.preview;
+	return (
+		!entry.title ||
+		!entry.preview ||
+		!entry.description ||
+		!entry.keywords?.length ||
+		!entry.ogTitle ||
+		!entry.ogDescription
+	);
 }
 
 /**
@@ -364,6 +371,18 @@ export function logChangelogMetadata(
 			),
 		);
 	}
+
+	if (metadata.description) {
+		console.log(white(`  description: ${truncate(metadata.description)}`));
+	}
+
+	if (metadata.keywords?.length) {
+		console.log(white(`  keywords: ${truncate(metadata.keywords.join(", "))}`));
+	}
+
+	if (metadata.title) {
+		console.log(white(`  ogTitle: ${truncate(metadata.title)}`));
+	}
 }
 
 /**
@@ -394,5 +413,11 @@ function applyMetadataToChangelog(
 		...entry,
 		title: entry.title || metadata.title || "",
 		preview: entry.preview || metadata.preview || metadata.summary || "",
+		description: entry.description || metadata.description || "",
+		keywords: entry.keywords?.length
+			? entry.keywords
+			: (metadata.keywords ?? []),
+		ogTitle: entry.ogTitle ?? metadata.title,
+		ogDescription: entry.ogDescription ?? metadata.description,
 	};
 }
