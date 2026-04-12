@@ -101,7 +101,6 @@ export function needsDocumentEnrichment(doc: DoculaDocument): boolean {
  */
 export function needsChangelogEnrichment(entry: DoculaChangelogEntry): boolean {
 	return (
-		!entry.title ||
 		!entry.preview ||
 		!entry.description ||
 		!entry.keywords?.length ||
@@ -429,7 +428,6 @@ function applyMetadataToChangelog(
 ): DoculaChangelogEntry {
 	return {
 		...entry,
-		title: entry.title || metadata.title || "",
 		preview: entry.preview || metadata.preview || metadata.summary || "",
 		description: entry.description || metadata.description || undefined,
 		keywords: entry.keywords?.length

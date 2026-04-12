@@ -205,7 +205,7 @@ describe("builder-ai", () => {
 	});
 
 	describe("needsChangelogEnrichment", () => {
-		it("should return true when title is empty", () => {
+		it("should return true when multiple fields are missing", () => {
 			const entry = makeChangelogEntry({ title: "" });
 			expect(needsChangelogEnrichment(entry)).toBe(true);
 		});
@@ -627,7 +627,7 @@ describe("builder-ai", () => {
 				doculaConsole,
 				cache,
 			);
-			expect(result?.[0].title).toBe("Cached Changelog Title");
+			expect(result?.[0].title).toBe("");
 			expect(result?.[0].preview).toBe("Cached preview text");
 			expect(result?.[0].description).toBe("Cached description");
 			expect(result?.[0].keywords).toEqual(["cached", "keyword"]);
@@ -779,7 +779,7 @@ describe("builder-ai", () => {
 				doculaConsole,
 				cache,
 			);
-			expect(result?.[0].title).toBe("AI Title");
+			expect(result?.[0].title).toBe("");
 			expect(result?.[0].preview).toBe("AI preview");
 			expect(result?.[0].description).toBe("Existing desc");
 			expect(result?.[0].keywords).toEqual(["existing"]);

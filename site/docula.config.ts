@@ -14,12 +14,10 @@ export const options: Partial<DoculaOptions> = {
 	siteDescription: 'Beautiful Website for Your Projects',
 	siteUrl: 'https://docula.org',
 	themeMode: 'light',
-	...(process.env.ANTHROPIC_API_KEY && {
-		ai: {
-			provider: 'anthropic',
-			apiKey: process.env.ANTHROPIC_API_KEY,
-		},
-	}),
+	ai: {
+		provider: 'anthropic',
+		apiKey: process.env.ANTHROPIC_API_KEY,
+	},
 	editPageUrl: "https://github.com/jaredwray/docula/blob/main/site/docs",
 	sections: [
 		{name: 'Project Guidelines', path: 'project-guidelines', order: 21},
