@@ -26,6 +26,8 @@ Fields that are enriched (only when missing):
 - `title` - changelog entry titles (if missing)
 - `preview` - changelog entry previews (if missing)
 
+Both documentation pages and changelog entries receive the full set of SEO fields (`description`, `keywords`, `ogTitle`, `ogDescription`). You can also set these fields manually in changelog entry frontmatter and AI will only fill the ones that are missing.
+
 Existing frontmatter values are never overwritten.
 
 ## Configuration

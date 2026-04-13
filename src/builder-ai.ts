@@ -88,19 +88,19 @@ export function saveAIMetadataCache(
  * Check if a document needs AI enrichment for OG/meta fields.
  */
 export function needsDocumentEnrichment(doc: DoculaDocument): boolean {
-	return (
-		!doc.description ||
-		doc.keywords.length === 0 ||
-		!doc.ogTitle ||
-		!doc.ogDescription
-	);
+	return !doc.description || doc.keywords.length === 0 || !doc.ogDescription;
 }
 
 /**
  * Check if a changelog entry needs AI enrichment.
  */
 export function needsChangelogEnrichment(entry: DoculaChangelogEntry): boolean {
-	return !entry.title || !entry.preview;
+	return (
+		!entry.preview ||
+		!entry.description ||
+		!entry.keywords?.length ||
+		!entry.ogDescription
+	);
 }
 
 /**
@@ -130,14 +130,20 @@ export async function enrichDocuments(
 			const cached = cache[bodyHash];
 
 			if (cached) {
-				enriched[i] = applyMetadataToDocument(doc, cached);
-				logDocumentMetadata(
-					console,
-					doc.title || doc.documentPath,
-					cached,
-					true,
-				);
-				continue;
+				const applied = applyMetadataToDocument(doc, cached);
+				if (!needsDocumentEnrichment(applied)) {
+					enriched[i] = applied;
+					logDocumentMetadata(
+						console,
+						doc.title || doc.documentPath,
+						cached,
+						true,
+					);
+					continue;
+				}
+
+				// Cached metadata is incomplete for current requirements; re-query
+				delete cache[bodyHash];
 			}
 
 			// Skip documents with very little content
@@ -191,6 +197,7 @@ export async function enrichChangelogEntries(
 	const enriched = [...entries];
 	for (let i = 0; i < enriched.length; i++) {
 		const entry = enriched[i];
+		/* v8 ignore next -- @preserve */
 		if (!needsChangelogEnrichment(entry)) {
 			continue;
 		}
@@ -200,9 +207,20 @@ export async function enrichChangelogEntries(
 			const cached = cache[bodyHash];
 
 			if (cached) {
-				enriched[i] = applyMetadataToChangelog(entry, cached);
-				logChangelogMetadata(console, entry.title || entry.slug, cached, true);
-				continue;
+				const applied = applyMetadataToChangelog(entry, cached);
+				if (!needsChangelogEnrichment(applied)) {
+					enriched[i] = applied;
+					logChangelogMetadata(
+						console,
+						entry.title || entry.slug,
+						cached,
+						true,
+					);
+					continue;
+				}
+
+				// Cached metadata is incomplete for current requirements; re-query
+				delete cache[bodyHash];
 			}
 
 			// Skip entries with very little content
@@ -330,10 +348,6 @@ export function logDocumentMetadata(
 	if (metadata.keywords?.length) {
 		console.log(white(`  keywords: ${truncate(metadata.keywords.join(", "))}`));
 	}
-
-	if (metadata.title) {
-		console.log(white(`  ogTitle: ${truncate(metadata.title)}`));
-	}
 }
 
 /**
@@ -353,9 +367,6 @@ export function logChangelogMetadata(
 	}
 
 	console.info(`AI enriched changelog: ${name}`);
-	if (metadata.title) {
-		console.log(white(`  title: ${truncate(metadata.title)}`));
-	}
 
 	if (metadata.preview || metadata.summary) {
 		console.log(
@@ -363,6 +374,14 @@ export function logChangelogMetadata(
 				`  preview: ${truncate(metadata.preview || metadata.summary || "")}`,
 			),
 		);
+	}
+
+	if (metadata.description) {
+		console.log(white(`  description: ${truncate(metadata.description)}`));
+	}
+
+	if (metadata.keywords?.length) {
+		console.log(white(`  keywords: ${truncate(metadata.keywords.join(", "))}`));
 	}
 }
 
@@ -378,7 +397,7 @@ function applyMetadataToDocument(
 		description: doc.description || metadata.description || "",
 		keywords:
 			doc.keywords.length > 0 ? doc.keywords : (metadata.keywords ?? []),
-		ogTitle: doc.ogTitle ?? metadata.title,
+		ogTitle: doc.ogTitle ?? (doc.title || undefined),
 		ogDescription: doc.ogDescription ?? metadata.description,
 	};
 }
@@ -392,7 +411,12 @@ function applyMetadataToChangelog(
 ): DoculaChangelogEntry {
 	return {
 		...entry,
-		title: entry.title || metadata.title || "",
 		preview: entry.preview || metadata.preview || metadata.summary || "",
+		description: entry.description || metadata.description || undefined,
+		keywords: entry.keywords?.length
+			? entry.keywords
+			: (metadata.keywords ?? []),
+		ogTitle: entry.ogTitle ?? (entry.title || undefined),
+		ogDescription: entry.ogDescription ?? metadata.description,
 	};
 }

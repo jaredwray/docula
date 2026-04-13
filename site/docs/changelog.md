@@ -119,27 +119,24 @@ Both files follow the [JSON Feed v1.1](https://www.jsonfeed.org/version/1.1/) sp
 
 ## Styling
 
-Tags receive a CSS class based on their value (e.g., a tag of `"Bug Fix"` gets the class `changelog-tag-bug-fix`). You can style tags and other changelog elements by overriding these classes in your `variables.css`:
+Tags receive a CSS class based on their value (e.g., a tag of `"Bug Fix"` gets the class `changelog-tag-bug-fix`). Both the modern and classic themes include built-in colors for the following tags:
+
+| Tag | CSS Class | Color |
+|-----|-----------|-------|
+| `Added` | `.changelog-tag-added` | Green |
+| `Improved` | `.changelog-tag-improved` | Blue |
+| `Fixed` | `.changelog-tag-fixed` | Amber |
+| `Removed` | `.changelog-tag-removed` | Red |
+| `Deprecated` | `.changelog-tag-deprecated` | Gray |
+| `Security` | `.changelog-tag-security` | Purple |
+| `Release` | `.changelog-tag-release` | Green |
+| `Pre-release` | `.changelog-tag-pre-release` | Yellow |
+
+Any custom tag value also works — it receives a CSS class derived from the tag name in kebab-case. You can style custom tags by adding classes in your `variables.css`:
 
 ```css
-.changelog-entry {
-  border-bottom: 1px solid var(--border);
-  padding: 1.5rem 0;
-}
-
-.changelog-tag {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
-
-.changelog-tag-release {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.changelog-tag-bug-fix {
-  background-color: #f8d7da;
-  color: #721c24;
+.changelog-tag-my-custom-tag {
+  background-color: #e0f2fe;
+  color: #0369a1;
 }
 ```

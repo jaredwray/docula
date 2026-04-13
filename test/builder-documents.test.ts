@@ -514,7 +514,7 @@ describe("DoculaBuilder - Documents", () => {
 				expect(result).toContain("<strong>Important:</strong>");
 				expect(result).toContain("This is an announcement!");
 			} finally {
-				await fs.promises.rm(data.sitePath, { recursive: true });
+				await fs.promises.rm(data.sitePath, { recursive: true, force: true });
 			}
 		});
 	});

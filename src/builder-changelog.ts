@@ -117,6 +117,12 @@ export function parseChangelogEntry(
 
 	const previewImage = matterData.previewImage as string | undefined;
 	const draft = matterData.draft === true;
+	const description = (matterData.description as string) || undefined;
+	const keywords = Array.isArray(matterData.keywords)
+		? (matterData.keywords as string[])
+		: undefined;
+	const ogTitle = (matterData.ogTitle as string) || undefined;
+	const ogDescription = (matterData.ogDescription as string) || undefined;
 
 	return {
 		title: matterData.title ?? fileName,
@@ -134,6 +140,10 @@ export function parseChangelogEntry(
 		previewImage,
 		urlPath: `${buildUrlPath(options.baseUrl, options.changelogPath, slug)}/index.html`,
 		lastModified: fs.statSync(filePath).mtime.toISOString().split("T")[0],
+		description,
+		keywords,
+		ogTitle,
+		ogDescription,
 	};
 }
 

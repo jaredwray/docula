@@ -173,14 +173,14 @@ describe("builder-ai", () => {
 			expect(needsDocumentEnrichment(doc)).toBe(true);
 		});
 
-		it("should return true when ogTitle is missing", () => {
+		it("should return false when ogTitle is missing but other fields present", () => {
 			const doc = makeDocument({
 				description: "has desc",
 				keywords: ["k1"],
 				ogTitle: undefined,
 				ogDescription: "desc",
 			});
-			expect(needsDocumentEnrichment(doc)).toBe(true);
+			expect(needsDocumentEnrichment(doc)).toBe(false);
 		});
 
 		it("should return true when ogDescription is missing", () => {
@@ -205,7 +205,7 @@ describe("builder-ai", () => {
 	});
 
 	describe("needsChangelogEnrichment", () => {
-		it("should return true when title is empty", () => {
+		it("should return true when multiple fields are missing", () => {
 			const entry = makeChangelogEntry({ title: "" });
 			expect(needsChangelogEnrichment(entry)).toBe(true);
 		});
@@ -215,10 +215,56 @@ describe("builder-ai", () => {
 			expect(needsChangelogEnrichment(entry)).toBe(true);
 		});
 
-		it("should return false when title and preview are present", () => {
+		it("should return true when description is empty", () => {
 			const entry = makeChangelogEntry({
 				title: "Title",
 				preview: "Preview text",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return true when keywords is empty or missing", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: [],
+				ogTitle: "OG",
+				ogDescription: "OG Desc",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return false when ogTitle is missing but other fields present", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: ["k1"],
+				ogDescription: "OG Desc",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(false);
+		});
+
+		it("should return true when ogDescription is missing", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: ["k1"],
+				ogTitle: "OG Title",
+			});
+			expect(needsChangelogEnrichment(entry)).toBe(true);
+		});
+
+		it("should return false when all fields are present", () => {
+			const entry = makeChangelogEntry({
+				title: "Title",
+				preview: "Preview text",
+				description: "Desc",
+				keywords: ["k1"],
+				ogTitle: "OG Title",
+				ogDescription: "OG Desc",
 			});
 			expect(needsChangelogEnrichment(entry)).toBe(false);
 		});
@@ -354,7 +400,7 @@ describe("builder-ai", () => {
 			);
 			expect(result?.[0].description).toBe("Cached description");
 			expect(result?.[0].keywords).toEqual(["cached", "keywords"]);
-			expect(result?.[0].ogTitle).toBe("Cached Title");
+			expect(result?.[0].ogTitle).toBe("Test Doc");
 			expect(result?.[0].ogDescription).toBe("Cached description");
 		});
 
@@ -443,7 +489,6 @@ describe("builder-ai", () => {
 				expect.stringContaining("description:"),
 			);
 			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("keywords:"));
-			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("ogTitle:"));
 		});
 
 		it("should truncate long metadata values", () => {
@@ -498,6 +543,29 @@ describe("builder-ai", () => {
 			expect(result?.[0].description).toBe("Existing desc");
 			expect(result?.[0].keywords).toEqual(["ai", "generated"]);
 		});
+
+		it("should invalidate incomplete document cache entries", async () => {
+			const doculaConsole = new DoculaConsole();
+			const doc = makeDocument({ content: "tiny", markdown: "tiny" });
+			const bodyHash = testHash.toHashSync(doc.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Stale Title",
+					// Missing description, keywords — incomplete cache
+				},
+			};
+
+			const result = await enrichDocuments(
+				[doc],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			// Cache was invalidated; content is too short for AI, so doc stays unenriched
+			expect(cache[bodyHash]).toBeUndefined();
+			expect(result?.[0].description).toBe("");
+		});
 	});
 
 	describe("enrichChangelogEntries", () => {
@@ -522,6 +590,10 @@ describe("builder-ai", () => {
 			const entry = makeChangelogEntry({
 				title: "Has title",
 				preview: "Has preview",
+				description: "Has description",
+				keywords: ["k1"],
+				ogTitle: "OG Title",
+				ogDescription: "OG Desc",
 			});
 			const result = await enrichChangelogEntries(
 				[entry],
@@ -540,6 +612,8 @@ describe("builder-ai", () => {
 			const cache: AIMetadataCache = {
 				[bodyHash]: {
 					title: "Cached Changelog Title",
+					description: "Cached description",
+					keywords: ["cached", "keyword"],
 					preview: "Cached preview text",
 					summary: "Cached summary",
 				},
@@ -552,8 +626,12 @@ describe("builder-ai", () => {
 				doculaConsole,
 				cache,
 			);
-			expect(result?.[0].title).toBe("Cached Changelog Title");
+			expect(result?.[0].title).toBe("");
 			expect(result?.[0].preview).toBe("Cached preview text");
+			expect(result?.[0].description).toBe("Cached description");
+			expect(result?.[0].keywords).toEqual(["cached", "keyword"]);
+			expect(result?.[0].ogTitle).toBeUndefined();
+			expect(result?.[0].ogDescription).toBe("Cached description");
 		});
 
 		it("should skip changelog entries with very short content", async () => {
@@ -632,6 +710,8 @@ describe("builder-ai", () => {
 				"test-entry",
 				{
 					title: "Changelog Generated Title",
+					description: "Generated description",
+					keywords: ["gen", "keywords"],
 					preview: "Generated preview text",
 				},
 				false,
@@ -640,8 +720,14 @@ describe("builder-ai", () => {
 			expect(infoSpy).toHaveBeenCalledWith(
 				expect.stringContaining("AI enriched changelog:"),
 			);
-			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("title:"));
 			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("preview:"));
+			expect(logSpy).toHaveBeenCalledWith(
+				expect.stringContaining("description:"),
+			);
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("keywords:"));
+			expect(logSpy).not.toHaveBeenCalledWith(
+				expect.stringContaining("ogTitle:"),
+			);
 		});
 
 		it("should use summary as fallback for preview", async () => {
@@ -651,6 +737,8 @@ describe("builder-ai", () => {
 			const cache: AIMetadataCache = {
 				[bodyHash]: {
 					title: "AI Title",
+					description: "AI description",
+					keywords: ["k1"],
 					summary: "Summary as fallback preview",
 				},
 			};
@@ -663,6 +751,67 @@ describe("builder-ai", () => {
 				cache,
 			);
 			expect(result?.[0].preview).toBe("Summary as fallback preview");
+		});
+
+		it("should preserve existing changelog fields when enriching", async () => {
+			const doculaConsole = new DoculaConsole();
+			const entry = makeChangelogEntry({
+				title: "",
+				preview: "",
+				description: "Existing desc",
+				keywords: ["existing"],
+				ogTitle: "Existing OG",
+			});
+			const bodyHash = testHash.toHashSync(entry.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "AI Title",
+					description: "AI description",
+					keywords: ["ai", "generated"],
+					preview: "AI preview",
+				},
+			};
+
+			const result = await enrichChangelogEntries(
+				[entry],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result?.[0].title).toBe("");
+			expect(result?.[0].preview).toBe("AI preview");
+			expect(result?.[0].description).toBe("Existing desc");
+			expect(result?.[0].keywords).toEqual(["existing"]);
+			expect(result?.[0].ogTitle).toBe("Existing OG");
+			expect(result?.[0].ogDescription).toBe("AI description");
+		});
+
+		it("should invalidate incomplete cache entries and skip short content", async () => {
+			const doculaConsole = new DoculaConsole();
+			const entry = makeChangelogEntry({
+				title: "",
+				preview: "",
+				content: "short",
+			});
+			const bodyHash = testHash.toHashSync(entry.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Stale Title",
+					// Missing description, keywords, preview — incomplete cache
+				},
+			};
+
+			const result = await enrichChangelogEntries(
+				[entry],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			// Cache was invalidated; content is too short for AI, so entry stays unenriched
+			expect(cache[bodyHash]).toBeUndefined();
+			expect(result?.[0].title).toBe("");
 		});
 	});
 

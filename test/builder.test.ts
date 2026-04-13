@@ -86,7 +86,10 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 			} finally {
-				await fs.promises.rm(builder.options.output, { recursive: true });
+				await fs.promises.rm(builder.options.output, {
+					recursive: true,
+					force: true,
+				});
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -113,7 +116,10 @@ describe("DoculaBuilder", () => {
 				);
 				expect(indexHtml).toContain("<title>docula -");
 			} finally {
-				await fs.promises.rm(builder.options.output, { recursive: true });
+				await fs.promises.rm(builder.options.output, {
+					recursive: true,
+					force: true,
+				});
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -159,7 +165,10 @@ describe("DoculaBuilder", () => {
 			try {
 				await builder.build();
 			} finally {
-				await fs.promises.rm(builder.options.output, { recursive: true });
+				await fs.promises.rm(builder.options.output, {
+					recursive: true,
+					force: true,
+				});
 			}
 
 			expect(consoleMessage).toContain("Build");
@@ -1717,7 +1726,10 @@ describe("DoculaBuilder", () => {
 					fs.existsSync(`${options.output}/.well-known/security.txt`),
 				).toBe(true);
 			} finally {
-				await fs.promises.rm(builder.options.output, { recursive: true });
+				await fs.promises.rm(builder.options.output, {
+					recursive: true,
+					force: true,
+				});
 				console.log = consoleLog;
 			}
 		});
@@ -1811,7 +1823,10 @@ describe("DoculaBuilder", () => {
 					),
 				).toBe(false);
 			} finally {
-				await fs.promises.rm(builder.options.output, { recursive: true });
+				await fs.promises.rm(builder.options.output, {
+					recursive: true,
+					force: true,
+				});
 				console.log = consoleLog;
 			}
 		});
@@ -1860,7 +1875,7 @@ describe("DoculaBuilder", () => {
 				// Verify no recursive dist/dist folder was created
 				expect(fs.existsSync(`${output}/dist`)).toBe(false);
 			} finally {
-				await fs.promises.rm(tempSitePath, { recursive: true });
+				await fs.promises.rm(tempSitePath, { recursive: true, force: true });
 				console.log = consoleLog;
 			}
 		});

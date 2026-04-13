@@ -55,7 +55,7 @@ export type DoculaCacheOptions = {
 export type DoculaAIOptions = {
 	provider: string;
 	model?: string;
-	apiKey: string;
+	apiKey?: string;
 };
 
 export class DoculaOptions {
