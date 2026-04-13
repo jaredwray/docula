@@ -1035,7 +1035,10 @@ export class DoculaBuilder {
 	public async buildReadmeSection(data: DoculaData): Promise<string> {
 		let htmlReadme = "";
 		if (data.readmeContent !== undefined) {
-			htmlReadme = await new Writr(data.readmeContent, writrOptions).render();
+			// Strip leading h1 heading so the rendered single-page does not
+			// duplicate the site title already present in the <title> tag.
+			const content = data.readmeContent.replace(/^\s*#\s+.+\n*/, "");
+			htmlReadme = await new Writr(content, writrOptions).render();
 		} else if (fs.existsSync(`${data.sitePath}/README.md`)) {
 			const readmeContent = fs.readFileSync(
 				`${data.sitePath}/README.md`,

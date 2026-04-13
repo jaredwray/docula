@@ -81,6 +81,6 @@ Subdirectories inside `docs/` automatically become sections in the sidebar navig
 
 Docula automatically detects what content exists and picks the starting view for your site:
 
-- **README.md exists** — A dedicated landing page renders at `/` using `home.hbs`, and docs are available at `/docs/`. Docula looks for a `README.md` in your site folder first, then falls back to your project root `README.md` via the `autoReadme` option.
+- **README.md exists** — A dedicated landing page renders at `/` using `home.hbs`, and docs are available at `/docs/`. Docula looks for a `README.md` in your site folder first, then falls back to your project root `README.md` via the `autoReadme` option. When using `autoReadme`, the leading `# Title` heading is automatically stripped from the rendered page to avoid duplicating the site title.
 - **No README.md, but docs exist** — The first doc page renders directly as `/index.html`.
 - **No README.md, no docs, but `api/swagger.json` exists** — The API page renders as `/index.html`.

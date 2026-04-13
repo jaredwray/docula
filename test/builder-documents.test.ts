@@ -447,6 +447,37 @@ describe("DoculaBuilder - Documents", () => {
 
 			expect(result).toBeTruthy();
 		});
+
+		it("should strip leading h1 from autoReadme content", async () => {
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const data = {
+				...doculaData,
+				readmeContent: "# My Title\n\nSome body content.",
+			};
+
+			const result = await builder.buildReadmeSection(data);
+
+			expect(result).not.toContain("<h1");
+			expect(result).toContain("Some body content");
+		});
+
+		it("should not strip h1 when readmeContent is not set", async () => {
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const data = {
+				...doculaData,
+				sitePath: "test/fixtures/single-page-site",
+				readmeContent: undefined,
+			};
+
+			const result = await builder.buildReadmeSection(data);
+
+			expect(result).toBeTruthy();
+			expect(result).toContain("<h1");
+		});
 	});
 
 	describe("Build Announcement Section", async () => {
