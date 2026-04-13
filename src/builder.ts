@@ -1037,7 +1037,7 @@ export class DoculaBuilder {
 		if (data.readmeContent !== undefined) {
 			// Strip leading h1 heading so the rendered single-page does not
 			// duplicate the site title already present in the <title> tag.
-			const content = data.readmeContent.replace(/^\s*#\s+.+\n*/, "");
+			const content = data.readmeContent.replace(/^\s*#\s+[^\r\n]*[\r\n]*/, "");
 			htmlReadme = await new Writr(content, writrOptions).render();
 		} else if (fs.existsSync(`${data.sitePath}/README.md`)) {
 			const readmeContent = fs.readFileSync(
