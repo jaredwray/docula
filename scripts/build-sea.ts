@@ -14,7 +14,7 @@ const blobPath = path.join(distDir, "sea-prep.blob");
 
 function run(cmd: string, args: string[]) {
 	console.log(`> ${cmd} ${args.join(" ")}`);
-	execFileSync(cmd, args, {stdio: "inherit"});
+	execFileSync(cmd, args, {stdio: "inherit", shell: isWindows});
 }
 
 // Generate the SEA blob from the bundled JS

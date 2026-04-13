@@ -16,15 +16,19 @@ jobs:
           - os: ubuntu-latest
             artifact: docula-linux-x64
             binary: docula
+            arch: x64
           - os: macos-latest
             artifact: docula-macos-arm64
             binary: docula
-          - os: macos-13
+            arch: arm64
+          - os: macos-latest
             artifact: docula-macos-x64
             binary: docula
+            arch: x64
           - os: windows-latest
             artifact: docula-windows-x64
             binary: docula.exe
+            arch: x64
 
     runs-on: ${{ matrix.os }}
 
@@ -40,6 +44,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          architecture: ${{ matrix.arch }}
 
       - name: Install Dependencies
         run: pnpm install
