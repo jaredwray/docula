@@ -152,5 +152,5 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `apiPath` | `string` | `'api'` | Output subdirectory and URL segment for API reference pages. |
 | `changelogPath` | `string` | `'changelog'` | Output subdirectory and URL segment for changelog pages. |
 | `googleTagManager` | `string` | - | Google Tag Manager container ID (e.g., `'GTM-XXXXXX'`) or Google Analytics 4 measurement ID (e.g., `'G-XXXXXXXXXX'`). Injects the appropriate tracking script on every page. |
-| `autoReadme` | `boolean` | `true` | Automatically use the project root `README.md` as the home page when no `README.md` exists in the site directory. Set to `false` to disable this fallback. |
+| `autoReadme` | `boolean` | `true` | Automatically use the project root `README.md` as the home page when no `README.md` exists in the site directory. The leading `# Title` heading is stripped from the rendered page to avoid duplicating the site title. Set to `false` to disable this fallback. |
 | `allowedAssets` | `string[]` | *(see [Assets & Public Folder](/docs/assets))* | File extensions to copy from `docs/` and `changelog/` to output |
