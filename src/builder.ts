@@ -115,6 +115,11 @@ export class DoculaBuilder {
 		entries: DoculaChangelogEntry[],
 		console: DoculaConsole,
 	) => Promise<DoculaChangelogEntry[]> | DoculaChangelogEntry[];
+	public onAutoReadme?: (
+		content: string,
+		sourcePath: string,
+		console: DoculaConsole,
+	) => Promise<string> | string;
 
 	public get console(): DoculaConsole {
 		return this._console;
@@ -814,7 +819,21 @@ export class DoculaBuilder {
 			}
 		}
 
-		return { sourcePath: cwdReadmePath, content: readmeContent };
+		let content = readmeContent;
+		if (this.onAutoReadme) {
+			try {
+				content = await this.onAutoReadme(
+					content,
+					cwdReadmePath,
+					this._console,
+				);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error);
+				this._console.error(`onAutoReadme error: ${message}`);
+			}
+		}
+
+		return { sourcePath: cwdReadmePath, content };
 	}
 
 	public async getGithubData(githubPath: string): Promise<GithubData> {

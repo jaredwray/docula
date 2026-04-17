@@ -107,9 +107,40 @@ Each `DoculaChangelogEntry` has these fields you can read or modify:
 
 The hook can be synchronous or async. If the hook throws an error, it is logged and the unmodified entries are used.
 
+## Cleaning Up the Auto README
+
+When `autoReadme` is enabled and docula falls back to your project root `README.md` for the home page, the `onAutoReadme` hook lets you transform that markdown before it is rendered. This is useful for stripping a shields/badges banner, removing an "Install" section that doesn't belong on the home page, or rewriting relative links.
+
+```typescript
+import type { DoculaConsole, DoculaOptions } from 'docula';
+
+export const options: Partial<DoculaOptions> = {
+  autoReadme: true,
+};
+
+export const onAutoReadme = (content: string, sourcePath: string, console: DoculaConsole): string => {
+  console.info(`Cleaning up README at ${sourcePath}`);
+  return content
+    // Drop everything from "## Install" up to the next H2
+    .replace(/^##\s+Install[\s\S]*?(?=^##\s)/m, '')
+    // Rewrite relative links to absolute
+    .replace(/\]\(\.\//g, '](https://github.com/your-username/your-repo/blob/main/');
+};
+```
+
+The hook receives:
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `content` | `string` | The resolved README markdown (with a `# name` title prepended if the README had none) |
+| `sourcePath` | `string` | Absolute path of the root `README.md` |
+| `console` | `DoculaConsole` | Logger (see below) |
+
+The hook can be synchronous or async and must return the new markdown. If the hook throws, the error is logged and the original content is used. The hook only runs when `autoReadme` is enabled and there is no `README.md` in the site directory.
+
 ## DoculaConsole Logger
 
-Both `onPrepare` and `onReleaseChangelog` hooks receive a `DoculaConsole` instance as their second argument. This provides styled, consistent logging output:
+The `onPrepare`, `onReleaseChangelog`, and `onAutoReadme` hooks all receive a `DoculaConsole` instance as their last argument. This provides styled, consistent logging output:
 
 | Method | Description |
 |--------|-------------|

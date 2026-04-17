@@ -3187,6 +3187,111 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
+		it("should invoke onAutoReadme hook to transform content", async () => {
+			const resolvedCwd = path.resolve(tempCwdPath);
+			const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(resolvedCwd);
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Project\n\nSome content here",
+			);
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.autoReadme = true;
+			const builder = new DoculaBuilder(options);
+			builder.onAutoReadme = (content, sourcePath) => {
+				expect(sourcePath).toEqual(path.join(resolvedCwd, "README.md"));
+				return content.replace("Some content here", "CLEANED");
+			};
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toContain("CLEANED");
+			expect(result?.content).not.toContain("Some content here");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should support async onAutoReadme hook", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "# Project\n\nBody");
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.onAutoReadme = async (content) =>
+				`${content}\n\nAppended by hook`;
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toContain("Appended by hook");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should catch onAutoReadme errors and keep original content", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Project\n\nOriginal body",
+			);
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			const errorSpy = vi
+				.spyOn(builder.console, "error")
+				.mockImplementation(() => {});
+			builder.onAutoReadme = () => {
+				throw new Error("hook boom");
+			};
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toEqual("# Project\n\nOriginal body");
+			expect(errorSpy).toHaveBeenCalledWith(
+				expect.stringContaining("onAutoReadme error: hook boom"),
+			);
+
+			errorSpy.mockRestore();
+			cwdSpy.mockRestore();
+		});
+
+		it("should handle non-Error throws from onAutoReadme", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "# Project\n\nBody");
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			const errorSpy = vi
+				.spyOn(builder.console, "error")
+				.mockImplementation(() => {});
+			builder.onAutoReadme = () => {
+				throw "string failure";
+			};
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toEqual("# Project\n\nBody");
+			expect(errorSpy).toHaveBeenCalledWith(
+				expect.stringContaining("onAutoReadme error: string failure"),
+			);
+
+			errorSpy.mockRestore();
+			cwdSpy.mockRestore();
+		});
+
 		it("should not copy README or referenced images into sitePath", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
@@ -3275,6 +3380,76 @@ describe("DoculaBuilder", () => {
 			const hashB = hashOptionsUtil(testHash, optionsB);
 
 			expect(hashA).not.toEqual(hashB);
+		});
+
+		it("should produce different hashes when docula.config.mjs changes", () => {
+			const tempDir = "test/temp/hash-config-change";
+			fs.mkdirSync(tempDir, { recursive: true });
+			const configPath = `${tempDir}/docula.config.mjs`;
+
+			try {
+				const options = new DoculaOptions();
+				options.quiet = true;
+				options.sitePath = tempDir;
+
+				fs.writeFileSync(configPath, "export const onAutoReadme = (c) => c;\n");
+				const hashBefore = hashOptionsUtil(testHash, options);
+
+				fs.writeFileSync(
+					configPath,
+					"export const onAutoReadme = (c) => c.toUpperCase();\n",
+				);
+				const hashAfter = hashOptionsUtil(testHash, options);
+
+				expect(hashBefore).not.toEqual(hashAfter);
+			} finally {
+				removeTempDir(tempDir);
+			}
+		});
+
+		it("should return the same hash when no config file exists", () => {
+			const tempDir = "test/temp/hash-config-missing";
+			fs.mkdirSync(tempDir, { recursive: true });
+
+			try {
+				const options = new DoculaOptions();
+				options.quiet = true;
+				options.sitePath = tempDir;
+
+				const hashA = hashOptionsUtil(testHash, options);
+				const hashB = hashOptionsUtil(testHash, options);
+
+				expect(hashA).toEqual(hashB);
+			} finally {
+				removeTempDir(tempDir);
+			}
+		});
+
+		it("should prefer docula.config.ts over docula.config.mjs", () => {
+			const tempDir = "test/temp/hash-config-priority";
+			fs.mkdirSync(tempDir, { recursive: true });
+
+			try {
+				const options = new DoculaOptions();
+				options.quiet = true;
+				options.sitePath = tempDir;
+
+				fs.writeFileSync(
+					`${tempDir}/docula.config.mjs`,
+					"export const a = 1;\n",
+				);
+				const hashMjsOnly = hashOptionsUtil(testHash, options);
+
+				fs.writeFileSync(
+					`${tempDir}/docula.config.ts`,
+					"export const a = 2;\n",
+				);
+				const hashWithTs = hashOptionsUtil(testHash, options);
+
+				expect(hashMjsOnly).not.toEqual(hashWithTs);
+			} finally {
+				removeTempDir(tempDir);
+			}
 		});
 	});
 });
