@@ -48,6 +48,17 @@ export function hashFile(hash: Hashery, filePath: string): string {
 	return hash.toHashSync(content);
 }
 
+export function hashConfigFile(hash: Hashery, sitePath: string): string {
+	for (const name of ["docula.config.ts", "docula.config.mjs"]) {
+		const configPath = path.join(sitePath, name);
+		if (fs.existsSync(configPath)) {
+			return hashFile(hash, configPath);
+		}
+	}
+
+	return "";
+}
+
 export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 	const relevant = {
 		siteUrl: options.siteUrl,
@@ -74,7 +85,9 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		ai: options.ai,
 		googleTagManager: options.googleTagManager,
 	};
-	return hash.toHashSync(JSON.stringify(relevant));
+	const optionsHash = hash.toHashSync(JSON.stringify(relevant));
+	const configHash = hashConfigFile(hash, options.sitePath);
+	return hash.toHashSync(`${optionsHash}:${configHash}`);
 }
 
 export function hashTemplateDirectory(

@@ -3381,5 +3381,75 @@ describe("DoculaBuilder", () => {
 
 			expect(hashA).not.toEqual(hashB);
 		});
+
+		it("should produce different hashes when docula.config.mjs changes", () => {
+			const tempDir = "test/temp/hash-config-change";
+			fs.mkdirSync(tempDir, { recursive: true });
+			const configPath = `${tempDir}/docula.config.mjs`;
+
+			try {
+				const options = new DoculaOptions();
+				options.quiet = true;
+				options.sitePath = tempDir;
+
+				fs.writeFileSync(configPath, "export const onAutoReadme = (c) => c;\n");
+				const hashBefore = hashOptionsUtil(testHash, options);
+
+				fs.writeFileSync(
+					configPath,
+					"export const onAutoReadme = (c) => c.toUpperCase();\n",
+				);
+				const hashAfter = hashOptionsUtil(testHash, options);
+
+				expect(hashBefore).not.toEqual(hashAfter);
+			} finally {
+				removeTempDir(tempDir);
+			}
+		});
+
+		it("should return the same hash when no config file exists", () => {
+			const tempDir = "test/temp/hash-config-missing";
+			fs.mkdirSync(tempDir, { recursive: true });
+
+			try {
+				const options = new DoculaOptions();
+				options.quiet = true;
+				options.sitePath = tempDir;
+
+				const hashA = hashOptionsUtil(testHash, options);
+				const hashB = hashOptionsUtil(testHash, options);
+
+				expect(hashA).toEqual(hashB);
+			} finally {
+				removeTempDir(tempDir);
+			}
+		});
+
+		it("should prefer docula.config.ts over docula.config.mjs", () => {
+			const tempDir = "test/temp/hash-config-priority";
+			fs.mkdirSync(tempDir, { recursive: true });
+
+			try {
+				const options = new DoculaOptions();
+				options.quiet = true;
+				options.sitePath = tempDir;
+
+				fs.writeFileSync(
+					`${tempDir}/docula.config.mjs`,
+					"export const a = 1;\n",
+				);
+				const hashMjsOnly = hashOptionsUtil(testHash, options);
+
+				fs.writeFileSync(
+					`${tempDir}/docula.config.ts`,
+					"export const a = 2;\n",
+				);
+				const hashWithTs = hashOptionsUtil(testHash, options);
+
+				expect(hashMjsOnly).not.toEqual(hashWithTs);
+			} finally {
+				removeTempDir(tempDir);
+			}
+		});
 	});
 });
