@@ -310,6 +310,11 @@ export default class Docula {
 			builder.onReleaseChangelog = this._configFileModule.onReleaseChangelog;
 		}
 
+		/* v8 ignore next 4 -- @preserve */
+		if (this._configFileModule.onAutoReadme) {
+			builder.onAutoReadme = this._configFileModule.onAutoReadme;
+		}
+
 		await builder.build();
 		return builder;
 	}

@@ -3187,6 +3187,83 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
+		it("should invoke onAutoReadme hook to transform content", async () => {
+			const resolvedCwd = path.resolve(tempCwdPath);
+			const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(resolvedCwd);
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Project\n\nSome content here",
+			);
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			options.autoReadme = true;
+			const builder = new DoculaBuilder(options);
+			builder.onAutoReadme = (content, sourcePath) => {
+				expect(sourcePath).toEqual(path.join(resolvedCwd, "README.md"));
+				return content.replace("Some content here", "CLEANED");
+			};
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toContain("CLEANED");
+			expect(result?.content).not.toContain("Some content here");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should support async onAutoReadme hook", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "# Project\n\nBody");
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			builder.onAutoReadme = async (content) =>
+				`${content}\n\nAppended by hook`;
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toContain("Appended by hook");
+
+			cwdSpy.mockRestore();
+		});
+
+		it("should catch onAutoReadme errors and keep original content", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(
+				`${tempCwdPath}/README.md`,
+				"# Project\n\nOriginal body",
+			);
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			const errorSpy = vi
+				.spyOn(builder.console, "error")
+				.mockImplementation(() => {});
+			builder.onAutoReadme = () => {
+				throw new Error("hook boom");
+			};
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toEqual("# Project\n\nOriginal body");
+			expect(errorSpy).toHaveBeenCalledWith(
+				expect.stringContaining("onAutoReadme error: hook boom"),
+			);
+
+			errorSpy.mockRestore();
+			cwdSpy.mockRestore();
+		});
+
 		it("should not copy README or referenced images into sitePath", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
