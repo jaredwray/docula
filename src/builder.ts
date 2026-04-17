@@ -828,7 +828,8 @@ export class DoculaBuilder {
 					this._console,
 				);
 			} catch (error) {
-				this._console.error(`onAutoReadme error: ${(error as Error).message}`);
+				const message = error instanceof Error ? error.message : String(error);
+				this._console.error(`onAutoReadme error: ${message}`);
 			}
 		}
 

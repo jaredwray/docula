@@ -3264,6 +3264,34 @@ describe("DoculaBuilder", () => {
 			cwdSpy.mockRestore();
 		});
 
+		it("should handle non-Error throws from onAutoReadme", async () => {
+			const cwdSpy = vi
+				.spyOn(process, "cwd")
+				.mockReturnValue(path.resolve(tempCwdPath));
+			fs.writeFileSync(`${tempCwdPath}/README.md`, "# Project\n\nBody");
+
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.sitePath = tempSitePath;
+			const builder = new DoculaBuilder(options);
+			const errorSpy = vi
+				.spyOn(builder.console, "error")
+				.mockImplementation(() => {});
+			builder.onAutoReadme = () => {
+				throw "string failure";
+			};
+
+			const result = await builder.autoReadme();
+
+			expect(result?.content).toEqual("# Project\n\nBody");
+			expect(errorSpy).toHaveBeenCalledWith(
+				expect.stringContaining("onAutoReadme error: string failure"),
+			);
+
+			errorSpy.mockRestore();
+			cwdSpy.mockRestore();
+		});
+
 		it("should not copy README or referenced images into sitePath", async () => {
 			const cwdSpy = vi
 				.spyOn(process, "cwd")
