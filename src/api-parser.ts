@@ -39,6 +39,7 @@ export type ApiOperation = {
 	id: string;
 	method: string;
 	methodUpper: string;
+	methodShort: string;
 	path: string;
 	summary: string;
 	description: string;
@@ -171,10 +172,12 @@ export function parseOpenApiSpec(specJson: string): ApiSpecData {
 				operation.operationId ??
 				`${method}-${pathStr.replaceAll(/[^a-zA-Z0-9]/g, "-")}`;
 
+			const methodUpper = method.toUpperCase();
 			const apiOperation: ApiOperation = {
 				id: slugify(operationId),
 				method,
-				methodUpper: method.toUpperCase(),
+				methodUpper,
+				methodShort: methodUpper === "DELETE" ? "DEL" : methodUpper,
 				path: pathStr,
 				summary: operation.summary ?? "",
 				description: operation.description ?? "",
