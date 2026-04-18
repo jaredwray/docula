@@ -227,6 +227,48 @@
       }
     });
 
+    // Sidebar section collapse/expand
+    const SIDEBAR_STORAGE_KEY = 'docula:sidebar-sections';
+    const collapsibleSections = document.querySelectorAll('.nav-sidebar__section--collapsible');
+    if (collapsibleSections.length > 0) {
+      let storedSectionState = {};
+      try {
+        storedSectionState = JSON.parse(localStorage.getItem(SIDEBAR_STORAGE_KEY) || '{}');
+      } catch (e) { storedSectionState = {}; }
+
+      const activeSidebarLink = document.querySelector('.nav-sidebar__item--active');
+      const activeSection = activeSidebarLink ? activeSidebarLink.closest('.nav-sidebar__section--collapsible') : null;
+      const defaultOpenSection = activeSection || collapsibleSections[0];
+
+      const setSectionOpen = (section, toggle, open) => {
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        section.classList.toggle('nav-sidebar__section--collapsed', !open);
+      };
+
+      collapsibleSections.forEach((section, idx) => {
+        const toggle = section.querySelector('.nav-sidebar__toggle');
+        const list = section.querySelector('.nav-sidebar__list');
+        if (!toggle || !list) return;
+        const listId = 'nav-sidebar-section-' + idx;
+        list.id = listId;
+        toggle.setAttribute('aria-controls', listId);
+
+        const key = 'section-' + idx;
+        const hasStored = Object.prototype.hasOwnProperty.call(storedSectionState, key);
+        const isOpen = hasStored ? !!storedSectionState[key] : section === defaultOpenSection;
+        setSectionOpen(section, toggle, isOpen);
+
+        toggle.addEventListener('click', () => {
+          const next = toggle.getAttribute('aria-expanded') !== 'true';
+          setSectionOpen(section, toggle, next);
+          storedSectionState[key] = next;
+          try {
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(storedSectionState));
+          } catch (e) { /* storage unavailable */ }
+        });
+      });
+    }
+
     // Active header nav link highlighting
     const navLinks = document.querySelectorAll('.header-bottom__item');
     navLinks.forEach((link) => {

@@ -289,6 +289,44 @@ body {
   letter-spacing: 0.24px;
 }
 
+.nav-sidebar__title:has(.nav-sidebar__toggle) {
+  padding: 0;
+}
+
+.nav-sidebar__toggle {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  padding: 0 8px 0 10px;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+}
+
+.nav-sidebar__toggle:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.nav-sidebar__chevron {
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.nav-sidebar__section--collapsed .nav-sidebar__chevron {
+  transform: rotate(-90deg);
+}
+
+.nav-sidebar__section--collapsed .nav-sidebar__list {
+  display: none;
+}
+
 .nav-sidebar__list {
   margin-block: 2px;
 }
