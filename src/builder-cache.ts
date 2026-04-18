@@ -48,6 +48,19 @@ export function hashFile(hash: Hashery, filePath: string): string {
 	return hash.toHashSync(content);
 }
 
+function tryHashFile(hash: Hashery, filePath: string): string | undefined {
+	try {
+		return hashFile(hash, filePath);
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+			return undefined;
+		}
+
+		/* v8 ignore next 2 -- @preserve */
+		throw error;
+	}
+}
+
 export function hashConfigFile(hash: Hashery, sitePath: string): string {
 	for (const name of ["docula.config.ts", "docula.config.mjs"]) {
 		const configPath = path.join(sitePath, name);
@@ -100,7 +113,14 @@ export function hashTemplateDirectory(
 	}
 
 	const files = listFilesRecursive(templatePath);
-	const hashes = files.map((f) => hashFile(hash, path.join(templatePath, f)));
+	const hashes: string[] = [];
+	for (const f of files) {
+		const fileHash = tryHashFile(hash, path.join(templatePath, f));
+		if (fileHash !== undefined) {
+			hashes.push(fileHash);
+		}
+	}
+
 	return hash.toHashSync(hashes.join(""));
 }
 
@@ -116,7 +136,10 @@ export function hashSourceFiles(
 	const files = listFilesRecursive(dir);
 	for (const file of files) {
 		const fullPath = path.join(dir, file);
-		hashes[file] = hashFile(hash, fullPath);
+		const fileHash = tryHashFile(hash, fullPath);
+		if (fileHash !== undefined) {
+			hashes[file] = fileHash;
+		}
 	}
 
 	return hashes;
