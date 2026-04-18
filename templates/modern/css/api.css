@@ -100,17 +100,20 @@
 }
 
 .api-sidebar__group-items {
-  padding: 2px 0 8px 0;
+  padding: 4px 0 8px 12px;
+  margin-left: 10px;
+  border-left: 1px solid var(--border);
 }
 
 .api-sidebar__item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
   font-size: 13px;
   border-radius: 4px;
-  color: var(--fg);
+  color: var(--muted-fg);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -125,8 +128,23 @@
 }
 
 .api-sidebar__item-path {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--muted-fg);
+}
+
+.api-sidebar__item--active .api-sidebar__item-path {
+  color: var(--fg);
+}
+
+.api-sidebar__item .method-badge {
+  background: transparent;
+  padding: 0;
+  min-width: 0;
+  border-radius: 0;
+  font-size: 11px;
+  letter-spacing: 0.5px;
 }
 
 /* Method Badges */

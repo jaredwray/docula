@@ -39,8 +39,8 @@
         <div class="api-sidebar__group-items">
           {{#each this.operations}}
           <a href="#{{this.id}}" class="api-sidebar__item" data-method="{{this.method}}" data-path="{{this.path}}">
-            <span class="method-badge method-badge--{{this.method}}">{{this.methodUpper}}</span>
             <span class="api-sidebar__item-path">{{this.path}}</span>
+            <span class="method-badge method-badge--{{this.method}}">{{this.methodShort}}</span>
           </a>
           {{/each}}
         </div>

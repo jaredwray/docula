@@ -90,3 +90,4 @@ test-results/
 
 # Test Temp Sites
 test/temp
+/tmp
