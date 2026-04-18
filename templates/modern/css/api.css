@@ -128,6 +128,7 @@
 }
 
 .api-sidebar__item-path {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--muted-fg);

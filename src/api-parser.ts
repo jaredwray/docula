@@ -177,7 +177,12 @@ export function parseOpenApiSpec(specJson: string): ApiSpecData {
 				id: slugify(operationId),
 				method,
 				methodUpper,
-				methodShort: methodUpper === "DELETE" ? "DEL" : methodUpper,
+				methodShort:
+					methodUpper === "DELETE"
+						? "DEL"
+						: methodUpper === "OPTIONS"
+							? "OPT"
+							: methodUpper,
 				path: pathStr,
 				summary: operation.summary ?? "",
 				description: operation.description ?? "",
