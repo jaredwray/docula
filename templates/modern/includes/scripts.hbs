@@ -324,6 +324,7 @@
     document.body.appendChild(lightboxOverlay);
 
     document.querySelectorAll('.article__main img, .changelog-entry-body img').forEach(function(img) {
+      if (img.closest('a')) return;
       img.addEventListener('click', function() {
         lightboxImg.src = img.src;
         lightboxOverlay.classList.add('lightbox-overlay--visible');
