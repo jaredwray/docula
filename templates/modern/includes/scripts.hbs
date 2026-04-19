@@ -236,10 +236,6 @@
         storedSectionState = JSON.parse(localStorage.getItem(SIDEBAR_STORAGE_KEY) || '{}');
       } catch (e) { storedSectionState = {}; }
 
-      const activeSidebarLink = document.querySelector('.nav-sidebar__item--active');
-      const activeSection = activeSidebarLink ? activeSidebarLink.closest('.nav-sidebar__section--collapsible') : null;
-      const defaultOpenSection = activeSection || collapsibleSections[0];
-
       const setSectionOpen = (section, toggle, open) => {
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         section.classList.toggle('nav-sidebar__section--collapsed', !open);
@@ -255,7 +251,7 @@
 
         const key = 'section-' + idx;
         const hasStored = Object.prototype.hasOwnProperty.call(storedSectionState, key);
-        const isOpen = hasStored ? !!storedSectionState[key] : section === defaultOpenSection;
+        const isOpen = hasStored ? !!storedSectionState[key] : true;
         setSectionOpen(section, toggle, isOpen);
 
         toggle.addEventListener('click', () => {
