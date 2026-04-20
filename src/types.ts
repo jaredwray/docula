@@ -85,6 +85,7 @@ export type DoculaData = {
 	changelogUrl: string;
 	editPageUrl?: string;
 	openGraph?: DoculaOpenGraph;
+	faviconUrl?: string;
 };
 
 export type DoculaTemplates = {
