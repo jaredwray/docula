@@ -54,7 +54,7 @@ export const options = {
 | Provider | Default Model |
 |----------|--------------|
 | `anthropic` | `claude-haiku-4-5` |
-| `openai` | `gpt-4o-mini-latest` |
+| `openai` | `gpt-4o-mini` |
 | `google` | `gemini-2.5-flash-lite` |
 
 ### Custom Model

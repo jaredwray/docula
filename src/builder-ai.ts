@@ -33,9 +33,7 @@ export async function createAIModel(
 
 			case "openai": {
 				const { createOpenAI } = await import("@ai-sdk/openai");
-				return createOpenAI({ apiKey: ai.apiKey })(
-					ai.model ?? "gpt-4o-mini-latest",
-				);
+				return createOpenAI({ apiKey: ai.apiKey })(ai.model ?? "gpt-4o-mini");
 			}
 
 			case "google": {
