@@ -267,7 +267,7 @@ export class DoculaBuilder {
 		// one auto-generated from their logo.
 		const faviconCandidates = ["favicon.ico", "logo.svg", "logo.png"];
 		const resolvedFavicon = faviconCandidates.find((file) =>
-			fs.existsSync(`${this.options.sitePath}/${file}`),
+			fs.existsSync(path.join(this.options.sitePath, file)),
 		);
 		if (resolvedFavicon) {
 			doculaData.faviconUrl = buildUrlPath(
@@ -628,16 +628,16 @@ export class DoculaBuilder {
 		if (
 			!hashAssetAndCheckSkip(
 				this._hash,
-				`${siteRelativePath}/logo.png`,
-				`${this.options.output}/logo.png`,
+				path.join(siteRelativePath, "logo.png"),
+				path.join(this.options.output, "logo.png"),
 				"logo.png",
 				previousAssets,
 				currentAssetHashes,
 			)
 		) {
 			await fs.promises.copyFile(
-				`${siteRelativePath}/logo.png`,
-				`${this.options.output}/logo.png`,
+				path.join(siteRelativePath, "logo.png"),
+				path.join(this.options.output, "logo.png"),
 			);
 			this._console.fileCopied("logo.png");
 		}
