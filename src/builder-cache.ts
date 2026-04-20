@@ -173,6 +173,7 @@ export function hasAssetsChanged(
 	const assetFiles = [
 		"favicon.ico",
 		"logo.svg",
+		"logo.png",
 		"logo_horizontal.png",
 		"variables.css",
 		"api/swagger.json",

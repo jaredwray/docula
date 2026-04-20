@@ -196,6 +196,116 @@ describe("DoculaBuilder", () => {
 				await fs.promises.rm(options.output, { recursive: true, force: true });
 			}
 		});
+
+		it("should auto-generate favicon from logo.svg when favicon.ico is missing", async () => {
+			const sitePath = "test/temp/favicon-from-svg";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+			fs.rmSync(`${sitePath}/favicon.ico`, { force: true });
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
+
+				await builder.build();
+
+				expect(fs.existsSync(`${output}/favicon.ico`)).toBe(false);
+				expect(fs.existsSync(`${output}/logo.svg`)).toBe(true);
+				const indexHtml = fs.readFileSync(`${output}/index.html`, "utf8");
+				expect(indexHtml).toContain('<link rel="icon" href="/logo.svg"');
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should auto-generate favicon from logo.png when favicon.ico and logo.svg are missing", async () => {
+			const sitePath = "test/temp/favicon-from-png";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+			fs.rmSync(`${sitePath}/favicon.ico`, { force: true });
+			fs.rmSync(`${sitePath}/logo.svg`, { force: true });
+			fs.writeFileSync(`${sitePath}/logo.png`, "png-data");
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
+
+				await builder.build();
+
+				expect(fs.existsSync(`${output}/favicon.ico`)).toBe(false);
+				expect(fs.existsSync(`${output}/logo.svg`)).toBe(false);
+				expect(fs.existsSync(`${output}/logo.png`)).toBe(true);
+				const indexHtml = fs.readFileSync(`${output}/index.html`, "utf8");
+				expect(indexHtml).toContain('<link rel="icon" href="/logo.png"');
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should omit favicon link when no favicon or logo is present", async () => {
+			const sitePath = "test/temp/favicon-none";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+			fs.rmSync(`${sitePath}/favicon.ico`, { force: true });
+			fs.rmSync(`${sitePath}/logo.svg`, { force: true });
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
+
+				await builder.build();
+
+				const indexHtml = fs.readFileSync(`${output}/index.html`, "utf8");
+				expect(indexHtml).not.toContain('rel="icon"');
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
+
+		it("should prefer favicon.ico over logo.svg and logo.png", async () => {
+			const sitePath = "test/temp/favicon-priority";
+			const output = `${sitePath}/dist`;
+
+			fs.cpSync("test/fixtures/single-page-site", sitePath, {
+				recursive: true,
+			});
+			fs.writeFileSync(`${sitePath}/logo.png`, "png-data");
+
+			try {
+				const options = new DoculaOptions();
+				options.sitePath = sitePath;
+				options.output = output;
+				const builder = new DoculaBuilder(options);
+				builder.console.quiet = true;
+
+				await builder.build();
+
+				const indexHtml = fs.readFileSync(`${output}/index.html`, "utf8");
+				expect(indexHtml).toContain('<link rel="icon" href="/favicon.ico"');
+				expect(fs.existsSync(`${output}/favicon.ico`)).toBe(true);
+				expect(fs.existsSync(`${output}/logo.png`)).toBe(true);
+			} finally {
+				fs.rmSync(sitePath, { recursive: true, force: true });
+			}
+		});
 	});
 
 	describe("Docula Builder - Template Overrides", () => {

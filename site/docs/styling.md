@@ -189,3 +189,6 @@ Replace the default files in your site directory to use your own branding:
 
 - `site/logo.png` (or `logo.svg`) -- displayed in the header and home page hero
 - `site/favicon.ico` -- browser tab icon
+
+If `site/favicon.ico` is not present, Docula automatically uses `site/logo.svg`
+or `site/logo.png` (in that order) as the favicon.
