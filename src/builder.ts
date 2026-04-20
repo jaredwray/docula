@@ -262,6 +262,20 @@ export class DoculaBuilder {
 			openGraph: this.options.openGraph,
 		};
 
+		// Resolve the favicon. Prefer a user-supplied favicon.ico, falling
+		// back to logo.svg or logo.png so sites without a favicon still get
+		// one auto-generated from their logo.
+		const faviconCandidates = ["favicon.ico", "logo.svg", "logo.png"];
+		const resolvedFavicon = faviconCandidates.find((file) =>
+			fs.existsSync(path.join(this.options.sitePath, file)),
+		);
+		if (resolvedFavicon) {
+			doculaData.faviconUrl = buildUrlPath(
+				this.options.baseUrl,
+				resolvedFavicon,
+			);
+		}
+
 		// Track README.md in asset hashes for change detection. Prefer the
 		// site README when it exists; otherwise track the root README that
 		// autoReadme resolved so edits to it still invalidate the cache.
@@ -607,6 +621,25 @@ export class DoculaBuilder {
 				`${this.options.output}/logo.svg`,
 			);
 			this._console.fileCopied("logo.svg");
+		}
+
+		// Copy over logo.png (used as a fallback favicon when favicon.ico
+		// and logo.svg are not provided).
+		if (
+			!hashAssetAndCheckSkip(
+				this._hash,
+				path.join(siteRelativePath, "logo.png"),
+				path.join(this.options.output, "logo.png"),
+				"logo.png",
+				previousAssets,
+				currentAssetHashes,
+			)
+		) {
+			await fs.promises.copyFile(
+				path.join(siteRelativePath, "logo.png"),
+				path.join(this.options.output, "logo.png"),
+			);
+			this._console.fileCopied("logo.png");
 		}
 
 		// Copy over logo_horizontal
