@@ -10,27 +10,7 @@ permissions:
 
 jobs:
   build-binary:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            artifact: docula-linux-x64
-            binary: docula
-            arch: x64
-          - os: macos-latest
-            artifact: docula-macos-arm64
-            binary: docula
-            arch: arm64
-          - os: macos-latest
-            artifact: docula-macos-x64
-            binary: docula
-            arch: x64
-          - os: windows-latest
-            artifact: docula-windows-x64
-            binary: docula.exe
-            arch: x64
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
@@ -38,28 +18,50 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 11
 
       - name: Use Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22
-          architecture: ${{ matrix.arch }}
+          node-version: 26
 
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Build Binary
+      - name: Build Binaries
         run: pnpm build:binary
 
-      - name: Upload Binary Artifact
+      - name: Upload Linux x64 Artifact
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.binary }}
+          name: docula-linux-x64
+          path: build/docula-linux-x64
+
+      - name: Upload macOS arm64 Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: docula-macos-arm64
+          path: build/docula-darwin-arm64
+
+      - name: Upload macOS x64 Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: docula-macos-x64
+          path: build/docula-darwin-x64
+
+      - name: Upload Windows x64 Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: docula-windows-x64
+          path: build/docula-win-x64.exe
 
       - name: Upload to Release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} dist/${{ matrix.binary }}#${{ matrix.artifact }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "build/docula-linux-x64#docula-linux-x64" \
+            "build/docula-darwin-arm64#docula-macos-arm64" \
+            "build/docula-darwin-x64#docula-macos-x64" \
+            "build/docula-win-x64.exe#docula-windows-x64"

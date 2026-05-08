@@ -64,6 +64,7 @@ yarn.lock
 
 # build
 dist
+build
 
 # Generated files
 src/embedded-templates.ts
