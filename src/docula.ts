@@ -135,6 +135,12 @@ export default class Docula {
 			return;
 		}
 
+		// Short-circuit for version — no config needed
+		if (consoleProcess.command === "version") {
+			this._console.log(this.getVersion());
+			return;
+		}
+
 		// Update options
 		if (consoleProcess.args.sitePath) {
 			this.options.sitePath = consoleProcess.args.sitePath;
@@ -154,12 +160,6 @@ export default class Docula {
 		// Propagate quiet setting to console
 		if (this.options.quiet) {
 			this._console.quiet = true;
-		}
-
-		// Short-circuit for version — after config but before onPrepare
-		if (consoleProcess.command === "version") {
-			this._console.log(this.getVersion());
-			return;
 		}
 
 		// Run the onPrepare function
@@ -462,10 +462,11 @@ export default class Docula {
 				try {
 					const mod = await import(fileUrl);
 					this._configFileModule = mod.default ?? mod;
-				} catch {
+				} catch (error) {
 					throw new Error(
-						"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. " +
-							"Please upgrade Node.js or use docula.config.mjs instead.",
+						`Failed to load TypeScript config file from standalone binary: ${(error as Error).message}. ` +
+							"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. " +
+							"If you are on a supported Node.js version, try using docula.config.mjs instead.",
 					);
 				}
 			} else {

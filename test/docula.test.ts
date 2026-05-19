@@ -702,6 +702,23 @@ describe("docula execute", () => {
 		expect(consoleMessage).toContain(".");
 		console.log = consoleLog;
 	});
+	it("should show version without loading the site config", async () => {
+		const docula = new Docula(cloneDefaultOptions(false));
+		docula.options.sitePath = "test/fixtures/multi-page-site";
+		const consoleLog = console.log;
+		let consoleMessage = "";
+		process.argv = ["node", "docula", "version"];
+		console.log = (message) => {
+			if (typeof message === "string") {
+				consoleMessage = message;
+			}
+		};
+
+		await docula.execute(process);
+		expect(consoleMessage).toContain(".");
+		expect(docula.configFileModule).toEqual({});
+		console.log = consoleLog;
+	});
 	it("should serve the site", async () => {
 		const options = new DoculaOptions();
 		options.sitePath = "test/fixtures/single-page-site";
@@ -1446,20 +1463,10 @@ describe("docula config file", () => {
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toBeDefined();
 		expect(docula.configFileModule.options).toBeDefined();
-		const consoleLog = console.log;
-		let _consoleMessage = "";
-		console.log = (message) => {
-			if (typeof message === "string") {
-				_consoleMessage = message;
-			}
-		};
-
-		process.argv = ["node", "docula", "version"];
-		await docula.execute(process);
+		docula.options.parseOptions(docula.configFileModule.options);
 		expect(docula.options.output).toEqual(
 			path.resolve(process.cwd(), docula.configFileModule.options.output),
 		);
-		console.log = consoleLog;
 	});
 	it("should build docs at root when no README.md exists", async () => {
 		const options = new DoculaOptions();
