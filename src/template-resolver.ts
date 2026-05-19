@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import sea from "node:sea";
 
 let embeddedTemplates: Record<string, string> | undefined;
 
@@ -16,14 +17,7 @@ export function setEmbeddedTemplates(templates: Record<string, string>): void {
  * Returns true when running as a single-executable application (SEA).
  */
 export function isSEA(): boolean {
-	try {
-		// Node.js SEA sets this flag at compile time
-		// @ts-expect-error -- only exists in SEA builds
-		return Boolean(process.sea);
-	} catch {
-		/* v8 ignore next -- @preserve */
-		return false;
-	}
+	return sea.isSea();
 }
 
 /**

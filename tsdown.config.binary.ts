@@ -11,4 +11,11 @@ export default defineConfig({
 	outputOptions: {
 		codeSplitting: false,
 	},
+	exe: {
+		fileName: "docula",
+		outDir: "dist",
+		seaConfig: {
+			disableExperimentalSEAWarning: true,
+		},
+	},
 });

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import sea from "node:sea";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	cleanupExtractedTemplates,
 	getBuiltInTemplatesDir,
@@ -41,17 +42,15 @@ describe("template-resolver", () => {
 			setEmbeddedTemplates({
 				"modern/home.hbs": Buffer.from("<h1>SEA</h1>").toString("base64"),
 			});
-			// @ts-expect-error -- only exists in SEA builds
-			process.sea = true;
 			fs.renameSync(normalDir, backupDir);
+			const isSeaSpy = vi.spyOn(sea, "isSea").mockReturnValue(true);
 			try {
 				const dir = getBuiltInTemplatesDir();
 				expect(dir).toBe(tmpDir);
 			} finally {
+				isSeaSpy.mockRestore();
 				fs.renameSync(backupDir, normalDir);
 				fs.rmSync(tmpDir, { recursive: true, force: true });
-				// @ts-expect-error -- test cleanup
-				delete process.sea;
 				setEmbeddedTemplates(undefined as unknown as Record<string, string>);
 			}
 		});
@@ -106,17 +105,15 @@ describe("template-resolver", () => {
 
 	describe("isSEA", () => {
 		afterEach(() => {
-			// @ts-expect-error -- test cleanup
-			delete process.sea;
+			vi.restoreAllMocks();
 		});
 
 		it("should return false when not in SEA mode", () => {
 			expect(isSEA()).toBe(false);
 		});
 
-		it("should return true when process.sea is set", () => {
-			// @ts-expect-error -- only exists in SEA builds
-			process.sea = true;
+		it("should return true when sea.isSea() reports true", () => {
+			vi.spyOn(sea, "isSea").mockReturnValue(true);
 			expect(isSEA()).toBe(true);
 		});
 	});
