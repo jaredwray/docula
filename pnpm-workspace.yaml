@@ -10,3 +10,5 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - writr
+  - ecto
+  - hashery

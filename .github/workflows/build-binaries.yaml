@@ -35,14 +35,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Use Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
           architecture: ${{ matrix.arch }}
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install Dependencies
         run: pnpm install
