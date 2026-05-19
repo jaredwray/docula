@@ -1,6 +1,12 @@
-onlyBuiltDependencies:
-  - esbuild
-  - unrs-resolver
-minimumReleaseAge: 2880
+minimumReleaseAge: 10080 # 7 days, in minutes
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+blockExoticSubdeps: true
+strictDepBuilds: true
+dangerouslyAllowAllBuilds: false
+
+allowBuilds:
+  esbuild: true
+
 minimumReleaseAgeExclude:
   - writr

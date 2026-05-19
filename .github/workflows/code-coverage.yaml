@@ -12,7 +12,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  
+
 jobs:
   build:
 
@@ -20,20 +20,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Enable Corepack
+      run: corepack enable
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 24
 
     - name: Install Dependencies
-      run: npm install pnpm -g && pnpm install
+      run: pnpm install
 
-    - name: Build    
+    - name: Build
       run: pnpm build
 
-    - name: Testing    
+    - name: Testing
       run: pnpm test:ci
-      
+
     - name: Code Coverage
       uses: codecov/codecov-action@v5
       with:

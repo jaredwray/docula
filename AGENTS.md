@@ -4,7 +4,7 @@ Guidelines for AI coding agents (Claude, Gemini, Codex).
 
 ## Project
 
-Docula is a documentation/website generator built with TypeScript and Node.js (>=20).
+Docula is a documentation/website generator built with TypeScript and Node.js (>=22).
 
 ## Commands
 
