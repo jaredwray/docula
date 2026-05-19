@@ -56,7 +56,7 @@ You can build Docula as a standalone binary that runs without Node.js installed.
 
 ## Building the Binary
 
-Requires Node.js >= 20 to build (the resulting binary does not need Node.js to run).
+Requires Node.js >= 25.7.0 to build (the resulting binary does not need Node.js to run). The build uses [tsdown's `exe` option](https://tsdown.dev/options/exe), which wraps Node.js's [Single Executable Applications](https://nodejs.org/api/single-executable-applications.html) feature added in Node 25.7.
 
 ```bash
 pnpm install
@@ -69,7 +69,7 @@ This produces a platform-specific binary at `dist/docula` (or `dist/docula.exe` 
 
 1. Embeds all built-in templates (modern, classic) into the bundle as base64
 2. Bundles all source code and dependencies into a single CJS file via [tsdown](https://tsdown.dev/)
-3. Uses tsdown's built-in `exe` option to create a Node.js SEA binary (blob generation, injection, and code signing are handled automatically)
+3. Uses tsdown's built-in `exe` option to create a Node.js SEA binary — blob generation, injection, and (on macOS hosts) ad-hoc code signing are handled automatically
 
 ## Testing the Binary
 
@@ -91,7 +91,7 @@ After building, test it locally:
 
 ## Cross-Platform Binaries
 
-Node.js SEA cannot cross-compile — the binary matches the OS and architecture it was built on. The CI workflow (`.github/workflows/build-binaries.yaml`) builds for all platforms using a matrix strategy:
+The CI workflow (`.github/workflows/build-binaries.yaml`) builds each platform natively on its own runner. Native builds avoid the cross-compile signing pitfall on Apple Silicon, where unsigned Mach-O binaries are killed on launch.
 
 | Platform | Runner | Artifact |
 |---|---|---|
