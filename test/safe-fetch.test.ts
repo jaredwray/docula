@@ -2,6 +2,7 @@ import { Agent } from "undici";
 import { describe, expect, it, vi } from "vitest";
 import {
 	isPrivateIp,
+	pinnedLookup,
 	resolveAndValidate,
 	SsrfBlockedError,
 	safeFetch,
@@ -112,6 +113,34 @@ describe("safe-fetch — isPrivateIp (IPv6, including v4-wrapping forms)", () =>
 		expect(isPrivateIp("2002:808:808::")).toBe(false);
 		expect(isPrivateIp("::8.8.8.8")).toBe(false);
 		expect(isPrivateIp("::808:808")).toBe(false);
+	});
+});
+
+describe("safe-fetch — pinnedLookup", () => {
+	const resolved = [
+		{ address: "93.184.216.34", family: 4 as const },
+		{ address: "2606:2800:220:1::1", family: 6 as const },
+	];
+
+	it("returns the full array when opts.all is true (autoSelectFamily on)", () => {
+		const lookup = pinnedLookup(resolved);
+		const cb = vi.fn();
+		lookup("example.com", { all: true }, cb);
+		expect(cb).toHaveBeenCalledWith(null, resolved);
+	});
+
+	it("returns a single address+family when opts.all is false (autoSelectFamily off)", () => {
+		const lookup = pinnedLookup(resolved);
+		const cb = vi.fn();
+		lookup("example.com", { all: false }, cb);
+		expect(cb).toHaveBeenCalledWith(null, "93.184.216.34", 4);
+	});
+
+	it("defaults to single-address signature when opts.all is undefined", () => {
+		const lookup = pinnedLookup(resolved);
+		const cb = vi.fn();
+		lookup("example.com", {}, cb);
+		expect(cb).toHaveBeenCalledWith(null, "93.184.216.34", 4);
 	});
 });
 

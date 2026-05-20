@@ -233,6 +233,43 @@ export async function resolveAndValidate(
 	};
 }
 
+type LookupCallback = (
+	err: NodeJS.ErrnoException | null,
+	addressOrList?: string | ResolvedAddress[],
+	family?: number,
+) => void;
+
+/**
+ * Builds a `net.lookup`-shaped callback that always returns the pre-validated
+ * `resolved` addresses, ignoring the hostname argument. Supports both call
+ * signatures: when `opts.all` is truthy the callback receives the full array;
+ * otherwise (the shape Node uses when `autoSelectFamily` is disabled) the
+ * callback receives a single `address, family` pair.
+ */
+export function pinnedLookup(
+	resolved: ResolvedAddress[],
+): (
+	hostname: string,
+	opts: { all?: boolean },
+	callback: LookupCallback,
+) => void {
+	return (_hostname, opts, callback) => {
+		if (opts.all) {
+			callback(null, resolved);
+			return;
+		}
+		const first = resolved[0];
+		/* v8 ignore next 4 -- resolved is non-empty by construction in safeFetch -- @preserve */
+		if (!first) {
+			callback(
+				new Error("No pinned address available") as NodeJS.ErrnoException,
+			);
+			return;
+		}
+		callback(null, first.address, first.family);
+	};
+}
+
 export type SafeFetchOptions = {
 	timeoutMs?: number;
 	maxRedirects?: number;
@@ -296,13 +333,7 @@ export async function safeFetch(
 
 			const dispatcher = new Agent({
 				connect: {
-					/* v8 ignore next 6 -- only invoked by real undici fetch -- @preserve */
-					lookup: (_hostname, _opts, callback) => {
-						(callback as (err: Error | null, addrs: ResolvedAddress[]) => void)(
-							null,
-							resolved,
-						);
-					},
+					lookup: pinnedLookup(resolved),
 				},
 			});
 			dispatchers.push(dispatcher);
@@ -317,6 +348,8 @@ export async function safeFetch(
 				const location = response.headers.get("location");
 				if (location) {
 					await response.body?.cancel().catch(() => {});
+					dispatcher.destroy().catch(() => {});
+					dispatchers.pop();
 					let nextUrl: string;
 					try {
 						nextUrl = new URL(location, currentUrl).toString();
