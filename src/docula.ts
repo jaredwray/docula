@@ -15,6 +15,7 @@ import {
 	logopng,
 } from "./init.js";
 import { DoculaOptions } from "./options.js";
+import { loadMjsAsCjsModule } from "./sea-config-loader.js";
 import { isSEA, resolveTemplatePath } from "./template-resolver.js";
 
 export default class Docula {
@@ -455,27 +456,22 @@ export default class Docula {
 		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(tsConfigFile)) {
 			const absolutePath = path.resolve(tsConfigFile);
-			const fileUrl = pathToFileURL(absolutePath).href;
-			// In SEA mode, use native import() which supports .ts on Node 22.6+
-			// Outside SEA, use jiti for broader compatibility
+			// In SEA mode, dynamic import() is broken for file URLs, so .ts
+			// configs aren't supported. Outside SEA, use jiti for broader
+			// compatibility.
 			if (isSEA()) {
-				try {
-					const mod = await import(fileUrl);
-					this._configFileModule = mod.default ?? mod;
-				} catch (error) {
-					throw new Error(
-						`Failed to load TypeScript config file from standalone binary: ${(error as Error).message}. ` +
-							"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. " +
-							"If you are on a supported Node.js version, try using docula.config.mjs instead.",
-					);
-				}
-			} else {
-				const { createJiti } = await import("jiti");
-				const jiti = createJiti(import.meta.url, {
-					interopDefault: true,
-				});
-				this._configFileModule = await jiti.import(absolutePath);
+				throw new Error(
+					"TypeScript config files (docula.config.ts) are not supported in the standalone binary " +
+						"due to a Node.js SEA limitation on dynamic import of file URLs. " +
+						"Please use docula.config.mjs instead.",
+				);
 			}
+
+			const { createJiti } = await import("jiti");
+			const jiti = createJiti(import.meta.url, {
+				interopDefault: true,
+			});
+			this._configFileModule = await jiti.import(absolutePath);
 
 			return;
 		}
@@ -484,7 +480,11 @@ export default class Docula {
 		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(mjsConfigFile)) {
 			const absolutePath = path.resolve(mjsConfigFile);
-			this._configFileModule = await import(pathToFileURL(absolutePath).href);
+			if (isSEA()) {
+				this._configFileModule = loadMjsAsCjsModule(absolutePath);
+			} else {
+				this._configFileModule = await import(pathToFileURL(absolutePath).href);
+			}
 		}
 	}
 
