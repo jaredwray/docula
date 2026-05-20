@@ -1457,6 +1457,24 @@ describe("docula config file", () => {
 		await docula.loadConfigFile(sitePath);
 		expect(docula.configFileModule).toEqual({});
 	});
+	it("should load a docula.config.json when no .ts/.mjs is present", async () => {
+		const docula = new Docula(cloneDefaultOptions(true));
+		const tempDir = await fs.promises.mkdtemp(
+			path.join(process.cwd(), "test/temp/json-config-"),
+		);
+		try {
+			await fs.promises.writeFile(
+				path.join(tempDir, "docula.config.json"),
+				JSON.stringify({ siteTitle: "JSON Site" }),
+			);
+			await docula.loadConfigFile(tempDir);
+			expect(docula.configFileModule.options).toEqual({
+				siteTitle: "JSON Site",
+			});
+		} finally {
+			await fs.promises.rm(tempDir, { recursive: true, force: true });
+		}
+	});
 	it("should load the config and set the options", async () => {
 		const docula = new Docula(cloneDefaultOptions(false));
 		const sitePath = "test/fixtures/multi-page-site";
