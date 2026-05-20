@@ -13,8 +13,8 @@ To report a security vulnerability, please create an issue and send an email to 
 We take the security of Docula seriously and have multiple layers of automated scanning in place to detect vulnerabilities as early as possible:
 
 - **Aikido Security**: We use [Aikido](https://www.aikido.dev/) to continuously scan our codebase, dependencies, and infrastructure for vulnerabilities. You can review our public audit report by clicking the badge above.
-- **Pull Request Scans**: Every pull request opened against this repository is automatically scanned for security issues. This ensures that no new code is merged without first being reviewed for known vulnerabilities, insecure dependencies, and common security pitfalls.
-- **CodeQL Analysis**: We run [GitHub CodeQL](https://codeql.github.com/) static analysis on the repository to identify potential security issues in our source code.
+- **Pull Request Scans**: Every pull request opened against the `main` branch is automatically scanned for security issues before it can be merged. This ensures that no new code lands in `main` without first being reviewed for known vulnerabilities, insecure dependencies, and common security pitfalls.
+- **CodeQL Analysis**: We run [GitHub CodeQL](https://codeql.github.com/) static analysis on pushes to `main` and on every pull request targeting `main` to identify potential security issues in our source code.
 
 ## npm Package Provenance
 
