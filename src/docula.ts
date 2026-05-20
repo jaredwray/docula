@@ -448,35 +448,42 @@ export default class Docula {
 			return;
 		}
 
+		const jsonConfigFile = `${sitePath}/docula.config.json`;
 		const tsConfigFile = `${sitePath}/docula.config.ts`;
 		const mjsConfigFile = `${sitePath}/docula.config.mjs`;
+
+		// In SEA mode, only docula.config.json is supported. Node's SEA
+		// embedder routes dynamic import() through a builtin-only module
+		// lookup that rejects file:// URLs, so .ts/.mjs configs can't be
+		// loaded. JSON can be read straight from disk and parsed — at
+		// the cost of no onPrepare hook (functions aren't JSON-serializable).
+		/* v8 ignore start -- @preserve */
+		if (isSEA()) {
+			if (fs.existsSync(jsonConfigFile)) {
+				const content = fs.readFileSync(jsonConfigFile, "utf8");
+				this._configFileModule = { options: JSON.parse(content) };
+				return;
+			}
+			if (fs.existsSync(tsConfigFile) || fs.existsSync(mjsConfigFile)) {
+				throw new Error(
+					"Only docula.config.json is supported when running the standalone binary " +
+						"(Node.js SEA cannot dynamic-import file URLs). " +
+						"Convert your config to JSON, or run docula from Node.js to use .ts/.mjs configs.",
+				);
+			}
+			return;
+		}
+		/* v8 ignore stop */
 
 		// Check for TypeScript config first
 		/* v8 ignore next -- @preserve */
 		if (fs.existsSync(tsConfigFile)) {
 			const absolutePath = path.resolve(tsConfigFile);
-			const fileUrl = pathToFileURL(absolutePath).href;
-			// In SEA mode, use native import() which supports .ts on Node 22.6+
-			// Outside SEA, use jiti for broader compatibility
-			if (isSEA()) {
-				try {
-					const mod = await import(fileUrl);
-					this._configFileModule = mod.default ?? mod;
-				} catch (error) {
-					throw new Error(
-						`Failed to load TypeScript config file from standalone binary: ${(error as Error).message}. ` +
-							"TypeScript config files require Node.js 22.6.0 or later when using the standalone binary. " +
-							"If you are on a supported Node.js version, try using docula.config.mjs instead.",
-					);
-				}
-			} else {
-				const { createJiti } = await import("jiti");
-				const jiti = createJiti(import.meta.url, {
-					interopDefault: true,
-				});
-				this._configFileModule = await jiti.import(absolutePath);
-			}
-
+			const { createJiti } = await import("jiti");
+			const jiti = createJiti(import.meta.url, {
+				interopDefault: true,
+			});
+			this._configFileModule = await jiti.import(absolutePath);
 			return;
 		}
 
@@ -485,6 +492,13 @@ export default class Docula {
 		if (fs.existsSync(mjsConfigFile)) {
 			const absolutePath = path.resolve(mjsConfigFile);
 			this._configFileModule = await import(pathToFileURL(absolutePath).href);
+			return;
+		}
+
+		// Fall back to .json config
+		if (fs.existsSync(jsonConfigFile)) {
+			const content = fs.readFileSync(jsonConfigFile, "utf8");
+			this._configFileModule = { options: JSON.parse(content) };
 		}
 	}
 
