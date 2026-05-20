@@ -2,7 +2,7 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
 	entry: ["src/sea-entry.ts"],
-	format: ["cjs"],
+	format: ["esm"],
 	clean: true,
 	deps: {
 		alwaysBundle: [/.*/],
