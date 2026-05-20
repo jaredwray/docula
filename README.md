@@ -8,6 +8,10 @@
 [![npm](https://img.shields.io/npm/dm/docula)](https://npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula)](https://npmjs.com/package/docula)
 
+<a href="https://app.aikido.dev/audit-report/external/lZAT2DfBsT11ZQfpYwClKi6s/request" target="_blank" rel="noopener noreferrer">
+    <img src="https://app.aikido.dev/assets/badges/full-light-theme.svg" alt="Aikido Security Audit Report" height="40" />
+</a>
+
 # Features
 * No configuration required. Just setup the folder structure with a logo, favicon, and css file.
 * Builds a static website that can be hosted anywhere.
