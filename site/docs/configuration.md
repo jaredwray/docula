@@ -5,7 +5,7 @@ order: 3
 
 # Configuration
 
-Docula supports TypeScript configuration files (`docula.config.ts`) in addition to JavaScript (`docula.config.mjs`). TypeScript configs provide type safety and better IDE support.
+Docula supports three config formats: TypeScript (`docula.config.ts`), ESM JavaScript (`docula.config.mjs`), and JSON (`docula.config.json`). TypeScript gives you type safety; JSON is the only format the [standalone binary](./binary-download) can read. When multiple are present in the same site, the priority is `.ts` → `.mjs` → `.json`.
 
 ## Initializing with TypeScript
 
