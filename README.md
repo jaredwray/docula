@@ -126,7 +126,7 @@ We take the security of Docula seriously and have multiple layers of protection 
 - **CodeQL Analysis**: GitHub CodeQL static analysis runs on every push and pull request targeting `main`.
 - **npm Package Provenance**: Releases are published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) for cryptographically verifiable links to source and build.
 
-To report a vulnerability, please open an issue and email me@jaredwray.com.
+To report a vulnerability, please email me@jaredwray.com.
 
 For full details, see [SECURITY.md](SECURITY.md) or our [Security Guidelines](https://docula.org/docs/project-guidelines/security/).
 
