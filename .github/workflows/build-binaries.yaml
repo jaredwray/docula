@@ -20,9 +20,6 @@ jobs:
           - os: macos-latest
             artifact: docula-macos-arm64
             binary: docula
-          - os: macos-13
-            artifact: docula-macos-x64
-            binary: docula
           - os: windows-latest
             artifact: docula-windows-x64
             binary: docula.exe
