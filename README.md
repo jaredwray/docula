@@ -114,17 +114,16 @@ See Docula in action with these open source projects that use it for their docum
 [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing](CONTRIBUTING.md) guidelines.
 
 # Security
-
-<a href="https://app.aikido.dev/audit-report/external/lZAT2DfBsT11ZQfpYwClKi6s/request" target="_blank" rel="noopener noreferrer">
-    <img src="https://app.aikido.dev/assets/badges/full-light-theme.svg" alt="Aikido Security Audit Report" height="40" />
-</a>
-
 We take the security of Docula seriously and have multiple layers of protection in place:
 
 - **Aikido Security**: Continuous scanning of our codebase, dependencies, and infrastructure for vulnerabilities. Review our public audit report by clicking the badge above.
 - **Pull Request Scans**: Every pull request against `main` is automatically scanned for security issues before merging.
 - **CodeQL Analysis**: GitHub CodeQL static analysis runs on every push and pull request targeting `main`.
 - **npm Package Provenance**: Releases are published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) for cryptographically verifiable links to source and build.
+
+<a href="https://app.aikido.dev/audit-report/external/lZAT2DfBsT11ZQfpYwClKi6s/request" target="_blank" rel="noopener noreferrer">
+    <img src="https://app.aikido.dev/assets/badges/full-light-theme.svg" alt="Aikido Security Audit Report" height="40" />
+</a>
 
 For full details, see [SECURITY.md](SECURITY.md) or our [Security Guidelines](https://docula.org/docs/project-guidelines/security/).
 
