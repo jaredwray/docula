@@ -134,6 +134,52 @@ export const x = 1;`;
 		expect(result.default.thing).toBe(42);
 	});
 
+	it("preserves named-import aliases (`a as b` → `a: b`)", () => {
+		const code = `import { join as pathJoin } from 'node:path';
+export const computed = pathJoin('a', 'b');`;
+		const transformed = transformEsmToCjs(code);
+		const result = evaluate(transformed, (id) => {
+			if (id === "node:path") {
+				return { join: (...p: string[]) => p.join("/") };
+			}
+			return {};
+		}) as { computed: string };
+		expect(result.computed).toBe("a/b");
+	});
+
+	it("keeps exported `const X` in module scope so later exports can use it", () => {
+		const code = `export const helper = (n) => n * 2;
+export const onPrepare = () => helper(21);`;
+		const transformed = transformEsmToCjs(code);
+		const result = evaluate(transformed) as {
+			helper: (n: number) => number;
+			onPrepare: () => number;
+		};
+		expect(result.onPrepare()).toBe(42);
+	});
+
+	it("keeps exported functions in module scope (hoisted) so later code can call them", () => {
+		const code = `export const onPrepare = () => helper(21);
+export function helper(n) { return n * 2; }`;
+		const transformed = transformEsmToCjs(code);
+		const result = evaluate(transformed) as {
+			helper: (n: number) => number;
+			onPrepare: () => number;
+		};
+		expect(result.onPrepare()).toBe(42);
+	});
+
+	it("keeps exported classes in module scope", () => {
+		const code = `export class Greeter { greet() { return "hi"; } }
+export const factory = () => new Greeter();`;
+		const transformed = transformEsmToCjs(code);
+		const result = evaluate(transformed) as {
+			Greeter: new () => { greet: () => string };
+			factory: () => { greet: () => string };
+		};
+		expect(result.factory().greet()).toBe("hi");
+	});
+
 	it("handles the smoke test fixture pattern", () => {
 		const code = `export const options = {
 	githubPath: "jaredwray/docula",
