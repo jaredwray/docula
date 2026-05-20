@@ -17,7 +17,6 @@ Grab the artifact matching your platform from the [latest release](https://githu
 |----------|----------|
 | Linux x64 | `docula-linux-x64` |
 | macOS arm64 (Apple Silicon) | `docula-macos-arm64` |
-| macOS x64 (Intel) | `docula-macos-x64` |
 | Windows x64 | `docula-windows-x64.exe` |
 
 On macOS and Linux, mark the file as executable after downloading:
