@@ -41,12 +41,16 @@ function rewriteAliases(specifiers: string): string {
 
 export function transformEsmToCjs(code: string): string {
 	const trailingExports: string[] = [];
+	let counter = 0;
+	const nextTmp = () => `__seaCfgMod${counter++}`;
 	let result = code
 		.replace(/^\s*import\s+type\s+[^;]*;?\s*$/gm, "")
 		.replace(
 			/^(\s*)import\s+(\w+)\s*,\s*\{([^}]+)\}\s+from\s+(['"])(.+?)\4\s*;?/gm,
-			(_m, indent, def, specs, q, pkg) =>
-				`${indent}const ${def} = require(${q}${pkg}${q}).default ?? require(${q}${pkg}${q}); const {${rewriteAliases(specs)}} = require(${q}${pkg}${q});`,
+			(_m, indent, def, specs, q, pkg) => {
+				const tmp = nextTmp();
+				return `${indent}const ${tmp} = require(${q}${pkg}${q}); const ${def} = ${tmp}.default ?? ${tmp}; const {${rewriteAliases(specs)}} = ${tmp};`;
+			},
 		)
 		.replace(
 			/^(\s*)import\s+\*\s+as\s+(\w+)\s+from\s+(['"])(.+?)\3\s*;?/gm,
@@ -59,7 +63,10 @@ export function transformEsmToCjs(code: string): string {
 		)
 		.replace(
 			/^(\s*)import\s+(\w+)\s+from\s+(['"])(.+?)\3\s*;?/gm,
-			"$1const $2 = require($3$4$3).default ?? require($3$4$3);",
+			(_m, indent, def, q, pkg) => {
+				const tmp = nextTmp();
+				return `${indent}const ${tmp} = require(${q}${pkg}${q}); const ${def} = ${tmp}.default ?? ${tmp};`;
+			},
 		)
 		.replace(/^(\s*)import\s+(['"])(.+?)\2\s*;?/gm, "$1require($2$3$2);")
 		// `export const X = expr` → `const X = exports.X = expr` so X stays

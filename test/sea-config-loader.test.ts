@@ -134,6 +134,35 @@ export const x = 1;`;
 		expect(result.default.thing).toBe(42);
 	});
 
+	it("handles multi-line named imports", () => {
+		const code = `import {
+	join,
+	dirname,
+} from 'node:path';
+export const computed = join('a', dirname('/b/c'));`;
+		const transformed = transformEsmToCjs(code);
+		const result = evaluate(transformed, (id) => {
+			if (id === "node:path") {
+				return {
+					join: (...p: string[]) => p.join("/"),
+					dirname: (p: string) => p.slice(0, p.lastIndexOf("/")),
+				};
+			}
+			return {};
+		}) as { computed: string };
+		expect(result.computed).toBe("a//b");
+	});
+
+	it("calls require once per default import (no double evaluation)", () => {
+		const code = `import dotenv from "dotenv";
+export const cfg = dotenv;`;
+		const transformed = transformEsmToCjs(code);
+		// Count require( calls for the package
+		const requireCalls = (transformed.match(/require\(["']dotenv["']\)/g) ?? [])
+			.length;
+		expect(requireCalls).toBe(1);
+	});
+
 	it("preserves named-import aliases (`a as b` → `a: b`)", () => {
 		const code = `import { join as pathJoin } from 'node:path';
 export const computed = pathJoin('a', 'b');`;
