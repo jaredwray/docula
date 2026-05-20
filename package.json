@@ -70,8 +70,10 @@
     "colorette": "^2.0.20",
     "ecto": "^4.8.5",
     "hashery": "^2.0.0",
+    "ipaddr.js": "2.2.0",
     "jiti": "^2.7.0",
     "serve-handler": "^6.1.7",
+    "undici": "7.25.0",
     "update-notifier": "^7.3.1",
     "writr": "^6.1.2"
   },

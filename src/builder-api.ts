@@ -9,6 +9,7 @@ import {
 	isPathWithinBasePath,
 	isRemoteUrl,
 } from "./builder-utils.js";
+import { safeFetch } from "./safe-fetch.js";
 import type { DoculaData } from "./types.js";
 
 const writrOptions: WritrOptions = {
@@ -176,11 +177,11 @@ async function parseAndRenderSpec(
 		/* v8 ignore next 9 -- @preserve */
 	} else if (isRemoteUrl(specUrl)) {
 		try {
-			const response = await fetch(specUrl);
+			const response = await safeFetch(specUrl);
 			const specContent = await response.text();
 			apiSpec = parseOpenApiSpec(specContent);
 		} catch {
-			// If remote fetch fails, render page without parsed spec
+			// If remote fetch fails (network error, SSRF block, timeout), render page without parsed spec
 		}
 	}
 
@@ -315,11 +316,11 @@ export async function renderApiContent(
 		apiSpec = parseOpenApiSpec(localSpec.content);
 	} else if (firstSpecUrl && isRemoteUrl(firstSpecUrl)) {
 		try {
-			const response = await fetch(firstSpecUrl);
+			const response = await safeFetch(firstSpecUrl);
 			const specContent = await response.text();
 			apiSpec = parseOpenApiSpec(specContent);
 		} catch {
-			// If remote fetch fails, render page without parsed spec
+			// If remote fetch fails (network error, SSRF block, timeout), render page without parsed spec
 		}
 	}
 
