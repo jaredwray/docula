@@ -101,7 +101,6 @@ The CI workflow (`.github/workflows/build-binaries.yaml`) builds each platform n
 |---|---|---|
 | Linux x64 | `ubuntu-latest` | `docula-linux-x64` |
 | macOS ARM64 | `macos-latest` | `docula-macos-arm64` |
-| macOS x64 | `macos-13` | `docula-macos-x64` |
 | Windows x64 | `windows-latest` | `docula-windows-x64` |
 
 Binaries are uploaded as build artifacts on every run and attached to GitHub releases automatically.
