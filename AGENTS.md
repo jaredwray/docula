@@ -22,6 +22,12 @@ Docula is a documentation/website generator built with TypeScript and Node.js (>
 
 ## Structure
 
-- `src/` - TypeScript source code
-- `test/` - Test files (Vitest)
-- `template/` - Handlebars templates
+This is a pnpm monorepo. Run commands from the root, or scope them to a package
+with `pnpm --filter <name> <script>` (e.g. `pnpm --filter @docula/fastify test:unit`).
+
+- `packages/docula/` - The core `docula` package (CLI + library)
+  - `src/` - TypeScript source code
+  - `test/` - Test files (Vitest)
+  - `templates/` - Handlebars templates
+- `packages/fastify/` - The `@docula/fastify` Fastify plugin
+- `site/` - Docula's own documentation site (built with docula)

@@ -37,4 +37,4 @@ jobs:
       run: pnpm test:ci
 
     - name: Publish
-      run: pnpm publish --no-git-checks --provenance
+      run: pnpm -r publish --no-git-checks --provenance

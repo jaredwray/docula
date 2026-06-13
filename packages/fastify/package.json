@@ -1,0 +1,65 @@
+{
+  "name": "@docula/fastify",
+  "version": "0.1.0",
+  "description": "Serve docula docs, changelog, and API reference from a Fastify app",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaredwray/docula.git",
+    "directory": "packages/fastify"
+  },
+  "author": "Jared Wray <me@jaredwray.com>",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.18.0 || >=24.0.0"
+  },
+  "keywords": [
+    "docula",
+    "fastify",
+    "fastify-plugin",
+    "documentation",
+    "openapi",
+    "swagger",
+    "changelog",
+    "api-reference"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "test:unit": "vitest run --coverage",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@fastify/static": "^8.0.0",
+    "docula": "workspace:*",
+    "fastify-plugin": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@fastify/swagger": "^9.0.0",
+    "fastify": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@fastify/swagger": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@fastify/swagger": "^9.0.0",
+    "@types/node": "^24.12.4",
+    "@vitest/coverage-v8": "^4.1.6",
+    "fastify": "^5.0.0",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  },
+  "files": [
+    "dist"
+  ]
+}

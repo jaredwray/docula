@@ -46,19 +46,19 @@ jobs:
       - name: Smoke Test Binary
         shell: bash
         run: |
-          ./dist/${{ matrix.binary }} version
-          ./dist/${{ matrix.binary }} build -s ./test/fixtures/single-page-site -o ./smoke-dist
+          ./packages/docula/dist/${{ matrix.binary }} version
+          ./packages/docula/dist/${{ matrix.binary }} build -s ./packages/docula/test/fixtures/single-page-site -o ./smoke-dist
           test -f ./smoke-dist/index.html
 
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.binary }}
+          path: packages/docula/dist/${{ matrix.binary }}
           if-no-files-found: error
 
       - name: Upload to Release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} dist/${{ matrix.binary }}#${{ matrix.artifact }} --clobber
+        run: gh release upload ${{ github.event.release.tag_name }} packages/docula/dist/${{ matrix.binary }}#${{ matrix.artifact }} --clobber

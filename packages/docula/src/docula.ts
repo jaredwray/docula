@@ -635,7 +635,15 @@ export default class Docula {
 }
 
 export { Writr } from "writr";
-export type { DoculaChangelogEntry } from "./builder.js";
+export type {
+	DoculaBuilderOptions,
+	DoculaChangelogEntry,
+	DoculaData,
+	DoculaDocument,
+	DoculaSection,
+	DoculaTemplates,
+} from "./builder.js";
+export { DoculaBuilder } from "./builder.js";
 export { DoculaConsole } from "./console.js";
 export type {
 	DoculaAIOptions,

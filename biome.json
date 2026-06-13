@@ -8,10 +8,10 @@
 	"files": {
 		"ignoreUnknown": false,
 		"includes": [
-			"src/**/*",
-			"test/**/*.ts",
-			"!src/init.ts",
-			"!src/embedded-templates.ts"
+			"packages/*/src/**/*",
+			"packages/*/test/**/*.ts",
+			"!packages/docula/src/init.ts",
+			"!packages/docula/src/embedded-templates.ts"
 		]
 	},
 	"formatter": {
