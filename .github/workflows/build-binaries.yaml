@@ -15,14 +15,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact: docula-linux-x64
             binary: docula
+            asset: docula-linux-x64
           - os: macos-latest
-            artifact: docula-macos-arm64
             binary: docula
+            asset: docula-macos-arm64
           - os: windows-latest
-            artifact: docula-windows-x64
             binary: docula.exe
+            asset: docula-windows-x64.exe
 
     runs-on: ${{ matrix.os }}
 
@@ -53,12 +53,15 @@ jobs:
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.artifact }}
+          name: ${{ matrix.asset }}
           path: dist/${{ matrix.binary }}
           if-no-files-found: error
 
       - name: Upload to Release
         if: github.event_name == 'release'
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} dist/${{ matrix.binary }}#${{ matrix.artifact }} --clobber
+        run: |
+          cp "dist/${{ matrix.binary }}" "dist/${{ matrix.asset }}"
+          gh release upload "${{ github.event.release.tag_name }}" "dist/${{ matrix.asset }}" --clobber
