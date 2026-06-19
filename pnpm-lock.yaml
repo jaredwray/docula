@@ -18,8 +18,8 @@ importers:
         specifier: ^3.0.70
         version: 3.0.70(zod@4.3.6)
       '@cacheable/net':
-        specifier: ^2.0.7
-        version: 2.0.7
+        specifier: ^2.0.8
+        version: 2.0.8
       ai:
         specifier: ^6.0.202
         version: 6.0.202(zod@4.3.6)
@@ -255,8 +255,8 @@ packages:
   '@cacheable/memory@2.0.8':
     resolution: {integrity: sha512-FvEb29x5wVwu/Kf93IWwsOOEuhHh6dYCJF3vcKLzXc0KXIW181AOzv6ceT4ZpBHDvAfG60eqb+ekmrnLHIy+jw==}
 
-  '@cacheable/net@2.0.7':
-    resolution: {integrity: sha512-yItascYmXnV324/43u+t8/DaljXV0dxfwC/4BfXm38SiKWBONgBehNa6FskfRL4HnogmeUrWKiU+J6CXGZ4eLw==}
+  '@cacheable/net@2.0.8':
+    resolution: {integrity: sha512-uSRwS6krnRsOM65F1S2IlkGQA+VoxkrbrkBwmbFxDj/ihdSHtDpLMIaKguM0A++dUXTha2cY146yNOqwv8gAPQ==}
 
   '@cacheable/utils@2.4.1':
     resolution: {integrity: sha512-eiFgzCbIneyMlLOmNG4g9xzF7Hv3Mga4LjxjcSC/ues6VYq2+gUbQI8JqNuw/ZM8tJIeIaBGpswAsqV2V7ApgA==}
@@ -2687,9 +2687,9 @@ snapshots:
       hookified: 1.15.1
       keyv: 5.6.0
 
-  '@cacheable/net@2.0.7':
+  '@cacheable/net@2.0.8':
     dependencies:
-      cacheable: 2.3.4
+      cacheable: 2.3.5
       hookified: 1.15.1
       http-cache-semantics: 4.2.0
       undici: 7.25.0
@@ -4599,11 +4599,11 @@ snapshots:
 
   qified@0.10.1:
     dependencies:
-      hookified: 2.1.1
+      hookified: 2.2.0
 
   qified@0.9.1:
     dependencies:
-      hookified: 2.1.1
+      hookified: 2.2.0
 
   quansync@1.0.0: {}
 
