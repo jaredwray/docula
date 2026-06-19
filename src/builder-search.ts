@@ -85,9 +85,10 @@ export function stripHtml(html: string): string {
 		return "";
 	}
 
-	const withoutBlocks = html
-		.replace(/<script[\s\S]*?<\/script>/gi, " ")
-		.replace(/<style[\s\S]*?<\/style>/gi, " ");
+	const withoutComments = html.replace(/<!--[\s\S]*?-->/g, " ");
+	const withoutBlocks = withoutComments
+		.replace(/<script\b[\s\S]*?<\/script\s*>/gi, " ")
+		.replace(/<style\b[\s\S]*?<\/style\s*>/gi, " ");
 	const withoutTags = withoutBlocks.replace(/<[^>]+>/g, " ");
 	return decodeEntities(withoutTags).replace(/\s+/g, " ").trim();
 }

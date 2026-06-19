@@ -104,10 +104,24 @@ describe("builder-search", () => {
 			expect(stripHtml("")).toBe("");
 		});
 
-		it("removes script and style blocks", () => {
-			const html =
-				"<style>.a{color:red}</style><p>Hello</p><script>var x = 1 < 2;</script>";
-			expect(stripHtml(html)).toBe("Hello");
+		it("removes script and style blocks, tolerating whitespace in end tags", () => {
+			expect(
+				stripHtml(
+					"<style>.a{color:red}</style><p>Hello</p><script>var x = 1 < 2;</script>",
+				),
+			).toBe("Hello");
+			// End tags with trailing whitespace/newlines are still stripped.
+			expect(
+				stripHtml(
+					'<p>Hi</p><script type="text/javascript">alert(1)</script ><style>.b{}</style\n>',
+				),
+			).toBe("Hi");
+		});
+
+		it("strips HTML comments, including comments containing '>'", () => {
+			expect(stripHtml("<p>Visible</p><!-- if x > y then hide -->")).toBe(
+				"Visible",
+			);
 		});
 
 		it("strips tags, decodes entities, and collapses whitespace", () => {

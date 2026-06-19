@@ -373,6 +373,10 @@
       }
     } else if (event.key === "Enter") {
       event.preventDefault();
+      // Flush any pending debounced search so Enter acts on the current input
+      // rather than stale results when typing then immediately pressing Enter.
+      clearTimeout(debounceTimer);
+      runSearch(input.value);
       if (activeIndex >= 0 && currentResults[activeIndex]) {
         navigate(currentResults[activeIndex].url);
       }
