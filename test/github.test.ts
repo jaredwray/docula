@@ -11,7 +11,7 @@ import {
 } from "../src/github.js";
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
-import { removeTempDir, setupGithubMock } from "./test-helpers.js";
+import { makeTempDir, removeTempDir, setupGithubMock } from "./test-helpers.js";
 
 const defaultOptions: GithubOptions = {
 	api: "https://api.github.com",
@@ -45,11 +45,11 @@ describe("Github", () => {
 		expect(github.options.repo).toEqual(newOptions.repo);
 	});
 	it("should be able to get the contributors", async () => {
-		const github = new Github(defaultOptions);
-
 		CacheableNet.prototype.get = vi
 			.fn()
 			.mockResolvedValue({ data: githubMockContributors });
+
+		const github = new Github(defaultOptions);
 
 		const result = await github.getContributors();
 		expect(result).toBeDefined();
@@ -99,6 +99,13 @@ describe("Github", () => {
 		const github = new Github(defaultOptions);
 
 		await expect(github.getContributors()).rejects.toThrow();
+	});
+	it("should return undefined when no contributors found", async () => {
+		CacheableNet.prototype.get = vi.fn().mockResolvedValue({ data: [] });
+		const github = new Github(defaultOptions);
+
+		const result = await github.getContributors();
+		expect(result).toBeUndefined();
 	});
 	it("should be able to get the releases", async () => {
 		const github = new Github(defaultOptions);
@@ -181,11 +188,8 @@ describe("Github", () => {
 });
 
 describe("Github file caching", () => {
-	const testCachePath = path.join(process.cwd(), "test/temp/github-cache");
-	const cacheConfig: GithubCacheConfig = {
-		cachePath: testCachePath,
-		ttl: 3600,
-	};
+	let testCachePath: string;
+	let cacheConfig: GithubCacheConfig;
 
 	afterEach(() => {
 		vi.resetAllMocks();
@@ -193,6 +197,11 @@ describe("Github file caching", () => {
 	});
 
 	beforeEach(() => {
+		testCachePath = makeTempDir("github-cache");
+		cacheConfig = {
+			cachePath: testCachePath,
+			ttl: 3600,
+		};
 		setupGithubMock();
 	});
 

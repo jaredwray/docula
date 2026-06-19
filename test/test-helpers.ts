@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { CacheableNet } from "@cacheable/net";
 import { vi } from "vitest";
@@ -6,86 +7,140 @@ import githubMockContributors from "./fixtures/data-mocks/github-contributors.js
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
 
 /**
- * All fixture directories that may produce `.cache/build` artifacts during tests.
- * Used by {@link cleanFixtureBuildCaches} to prevent differential-build interference
- * between parallel test files.
+ * Registry of every temp directory created during the current worker's run.
+ * Each Vitest worker imports this module once, so the registry is scoped to a
+ * single worker process. {@link cleanupTempDirs} (wired up as a global
+ * `afterEach` in `test/setup.ts`) drains it after every test, guaranteeing
+ * cleanup even when a test throws.
  */
-const ALL_FIXTURE_PATHS = [
-	"test/fixtures/single-page-site",
-	"test/fixtures/single-page-site-ts",
-	"test/fixtures/single-page-site-onprepare",
-	"test/fixtures/single-page-site-ts-onprepare",
-	"test/fixtures/multi-page-site",
-	"test/fixtures/mega-page-site",
-	"test/fixtures/mega-page-site-no-home-page",
-	"test/fixtures/changelog-site",
-	"test/fixtures/announcement-site",
-	"test/fixtures/mega-custom-template",
-	"test/fixtures/auto-readme-site",
-	"test/fixtures/api-only-site",
-	"test/fixtures/empty-site",
-	"test/fixtures/multi-api-site",
-] as const;
+const tempDirs = new Set<string>();
 
 /**
- * Fixtures where builds may auto-generate a README.md or copy site assets
- * that need to be cleaned up after tests.
+ * Root for all docula test temp directories. Lives under the OS temp dir so it
+ * never pollutes the repo and is isolated from concurrent Vitest processes
+ * (every directory name is made unique with `fs.mkdtempSync`).
  */
-const FIXTURES_WITH_GENERATED_ASSETS = [
-	"test/fixtures/api-only-site",
-	"test/fixtures/auto-readme-site",
-	"test/fixtures/empty-site",
-	"test/fixtures/mega-page-site",
-	"test/fixtures/mega-page-site-no-home-page",
-] as const;
+const TEMP_ROOT = path.join(os.tmpdir(), "docula-tests");
 
 /**
- * Remove `.cache/build` directories from all known fixture paths.
- * Wrapped in try/catch per fixture because parallel test files may be
- * writing to the same directories, causing ENOTEMPTY races.
+ * Create a unique, empty temporary directory and register it for automatic
+ * cleanup after the current test. Safe to call any number of times per test.
+ *
+ * @param prefix - Human-readable hint included in the directory name.
+ * @returns Absolute path to the freshly created directory.
  */
-export function cleanFixtureBuildCaches(): void {
-	for (const fixture of ALL_FIXTURE_PATHS) {
+export function makeTempDir(prefix = "docula"): string {
+	fs.mkdirSync(TEMP_ROOT, { recursive: true });
+	const safePrefix = prefix.replace(/[^a-zA-Z0-9._-]/g, "-");
+	const dir = fs.mkdtempSync(path.join(TEMP_ROOT, `${safePrefix}-`));
+	tempDirs.add(dir);
+	return dir;
+}
+
+/**
+ * Copy a fixture directory into a fresh, unique temp directory so that builds
+ * (which write `.cache`, `.gitignore`, generated README files, etc.) never
+ * mutate the shared fixture or race with other test files.
+ *
+ * The cloned copy always starts without a `.cache` directory so differential
+ * build behaviour is deterministic.
+ *
+ * @param fixturePath - Path to the source fixture (relative to repo root).
+ * @param prefix - Optional directory-name hint (defaults to the fixture name).
+ * @returns Absolute path to the cloned fixture.
+ */
+export function cloneFixture(fixturePath: string, prefix?: string): string {
+	const dir = makeTempDir(prefix ?? path.basename(fixturePath));
+	fs.cpSync(fixturePath, dir, { recursive: true });
+	fs.rmSync(path.join(dir, ".cache"), { recursive: true, force: true });
+	return dir;
+}
+
+/**
+ * Like {@link cloneFixture}, but also neutralizes any self-referential
+ * `sitePath`/`output` entries in the cloned `docula.config.*` file.
+ *
+ * Several fixtures ship a config that hard-codes `sitePath`/`output` back to the
+ * original fixture location (e.g. `"./test/fixtures/<name>"` or `"./site"`).
+ * When such a config is loaded by `docula.execute()`/`loadConfigFile()`, those
+ * values would override the cloned `sitePath`, causing the build (and its
+ * persistent `.cache`) to land in the shared fixture or the repo's real `site/`
+ * directory — a cross-run, cross-file flake. Stripping them keeps every build
+ * fully contained inside the unique clone.
+ *
+ * Use this for tests that build through the config-loading code path; use
+ * {@link cloneFixture} when calling builder methods directly with explicit
+ * options.
+ */
+export function cloneSite(fixturePath: string, prefix?: string): string {
+	const dir = cloneFixture(fixturePath, prefix);
+	for (const entry of fs.readdirSync(dir)) {
+		if (!/^docula\.config\.(mjs|cjs|js|ts|json)$/.test(entry)) {
+			continue;
+		}
+		const configPath = path.join(dir, entry);
+		if (entry.endsWith(".json")) {
+			try {
+				const data = JSON.parse(fs.readFileSync(configPath, "utf8"));
+				delete data.sitePath;
+				delete data.output;
+				fs.writeFileSync(configPath, JSON.stringify(data, null, 2));
+			} catch {
+				// Leave a non-parseable config untouched.
+			}
+			continue;
+		}
+		const text = fs
+			.readFileSync(configPath, "utf8")
+			.replace(/^[ \t]*(?:sitePath|output)[ \t]*:[ \t]*[^\n]*\n/gm, "");
+		fs.writeFileSync(configPath, text);
+	}
+	return dir;
+}
+
+/**
+ * Remove a single temp directory and stop tracking it. Tolerates a missing
+ * directory. Prefer relying on the automatic {@link cleanupTempDirs} hook; use
+ * this only when a test needs to delete a directory mid-test.
+ */
+export function removeTempDir(dirPath: string): void {
+	fs.rmSync(dirPath, { recursive: true, force: true, maxRetries: 5 });
+	tempDirs.delete(dirPath);
+}
+
+/**
+ * Async variant of {@link removeTempDir}.
+ */
+export async function removeTempDirAsync(dirPath: string): Promise<void> {
+	await fs.promises.rm(dirPath, {
+		recursive: true,
+		force: true,
+		maxRetries: 5,
+	});
+	tempDirs.delete(dirPath);
+}
+
+/**
+ * Remove every temp directory created since the last cleanup. Errors per
+ * directory are swallowed so one stuck directory cannot fail a test, but each
+ * removal uses retries to ride out transient filesystem contention. Wired up as
+ * a global `afterEach` in `test/setup.ts`.
+ */
+export function cleanupTempDirs(): void {
+	for (const dir of tempDirs) {
 		try {
-			fs.rmSync(`${fixture}/.cache/build`, { recursive: true, force: true });
+			fs.rmSync(dir, {
+				recursive: true,
+				force: true,
+				maxRetries: 5,
+				retryDelay: 25,
+			});
 		} catch {
-			// ignore race conditions with parallel test files
+			// Best-effort: a failed removal must never fail a test. The OS temp
+			// dir is reclaimed by the platform, so a leaked directory is benign.
 		}
 	}
-}
-
-/**
- * Remove auto-generated README.md and copied `site/` directories from
- * fixtures that should not retain them between tests.
- */
-export function cleanFixtureGeneratedAssets(): void {
-	for (const fixture of FIXTURES_WITH_GENERATED_ASSETS) {
-		try {
-			fs.rmSync(`${fixture}/README.md`, { force: true });
-			fs.rmSync(`${fixture}/site`, { recursive: true, force: true });
-		} catch {
-			// ignore if files do not exist
-		}
-	}
-}
-
-/**
- * Standard afterEach cleanup for test suites that build sites.
- * Resets mocks, cleans fixture build caches, and removes generated assets.
- */
-export function cleanupAfterEach(): void {
-	vi.resetAllMocks();
-	cleanFixtureBuildCaches();
-	cleanFixtureGeneratedAssets();
-}
-
-/**
- * Standard afterEach cleanup for test suites that only need mock resets
- * and build cache cleanup (no generated asset cleanup).
- */
-export function cleanupAfterEachBuildOnly(): void {
-	vi.resetAllMocks();
-	cleanFixtureBuildCaches();
+	tempDirs.clear();
 }
 
 /**
@@ -108,37 +163,19 @@ export function setupGithubMock(): void {
 }
 
 /**
- * Recursively remove a temporary directory, tolerating non-existence.
+ * Standard `afterEach` cleanup: reset mocks and remove temp directories.
+ * Temp-dir removal also happens automatically via `test/setup.ts`, so calling
+ * this is optional; it remains for suites that want an explicit mock reset.
  */
-export function removeTempDir(dirPath: string): void {
-	fs.rmSync(dirPath, { recursive: true, force: true });
+export function cleanupAfterEach(): void {
+	vi.resetAllMocks();
+	cleanupTempDirs();
 }
 
 /**
- * Recursively remove a temporary directory (async), tolerating non-existence.
+ * Alias of {@link cleanupAfterEach}; kept as a distinct name for suites that
+ * previously distinguished "build only" cleanup.
  */
-export async function removeTempDirAsync(dirPath: string): Promise<void> {
-	await fs.promises.rm(dirPath, { recursive: true, force: true });
-}
-
-/**
- * Create a temporary directory under `test/temp/` by copying a fixture.
- * Returns the created path. The caller is responsible for cleanup via
- * {@link removeTempDir} or a try/finally block.
- */
-export function cloneFixture(fixturePath: string, tempName: string): string {
-	const dest = `test/temp/${tempName}`;
-	fs.mkdirSync(path.dirname(dest), { recursive: true });
-	fs.cpSync(fixturePath, dest, { recursive: true });
-	return dest;
-}
-
-/**
- * Ensure a temporary directory exists under `test/temp/`.
- * Returns the full path.
- */
-export function ensureTempDir(tempName: string): string {
-	const dest = `test/temp/${tempName}`;
-	fs.mkdirSync(dest, { recursive: true });
-	return dest;
+export function cleanupAfterEachBuildOnly(): void {
+	cleanupAfterEach();
 }

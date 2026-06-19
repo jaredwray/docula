@@ -1,16 +1,29 @@
 import fs from "node:fs";
+import path from "node:path";
 import { CacheableNet } from "@cacheable/net";
+import { Ecto } from "ecto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DoculaBuilder, type DoculaData } from "../src/builder.js";
 import {
 	buildAllApiPages,
+	getSafeLocalOpenApiSpec,
+	getSafeLocalOpenApiSpecForSpec,
+	getSafeSiteOverrideFileContent,
+	renderApiContent,
+	renderCombinedApiContent,
 	resolveLocalOpenApiPathForSpec,
+	resolveOpenApiSpecUrl,
 	resolveSpecUrl,
 } from "../src/builder-api.js";
 import { DoculaOptions } from "../src/options.js";
 import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
 import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
-import { cleanupAfterEach, setupGithubMock } from "./test-helpers.js";
+import {
+	cleanupAfterEach,
+	cloneFixture,
+	makeTempDir,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -42,9 +55,9 @@ describe("DoculaBuilder - API", () => {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
-				sitePath: "test/fixtures/single-page-site",
+				sitePath: cloneFixture("test/fixtures/single-page-site"),
 				templatePath: "templates/classic",
-				output: "test/temp/api-test",
+				output: makeTempDir("api-test"),
 				openApiSpecs: [
 					{
 						name: "API Reference",
@@ -86,9 +99,9 @@ describe("DoculaBuilder - API", () => {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
-				sitePath: "test/fixtures/single-page-site",
+				sitePath: cloneFixture("test/fixtures/single-page-site"),
 				templatePath: "templates/classic",
-				output: "test/temp/api-test-no-url",
+				output: makeTempDir("api-test-no-url"),
 				templates: {
 					home: "home.hbs",
 				},
@@ -117,9 +130,9 @@ describe("DoculaBuilder - API", () => {
 				siteUrl: "http://foo.com",
 				siteTitle: "docula",
 				siteDescription: "Beautiful Website for Your Projects",
-				sitePath: "test/fixtures/single-page-site",
+				sitePath: cloneFixture("test/fixtures/single-page-site"),
 				templatePath: "templates/classic",
-				output: "test/temp/api-test-no-template",
+				output: makeTempDir("api-test-no-template"),
 				openApiSpecs: [
 					{
 						name: "API Reference",
@@ -156,7 +169,7 @@ describe("DoculaBuilder - API", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp/sitemap-api-test",
+				output: makeTempDir("sitemap-api-test"),
 				openApiSpecs: [
 					{
 						name: "API Reference",
@@ -199,7 +212,7 @@ describe("DoculaBuilder - API", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/classic",
-				output: "test/temp/sitemap-no-api-test",
+				output: makeTempDir("sitemap-no-api-test"),
 				openApiSpecs: [
 					{
 						name: "API Reference",
@@ -253,7 +266,8 @@ describe("DoculaBuilder - API", () => {
 
 		it("should build with openApiUrl configured", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-api-test";
+			options.sitePath = cloneFixture("site");
+			options.output = makeTempDir("build-api-test");
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 			const builder = new DoculaBuilder(options, { quiet: true });
 			builder.console.quiet = false;
@@ -282,19 +296,15 @@ describe("DoculaBuilder - API", () => {
 			const templates = ["modern", "classic"] as const;
 
 			for (const template of templates) {
-				const tempSitePath = `test/temp/api-home-button-${template}-site`;
-				fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
-					recursive: true,
-					filter: (src) => {
-						const base = src.split("/").pop() ?? "";
-						return !base.startsWith("dist") && base !== ".cache";
-					},
-				});
+				const tempSitePath = cloneFixture(
+					"test/fixtures/multi-page-site",
+					`api-home-button-${template}-site`,
+				);
 				const options = new DoculaOptions();
 				options.quiet = true;
 				options.template = template;
 				options.sitePath = tempSitePath;
-				options.output = `test/temp/build-api-home-button-${template}`;
+				options.output = makeTempDir(`build-api-home-button-${template}`);
 				options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 
 				const builder = new DoculaBuilder(options, { quiet: true });
@@ -318,19 +328,15 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should not render API Reference button on home page when api template is missing", async () => {
-			const tempSitePath = "test/temp/api-no-template-button-site";
-			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-page-site",
+				"api-no-template-button-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.templatePath = "test/fixtures/template-example";
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-api-home-no-template-button";
+			options.output = makeTempDir("build-api-home-no-template-button");
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 
 			const builder = new DoculaBuilder(options, { quiet: true });
@@ -353,18 +359,14 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should auto-detect api/swagger.json when openApiUrl is not set", async () => {
-			const tempSitePath = "test/temp/api-autodetect-site";
-			fs.cpSync("test/fixtures/mega-page-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/mega-page-site",
+				"api-autodetect-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-api-autodetect";
+			options.output = makeTempDir("build-api-autodetect");
 			const builder = new DoculaBuilder(options, { quiet: true });
 
 			try {
@@ -385,17 +387,13 @@ describe("DoculaBuilder - API", () => {
 
 	describe("Docula Builder - buildApiHomePage", () => {
 		it("should render API page as index.html when no README and no docs", async () => {
-			const tempSitePath = "test/temp/api-home-test-site";
-			fs.cpSync("test/fixtures/api-only-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/api-only-site",
+				"api-home-test-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.output = "test/temp/api-home-test";
+			options.output = makeTempDir("api-home-test");
 			options.sitePath = tempSitePath;
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options, { quiet: true });
@@ -424,7 +422,7 @@ describe("DoculaBuilder - API", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/empty-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/api-home-error-test",
+				output: makeTempDir("api-home-error-test"),
 			};
 
 			await expect(builder.renderApiContent(data)).rejects.toThrow(
@@ -448,18 +446,14 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should build a single API page with all specs as sections", async () => {
-			const tempSitePath = "test/temp/multi-api-specs-site";
-			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-api-site",
+				"multi-api-specs-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-multi-api-specs";
+			options.output = makeTempDir("build-multi-api-specs");
 			options.openApiUrl = [
 				{
 					name: "Petstore API",
@@ -494,18 +488,14 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should auto-detect multiple api/*/swagger.json files", async () => {
-			const tempSitePath = "test/temp/multi-api-autodetect-site";
-			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-api-site",
+				"multi-api-autodetect-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-multi-api-autodetect";
+			options.output = makeTempDir("build-multi-api-autodetect");
 
 			const builder = new DoculaBuilder(options, { quiet: true });
 
@@ -582,18 +572,14 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should copy swagger.json to each spec output directory", async () => {
-			const tempSitePath = "test/temp/multi-api-copy-site";
-			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-api-site",
+				"multi-api-copy-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-multi-api-copy";
+			options.output = makeTempDir("build-multi-api-copy");
 			options.openApiUrl = [
 				{
 					name: "Petstore API",
@@ -672,7 +658,7 @@ describe("DoculaBuilder - API", () => {
 				siteDescription: "test",
 				sitePath: "test/fixtures/multi-api-site",
 				templatePath: "templates/modern",
-				output: "test/temp/build-api-noop",
+				output: makeTempDir("build-api-noop"),
 				templates: { home: "home.hbs", api: "api.hbs" },
 			} as DoculaData;
 
@@ -690,18 +676,14 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should generate multi-spec llms.txt content", async () => {
-			const tempSitePath = "test/temp/multi-api-llms-site";
-			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-api-site",
+				"multi-api-llms-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-multi-api-llms";
+			options.output = makeTempDir("build-multi-api-llms");
 			options.enableLlmsTxt = true;
 			options.openApiUrl = [
 				{
@@ -745,18 +727,14 @@ describe("DoculaBuilder - API", () => {
 		});
 
 		it("should sort specs by order field", async () => {
-			const tempSitePath = "test/temp/multi-api-order-site";
-			fs.cpSync("test/fixtures/multi-api-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-api-site",
+				"multi-api-order-site",
+			);
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = tempSitePath;
-			options.output = "test/temp/build-multi-api-order";
+			options.output = makeTempDir("build-multi-api-order");
 			options.openApiUrl = [
 				{
 					name: "Users API",
@@ -786,6 +764,252 @@ describe("DoculaBuilder - API", () => {
 				fs.rmSync(tempSitePath, { recursive: true, force: true });
 				await fs.promises.rm(options.output, { recursive: true, force: true });
 			}
+		});
+	});
+
+	describe("Docula Builder - spec resolution helpers", () => {
+		it("resolveOpenApiSpecUrl returns undefined when no spec url", () => {
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+			} as DoculaData;
+			expect(resolveOpenApiSpecUrl(data)).toBeUndefined();
+
+			data.openApiSpecs = [];
+			expect(resolveOpenApiSpecUrl(data)).toBeUndefined();
+		});
+
+		it("resolveOpenApiSpecUrl returns remote url unchanged", () => {
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				openApiSpecs: [{ name: "Remote", url: "https://example.com/api.json" }],
+			} as DoculaData;
+			expect(resolveOpenApiSpecUrl(data)).toBe("https://example.com/api.json");
+		});
+
+		it("resolveOpenApiSpecUrl normalizes a relative local url", () => {
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				openApiSpecs: [{ name: "Local", url: "api/swagger.json" }],
+			} as DoculaData;
+			expect(resolveOpenApiSpecUrl(data)).toBe(
+				"http://foo.com/api/swagger.json",
+			);
+		});
+
+		it("resolveOpenApiSpecUrl keeps an absolute local url as-is", () => {
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				openApiSpecs: [{ name: "Local", url: "/api/swagger.json" }],
+			} as DoculaData;
+			expect(resolveOpenApiSpecUrl(data)).toBe(
+				"http://foo.com/api/swagger.json",
+			);
+		});
+	});
+
+	describe("Docula Builder - getSafeSiteOverrideFileContent", () => {
+		it("returns undefined when candidate escapes the base path", async () => {
+			// fileName is typed as a literal union; cast to reach the traversal guard.
+			const result = await getSafeSiteOverrideFileContent(
+				makeTempDir("override-traversal"),
+				"../llms.txt" as "llms.txt",
+			);
+			expect(result).toBeUndefined();
+		});
+
+		it("returns undefined when the file does not exist", async () => {
+			const dir = makeTempDir("override-missing");
+			expect(
+				await getSafeSiteOverrideFileContent(dir, "llms.txt"),
+			).toBeUndefined();
+		});
+
+		it("returns undefined when the candidate is a directory", async () => {
+			const dir = makeTempDir("override-dir");
+			fs.mkdirSync(path.join(dir, "llms.txt"));
+			expect(
+				await getSafeSiteOverrideFileContent(dir, "llms.txt"),
+			).toBeUndefined();
+		});
+
+		it("returns undefined when the candidate is a symlink", async () => {
+			const dir = makeTempDir("override-symlink");
+			const target = path.join(dir, "real.txt");
+			fs.writeFileSync(target, "hello");
+			fs.symlinkSync(target, path.join(dir, "llms.txt"));
+			expect(
+				await getSafeSiteOverrideFileContent(dir, "llms.txt"),
+			).toBeUndefined();
+		});
+
+		it("returns file content for a valid override file", async () => {
+			const dir = makeTempDir("override-valid");
+			fs.writeFileSync(path.join(dir, "llms.txt"), "override body");
+			expect(await getSafeSiteOverrideFileContent(dir, "llms.txt")).toBe(
+				"override body",
+			);
+		});
+	});
+
+	describe("Docula Builder - getSafeLocalOpenApiSpec", () => {
+		it("returns undefined when no spec url is configured", async () => {
+			const data = {
+				...defaultPathFields,
+				sitePath: makeTempDir("no-spec"),
+			} as DoculaData;
+			expect(await getSafeLocalOpenApiSpec(data)).toBeUndefined();
+
+			data.openApiSpecs = [];
+			expect(await getSafeLocalOpenApiSpec(data)).toBeUndefined();
+		});
+
+		it("reads the first configured local spec", async () => {
+			const dir = makeTempDir("local-spec");
+			fs.mkdirSync(path.join(dir, "api"), { recursive: true });
+			fs.writeFileSync(
+				path.join(dir, "api", "swagger.json"),
+				'  {"openapi":"3.0.0"}  ',
+			);
+			const data = {
+				...defaultPathFields,
+				sitePath: dir,
+				openApiSpecs: [{ name: "Local", url: "api/swagger.json" }],
+			} as DoculaData;
+			const result = await getSafeLocalOpenApiSpec(data);
+			expect(result?.content).toBe('{"openapi":"3.0.0"}');
+		});
+	});
+
+	describe("Docula Builder - getSafeLocalOpenApiSpecForSpec", () => {
+		it("returns undefined for a remote spec url", async () => {
+			const data = {
+				...defaultPathFields,
+				sitePath: makeTempDir("for-spec-remote"),
+			} as DoculaData;
+			expect(
+				await getSafeLocalOpenApiSpecForSpec(
+					data,
+					"https://example.com/api.json",
+				),
+			).toBeUndefined();
+		});
+
+		it("returns undefined when the resolved path escapes the site path", async () => {
+			const data = {
+				...defaultPathFields,
+				sitePath: makeTempDir("for-spec-escape"),
+			} as DoculaData;
+			expect(
+				await getSafeLocalOpenApiSpecForSpec(data, "../../etc/passwd"),
+			).toBeUndefined();
+		});
+
+		it("returns undefined when the resolved path is a directory", async () => {
+			const dir = makeTempDir("for-spec-dir");
+			fs.mkdirSync(path.join(dir, "swagger.json"));
+			const data = {
+				...defaultPathFields,
+				sitePath: dir,
+			} as DoculaData;
+			expect(
+				await getSafeLocalOpenApiSpecForSpec(data, "swagger.json"),
+			).toBeUndefined();
+		});
+
+		it("returns undefined when the resolved path is a symlink", async () => {
+			const dir = makeTempDir("for-spec-symlink");
+			const target = path.join(dir, "real.json");
+			fs.writeFileSync(target, "{}");
+			fs.symlinkSync(target, path.join(dir, "swagger.json"));
+			const data = {
+				...defaultPathFields,
+				sitePath: dir,
+			} as DoculaData;
+			expect(
+				await getSafeLocalOpenApiSpecForSpec(data, "swagger.json"),
+			).toBeUndefined();
+		});
+
+		it("returns undefined when the real path escapes the real site path", async () => {
+			// Spec dir is a symlink to an out-of-tree directory: the post-realpath
+			// containment check (L152) rejects it even though the pre-resolution
+			// path looks contained.
+			const root = makeTempDir("for-spec-realpath");
+			const siteDir = path.join(root, "site");
+			const outsideDir = path.join(root, "outside");
+			fs.mkdirSync(siteDir);
+			fs.mkdirSync(outsideDir);
+			fs.writeFileSync(path.join(outsideDir, "swagger.json"), "{}");
+			fs.symlinkSync(outsideDir, path.join(siteDir, "linked"));
+			const data = {
+				...defaultPathFields,
+				sitePath: siteDir,
+			} as DoculaData;
+			expect(
+				await getSafeLocalOpenApiSpecForSpec(data, "linked/swagger.json"),
+			).toBeUndefined();
+		});
+	});
+
+	describe("Docula Builder - renderCombinedApiContent / renderApiContent branches", () => {
+		it("defaults to an empty spec list when openApiSpecs is undefined", async () => {
+			const ecto = new Ecto();
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "test",
+				siteDescription: "test",
+				sitePath: cloneFixture("test/fixtures/single-page-site"),
+				templatePath: "templates/classic",
+				output: makeTempDir("combined-empty"),
+				templates: { home: "home.hbs", api: "api.hbs" },
+			} as DoculaData;
+			// openApiSpecs intentionally left undefined -> `?? []` right side (L234)
+			const html = await renderCombinedApiContent(ecto, data);
+			expect(typeof html).toBe("string");
+		});
+
+		it("renders without a parsed spec when a local spec is missing and not remote", async () => {
+			// Local (non-remote) url whose file does not exist: getSafeLocalOpenApiSpec
+			// returns undefined and `isRemoteUrl` is false, so the else-if at L178 is
+			// taken on its false branch and apiSpec stays undefined.
+			const ecto = new Ecto();
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "test",
+				siteDescription: "test",
+				sitePath: cloneFixture("test/fixtures/single-page-site"),
+				templatePath: "templates/classic",
+				output: makeTempDir("combined-missing-local"),
+				templates: { home: "home.hbs", api: "api.hbs" },
+				openApiSpecs: [{ name: "Missing", url: "api/does-not-exist.json" }],
+			} as DoculaData;
+			const html = await renderCombinedApiContent(ecto, data);
+			expect(typeof html).toBe("string");
+			expect(html.length).toBeGreaterThan(0);
+		});
+
+		it("renderApiContent delegates to combined rendering when specs exist", async () => {
+			const ecto = new Ecto();
+			const data = {
+				...defaultPathFields,
+				siteUrl: "http://foo.com",
+				siteTitle: "test",
+				siteDescription: "test",
+				sitePath: cloneFixture("test/fixtures/single-page-site"),
+				templatePath: "templates/classic",
+				output: makeTempDir("render-api-combined"),
+				templates: { home: "home.hbs", api: "api.hbs" },
+				openApiSpecs: [{ name: "Missing", url: "api/does-not-exist.json" }],
+			} as DoculaData;
+			const html = await renderApiContent(ecto, data);
+			expect(typeof html).toBe("string");
+			expect(html.length).toBeGreaterThan(0);
 		});
 	});
 });

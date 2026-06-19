@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { CacheableNet } from "@cacheable/net";
 import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -7,7 +8,14 @@ import {
 	type DoculaData,
 } from "../src/builder.js";
 import { DoculaOptions } from "../src/options.js";
-import { cleanupAfterEachBuildOnly, setupGithubMock } from "./test-helpers.js";
+import githubMockContributors from "./fixtures/data-mocks/github-contributors.json";
+import githubMockReleases from "./fixtures/data-mocks/github-releases.json";
+import {
+	cleanupAfterEachBuildOnly,
+	cloneFixture,
+	makeTempDir,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 const _testHash = new Hashery();
 
@@ -36,7 +44,7 @@ describe("DoculaBuilder - Changelog", () => {
 		siteDescription: "Beautiful Website for Your Projects",
 		sitePath: "test/fixtures/single-page-site",
 		templatePath: "test/fixtures/template-example",
-		output: "test/temp/sitemap-test",
+		output: makeTempDir("sitemap-test"),
 	};
 
 	afterEach(() => {
@@ -44,6 +52,21 @@ describe("DoculaBuilder - Changelog", () => {
 	});
 	beforeEach(() => {
 		setupGithubMock();
+		// Reinforce the GitHub mock against the `CacheableNet` instance resolved
+		// by this test file's mocked module graph. `setupGithubMock` patches the
+		// copy imported inside test-helpers, which does not always resolve to the
+		// same mocked module that `src/github.ts` consumes, so release-driven
+		// builds would otherwise see an empty response.
+		// biome-ignore lint/suspicious/noExplicitAny: test mock assignment
+		(CacheableNet.prototype.get as any) = vi.fn(async (url: string) => {
+			if (url.endsWith("releases")) {
+				return { data: githubMockReleases };
+			}
+			if (url.endsWith("contributors")) {
+				return { data: githubMockContributors };
+			}
+			return { data: {} };
+		});
 	});
 
 	describe("Docula Builder - Changelog", () => {
@@ -84,7 +107,7 @@ describe("DoculaBuilder - Changelog", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const changelogPath = "test/temp/changelog-mixed-files";
+			const changelogPath = makeTempDir("changelog-mixed-files");
 			await fs.promises.rm(changelogPath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${changelogPath}/nested`, { recursive: true });
 			await fs.promises.writeFile(
@@ -253,7 +276,7 @@ describe("DoculaBuilder - Changelog", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const changelogPath = "test/temp/changelog-missing-frontmatter";
+			const changelogPath = makeTempDir("changelog-missing-frontmatter");
 			const filePath = `${changelogPath}/2026-03-02-missing-fields.md`;
 			await fs.promises.rm(changelogPath, { recursive: true, force: true });
 			await fs.promises.mkdir(changelogPath, { recursive: true });
@@ -287,7 +310,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-test",
+				output: makeTempDir("changelog-test"),
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -343,7 +366,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-entry-test",
+				output: makeTempDir("changelog-entry-test"),
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -401,7 +424,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/no-changelog-test",
+				output: makeTempDir("no-changelog-test"),
 				hasChangelog: false,
 			};
 
@@ -432,7 +455,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/no-changelog-entries-test",
+				output: makeTempDir("no-changelog-entries-test"),
 				hasChangelog: false,
 				changelogEntries: [],
 			};
@@ -458,7 +481,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-changelog-test",
+				output: makeTempDir("sitemap-changelog-test"),
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -512,7 +535,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-changelog-no-entries-test",
+				output: makeTempDir("sitemap-changelog-no-entries-test"),
 				hasChangelog: true,
 				templates: {
 					home: "home.hbs",
@@ -549,7 +572,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-no-changelog-test",
+				output: makeTempDir("sitemap-no-changelog-test"),
 				hasChangelog: false,
 				templates: {
 					home: "home.hbs",
@@ -602,8 +625,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should build with changelog", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-changelog-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-changelog-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 			builder.console.quiet = false;
@@ -835,10 +858,47 @@ describe("DoculaBuilder - Changelog", () => {
 			expect(preview).toContain("</div></div>");
 		});
 
+		it("should skip non-matching open tags when scanning back for a close tag", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// Overlapping/misordered tags: <a> opens, then <b> opens, then </a>
+			// closes. The backward scan for </a> first sees the still-open <b> (a
+			// non-match) and must skip it before finding <a>. Content must exceed
+			// the 300-char minimum so the HTML-block scan actually runs.
+			const filler = "word ".repeat(80);
+			const markdown = `<a>${filler}<b>${filler}</a>${filler}</b>`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toBeDefined();
+			expect(preview).toContain("word");
+		});
+
+		it("should keep the first early paragraph break when later breaks precede minLength", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// Two paragraph breaks both occur before the 300-char minimum, followed
+			// by a long unbroken run that pushes total length past minLength. The
+			// loop sets splitIndex on the first (latest) break, then encounters the
+			// earlier break with splitIndex already set, exercising the else arm.
+			const markdown = `AAAA\n\nBBBB\n\n${"C".repeat(400)}`;
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toBeDefined();
+			expect(preview).toContain("AAAA");
+			expect(preview).not.toContain("CCCC");
+		});
+
+		it("should append ellipsis without a word boundary when no space exists", () => {
+			const builder = new DoculaBuilder(new DoculaOptions({ quiet: true }));
+			// A single long token with no spaces, paragraph breaks, or list items.
+			// splitIndex stays -1, the fallback runs, and lastIndexOf(" ") is -1 so
+			// the word-boundary trim is skipped before the ellipsis is appended.
+			const markdown = "x".repeat(400);
+			const preview = builder.generateChangelogPreview(markdown);
+			expect(preview).toContain("...");
+			expect(preview).toContain("x");
+		});
+
 		it("should build paginated changelog pages", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
-			options.output = "test/temp/changelog-pagination-test";
+			options.output = makeTempDir("changelog-pagination-test");
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
@@ -922,7 +982,7 @@ describe("DoculaBuilder - Changelog", () => {
 		it("should include paginated changelog pages in sitemap", async () => {
 			const options = new DoculaOptions();
 			options.changelogPerPage = 2;
-			options.output = "test/temp/sitemap-pagination-test";
+			options.output = makeTempDir("sitemap-pagination-test");
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
 
@@ -1134,8 +1194,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should build with enableReleaseChangelog enabled and merge release entries with file entries", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-release-changelog-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-release-changelog-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
 			options.quiet = true;
@@ -1166,8 +1226,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should not include release entries when enableReleaseChangelog is false", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-no-release-changelog-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-no-release-changelog-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.enableReleaseChangelog = false;
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
@@ -1197,8 +1257,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should skip changelog pages when no changelog entries exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-no-changelog-pages-test";
-			options.sitePath = "test/fixtures/single-page-site";
+			options.output = makeTempDir("build-no-changelog-pages-test");
+			options.sitePath = cloneFixture("test/fixtures/single-page-site");
 			options.enableReleaseChangelog = false;
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
@@ -1218,8 +1278,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should call onReleaseChangelog hook to modify release entries", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-on-release-changelog-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-on-release-changelog-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
 			options.quiet = true;
@@ -1262,8 +1322,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should call async onReleaseChangelog hook", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-on-release-changelog-async-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-on-release-changelog-async-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
 			options.quiet = true;
@@ -1287,8 +1347,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should handle onReleaseChangelog hook errors gracefully", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-on-release-changelog-error-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-on-release-changelog-error-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
 			options.quiet = true;
@@ -1314,8 +1374,8 @@ describe("DoculaBuilder - Changelog", () => {
 
 		it("should work normally when onReleaseChangelog is not set", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-no-on-release-changelog-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-no-on-release-changelog-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.githubPath = "jaredwray/docula";
 			options.enableReleaseChangelog = true;
 			options.quiet = true;
@@ -1350,7 +1410,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Site description",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-json-test",
+				output: makeTempDir("changelog-json-test"),
 				changelogEntries: [
 					{
 						title: "Release v2.0",
@@ -1438,7 +1498,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-json-empty-test",
+				output: makeTempDir("changelog-json-empty-test"),
 				changelogEntries: [],
 			};
 
@@ -1467,7 +1527,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-json-undef-test",
+				output: makeTempDir("changelog-json-undef-test"),
 			};
 
 			if (fs.existsSync(data.output)) {
@@ -1495,7 +1555,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-json-optional-test",
+				output: makeTempDir("changelog-json-optional-test"),
 				changelogEntries: [
 					{
 						title: "Minimal Entry",
@@ -1548,7 +1608,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-json-baseurl-test",
+				output: makeTempDir("changelog-json-baseurl-test"),
 				changelogEntries: [
 					{
 						title: "Release v1.0",
@@ -1599,7 +1659,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-changelog-json-test",
+				output: makeTempDir("sitemap-changelog-json-test"),
 				hasChangelog: true,
 				templates: {
 					home: "home.hbs",
@@ -1652,7 +1712,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-no-changelog-json-test",
+				output: makeTempDir("sitemap-no-changelog-json-test"),
 			};
 
 			if (fs.existsSync(data.output)) {
@@ -1688,7 +1748,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Site description",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-latest-json-test",
+				output: makeTempDir("changelog-latest-json-test"),
 				changelogEntries: [
 					{
 						title: "Release v3.0",
@@ -1763,7 +1823,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-latest-json-all-test",
+				output: makeTempDir("changelog-latest-json-all-test"),
 				changelogEntries: [
 					{
 						title: "Release v1.0",
@@ -1811,7 +1871,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-latest-json-empty-test",
+				output: makeTempDir("changelog-latest-json-empty-test"),
 				changelogEntries: [],
 			};
 
@@ -1842,7 +1902,7 @@ describe("DoculaBuilder - Changelog", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-latest-json-undef-test",
+				output: makeTempDir("changelog-latest-json-undef-test"),
 			};
 
 			if (fs.existsSync(data.output)) {

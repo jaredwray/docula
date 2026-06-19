@@ -103,6 +103,16 @@ describe("safe-fetch — isPrivateIp (IPv6, including v4-wrapping forms)", () =>
 		expect(isPrivateIp("2002:7f00:1::")).toBe(true);
 		expect(isPrivateIp("2002:a9fe:a9fe::")).toBe(true);
 		expect(isPrivateIp("2002:a00:1::")).toBe(true);
+		// 6to4 wrapping the loopback 127.0.0.1 (parts[1]=0x7f00, parts[2]=0x0001).
+		expect(isPrivateIp("2002:7f00:1::1")).toBe(true);
+	});
+
+	it("unwraps IPv4-compatible IPv6 when parts[6] is zero (`::a.b.c.d`)", () => {
+		// `::2` => parts[6]===0, parts[7]===2 => embedded 0.0.0.2 (unspecified) -> blocked.
+		// Exercises the parts[7] side of the `parts[6] === 0 && parts[7] === 0` guard
+		// and the L107-110 octet extraction with parts[6]===0.
+		expect(isPrivateIp("::2")).toBe(true);
+		expect(isPrivateIp("::ff")).toBe(true);
 	});
 
 	it("allows global-unicast IPv6 and v4-wrapping forms pointing at public v4", () => {
@@ -228,6 +238,37 @@ describe("safe-fetch — resolveAndValidate", () => {
 		expect(lookup).not.toHaveBeenCalled();
 	});
 
+	it("accepts a literal public IPv6 and reports family 6 without DNS", async () => {
+		const lookup = vi.fn();
+		const { urlObj, resolved } = await resolveAndValidate(
+			"https://[2606:4700:4700::1111]/spec.json",
+			{ lookup },
+		);
+		expect(urlObj.hostname).toBe("[2606:4700:4700::1111]");
+		expect(resolved).toEqual([{ address: "2606:4700:4700::1111", family: 6 }]);
+		expect(lookup).not.toHaveBeenCalled();
+	});
+
+	it("preserves family 6 for IPv6 addresses returned by DNS", async () => {
+		const lookup = vi.fn(async () => [
+			{ address: "2606:4700:4700::1111", family: 6 },
+		]);
+		const { resolved } = await resolveAndValidate(
+			"https://example.com/spec.json",
+			{ lookup },
+		);
+		expect(resolved).toEqual([{ address: "2606:4700:4700::1111", family: 6 }]);
+	});
+
+	it("stringifies non-Error rejections from the DNS lookup", async () => {
+		const lookup = vi.fn(async () => {
+			throw "boom";
+		}) as unknown as typeof publicLookup;
+		await expect(
+			resolveAndValidate("https://weird.example.com/", { lookup }),
+		).rejects.toThrow(/DNS lookup .* failed: boom/);
+	});
+
 	it("blocks when any resolved address is private", async () => {
 		const lookup = vi.fn(async () => [
 			{ address: "8.8.8.8", family: 4 },
@@ -350,6 +391,23 @@ describe("safe-fetch — safeFetch", () => {
 				fetchImpl: fetchImpl as never,
 			}),
 		).rejects.toThrow(/Invalid redirect Location header/);
+	});
+
+	it("accepts a valid content-length within the limit", async () => {
+		const fetchImpl = vi.fn(
+			async () =>
+				new Response("ok", {
+					status: 200,
+					headers: { "content-length": "2" },
+				}),
+		) as unknown as typeof globalThis.fetch;
+
+		const response = await safeFetch("https://example.com/ok", {
+			lookup: publicLookup,
+			fetchImpl: fetchImpl as never,
+			maxBodyBytes: 1024,
+		});
+		expect(await response.text()).toBe("ok");
 	});
 
 	it("ignores non-decimal content-length and falls back to streaming cap", async () => {
@@ -515,6 +573,66 @@ describe("safe-fetch — safeFetch", () => {
 			fetchImpl: fetchImpl as never,
 		});
 		expect(response.status).toBe(204);
+	});
+
+	it("defaults to undici fetch when no fetchImpl is supplied", async () => {
+		// The blocked URL is rejected before fetch runs, so we exercise the
+		// `?? undiciFetch` default assignment without performing any network I/O.
+		await expect(safeFetch("http://169.254.169.254/")).rejects.toThrow(
+			SsrfBlockedError,
+		);
+	});
+
+	it("swallows a rejecting body cancel on a redirect hop", async () => {
+		const firstBody = new ReadableStream<Uint8Array>({
+			start() {},
+			cancel() {
+				throw new Error("cancel exploded");
+			},
+		});
+		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+			const url = typeof input === "string" ? input : input.toString();
+			if (url === "https://example.com/start") {
+				return new Response(firstBody, {
+					status: 302,
+					headers: { location: "https://example.com/final" },
+				});
+			}
+			return new Response("done", { status: 200 });
+		}) as unknown as typeof globalThis.fetch;
+
+		const response = await safeFetch("https://example.com/start", {
+			lookup: publicLookup,
+			fetchImpl: fetchImpl as never,
+		});
+		expect(response.status).toBe(200);
+		expect(await response.text()).toBe("done");
+	});
+
+	it("swallows a rejecting reader cancel when the stream exceeds maxBodyBytes", async () => {
+		const chunk = new Uint8Array(2048);
+		// A pull-based (still-active) stream so reader.cancel() reaches the source
+		// `cancel`; a closed stream would make cancel a no-op that never rejects.
+		const stream = new ReadableStream<Uint8Array>({
+			pull(controller) {
+				controller.enqueue(chunk);
+			},
+			cancel() {
+				throw new Error("reader cancel exploded");
+			},
+		});
+		const fetchImpl = vi.fn(
+			async () => new Response(stream, { status: 200 }),
+		) as unknown as typeof globalThis.fetch;
+
+		const response = await safeFetch("https://example.com/big", {
+			lookup: publicLookup,
+			fetchImpl: fetchImpl as never,
+			maxBodyBytes: 3000,
+		});
+		await expect(response.text()).rejects.toThrow(
+			/exceeds 3000 bytes \(streamed\)/,
+		);
 	});
 
 	it("URL-length cap rejects oversized redirect targets too", async () => {

@@ -371,6 +371,7 @@ export function logChangelogMetadata(
 	if (metadata.preview || metadata.summary) {
 		console.log(
 			white(
+				/* v8 ignore next -- the enclosing `if` guarantees preview or summary is truthy, so the `|| ""` fallback is unreachable; it only satisfies truncate's string parameter type -- @preserve */
 				`  preview: ${truncate(metadata.preview || metadata.summary || "")}`,
 			),
 		);

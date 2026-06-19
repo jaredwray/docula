@@ -157,7 +157,9 @@ export class Github {
 
 			const stat = fs.statSync(cacheFile);
 			const ageInSeconds = (Date.now() - stat.mtimeMs) / 1000;
+			/* v8 ignore start -- cacheConfig.ttl is always a positive number when loadCache runs (guarded in getData), so the `?? 0` fallback is defensive -- @preserve */
 			if (ageInSeconds > (this.cacheConfig?.ttl ?? 0)) {
+				/* v8 ignore stop */
 				return undefined;
 			}
 
