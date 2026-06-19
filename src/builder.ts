@@ -389,10 +389,6 @@ export class DoculaBuilder {
 
 		doculaData.hasDocuments = doculaData.documents?.length > 0;
 		doculaData.hasFeed = doculaData.hasDocuments;
-		// Search is available when enabled and there are documents to index.
-		doculaData.enableSearch = Boolean(
-			this.options.enableSearch && doculaData.hasDocuments,
-		);
 
 		// Get file-based changelog entries
 		const changelogPath = `${doculaData.sitePath}/changelog`;
@@ -460,6 +456,13 @@ export class DoculaBuilder {
 		doculaData.changelogEntries = allChangelogEntries;
 		doculaData.hasChangelog =
 			allChangelogEntries.length > 0 && hasChangelogTemplate;
+
+		// Search is available when enabled and there is indexable content
+		// (documentation pages and/or changelog entries).
+		doculaData.enableSearch = Boolean(
+			this.options.enableSearch &&
+				(doculaData.hasDocuments || doculaData.hasChangelog),
+		);
 
 		// AI metadata enrichment for OG/meta tags
 		/* v8 ignore next 40 -- @preserve */

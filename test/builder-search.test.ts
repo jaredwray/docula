@@ -110,10 +110,10 @@ describe("builder-search", () => {
 					"<style>.a{color:red}</style><p>Hello</p><script>var x = 1 < 2;</script>",
 				),
 			).toBe("Hello");
-			// End tags with trailing whitespace/newlines are still stripped.
+			// End tags with whitespace, newlines, or bogus attributes are stripped.
 			expect(
 				stripHtml(
-					'<p>Hi</p><script type="text/javascript">alert(1)</script ><style>.b{}</style\n>',
+					'<p>Hi</p><script type="text/javascript">alert(1)</script\t\n bar><style>.b{}</style foo>',
 				),
 			).toBe("Hi");
 		});

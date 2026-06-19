@@ -87,8 +87,8 @@ export function stripHtml(html: string): string {
 
 	const withoutComments = html.replace(/<!--[\s\S]*?-->/g, " ");
 	const withoutBlocks = withoutComments
-		.replace(/<script\b[\s\S]*?<\/script\s*>/gi, " ")
-		.replace(/<style\b[\s\S]*?<\/style\s*>/gi, " ");
+		.replace(/<script\b[\s\S]*?<\/script[^>]*>/gi, " ")
+		.replace(/<style\b[\s\S]*?<\/style[^>]*>/gi, " ");
 	const withoutTags = withoutBlocks.replace(/<[^>]+>/g, " ");
 	return decodeEntities(withoutTags).replace(/\s+/g, " ").trim();
 }
