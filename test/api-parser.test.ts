@@ -1431,6 +1431,53 @@ describe("API Parser", () => {
 			expect(result.securitySchemes[0].description).toBe("");
 		});
 
+		it("should default missing type to empty string in security schemes", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						notype: { name: "key", in: "header", description: "No type" },
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(1);
+			expect(result.securitySchemes[0].type).toBe("");
+		});
+
+		it("should default missing scopes to empty object in oauth2 flows", () => {
+			const spec = JSON.stringify({
+				openapi: "3.0.3",
+				info: { title: "Test", version: "1.0" },
+				components: {
+					securitySchemes: {
+						oauth2: {
+							type: "oauth2",
+							flows: {
+								authorizationCode: {
+									authorizationUrl: "https://auth.example.com/authorize",
+									tokenUrl: "https://auth.example.com/token",
+								},
+							},
+						},
+					},
+				},
+				paths: {},
+			});
+
+			const result = parseOpenApiSpec(spec);
+			expect(result.securitySchemes).toHaveLength(1);
+			expect(result.securitySchemes[0].flows?.authorizationCode).toEqual({
+				authorizationUrl: "https://auth.example.com/authorize",
+				tokenUrl: "https://auth.example.com/token",
+				refreshUrl: undefined,
+				scopes: {},
+			});
+		});
+
 		it("should generate python code without query params using full URL", () => {
 			const spec = JSON.stringify({
 				openapi: "3.0.3",

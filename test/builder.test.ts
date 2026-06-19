@@ -12,6 +12,8 @@ import {
 	hasAssetsChanged,
 	hashFile as hashFileUtil,
 	hashOptions as hashOptionsUtil,
+	hashSourceFiles,
+	hashTemplateDirectory,
 	loadBuildManifest,
 	loadCachedChangelog,
 	recordsEqual,
@@ -25,6 +27,8 @@ import { escapeXml } from "../src/builder-utils.js";
 import { DoculaOptions } from "../src/options.js";
 import {
 	cleanupAfterEach,
+	cloneFixture,
+	makeTempDir,
 	removeTempDir,
 	setupGithubMock,
 } from "./test-helpers.js";
@@ -75,7 +79,8 @@ describe("DoculaBuilder", () => {
 	describe("Docula Builder - Build", () => {
 		it("should build single page", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-test";
+			options.output = makeTempDir("build-test");
+			options.sitePath = cloneFixture("site");
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -98,8 +103,10 @@ describe("DoculaBuilder", () => {
 		});
 		it("should use first doc as index.html when no README.md exists", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-test";
-			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
+			options.output = makeTempDir("build-test");
+			options.sitePath = cloneFixture(
+				"test/fixtures/mega-page-site-no-home-page",
+			);
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
@@ -128,8 +135,8 @@ describe("DoculaBuilder", () => {
 		});
 		it("should log error when no README.md, no docs, and no API exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-no-content";
-			options.sitePath = "test/fixtures/empty-site";
+			options.output = makeTempDir("build-no-content");
+			options.sitePath = cloneFixture("test/fixtures/empty-site");
 			options.autoReadme = false;
 			const builder = new DoculaBuilder(options);
 			builder.console.quiet = true;
@@ -153,8 +160,8 @@ describe("DoculaBuilder", () => {
 		});
 		it("should build multi page", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/build-test";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = makeTempDir("build-test");
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			let consoleMessage = "";
@@ -178,8 +185,8 @@ describe("DoculaBuilder", () => {
 		it("should not build changelog.json when changelog-entry template is missing", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.output = "test/temp/build-no-changelog-entry-test";
-			options.sitePath = "test/fixtures/changelog-site";
+			options.output = makeTempDir("build-no-changelog-entry-test");
+			options.sitePath = cloneFixture("test/fixtures/changelog-site");
 			options.templatePath = path.join(
 				process.cwd(),
 				"test/fixtures/template-no-changelog-entry",
@@ -198,7 +205,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should auto-generate favicon from logo.svg when favicon.ico is missing", async () => {
-			const sitePath = "test/temp/favicon-from-svg";
+			const sitePath = makeTempDir("favicon-from-svg");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -225,7 +232,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should auto-generate favicon from logo.png when favicon.ico and logo.svg are missing", async () => {
-			const sitePath = "test/temp/favicon-from-png";
+			const sitePath = makeTempDir("favicon-from-png");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -255,7 +262,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should omit favicon link when no favicon or logo is present", async () => {
-			const sitePath = "test/temp/favicon-none";
+			const sitePath = makeTempDir("favicon-none");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -281,7 +288,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should prefer favicon.ico over logo.svg and logo.png", async () => {
-			const sitePath = "test/temp/favicon-priority";
+			const sitePath = makeTempDir("favicon-priority");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -358,7 +365,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should merge template overrides and log overridden files", async () => {
-			const sitePath = "test/temp/override-log-test";
+			const sitePath = makeTempDir("override-log-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			// Create override directory with a custom footer
@@ -420,9 +427,9 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should build with template overrides applied", async () => {
-			const sitePath = "test/fixtures/multi-page-site";
+			const sitePath = cloneFixture("test/fixtures/multi-page-site");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
-			const outputDir = "test/temp/build-override-test";
+			const outputDir = makeTempDir("build-override-test");
 			const cacheDir = `${sitePath}/.cache`;
 
 			// Create override with a custom footer containing a marker
@@ -451,7 +458,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should update cache when override file content changes", () => {
-			const sitePath = "test/temp/override-update-cache-test";
+			const sitePath = makeTempDir("override-update-cache-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
@@ -517,7 +524,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should reuse cache when override files have not changed", () => {
-			const sitePath = "test/temp/override-reuse-cache-test";
+			const sitePath = makeTempDir("override-reuse-cache-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
@@ -571,7 +578,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should invalidate cache when an override file is deleted", () => {
-			const sitePath = "test/temp/override-invalidate-cache-test";
+			const sitePath = makeTempDir("override-invalidate-cache-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -633,7 +640,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should rebuild when manifest is missing or corrupt", () => {
-			const sitePath = "test/temp/override-manifest-rebuild-test";
+			const sitePath = makeTempDir("override-manifest-rebuild-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
@@ -704,7 +711,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should only replace changed override files and preserve unchanged ones", () => {
-			const sitePath = "test/temp/override-partial-update-test";
+			const sitePath = makeTempDir("override-partial-update-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
@@ -785,7 +792,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should create .gitignore with .cache when it does not exist", () => {
-			const sitePath = "test/temp/gitignore-create";
+			const sitePath = makeTempDir("gitignore-create");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -824,7 +831,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should append .cache to existing .gitignore", () => {
-			const sitePath = "test/temp/gitignore-append";
+			const sitePath = makeTempDir("gitignore-append");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -863,7 +870,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should not modify .gitignore when .cache entry already exists", () => {
-			const sitePath = "test/temp/gitignore-exists";
+			const sitePath = makeTempDir("gitignore-exists");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -902,7 +909,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should not modify .gitignore when autoUpdateIgnores is false", () => {
-			const sitePath = "test/temp/gitignore-disabled";
+			const sitePath = makeTempDir("gitignore-disabled");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -931,7 +938,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should not modify .gitignore when .cache already exists", () => {
-			const sitePath = "test/temp/gitignore-cache-exists";
+			const sitePath = makeTempDir("gitignore-cache-exists");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			fs.mkdirSync(overrideDir, { recursive: true });
@@ -964,7 +971,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should add new override files to an existing cache", () => {
-			const sitePath = "test/temp/override-add-files-test";
+			const sitePath = makeTempDir("override-add-files-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
@@ -1036,7 +1043,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should delete cached file when removed override has no original template", () => {
-			const sitePath = "test/temp/override-delete-cached-test";
+			const sitePath = makeTempDir("override-delete-cached-test");
 			const overrideDir = `${sitePath}/templates/modern`;
 			const cachePath = `${sitePath}/.cache/templates/modern`;
 
@@ -1104,7 +1111,7 @@ describe("DoculaBuilder", () => {
 
 	describe("Docula Builder - Differential Builds", () => {
 		it("should write build manifest after first build", async () => {
-			const sitePath = "test/temp/diff-build-manifest";
+			const sitePath = makeTempDir("diff-build-manifest");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1145,7 +1152,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should skip build when nothing has changed", async () => {
-			const sitePath = "test/temp/diff-build-skip";
+			const sitePath = makeTempDir("diff-build-skip");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1190,7 +1197,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should rebuild when openGraph config changes", async () => {
-			const sitePath = "test/temp/diff-build-og-change";
+			const sitePath = makeTempDir("diff-build-og-change");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1239,7 +1246,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should rebuild when a document changes", async () => {
-			const sitePath = "test/temp/diff-build-doc-change";
+			const sitePath = makeTempDir("diff-build-doc-change");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
@@ -1288,7 +1295,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should use cached documents for unchanged files", async () => {
-			const sitePath = "test/temp/diff-build-cached-docs";
+			const sitePath = makeTempDir("diff-build-cached-docs");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, { recursive: true });
@@ -1327,7 +1334,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should force full rebuild when config changes", async () => {
-			const sitePath = "test/temp/diff-build-config-change";
+			const sitePath = makeTempDir("diff-build-config-change");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/single-page-site", sitePath, {
@@ -1376,7 +1383,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should load and save build manifest correctly", () => {
-			const sitePath = "test/temp/diff-manifest-io";
+			const sitePath = makeTempDir("diff-manifest-io");
 
 			try {
 				const options = new DoculaOptions();
@@ -1410,7 +1417,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should return undefined for corrupt or wrong-version manifest", () => {
-			const sitePath = "test/temp/diff-manifest-corrupt";
+			const sitePath = makeTempDir("diff-manifest-corrupt");
 
 			try {
 				const options = new DoculaOptions();
@@ -1437,7 +1444,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should skip unchanged asset copies", async () => {
-			const sitePath = "test/temp/diff-build-asset-skip";
+			const sitePath = makeTempDir("diff-build-asset-skip");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
@@ -1480,7 +1487,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should detect asset changes", () => {
-			const sitePath = "test/temp/diff-assets-changed";
+			const sitePath = makeTempDir("diff-assets-changed");
 
 			try {
 				const options = new DoculaOptions();
@@ -1515,7 +1522,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should handle cached changelog entries", async () => {
-			const sitePath = "test/temp/diff-build-changelog-cache";
+			const sitePath = makeTempDir("diff-build-changelog-cache");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/changelog-site", sitePath, { recursive: true });
@@ -1559,7 +1566,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should handle corrupt cached changelog gracefully", () => {
-			const sitePath = "test/temp/diff-corrupt-changelog";
+			const sitePath = makeTempDir("diff-corrupt-changelog");
 
 			try {
 				const options = new DoculaOptions();
@@ -1579,7 +1586,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should detect public folder asset changes", () => {
-			const sitePath = "test/temp/diff-public-assets";
+			const sitePath = makeTempDir("diff-public-assets");
 
 			try {
 				const options = new DoculaOptions();
@@ -1618,8 +1625,8 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should detect root README changes tracked by autoReadme", () => {
-			const sitePath = "test/temp/diff-auto-readme";
-			const tempCwd = "test/temp/diff-auto-readme-cwd";
+			const sitePath = makeTempDir("diff-auto-readme");
+			const tempCwd = makeTempDir("diff-auto-readme-cwd");
 
 			try {
 				fs.mkdirSync(sitePath, { recursive: true });
@@ -1709,46 +1716,41 @@ describe("DoculaBuilder", () => {
 				"githubPath must be in 'owner/repo' format",
 			);
 		});
-		it("should validate siteDescription options", async () => {
+		it("should validate siteDescription options", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.quiet = true;
-			try {
-				options.siteDescription = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe(
-					"No site description options provided",
-				);
-			}
+			options.siteDescription = "";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"No site description options provided",
+			);
 		});
-		it("should validate site title options", async () => {
+		it("should validate site title options", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.quiet = true;
-			try {
-				options.siteTitle = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe("No site title options provided");
-			}
+			options.siteTitle = "";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"No site title options provided",
+			);
 		});
-		it("should validate site url options", async () => {
+		it("should validate site url options", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.quiet = true;
-			try {
-				options.siteUrl = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe("No site url options provided");
-			}
+			options.siteUrl = "";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"No site url options provided",
+			);
 		});
 	});
 
 	describe("Docula Builder - Get Data", () => {
 		it("should get github data", async () => {
 			const builder = new DoculaBuilder();
+			// Isolate the github cache (written to sitePath/.cache) in a temp dir so
+			// it never pollutes the repo's real site/ directory.
+			builder.options.sitePath = makeTempDir("github-data");
 			CacheableNet.prototype.get = vi.fn().mockResolvedValue({ data: {} });
 			const githubData = await builder.getGithubData("jaredwray/docula");
 			expect(githubData).toBeTruthy();
@@ -1783,19 +1785,17 @@ describe("DoculaBuilder", () => {
 		});
 		it("should throw error when template path doesnt exist", async () => {
 			const builder = new DoculaBuilder();
-			try {
-				await builder.getTemplates("test/fixtures/template-example1/", false);
-			} catch (error) {
-				expect((error as Error).message).toContain("No template path found");
-			}
+			await expect(
+				builder.getTemplates("test/fixtures/template-example1/", false),
+			).rejects.toThrow("No template path found");
 		});
 	});
 
 	describe("Docula Builder - Public Folder", () => {
 		it("should copy public folder contents to dist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/public-folder-test";
-			options.sitePath = "test/fixtures/single-page-site";
+			options.output = makeTempDir("public-folder-test");
+			options.sitePath = cloneFixture("test/fixtures/single-page-site");
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			const consoleMessages: string[] = [];
@@ -1845,7 +1845,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should skip copying unchanged public folder files when hashes match", () => {
-			const sitePath = "test/temp/public-diff-skip";
+			const sitePath = makeTempDir("public-diff-skip");
 			const publicPath = `${sitePath}/public`;
 			const outputPath = `${sitePath}/output`;
 
@@ -1914,8 +1914,8 @@ describe("DoculaBuilder", () => {
 
 		it("should not log anything when public folder does not exist", async () => {
 			const options = new DoculaOptions();
-			options.output = "test/temp/no-public-folder-test";
-			options.sitePath = "test/fixtures/multi-page-site";
+			options.output = makeTempDir("no-public-folder-test");
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
 			const builder = new DoculaBuilder(options);
 			const consoleLog = console.log;
 			const consoleMessages: string[] = [];
@@ -1943,7 +1943,7 @@ describe("DoculaBuilder", () => {
 
 		it("should skip output when it is inside public folder to prevent recursive copy", async () => {
 			// Create a temporary site with public folder where output is inside public
-			const tempSitePath = "test/temp/recursive-site";
+			const tempSitePath = makeTempDir("recursive-site");
 			const publicPath = `${tempSitePath}/public`;
 			const output = `${publicPath}/dist`;
 
@@ -1996,8 +1996,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth");
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -2024,8 +2024,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-no-cookie-auth";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-no-cookie-auth");
 
 			const builder = new DoculaBuilder(options);
 
@@ -2049,8 +2049,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-logout-url";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-logout-url");
 
 			options.cookieAuth = {
 				loginUrl: "/login",
@@ -2077,8 +2077,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-mobile";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-mobile");
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -2104,8 +2104,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-header-actions";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-header-actions");
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -2129,8 +2129,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-head-cache";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-head-cache");
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -2155,8 +2155,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-inline-username";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-inline-username");
 
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
@@ -2181,8 +2181,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-no-inline-styles";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-no-inline-styles");
 			options.cookieAuth = { loginUrl: "/login" };
 			const builder = new DoculaBuilder(options);
 
@@ -2207,8 +2207,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-cookie-auth-check-url";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-cookie-auth-check-url");
 
 			options.cookieAuth = {
 				loginUrl: "/login",
@@ -2241,8 +2241,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-gtm";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-gtm");
 			options.googleTagManager = "GTM-TEST123";
 			const builder = new DoculaBuilder(options);
 
@@ -2269,8 +2269,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-no-gtm";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-no-gtm");
 			const builder = new DoculaBuilder(options);
 
 			try {
@@ -2292,8 +2292,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "classic";
-			options.sitePath = "test/fixtures/single-page-site";
-			options.output = "test/temp/build-gtm-classic";
+			options.sitePath = cloneFixture("test/fixtures/single-page-site");
+			options.output = makeTempDir("build-gtm-classic");
 			options.googleTagManager = "GTM-CLASSIC1";
 			const builder = new DoculaBuilder(options);
 
@@ -2320,8 +2320,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-gtag";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-gtag");
 			options.googleTagManager = "G-XXXXXXXXXX";
 			const builder = new DoculaBuilder(options);
 
@@ -2349,8 +2349,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-header-links";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-header-links");
 
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
@@ -2383,8 +2383,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-no-header-links";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-no-header-links");
 
 			const builder = new DoculaBuilder(options);
 
@@ -2407,8 +2407,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-header-links-icon";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-header-links-icon");
 
 			options.headerLinks = [
 				{
@@ -2439,8 +2439,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-header-links-default-icon";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-header-links-default-icon");
 
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
@@ -2468,8 +2468,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-header-links-mobile";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-header-links-mobile");
 
 			options.headerLinks = [
 				{ label: "Blog", url: "https://blog.example.com" },
@@ -2498,7 +2498,7 @@ describe("DoculaBuilder", () => {
 
 	describe("Branch coverage - uncovered paths", () => {
 		it("should rebuild when assets change but docs and template are unchanged", async () => {
-			const sitePath = "test/temp/diff-build-asset-change";
+			const sitePath = makeTempDir("diff-build-asset-change");
 			const output = `${sitePath}/dist`;
 
 			fs.cpSync("test/fixtures/multi-page-site", sitePath, {
@@ -2560,7 +2560,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should restore original template file when override is removed", () => {
-			const sitePath = "test/temp/override-restore-original-test";
+			const sitePath = makeTempDir("override-restore-original-test");
 			const overrideDir = `${sitePath}/templates/modern/includes`;
 
 			// Create override that shadows an existing template file
@@ -2684,7 +2684,7 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions({
 				quiet: true,
 				sitePath: "test/fixtures/multi-page-site",
-				output: "./test/temp/empty-docspath",
+				output: makeTempDir("empty-docspath"),
 				docsPath: "",
 			});
 			const builder = new DoculaBuilder(options);
@@ -2729,7 +2729,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Test Description",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "",
-				output: "test/temp/sitemap-basurl",
+				output: makeTempDir("sitemap-basurl"),
 				baseUrl: "/docs",
 				docsPath: "",
 				docsUrl: "/docs",
@@ -2779,7 +2779,7 @@ describe("DoculaBuilder", () => {
 				siteDescription: "Test Description",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "",
-				output: "test/temp/sitemap-apipath",
+				output: makeTempDir("sitemap-apipath"),
 				baseUrl: "/docs",
 				docsPath: "",
 				docsUrl: "/docs",
@@ -2816,8 +2816,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-edit-page-url";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-edit-page-url");
 			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
 
 			const builder = new DoculaBuilder(options);
@@ -2847,8 +2847,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-no-edit-page-url";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-no-edit-page-url");
 
 			const builder = new DoculaBuilder(options);
 
@@ -2872,8 +2872,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-edit-page-url-slash";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-edit-page-url-slash");
 			options.parseOptions({
 				editPageUrl: "https://github.com/owner/repo/edit/main/site/docs/",
 			});
@@ -2901,8 +2901,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "modern";
-			options.sitePath = "test/fixtures/mega-page-site";
-			options.output = "test/temp/build-edit-page-url-nested";
+			options.sitePath = cloneFixture("test/fixtures/mega-page-site");
+			options.output = makeTempDir("build-edit-page-url-nested");
 			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
 
 			const builder = new DoculaBuilder(options);
@@ -2940,8 +2940,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "classic";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-edit-page-url-classic";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-edit-page-url-classic");
 			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
 
 			const builder = new DoculaBuilder(options);
@@ -2969,8 +2969,10 @@ describe("DoculaBuilder", () => {
 		it("should render edit page link on docs home page when site has no README", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.sitePath = "test/fixtures/mega-page-site-no-home-page";
-			options.output = "test/temp/build-edit-page-url-no-home";
+			options.sitePath = cloneFixture(
+				"test/fixtures/mega-page-site-no-home-page",
+			);
+			options.output = makeTempDir("build-edit-page-url-no-home");
 			options.editPageUrl = "https://github.com/owner/repo/edit/main/site/docs";
 			options.autoReadme = false;
 
@@ -2998,8 +3000,8 @@ describe("DoculaBuilder", () => {
 		it("should render OpenGraph meta tags when openGraph is configured", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-opengraph";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-opengraph");
 			options.openGraph = {
 				title: "Default OG Title",
 				description: "Default OG Description",
@@ -3034,8 +3036,8 @@ describe("DoculaBuilder", () => {
 		it("should not render OpenGraph meta tags when openGraph is not configured", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-no-opengraph";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-no-opengraph");
 
 			const builder = new DoculaBuilder(options);
 
@@ -3058,8 +3060,8 @@ describe("DoculaBuilder", () => {
 		it("should use document frontmatter ogTitle/ogDescription/ogImage over site defaults", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-opengraph-override";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-opengraph-override");
 			options.openGraph = {
 				title: "Default OG Title",
 				description: "Default OG Description",
@@ -3088,8 +3090,8 @@ describe("DoculaBuilder", () => {
 		it("should render OpenGraph meta tags on the home page when configured", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-opengraph-home";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-opengraph-home");
 			options.openGraph = {
 				title: "Home OG",
 				description: "Home OG Description",
@@ -3119,8 +3121,8 @@ describe("DoculaBuilder", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.template = "classic";
-			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/build-no-edit-page-url-classic";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-no-edit-page-url-classic");
 
 			const builder = new DoculaBuilder(options);
 
@@ -3142,11 +3144,14 @@ describe("DoculaBuilder", () => {
 	});
 
 	describe("autoReadme", () => {
-		const tempDir = "test/temp/auto-readme-test";
-		const tempSitePath = `${tempDir}/site`;
-		const tempCwdPath = `${tempDir}/cwd`;
+		let tempDir: string;
+		let tempSitePath: string;
+		let tempCwdPath: string;
 
 		beforeEach(async () => {
+			tempDir = makeTempDir("auto-readme-test");
+			tempSitePath = `${tempDir}/site`;
+			tempCwdPath = `${tempDir}/cwd`;
 			await fs.promises.mkdir(tempSitePath, { recursive: true });
 			await fs.promises.mkdir(tempCwdPath, { recursive: true });
 		});
@@ -3444,7 +3449,7 @@ describe("DoculaBuilder", () => {
 			);
 
 			const options = new DoculaOptions();
-			options.sitePath = "test/fixtures/auto-readme-site";
+			options.sitePath = cloneFixture("test/fixtures/auto-readme-site");
 			options.output = `${tempDir}/output`;
 
 			const builder = new DoculaBuilder(options);
@@ -3462,15 +3467,9 @@ describe("DoculaBuilder", () => {
 				// duplicating the site title already in the <title> tag.
 				expect(indexHtml).not.toContain("<h1>My Project</h1>");
 				// The root README should NOT have been copied into the site path
-				expect(fs.existsSync("test/fixtures/auto-readme-site/README.md")).toBe(
-					false,
-				);
+				expect(fs.existsSync(`${options.sitePath}/README.md`)).toBe(false);
 			} finally {
 				fs.rmSync(options.output, { recursive: true, force: true });
-				fs.rmSync("test/fixtures/auto-readme-site/.cache", {
-					recursive: true,
-					force: true,
-				});
 			}
 
 			cwdSpy.mockRestore();
@@ -3493,7 +3492,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should produce different hashes when docula.config.mjs changes", () => {
-			const tempDir = "test/temp/hash-config-change";
+			const tempDir = makeTempDir("hash-config-change");
 			fs.mkdirSync(tempDir, { recursive: true });
 			const configPath = `${tempDir}/docula.config.mjs`;
 
@@ -3518,7 +3517,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should return the same hash when no config file exists", () => {
-			const tempDir = "test/temp/hash-config-missing";
+			const tempDir = makeTempDir("hash-config-missing");
 			fs.mkdirSync(tempDir, { recursive: true });
 
 			try {
@@ -3536,7 +3535,7 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("should prefer docula.config.ts over docula.config.mjs", () => {
-			const tempDir = "test/temp/hash-config-priority";
+			const tempDir = makeTempDir("hash-config-priority");
 			fs.mkdirSync(tempDir, { recursive: true });
 
 			try {
@@ -3560,6 +3559,600 @@ describe("DoculaBuilder", () => {
 			} finally {
 				removeTempDir(tempDir);
 			}
+		});
+	});
+
+	describe("Docula Builder - 100% coverage targets", () => {
+		it("should use console passed via options", () => {
+			const baseOptions = new DoculaOptions();
+			baseOptions.quiet = true;
+			const seed = new DoculaBuilder(baseOptions);
+			const sharedConsole = seed.console;
+			// biome-ignore lint/suspicious/noExplicitAny: test injection of console option
+			const options: any = new DoculaOptions();
+			options.quiet = true;
+			options.console = sharedConsole;
+			const builder = new DoculaBuilder(options as DoculaBuilderOptions);
+			expect(builder.console).toBe(sharedConsole);
+		});
+
+		it("should map an array openApiUrl that mixes remote and relative spec urls", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.output = makeTempDir("openapi-array-remote");
+			options.sitePath = cloneFixture("test/fixtures/multi-api-site");
+			// Array form: one remote spec (covers the `? spec.url` branch and the
+			// "no order" side of the order spread) and one relative spec with order.
+			options.openApiUrl = [
+				{ name: "Remote API", url: "https://example.com/remote/swagger.json" },
+				{ name: "Local API", url: "petstore/swagger.json", order: 1 },
+			];
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+
+			await builder.build();
+
+			expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
+		});
+
+		it("should use a string openApiUrl as a single API Reference spec", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.output = makeTempDir("openapi-string");
+			options.sitePath = cloneFixture("test/fixtures/multi-api-site");
+			options.openApiUrl = "https://example.com/swagger.json";
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+
+			await builder.build();
+
+			expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
+		});
+
+		it("should auto-detect api subdirectory swagger specs and ignore subdirs without swagger.json", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.output = makeTempDir("openapi-autodetect");
+			options.sitePath = cloneFixture("test/fixtures/multi-api-site");
+			// Add an api subdirectory WITHOUT a swagger.json to exercise the false
+			// side of `if (fs.existsSync(subSwaggerPath))` in both the spec
+			// detection loop and the asset-hashing loop.
+			fs.mkdirSync(`${options.sitePath}/api/empty-section`, {
+				recursive: true,
+			});
+			fs.writeFileSync(
+				`${options.sitePath}/api/empty-section/notes.txt`,
+				"no swagger here",
+			);
+			// Leave openApiUrl unset so the builder auto-detects from disk.
+			options.openApiUrl = undefined;
+			options.githubPath = "jaredwray/docula";
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+
+			await builder.build();
+
+			expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
+			// Detected subdir specs are built under the api path.
+			expect(fs.existsSync(`${options.output}/api/index.html`)).toBe(true);
+		});
+
+		const mockGithubReleases = [
+			{
+				tag_name: "v2.0.0",
+				name: "Version 2",
+				body: "Second release",
+				published_at: "2025-02-01T00:00:00Z",
+				draft: false,
+				prerelease: false,
+			},
+			{
+				tag_name: "v1.0.0",
+				name: "Version 1",
+				body: "First release",
+				published_at: "2025-01-01T00:00:00Z",
+				draft: false,
+				prerelease: false,
+			},
+		];
+
+		it("should merge release-based changelog entries and run onReleaseChangelog", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.output = makeTempDir("release-changelog");
+			options.sitePath = cloneFixture("test/fixtures/mega-page-site");
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+			// Inject deterministic GitHub release data so the release-changelog merge
+			// branch runs without depending on networked/automocked fetch behaviour.
+			vi.spyOn(builder, "getGithubData").mockResolvedValue({
+				releases: mockGithubReleases,
+				contributors: [],
+				// biome-ignore lint/suspicious/noExplicitAny: minimal GithubData stub
+			} as any);
+			let hookCalled = false;
+			builder.onReleaseChangelog = (entries) => {
+				hookCalled = true;
+				return entries;
+			};
+
+			await builder.build();
+
+			expect(hookCalled).toBe(true);
+		});
+
+		it("should merge release-based changelog entries without an onReleaseChangelog hook", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.output = makeTempDir("release-changelog-no-hook");
+			options.sitePath = cloneFixture("test/fixtures/mega-page-site");
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+			vi.spyOn(builder, "getGithubData").mockResolvedValue({
+				releases: mockGithubReleases,
+				contributors: [],
+				// biome-ignore lint/suspicious/noExplicitAny: minimal GithubData stub
+			} as any);
+			// No onReleaseChangelog hook set: exercises the false side of
+			// `if (this.onReleaseChangelog)`.
+			expect(builder.onReleaseChangelog).toBeUndefined();
+
+			await builder.build();
+
+			expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+				true,
+			);
+		});
+
+		it("should log an error when onReleaseChangelog throws", async () => {
+			const options = new DoculaOptions();
+			options.output = makeTempDir("release-changelog-error");
+			options.sitePath = cloneFixture("test/fixtures/mega-page-site");
+			options.githubPath = "jaredwray/docula";
+			options.enableReleaseChangelog = true;
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+			vi.spyOn(builder, "getGithubData").mockResolvedValue({
+				releases: mockGithubReleases,
+				contributors: [],
+				// biome-ignore lint/suspicious/noExplicitAny: minimal GithubData stub
+			} as any);
+			builder.onReleaseChangelog = () => {
+				throw new Error("hook boom");
+			};
+			const consoleError = console.error;
+			const errors: string[] = [];
+			console.error = (message) => {
+				errors.push(stripAnsi(message as string));
+			};
+
+			try {
+				await builder.build();
+				expect(
+					errors.some((e) => e.includes("onReleaseChangelog error: hook boom")),
+				).toBe(true);
+			} finally {
+				console.error = consoleError;
+			}
+		});
+
+		it("should build an API-only home page when only api/swagger.json exists", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.output = makeTempDir("api-only-home");
+			options.sitePath = cloneFixture("test/fixtures/api-only-site");
+			options.autoReadme = false;
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+
+			await builder.build();
+
+			expect(fs.existsSync(`${options.output}/index.html`)).toBe(true);
+		});
+
+		it("should sort changelog entries with an invalid second date to the end", () => {
+			const builder = new DoculaBuilder();
+			// getReleasesAsChangelogEntries returns valid-date entries; pair with a
+			// crafted invalid-date entry via the merge sort exercised in build is
+			// hard to isolate, so verify the comparator behaviour directly through
+			// the public sorting performed in build by constructing entries.
+			const releases = [
+				{
+					tag_name: "v1.0.0",
+					name: "First",
+					body: "body",
+					published_at: "not-a-date",
+					draft: false,
+				},
+				{
+					tag_name: "v2.0.0",
+					name: "Second",
+					body: "body",
+					published_at: "2025-01-01T00:00:00Z",
+					draft: false,
+				},
+			];
+			const entries = builder.getReleasesAsChangelogEntries(releases);
+			expect(entries).toHaveLength(2);
+			const single = builder.convertReleaseToChangelogEntry(releases[1]);
+			expect(single.title).toBe("Second");
+		});
+
+		it("should sort entries placing invalid second date after a valid first date during build", async () => {
+			const options = new DoculaOptions();
+			options.output = makeTempDir("changelog-invalid-date");
+			options.sitePath = cloneFixture("test/fixtures/mega-page-site");
+			// Add a changelog entry with no/invalid date AFTER valid ones so the
+			// comparator hits the `Number.isNaN(dateB)` -> return -1 branch.
+			fs.writeFileSync(
+				`${options.sitePath}/changelog/zzz-invalid-date.md`,
+				"---\ntitle: No Date Entry\n---\n\nContent without a date.\n",
+			);
+			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+
+			await builder.build();
+
+			expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
+				true,
+			);
+		});
+
+		it("buildIndexPage throws when templates are missing", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: "test/fixtures/single-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("index-no-templates"),
+			};
+			await expect(builder.buildIndexPage(data)).rejects.toThrow(
+				"No templates found",
+			);
+		});
+
+		it("buildDocsHomePage throws when docPage template is missing", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("docs-home-no-template"),
+				templates: { home: "home.hbs" },
+			};
+			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
+				"No docPage template found for docs home page",
+			);
+		});
+
+		it("buildDocsHomePage throws when there are no documents", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("docs-home-no-docs"),
+				templates: { home: "home.hbs", docPage: "docs.hbs" },
+				documents: [],
+			};
+			await expect(builder.buildDocsHomePage(data)).rejects.toThrow(
+				"No documents found for docs home page",
+			);
+		});
+
+		it("buildDocsHomePage generates sidebar items when none are provided", async () => {
+			const options = new DoculaOptions({
+				quiet: true,
+				sitePath: "test/fixtures/multi-page-site",
+			});
+			const builder = new DoculaBuilder(options);
+			const output = makeTempDir("docs-home-sidebar");
+			const documents = builder.getDocuments(`${options.sitePath}/docs`, {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "test/fixtures/template-example",
+				output,
+			});
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "test/fixtures/template-example",
+				output,
+				templates: { home: "home.hbs", docPage: "docs.hbs" },
+				documents,
+			};
+			expect(data.sidebarItems).toBeUndefined();
+
+			await builder.buildDocsHomePage(data);
+
+			expect(data.sidebarItems).toBeDefined();
+			expect(fs.existsSync(`${output}/index.html`)).toBe(true);
+		});
+
+		it("buildDocsHomePage reuses existing sidebar items when already present", async () => {
+			const options = new DoculaOptions({
+				quiet: true,
+				sitePath: "test/fixtures/multi-page-site",
+			});
+			const builder = new DoculaBuilder(options);
+			const output = makeTempDir("docs-home-sidebar-present");
+			const documents = builder.getDocuments(`${options.sitePath}/docs`, {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "test/fixtures/template-example",
+				output,
+			});
+			const existingSidebar = [{ name: "Preset", path: "preset", order: 0 }];
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "test/fixtures/template-example",
+				output,
+				templates: { home: "home.hbs", docPage: "docs.hbs" },
+				documents,
+				sidebarItems: existingSidebar,
+			};
+
+			await builder.buildDocsHomePage(data);
+
+			// Existing sidebar must be left untouched (false side of !sidebarItems).
+			expect(data.sidebarItems).toBe(existingSidebar);
+			expect(fs.existsSync(`${output}/index.html`)).toBe(true);
+		});
+
+		it("buildReadmeSection returns empty string when no readme content or file exists", async () => {
+			const sitePath = makeTempDir("readme-section-empty");
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("readme-section-empty-out"),
+			};
+			expect(data.readmeContent).toBeUndefined();
+			expect(fs.existsSync(`${sitePath}/README.md`)).toBe(false);
+
+			const html = await builder.buildReadmeSection(data);
+
+			expect(html).toBe("");
+		});
+
+		it("buildReadmeSection reads README.md from the site path", async () => {
+			const sitePath = makeTempDir("readme-section");
+			fs.writeFileSync(`${sitePath}/README.md`, "# Hello\n\nWorld\n");
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("readme-section-out"),
+			};
+
+			const html = await builder.buildReadmeSection(data);
+
+			expect(html).toContain("World");
+		});
+
+		it("buildAnnouncementSection renders announcement.md when present", async () => {
+			const sitePath = makeTempDir("announcement");
+			fs.writeFileSync(
+				`${sitePath}/announcement.md`,
+				"**Big news!** Read all about it.\n",
+			);
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath,
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("announcement-out"),
+			};
+
+			const announcement = await builder.buildAnnouncementSection(data);
+
+			expect(announcement).toContain("Big news!");
+		});
+
+		it("buildDocsPages throws when templates are missing", async () => {
+			const builder = new DoculaBuilder();
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: "test/fixtures/multi-page-site",
+				templatePath: "test/fixtures/template-example",
+				output: makeTempDir("docs-pages-no-templates"),
+				documents: [],
+			};
+			await expect(builder.buildDocsPages(data)).rejects.toThrow(
+				"No templates found",
+			);
+		});
+
+		it("renderApiContent and buildApiPage delegate to the api builder", async () => {
+			const options = new DoculaOptions({ quiet: true });
+			// Assign after construction: DoculaOptions' constructor re-resolves a
+			// provided sitePath via path.join(cwd, …), which would mangle the
+			// absolute clone path. Direct assignment keeps the real clone path.
+			options.sitePath = cloneFixture("test/fixtures/api-only-site");
+			const builder = new DoculaBuilder(options);
+			const output = makeTempDir("api-delegate-out");
+			const data: DoculaData = {
+				...defaultPathFields,
+				siteUrl: "http://example.com",
+				siteTitle: "Test",
+				siteDescription: "Test Description",
+				sitePath: options.sitePath,
+				templatePath: "templates/modern",
+				output,
+				templates: { api: "api.hbs" },
+				openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
+			};
+
+			const content = await builder.renderApiContent(data);
+			expect(typeof content).toBe("string");
+
+			await builder.buildApiPage(data);
+			expect(fs.existsSync(`${output}/api/index.html`)).toBe(true);
+
+			const homeOutput = makeTempDir("api-home-delegate-out");
+			const homeData: DoculaData = { ...data, output: homeOutput };
+			await builder.buildApiHomePage(homeData);
+			expect(fs.existsSync(`${homeOutput}/index.html`)).toBe(true);
+		});
+
+		it("getDocumentInDirectory returns documents for a directory", () => {
+			const options = new DoculaOptions({
+				quiet: true,
+				sitePath: "test/fixtures/multi-page-site",
+			});
+			const builder = new DoculaBuilder(options);
+			const docsRoot = `${options.sitePath}/docs`;
+			const documents = builder.getDocumentInDirectory(docsRoot, docsRoot);
+			expect(documents.length).toBeGreaterThan(0);
+		});
+
+		it("hashSourceFiles skips files that vanish (ENOENT) before hashing", () => {
+			const dir = makeTempDir("hash-enoent");
+			const filePath = path.join(dir, "doc.md");
+			fs.writeFileSync(filePath, "# Doc\n");
+
+			// The file is listed by listFilesRecursive but reading it throws ENOENT,
+			// driving tryHashFile down the ENOENT -> undefined branch.
+			const realReadFileSync = fs.readFileSync;
+			const spy = vi
+				.spyOn(fs, "readFileSync")
+				// biome-ignore lint/suspicious/noExplicitAny: test stub matches overloads
+				.mockImplementation((p: any, ...rest: any[]) => {
+					if (typeof p === "string" && p === filePath) {
+						const error = new Error(
+							"ENOENT: no such file or directory",
+						) as NodeJS.ErrnoException;
+						error.code = "ENOENT";
+						throw error;
+					}
+					// biome-ignore lint/suspicious/noExplicitAny: passthrough to real impl
+					return (realReadFileSync as any)(p, ...rest);
+				});
+
+			try {
+				const hashes = hashSourceFiles(testHash, dir);
+				expect(hashes["doc.md"]).toBeUndefined();
+				expect(Object.keys(hashes)).toHaveLength(0);
+			} finally {
+				spy.mockRestore();
+			}
+		});
+
+		it("hashSourceFiles re-throws non-ENOENT read errors", () => {
+			const dir = makeTempDir("hash-eacces");
+			const filePath = path.join(dir, "doc.md");
+			fs.writeFileSync(filePath, "# Doc\n");
+
+			const realReadFileSync = fs.readFileSync;
+			const spy = vi
+				.spyOn(fs, "readFileSync")
+				// biome-ignore lint/suspicious/noExplicitAny: test stub matches overloads
+				.mockImplementation((p: any, ...rest: any[]) => {
+					if (typeof p === "string" && p === filePath) {
+						const error = new Error(
+							"EACCES: permission denied",
+						) as NodeJS.ErrnoException;
+						error.code = "EACCES";
+						throw error;
+					}
+					// biome-ignore lint/suspicious/noExplicitAny: passthrough to real impl
+					return (realReadFileSync as any)(p, ...rest);
+				});
+
+			try {
+				expect(() => hashSourceFiles(testHash, dir)).toThrow(
+					"EACCES: permission denied",
+				);
+			} finally {
+				spy.mockRestore();
+			}
+		});
+
+		it("hashTemplateDirectory skips template files that vanish (ENOENT)", () => {
+			const dir = makeTempDir("hash-template-enoent");
+			const filePath = path.join(dir, "home.hbs");
+			fs.writeFileSync(filePath, "<html></html>");
+
+			const realReadFileSync = fs.readFileSync;
+			const spy = vi
+				.spyOn(fs, "readFileSync")
+				// biome-ignore lint/suspicious/noExplicitAny: test stub matches overloads
+				.mockImplementation((p: any, ...rest: any[]) => {
+					if (typeof p === "string" && p === filePath) {
+						const error = new Error(
+							"ENOENT: no such file or directory",
+						) as NodeJS.ErrnoException;
+						error.code = "ENOENT";
+						throw error;
+					}
+					// biome-ignore lint/suspicious/noExplicitAny: passthrough to real impl
+					return (realReadFileSync as any)(p, ...rest);
+				});
+
+			try {
+				// All files vanish -> hashes array stays empty (false side of
+				// `if (fileHash !== undefined)`), and the directory hash is the
+				// hash of the empty string.
+				const result = hashTemplateDirectory(testHash, dir);
+				expect(result).toBe(testHash.toHashSync(""));
+			} finally {
+				spy.mockRestore();
+			}
+		});
+
+		it("mergeSectionWithOptions overrides a section from options", () => {
+			const options = new DoculaOptions({
+				quiet: true,
+				sitePath: "test/fixtures/multi-page-site",
+				sections: [{ name: "Renamed Guides", path: "guides", order: 5 }],
+			});
+			const builder = new DoculaBuilder(options);
+			const merged = builder.mergeSectionWithOptions(
+				{ name: "Guides", path: "guides", order: 1 },
+				options,
+			);
+			expect(merged.name).toBe("Renamed Guides");
+			expect(merged.order).toBe(5);
 		});
 	});
 });

@@ -7,7 +7,11 @@ import {
 } from "../src/builder-api.js";
 import * as builderUtils from "../src/builder-utils.js";
 import { DoculaOptions } from "../src/options.js";
-import { cleanupAfterEachBuildOnly, setupGithubMock } from "./test-helpers.js";
+import {
+	cleanupAfterEachBuildOnly,
+	makeTempDir,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -22,15 +26,15 @@ const defaultPathFields = {
 };
 
 describe("DoculaBuilder - LLM", () => {
-	const _doculaData: DoculaData = {
+	const _makeDoculaData = (): DoculaData => ({
 		...defaultPathFields,
 		siteUrl: "http://foo.com",
 		siteTitle: "docula",
 		siteDescription: "Beautiful Website for Your Projects",
 		sitePath: "test/fixtures/single-page-site",
 		templatePath: "test/fixtures/template-example",
-		output: "test/temp/sitemap-test",
-	};
+		output: makeTempDir("sitemap-test"),
+	});
 
 	afterEach(() => {
 		cleanupAfterEachBuildOnly();
@@ -44,7 +48,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-docs-only";
+			const output = makeTempDir("llms-docs-only");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -95,7 +99,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-api-local-spec";
+			const output = makeTempDir("llms-api-local-spec");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -131,7 +135,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-openapi-fallback";
+			const output = makeTempDir("llms-openapi-fallback");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com/",
@@ -183,7 +187,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-api-no-openapi";
+			const output = makeTempDir("llms-api-no-openapi");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -216,7 +220,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-openapi-query-only";
+			const output = makeTempDir("llms-openapi-query-only");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -248,9 +252,9 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const sitePath = "test/temp/llms-safe-openapi-site";
-			const output = "test/temp/llms-safe-openapi-output";
-			const externalSpecPath = "test/temp/llms-safe-openapi-external.json";
+			const sitePath = makeTempDir("llms-safe-openapi-site");
+			const output = makeTempDir("llms-safe-openapi-output");
+			const externalSpecPath = `${makeTempDir("llms-safe-openapi-external")}/external.json`;
 			const externalMarker = "external-openapi-should-not-be-read";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -304,8 +308,8 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const sitePath = "test/temp/llms-openapi-symlink-site";
-			const output = "test/temp/llms-openapi-symlink-output";
+			const sitePath = makeTempDir("llms-openapi-symlink-site");
+			const output = makeTempDir("llms-openapi-symlink-output");
 			const targetSpecPath = `${sitePath}/api/real-swagger.json`;
 			const symlinkSpecPath = `${sitePath}/api/swagger-link.json`;
 			const marker = "symlink-openapi-should-not-be-read";
@@ -354,7 +358,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-changelog-index";
+			const output = makeTempDir("llms-changelog-index");
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
 				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
@@ -412,7 +416,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-full-changelog";
+			const output = makeTempDir("llms-full-changelog");
 			const changelogEntries = Array.from({ length: 25 }, (_, index) => ({
 				title: `Entry ${index + 1}`,
 				date: `2025-01-${String(index + 1).padStart(2, "0")}`,
@@ -460,8 +464,8 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const sitePath = "test/temp/custom-llms-site";
-			const output = "test/temp/custom-llms-output";
+			const sitePath = makeTempDir("custom-llms-site");
+			const output = makeTempDir("custom-llms-output");
 			const customLlms = "# Custom llms.txt";
 			const customLlmsFull = "# Custom llms-full.txt";
 			const data: DoculaData = {
@@ -505,11 +509,10 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const sitePath = "test/temp/custom-llms-symlink-site";
-			const output = "test/temp/custom-llms-symlink-output";
-			const externalLlmsPath = "test/temp/custom-llms-symlink-source.txt";
-			const externalLlmsFullPath =
-				"test/temp/custom-llms-symlink-source-full.txt";
+			const sitePath = makeTempDir("custom-llms-symlink-site");
+			const output = makeTempDir("custom-llms-symlink-output");
+			const externalLlmsPath = `${makeTempDir("custom-llms-symlink-source")}/source.txt`;
+			const externalLlmsFullPath = `${makeTempDir("custom-llms-symlink-source-full")}/source-full.txt`;
 			const externalMarker = "symlink-override-should-not-be-read";
 			const data: DoculaData = {
 				...defaultPathFields,
@@ -571,7 +574,8 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const sitePath = "test/temp/override-boundary-check";
+			const sitePath = makeTempDir("override-boundary-check");
+			const output = makeTempDir("override-boundary-check-output");
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
@@ -591,7 +595,7 @@ describe("DoculaBuilder - LLM", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp/override-boundary-check-output",
+					output,
 				};
 				await fs.promises.rm(data.output, { recursive: true, force: true });
 
@@ -605,7 +609,7 @@ describe("DoculaBuilder - LLM", () => {
 				expect(llms).not.toContain("marker-should-not-be-used");
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp/override-boundary-check-output", {
+				await fs.promises.rm(output, {
 					recursive: true,
 					force: true,
 				});
@@ -616,7 +620,8 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const sitePath = "test/temp/override-realpath-fail";
+			const sitePath = makeTempDir("override-realpath-fail");
+			const output = makeTempDir("override-realpath-fail-output");
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
@@ -638,7 +643,7 @@ describe("DoculaBuilder - LLM", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp/override-realpath-fail-output",
+					output,
 				};
 				await fs.promises.rm(data.output, { recursive: true, force: true });
 
@@ -652,7 +657,7 @@ describe("DoculaBuilder - LLM", () => {
 				expect(llms).not.toContain("marker-should-not-be-used");
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp/override-realpath-fail-output", {
+				await fs.promises.rm(output, {
 					recursive: true,
 					force: true,
 				});
@@ -660,7 +665,7 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should return undefined when override realpath escapes base path", async () => {
-			const sitePath = "test/temp/override-realpath-escape";
+			const sitePath = makeTempDir("override-realpath-escape");
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(sitePath, { recursive: true });
@@ -682,7 +687,8 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should return undefined when OpenAPI realpath lookup fails", async () => {
-			const sitePath = "test/temp/openapi-realpath-fail";
+			const sitePath = makeTempDir("openapi-realpath-fail");
+			const output = makeTempDir("openapi-realpath-fail-output");
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
@@ -704,7 +710,7 @@ describe("DoculaBuilder - LLM", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp/openapi-realpath-fail-output",
+					output,
 					openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 					hasApi: true,
 				};
@@ -713,7 +719,7 @@ describe("DoculaBuilder - LLM", () => {
 				expect(spec).toBeUndefined();
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp/openapi-realpath-fail-output", {
+				await fs.promises.rm(output, {
 					recursive: true,
 					force: true,
 				});
@@ -721,7 +727,8 @@ describe("DoculaBuilder - LLM", () => {
 		});
 
 		it("should return undefined when OpenAPI realpath escapes base path", async () => {
-			const sitePath = "test/temp/openapi-realpath-escape";
+			const sitePath = makeTempDir("openapi-realpath-escape");
+			const output = makeTempDir("openapi-realpath-escape-output");
 
 			await fs.promises.rm(sitePath, { recursive: true, force: true });
 			await fs.promises.mkdir(`${sitePath}/api`, { recursive: true });
@@ -743,7 +750,7 @@ describe("DoculaBuilder - LLM", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath,
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp/openapi-realpath-escape-output",
+					output,
 					openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 					hasApi: true,
 				};
@@ -752,7 +759,7 @@ describe("DoculaBuilder - LLM", () => {
 				expect(spec).toBeUndefined();
 			} finally {
 				await fs.promises.rm(sitePath, { recursive: true, force: true });
-				await fs.promises.rm("test/temp/openapi-realpath-escape-output", {
+				await fs.promises.rm(output, {
 					recursive: true,
 					force: true,
 				});
@@ -765,7 +772,7 @@ describe("DoculaBuilder - LLM", () => {
 			options.enableLlmsTxt = false;
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
-			const output = "test/temp/llms-disabled";
+			const output = makeTempDir("llms-disabled");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -791,7 +798,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/sitemap-no-llms";
+			const output = makeTempDir("sitemap-no-llms");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",
@@ -857,7 +864,7 @@ describe("DoculaBuilder - LLM", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const output = "test/temp/llms-remote-multi-spec";
+			const output = makeTempDir("llms-remote-multi-spec");
 			const data: DoculaData = {
 				...defaultPathFields,
 				siteUrl: "http://foo.com",

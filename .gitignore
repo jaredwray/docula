@@ -91,3 +91,6 @@ test-results/
 # Test Temp Sites
 test/temp
 /tmp
+
+# Stray coverage artifacts from parallel runs
+coverage-*/

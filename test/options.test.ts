@@ -726,4 +726,103 @@ describe("DoculaOptions", () => {
 			expect(options.openGraph).toBeUndefined();
 		});
 	});
+
+	describe("openApiUrl", () => {
+		let options: DoculaOptions;
+
+		beforeEach(() => {
+			options = new DoculaOptions();
+		});
+
+		it("should have openApiUrl undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.openApiUrl).toBeUndefined();
+		});
+
+		it("should parse openApiUrl from a string", () => {
+			options.parseOptions({ openApiUrl: "https://example.com/openapi.json" });
+			expect(options.openApiUrl).toEqual("https://example.com/openapi.json");
+		});
+
+		it("should parse openApiUrl from an array of valid specs", () => {
+			options.parseOptions({
+				openApiUrl: [
+					{ name: "Public API", url: "https://example.com/public.json" },
+					{ name: "Admin API", url: "https://example.com/admin.json" },
+				],
+			});
+			expect(options.openApiUrl).toEqual([
+				{ name: "Public API", url: "https://example.com/public.json" },
+				{ name: "Admin API", url: "https://example.com/admin.json" },
+			]);
+		});
+
+		it("should include order when it is a number", () => {
+			options.parseOptions({
+				openApiUrl: [
+					{
+						name: "Public API",
+						url: "https://example.com/public.json",
+						order: 2,
+					},
+				],
+			});
+			expect(options.openApiUrl).toEqual([
+				{
+					name: "Public API",
+					url: "https://example.com/public.json",
+					order: 2,
+				},
+			]);
+		});
+
+		it("should omit order when it is not a number", () => {
+			options.parseOptions({
+				openApiUrl: [
+					{
+						name: "Public API",
+						url: "https://example.com/public.json",
+						order: "first",
+					},
+				],
+			});
+			expect(options.openApiUrl).toEqual([
+				{ name: "Public API", url: "https://example.com/public.json" },
+			]);
+		});
+
+		it("should filter out invalid entries from openApiUrl array", () => {
+			options.parseOptions({
+				openApiUrl: [
+					{ name: "Valid API", url: "https://example.com/valid.json" },
+					"not-an-object",
+					null,
+					{ url: "https://example.com/no-name.json" },
+					{ name: "No URL" },
+					{ name: 123, url: "https://example.com/bad-name.json" },
+					{ name: "Bad URL", url: 456 },
+				],
+			});
+			expect(options.openApiUrl).toEqual([
+				{ name: "Valid API", url: "https://example.com/valid.json" },
+			]);
+		});
+
+		it("should not set openApiUrl when all array entries are invalid", () => {
+			options.parseOptions({
+				openApiUrl: [
+					"not-an-object",
+					null,
+					{ name: "No URL" },
+					{ url: "https://example.com/no-name.json" },
+				],
+			});
+			expect(options.openApiUrl).toBeUndefined();
+		});
+
+		it("should not set openApiUrl for non-string, non-array values", () => {
+			options.parseOptions({ openApiUrl: 123 });
+			expect(options.openApiUrl).toBeUndefined();
+		});
+	});
 });

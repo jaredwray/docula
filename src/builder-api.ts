@@ -70,9 +70,11 @@ export async function getSafeSiteOverrideFileContent(
 		realSitePath = await fs.promises.realpath(resolvedSitePath);
 		realCandidatePath = await fs.promises.realpath(candidatePath);
 	} catch {
+		/* v8 ignore next -- realpath only throws on ENOENT/race after a successful lstat; defensive -- @preserve */
 		return undefined;
 	}
 
+	/* v8 ignore next 3 -- llms override uses a fixed single-component filename, so no intermediate symlink can make a regular file's realpath escape the (consistently resolved) site path; defensive TOCTOU guard -- @preserve */
 	if (!isPathWithinBasePath(realCandidatePath, realSitePath)) {
 		return undefined;
 	}
@@ -144,8 +146,8 @@ export async function getSafeLocalOpenApiSpecForSpec(
 	try {
 		realSitePath = await fs.promises.realpath(resolvedSitePath);
 		realLocalPath = await fs.promises.realpath(resolvedLocalPath);
-		/* v8 ignore next 3 -- @preserve */
 	} catch {
+		/* v8 ignore next -- realpath only throws on ENOENT/race after a successful lstat; defensive -- @preserve */
 		return undefined;
 	}
 
@@ -295,7 +297,8 @@ export async function renderApiContent(
 		throw new Error("No API template or openApiUrl found");
 	}
 
-	// When openApiSpecs is populated, render the combined page
+	// When openApiSpecs is populated, render the combined page.
+	/* v8 ignore next -- a truthy firstSpecUrl guarantees a non-empty openApiSpecs, so the false branch is unreachable; the legacy fallback below stays for defense-in-depth -- @preserve */
 	if (data.openApiSpecs && data.openApiSpecs.length > 0) {
 		return renderCombinedApiContent(ecto, data);
 	}
