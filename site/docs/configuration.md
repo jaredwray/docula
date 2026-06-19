@@ -174,6 +174,7 @@ When both config files exist, Docula loads them in this order (first found wins)
 | `enableReleaseChangelog` | `boolean` | `true` | Convert GitHub releases to changelog entries |
 | `changelogPerPage` | `number` | `20` | Number of changelog entries to display per page |
 | `enableLlmsTxt` | `boolean` | `true` | Generate `llms.txt` and `llms-full.txt` in the build output |
+| `enableSearch` | `boolean` | `true` | Generate `search-index.json` and render the search modal (⌘K / Ctrl K) in the modern template. See [Search](/docs/search). |
 | `themeMode` | `'light'` \| `'dark'` | - | Override the default theme. By default the site follows the system preference. Set to `'light'` or `'dark'` to use that theme when no user preference is stored. |
 | `cookieAuth` | `{ loginUrl: string; logoutUrl?: string; authCheckUrl?: string; authCheckMethod?: string; authCheckUserPath?: string }` | - | Enables cookie-based authentication, which displays a Login/Logout button in the header. See [Cookie Auth](/docs/cookie-auth). |
 | `headerLinks` | `Array<{ label: string; url: string; icon?: string }>` | - | Additional links to display in the site header navigation. See [Header Links](/docs/header-links). |

@@ -119,6 +119,11 @@ export class DoculaOptions {
 	 */
 	public enableLlmsTxt = true;
 	/**
+	 * When true, generates a search index (search-index.json) and renders the
+	 * search UI in templates that support it. Set to false to disable search.
+	 */
+	public enableSearch = true;
+	/**
 	 * Override the default theme toggle. By default the site follows the system
 	 * preference. Set to "light" or "dark" to use that theme when no user
 	 * preference is stored in localStorage.
@@ -340,6 +345,13 @@ export class DoculaOptions {
 			typeof options.enableLlmsTxt === "boolean"
 		) {
 			this.enableLlmsTxt = options.enableLlmsTxt;
+		}
+
+		if (
+			options.enableSearch !== undefined &&
+			typeof options.enableSearch === "boolean"
+		) {
+			this.enableSearch = options.enableSearch;
 		}
 
 		if (

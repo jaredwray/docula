@@ -11,7 +11,7 @@
 # Features
 * No configuration required. Just setup the folder structure with a logo, favicon, and css file.
 * Builds a static website that can be hosted anywhere.
-* Simple search is provided by default out of the box.
+* Built-in, fully client-side search (⌘K / Ctrl K) with a keyboard-navigable modal and deep links to matching headings — no external service required.
 * Support for single page with readme or multiple markdown pages in a docs folder.
 * Full TypeScript support with typed configuration and IDE autocompletion.
 * For more complex projects easily add a `docula.config.ts` (TypeScript) or `docula.config.mjs` (JavaScript) file to customize the build process with lifecycle hooks and `DoculaConsole` logging.

@@ -81,6 +81,7 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		template: options.template,
 		templatePath: options.templatePath,
 		enableLlmsTxt: options.enableLlmsTxt,
+		enableSearch: options.enableSearch,
 		changelogPerPage: options.changelogPerPage,
 		enableReleaseChangelog: options.enableReleaseChangelog,
 		sections: options.sections,

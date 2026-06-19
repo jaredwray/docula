@@ -1,0 +1,46 @@
+{{#if enableSearch}}
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-modal__backdrop" data-search-close></div>
+  <div class="search-modal__panel" role="dialog" aria-modal="true" aria-label="Search">
+    <div class="search-modal__header">
+      <svg class="search-modal__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input
+        type="search"
+        id="search-input"
+        class="search-modal__input"
+        placeholder="Search"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-label="Search"
+        aria-controls="search-results"
+        aria-activedescendant=""
+        role="combobox"
+        aria-expanded="true"
+      />
+      <button class="search-modal__clear" id="search-clear" type="button" aria-label="Clear search" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="search-modal__body">
+      <ul class="search-results" id="search-results" role="listbox" aria-label="Search results"></ul>
+      <div class="search-modal__empty" id="search-empty" hidden>
+        No results for "<span class="search-modal__empty-query" id="search-empty-query"></span>"
+      </div>
+      <div class="search-modal__initial" id="search-initial">
+        Type to search the documentation.
+      </div>
+    </div>
+    <div class="search-modal__footer">
+      <span class="search-modal__hint"><kbd class="search-modal__kbd">↑</kbd><kbd class="search-modal__kbd">↓</kbd> to navigate</span>
+      <span class="search-modal__hint"><kbd class="search-modal__kbd">↵</kbd> to select</span>
+      <span class="search-modal__hint"><kbd class="search-modal__kbd">esc</kbd> to close</span>
+    </div>
+  </div>
+</div>
+<script>
+  window.__doculaSearch = { indexUrl: "{{baseUrl}}/search-index.json" };
+</script>
+<script src="{{baseUrl}}/js/search.js" defer></script>
+{{/if}}
