@@ -1459,18 +1459,29 @@ describe("docula dev", () => {
 	});
 
 	it("should respond to a real HTTP request via the dev-server handler", async () => {
-		const port = 8231;
 		const options = new DoculaOptions();
 		options.sitePath = cloneSite("test/fixtures/single-page-site");
 		options.output = makeTempDir("docula-dev-http");
 		options.templatePath = "test/fixtures/template-example/";
 		const docula = new Docula(options);
-		process.argv = ["node", "docula", "dev", "-p", String(port)];
+		// Bind to an ephemeral port (0) so the test can never collide with another
+		// process or a concurrent job; read the actual bound port before fetching.
+		process.argv = ["node", "docula", "dev", "-p", "0"];
 		docula.console.quiet = true;
 
 		try {
 			await docula.execute(process);
 			expect(docula.server).toBeDefined();
+
+			// Wait until the OS has assigned the ephemeral port before reading it.
+			if (docula.server && !docula.server.listening) {
+				await new Promise((resolve) =>
+					docula.server?.once("listening", resolve),
+				);
+			}
+			const address = docula.server?.address();
+			const port =
+				typeof address === "object" && address !== null ? address.port : 0;
 
 			// Make ONE real request so the createServer request handler arrow
 			// function (and its response "finish" logging) is actually invoked.

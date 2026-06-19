@@ -3467,15 +3467,9 @@ describe("DoculaBuilder", () => {
 				// duplicating the site title already in the <title> tag.
 				expect(indexHtml).not.toContain("<h1>My Project</h1>");
 				// The root README should NOT have been copied into the site path
-				expect(fs.existsSync("test/fixtures/auto-readme-site/README.md")).toBe(
-					false,
-				);
+				expect(fs.existsSync(`${options.sitePath}/README.md`)).toBe(false);
 			} finally {
 				fs.rmSync(options.output, { recursive: true, force: true });
-				fs.rmSync("test/fixtures/auto-readme-site/.cache", {
-					recursive: true,
-					force: true,
-				});
 			}
 
 			cwdSpy.mockRestore();
@@ -4010,10 +4004,11 @@ describe("DoculaBuilder", () => {
 		});
 
 		it("renderApiContent and buildApiPage delegate to the api builder", async () => {
-			const options = new DoculaOptions({
-				quiet: true,
-				sitePath: cloneFixture("test/fixtures/api-only-site"),
-			});
+			const options = new DoculaOptions({ quiet: true });
+			// Assign after construction: DoculaOptions' constructor re-resolves a
+			// provided sitePath via path.join(cwd, …), which would mangle the
+			// absolute clone path. Direct assignment keeps the real clone path.
+			options.sitePath = cloneFixture("test/fixtures/api-only-site");
 			const builder = new DoculaBuilder(options);
 			const output = makeTempDir("api-delegate-out");
 			const data: DoculaData = {
