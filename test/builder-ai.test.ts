@@ -20,7 +20,7 @@ import {
 } from "../src/builder-ai.js";
 import { DoculaConsole } from "../src/console.js";
 import type { DoculaChangelogEntry, DoculaDocument } from "../src/types.js";
-import { ensureTempDir, removeTempDir } from "./test-helpers.js";
+import { makeTempDir, removeTempDir } from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -67,11 +67,11 @@ function makeChangelogEntry(
 	};
 }
 
-const tempDir = "test/temp/ai-test";
+let tempDir: string;
 
 describe("builder-ai", () => {
 	beforeEach(() => {
-		ensureTempDir("ai-test");
+		tempDir = makeTempDir("ai-test");
 	});
 
 	afterEach(() => {
@@ -128,6 +128,21 @@ describe("builder-ai", () => {
 				apiKey: "test-key",
 				model: "claude-sonnet-4-20250514",
 			});
+			expect(result).toBeDefined();
+		});
+
+		it("should create an Anthropic model without an apiKey", async () => {
+			const result = await createAIModel({ provider: "anthropic" });
+			expect(result).toBeDefined();
+		});
+
+		it("should create an OpenAI model without an apiKey", async () => {
+			const result = await createAIModel({ provider: "openai" });
+			expect(result).toBeDefined();
+		});
+
+		it("should create a Google model without an apiKey", async () => {
+			const result = await createAIModel({ provider: "google" });
 			expect(result).toBeDefined();
 		});
 
@@ -491,6 +506,28 @@ describe("builder-ai", () => {
 			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("keywords:"));
 		});
 
+		it("should not log description or keywords when metadata has neither", () => {
+			const doculaConsole = new DoculaConsole();
+			const infoSpy = vi
+				.spyOn(doculaConsole, "info")
+				.mockImplementation(() => {});
+			const logSpy = vi
+				.spyOn(doculaConsole, "log")
+				.mockImplementation(() => {});
+
+			logDocumentMetadata(
+				doculaConsole,
+				"Test Doc",
+				{ title: "Only Title" },
+				false,
+			);
+
+			expect(infoSpy).toHaveBeenCalledWith(
+				expect.stringContaining("AI enriched:"),
+			);
+			expect(logSpy).not.toHaveBeenCalled();
+		});
+
 		it("should truncate long metadata values", () => {
 			const doculaConsole = new DoculaConsole();
 			const logSpy = vi
@@ -542,6 +579,88 @@ describe("builder-ai", () => {
 			);
 			expect(result?.[0].description).toBe("Existing desc");
 			expect(result?.[0].keywords).toEqual(["ai", "generated"]);
+		});
+
+		it("should log documentPath when cached document title is empty", async () => {
+			const doculaConsole = new DoculaConsole();
+			const infoSpy = vi
+				.spyOn(doculaConsole, "info")
+				.mockImplementation(() => {});
+			vi.spyOn(doculaConsole, "log").mockImplementation(() => {});
+
+			const doc = makeDocument({ title: "" });
+			const bodyHash = testHash.toHashSync(doc.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Cached Title",
+					description: "Cached description",
+					keywords: ["cached", "keywords"],
+				},
+			};
+
+			await enrichDocuments([doc], mockModel, testHash, doculaConsole, cache);
+
+			expect(infoSpy).toHaveBeenCalledWith(
+				expect.stringContaining(doc.documentPath),
+			);
+		});
+
+		it("should keep existing keywords over cached keywords when present", async () => {
+			const doculaConsole = new DoculaConsole();
+			vi.spyOn(doculaConsole, "info").mockImplementation(() => {});
+			vi.spyOn(doculaConsole, "log").mockImplementation(() => {});
+
+			const doc = makeDocument({ keywords: ["existing-kw"] });
+			const bodyHash = testHash.toHashSync(doc.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Cached Title",
+					description: "Cached description",
+					keywords: ["cached", "keywords"],
+				},
+			};
+
+			const result = await enrichDocuments(
+				[doc],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result?.[0].keywords).toEqual(["existing-kw"]);
+		});
+
+		it("should default to empty keywords when cache has none and doc has none", async () => {
+			const doculaConsole = new DoculaConsole();
+			vi.spyOn(doculaConsole, "info").mockImplementation(() => {});
+			vi.spyOn(doculaConsole, "log").mockImplementation(() => {});
+
+			// Short content so after the incomplete cache is invalidated the
+			// document is skipped (no live AI call). applyMetadataToDocument still
+			// runs, exercising the `metadata.keywords ?? []` fallback (undefined).
+			const doc = makeDocument({
+				content: "tiny",
+				markdown: "tiny",
+				keywords: [],
+			});
+			const bodyHash = testHash.toHashSync(doc.content);
+			const cache: AIMetadataCache = {
+				[bodyHash]: {
+					title: "Cached Title",
+					description: "Cached description",
+					// no keywords -> metadata.keywords is undefined -> ?? []
+				},
+			};
+
+			const result = await enrichDocuments(
+				[doc],
+				mockModel,
+				testHash,
+				doculaConsole,
+				cache,
+			);
+			expect(result?.[0].keywords).toEqual([]);
+			expect(cache[bodyHash]).toBeUndefined();
 		});
 
 		it("should invalidate incomplete document cache entries", async () => {
@@ -728,6 +847,56 @@ describe("builder-ai", () => {
 			expect(logSpy).not.toHaveBeenCalledWith(
 				expect.stringContaining("ogTitle:"),
 			);
+		});
+
+		it("should log summary as preview when preview is empty", () => {
+			const doculaConsole = new DoculaConsole();
+			vi.spyOn(doculaConsole, "info").mockImplementation(() => {});
+			const logSpy = vi
+				.spyOn(doculaConsole, "log")
+				.mockImplementation(() => {});
+
+			// preview falsy, summary truthy: exercises `metadata.preview || metadata.summary`
+			// (binary path) and `... || metadata.summary || ""` (uses summary).
+			logChangelogMetadata(
+				doculaConsole,
+				"test-entry",
+				{
+					title: "Title",
+					summary: "Summary used as preview",
+				},
+				false,
+			);
+
+			const previewCall = logSpy.mock.calls.find((c) =>
+				String(c[0]).includes("preview:"),
+			);
+			expect(previewCall).toBeDefined();
+			expect(String(previewCall?.[0])).toContain("Summary used as preview");
+		});
+
+		it("should not log preview, description, or keywords when metadata is bare", () => {
+			const doculaConsole = new DoculaConsole();
+			const infoSpy = vi
+				.spyOn(doculaConsole, "info")
+				.mockImplementation(() => {});
+			const logSpy = vi
+				.spyOn(doculaConsole, "log")
+				.mockImplementation(() => {});
+
+			// No preview, no summary, no description, no keywords: every optional
+			// log branch takes its false path.
+			logChangelogMetadata(
+				doculaConsole,
+				"test-entry",
+				{ title: "Only Title" },
+				false,
+			);
+
+			expect(infoSpy).toHaveBeenCalledWith(
+				expect.stringContaining("AI enriched changelog:"),
+			);
+			expect(logSpy).not.toHaveBeenCalled();
 		});
 
 		it("should use summary as fallback for preview", async () => {

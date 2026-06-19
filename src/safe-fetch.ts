@@ -80,10 +80,12 @@ export function isPrivateIp(ip: string): boolean {
 
 	if (range === "6to4") {
 		const parts = v6.parts;
+		/* v8 ignore start -- v6.parts is always a fixed length-8 number[]; the `?? 0` is defensive -- @preserve */
 		const a = (parts[1] ?? 0) >> 8;
 		const b = (parts[1] ?? 0) & 0xff;
 		const c = (parts[2] ?? 0) >> 8;
 		const d = (parts[2] ?? 0) & 0xff;
+		/* v8 ignore stop */
 		return isPrivateIp(`${a}.${b}.${c}.${d}`);
 	}
 
@@ -104,10 +106,12 @@ export function isPrivateIp(ip: string): boolean {
 		parts[5] === 0 &&
 		!(parts[6] === 0 && parts[7] === 0)
 	) {
+		/* v8 ignore start -- v6.parts is always a fixed length-8 number[]; the `?? 0` is defensive -- @preserve */
 		const a = (parts[6] ?? 0) >> 8;
 		const b = (parts[6] ?? 0) & 0xff;
 		const c = (parts[7] ?? 0) >> 8;
 		const d = (parts[7] ?? 0) & 0xff;
+		/* v8 ignore stop */
 		return isPrivateIp(`${a}.${b}.${c}.${d}`);
 	}
 
@@ -198,6 +202,7 @@ export async function resolveAndValidate(
 		};
 	}
 
+	/* v8 ignore next -- the `?? dns.lookup` default invokes real DNS; only reachable without an injected lookup -- @preserve */
 	const lookupFn = (options.lookup ?? dns.lookup) as DnsLookupAllFn;
 	let addresses: Array<{ address: string; family: number }>;
 	try {
@@ -322,6 +327,7 @@ export async function safeFetch(
 		cleaned = true;
 		clearTimeout(totalTimer);
 		for (const d of dispatchers) {
+			/* v8 ignore next -- the .catch arrow only runs if undici Agent.destroy() rejects, which it does not in practice -- @preserve */
 			d.destroy().catch(() => {});
 		}
 	};
@@ -348,6 +354,7 @@ export async function safeFetch(
 				const location = response.headers.get("location");
 				if (location) {
 					await response.body?.cancel().catch(() => {});
+					/* v8 ignore next -- the .catch arrow only runs if undici Agent.destroy() rejects, which it does not in practice -- @preserve */
 					dispatcher.destroy().catch(() => {});
 					dispatchers.pop();
 					let nextUrl: string;
@@ -401,6 +408,7 @@ function capResponseBody(
 	let received = 0;
 	let finalized = false;
 	const finalize = () => {
+		/* v8 ignore next -- double-call guard; each finalize caller settles the stream, so finalize cannot deterministically run twice -- @preserve */
 		if (finalized) return;
 		finalized = true;
 		onDone();

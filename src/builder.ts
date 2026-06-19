@@ -841,6 +841,7 @@ export class DoculaBuilder {
 		let readmeContent = await fs.promises.readFile(cwdReadmePath, "utf8");
 
 		// Check if README already has a title (# heading on the first non-empty line)
+		/* v8 ignore next -- split() always yields at least one element; ?? is defensive -- @preserve */
 		const firstLine = readmeContent.trimStart().split("\n")[0] ?? "";
 		const hasTitle = /^#\s+/.test(firstLine);
 

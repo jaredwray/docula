@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { DoculaConsole } from "../src/console.js";
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: needed to strip ANSI escape codes
@@ -7,7 +7,23 @@ function stripAnsi(str: string): string {
 	return str.replace(ansiRegex, "");
 }
 
+// Snapshot of the real console methods captured before any test overrides them.
+const realConsole = {
+	log: console.log,
+	error: console.error,
+	warn: console.warn,
+	info: console.info,
+	debug: console.debug,
+	trace: console.trace,
+};
+
 describe("DoculaConsole", () => {
+	// Safety net: restore console.* after every test so a thrown assertion mid-test
+	// cannot leave an override in place and contaminate later tests.
+	afterEach(() => {
+		Object.assign(console, realConsole);
+	});
+
 	it("should be able to log", () => {
 		const consoleLog = console.log;
 		console.log = (message) => {

@@ -2,7 +2,11 @@ import fs from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DoculaBuilder, type DoculaData } from "../src/builder.js";
 import { DoculaOptions } from "../src/options.js";
-import { cleanupAfterEachBuildOnly, setupGithubMock } from "./test-helpers.js";
+import {
+	cleanupAfterEachBuildOnly,
+	makeTempDir,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -17,15 +21,17 @@ const defaultPathFields = {
 };
 
 describe("DoculaBuilder - SEO", () => {
-	const doculaData: DoculaData = {
-		...defaultPathFields,
-		siteUrl: "http://foo.com",
-		siteTitle: "docula",
-		siteDescription: "Beautiful Website for Your Projects",
-		sitePath: "test/fixtures/single-page-site",
-		templatePath: "test/fixtures/template-example",
-		output: "test/temp/sitemap-test",
-	};
+	function makeDoculaData(): DoculaData {
+		return {
+			...defaultPathFields,
+			siteUrl: "http://foo.com",
+			siteTitle: "docula",
+			siteDescription: "Beautiful Website for Your Projects",
+			sitePath: "test/fixtures/single-page-site",
+			templatePath: "test/fixtures/template-example",
+			output: makeTempDir("sitemap-test"),
+		};
+	}
 
 	afterEach(() => {
 		cleanupAfterEachBuildOnly();
@@ -40,7 +46,7 @@ describe("DoculaBuilder - SEO", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = "test/fixtures/single-page-site";
-			options.output = "test/temp/robots-test";
+			options.output = makeTempDir("robots-test");
 
 			if (fs.existsSync(options.output)) {
 				await fs.promises.rm(options.output, { recursive: true });
@@ -64,7 +70,7 @@ describe("DoculaBuilder - SEO", () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
 			options.sitePath = "test/fixtures/multi-page-site";
-			options.output = "test/temp/robots-test-copy";
+			options.output = makeTempDir("robots-test-copy");
 
 			if (fs.existsSync(options.output)) {
 				await fs.promises.rm(options.output, { recursive: true });
@@ -85,7 +91,7 @@ describe("DoculaBuilder - SEO", () => {
 		});
 		it("should build the sitemap.xml (/sitemap.xml)", async () => {
 			const builder = new DoculaBuilder(undefined, { quiet: true });
-			const data = doculaData;
+			const data = makeDoculaData();
 
 			if (fs.existsSync(data.output)) {
 				await fs.promises.rm(data.output, { recursive: true });
@@ -113,7 +119,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-feed-test",
+				output: makeTempDir("sitemap-feed-test"),
 				documents: [
 					{
 						title: "Guide",
@@ -160,7 +166,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful <docs> & updates",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-test",
+				output: makeTempDir("feed-test"),
 				documents: [
 					{
 						title: "Guide",
@@ -226,7 +232,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-excerpt-test",
+				output: makeTempDir("feed-excerpt-test"),
 				documents: [
 					{
 						title: "Guide",
@@ -275,7 +281,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-no-toc-test",
+				output: makeTempDir("feed-no-toc-test"),
 				documents: [
 					{
 						title: "Guide",
@@ -325,7 +331,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-hyphen-test",
+				output: makeTempDir("feed-hyphen-test"),
 				documents: [
 					{
 						title: "Guide",
@@ -374,7 +380,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-thematic-break-test",
+				output: makeTempDir("feed-thematic-break-test"),
 				documents: [
 					{
 						title: "Guide",
@@ -423,7 +429,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-no-docs",
+				output: makeTempDir("feed-no-docs"),
 			};
 
 			if (fs.existsSync(data.output)) {
@@ -449,7 +455,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/feed-scope-test",
+				output: makeTempDir("feed-scope-test"),
 				openApiSpecs: [{ name: "API Reference", url: "/api/swagger.json" }],
 				hasApi: true,
 				hasChangelog: true,
@@ -507,13 +513,13 @@ describe("DoculaBuilder - SEO", () => {
 	describe("Docula Builder - Build Index", () => {
 		it("should build the index.html (/index.html)", async () => {
 			const builder = new DoculaBuilder(undefined, { quiet: true });
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			if (fs.existsSync(data.output)) {
 				await fs.promises.rm(data.output, { recursive: true });
@@ -534,9 +540,9 @@ describe("DoculaBuilder - SEO", () => {
 		});
 		it("should throw an error build the index.html (/index.html)", async () => {
 			const builder = new DoculaBuilder(undefined, { quiet: true });
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.sitePath = "template";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 			data.templates = undefined;
 
 			try {
@@ -559,7 +565,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Site fallback description",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/modern",
-				output: "test/temp/index-readme-meta",
+				output: makeTempDir("index-readme-meta"),
 				templates: { home: "home.hbs" },
 				readmeMetadata: {
 					description: "Enriched README description",
@@ -599,7 +605,7 @@ describe("DoculaBuilder - SEO", () => {
 				siteDescription: "Site fallback description",
 				sitePath: "test/fixtures/single-page-site",
 				templatePath: "templates/modern",
-				output: "test/temp/index-readme-meta-fallback",
+				output: makeTempDir("index-readme-meta-fallback"),
 				templates: { home: "home.hbs" },
 			};
 

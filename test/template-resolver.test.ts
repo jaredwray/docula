@@ -22,34 +22,36 @@ describe("template-resolver", () => {
 
 		it("should fall through to normalDir when not in SEA mode and templates dir is missing", () => {
 			const normalDir = getBuiltInTemplatesDir();
-			const backupDir = `${normalDir}.__test_backup__`;
-			fs.renameSync(normalDir, backupDir);
+			// Simulate the templates dir being absent without mutating the real
+			// on-disk directory (which other parallel test files read from).
+			const existsSpy = vi.spyOn(fs, "existsSync").mockReturnValue(false);
 			try {
 				const dir = getBuiltInTemplatesDir();
 				// Should still return the normalDir path even though it doesn't exist
 				expect(dir).toContain("templates");
 				expect(dir).toBe(normalDir);
 			} finally {
-				fs.renameSync(backupDir, normalDir);
+				existsSpy.mockRestore();
 			}
 		});
 
 		it("should return extracted templates dir when in SEA mode and templates dir is missing", () => {
-			const normalDir = getBuiltInTemplatesDir();
-			const backupDir = `${normalDir}.__test_backup__`;
 			const tmpDir = getExtractedTemplatesPath();
+			fs.rmSync(tmpDir, { recursive: true, force: true });
 
 			setEmbeddedTemplates({
 				"modern/home.hbs": Buffer.from("<h1>SEA</h1>").toString("base64"),
 			});
-			fs.renameSync(normalDir, backupDir);
+			// Force the "templates dir missing" path without renaming the real
+			// directory; extraction (mkdir/writeFile) still happens for real.
+			const existsSpy = vi.spyOn(fs, "existsSync").mockReturnValue(false);
 			const isSeaSpy = vi.spyOn(sea, "isSea").mockReturnValue(true);
 			try {
 				const dir = getBuiltInTemplatesDir();
 				expect(dir).toBe(tmpDir);
 			} finally {
+				existsSpy.mockRestore();
 				isSeaSpy.mockRestore();
-				fs.renameSync(backupDir, normalDir);
 				fs.rmSync(tmpDir, { recursive: true, force: true });
 				setEmbeddedTemplates(undefined as unknown as Record<string, string>);
 			}

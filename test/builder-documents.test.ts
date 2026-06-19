@@ -7,7 +7,12 @@ import {
 	type DoculaSection,
 } from "../src/builder.js";
 import { DoculaOptions } from "../src/options.js";
-import { cleanupAfterEachBuildOnly, setupGithubMock } from "./test-helpers.js";
+import {
+	cleanupAfterEachBuildOnly,
+	cloneFixture,
+	makeTempDir,
+	setupGithubMock,
+} from "./test-helpers.js";
 
 vi.mock("@cacheable/net");
 
@@ -22,15 +27,15 @@ const defaultPathFields = {
 };
 
 describe("DoculaBuilder - Documents", () => {
-	const doculaData: DoculaData = {
+	const makeDoculaData = (): DoculaData => ({
 		...defaultPathFields,
 		siteUrl: "http://foo.com",
 		siteTitle: "docula",
 		siteDescription: "Beautiful Website for Your Projects",
 		sitePath: "test/fixtures/single-page-site",
 		templatePath: "test/fixtures/template-example",
-		output: "test/temp/sitemap-test",
-	};
+		output: makeTempDir("sitemap-test"),
+	});
 
 	afterEach(() => {
 		cleanupAfterEachBuildOnly();
@@ -44,7 +49,7 @@ describe("DoculaBuilder - Documents", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 
@@ -52,7 +57,7 @@ describe("DoculaBuilder - Documents", () => {
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 			data.hasDocuments = true;
 			data.sections = [
 				{
@@ -93,11 +98,11 @@ describe("DoculaBuilder - Documents", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = undefined;
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/no-template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			if (fs.existsSync(data.output)) {
 				await fs.promises.rm(data.output, { recursive: true });
@@ -131,7 +136,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/mega-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/sitemap-test",
+				output: makeTempDir("sitemap-test"),
 			};
 			const documentsPath = "test/fixtures/mega-page-site/docs";
 			const documents = builder.getDocuments(documentsPath, doculaData);
@@ -213,13 +218,13 @@ describe("DoculaBuilder - Documents", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			data.sections = undefined;
 			data.documents = undefined;
@@ -236,13 +241,13 @@ describe("DoculaBuilder - Documents", () => {
 			const fooChildreNoOrder = { name: "foo", path: "foo" };
 			const barChildrenNoOrder = { name: "bar", path: "bar" };
 
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			data.sections = [
 				{
@@ -300,13 +305,13 @@ describe("DoculaBuilder - Documents", () => {
 				},
 			];
 
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			data.sections = [
 				{
@@ -345,13 +350,13 @@ describe("DoculaBuilder - Documents", () => {
 				},
 			];
 
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			data.sections = [
 				{
@@ -386,13 +391,13 @@ describe("DoculaBuilder - Documents", () => {
 				},
 			];
 
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.templates = {
 				home: "home.hbs",
 			};
 			data.sitePath = "site";
 			data.templatePath = "test/fixtures/template-example";
-			data.output = "test/temp/index-test";
+			data.output = makeTempDir("index-test");
 
 			data.sections = [
 				{
@@ -440,7 +445,7 @@ describe("DoculaBuilder - Documents", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.sitePath = "test/fixtures/single-page-site";
 
 			const result = await builder.buildReadmeSection(data);
@@ -453,7 +458,7 @@ describe("DoculaBuilder - Documents", () => {
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
 			const data = {
-				...doculaData,
+				...makeDoculaData(),
 				readmeContent: "# My Title\n\nSome body content.",
 			};
 
@@ -468,7 +473,7 @@ describe("DoculaBuilder - Documents", () => {
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
 			const data = {
-				...doculaData,
+				...makeDoculaData(),
 				sitePath: "test/fixtures/single-page-site",
 				readmeContent: undefined,
 			};
@@ -485,7 +490,7 @@ describe("DoculaBuilder - Documents", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const data = doculaData;
+			const data = makeDoculaData();
 			data.sitePath = "test/fixtures/single-page-site";
 
 			const result = await builder.buildAnnouncementSection(data);
@@ -497,8 +502,8 @@ describe("DoculaBuilder - Documents", () => {
 			const builder = new DoculaBuilder(
 				Object.assign(new DoculaOptions(), { quiet: true }),
 			);
-			const data = doculaData;
-			data.sitePath = "test/fixtures/announcement-site";
+			const data = makeDoculaData();
+			data.sitePath = makeTempDir("announcement-site");
 
 			// Create temporary announcement site
 			await fs.promises.mkdir(data.sitePath, { recursive: true });
@@ -569,7 +574,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/generics-test",
+				output: makeTempDir("generics-test"),
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
@@ -619,7 +624,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/changelog-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/changelog-generics-test",
+				output: makeTempDir("changelog-generics-test"),
 				hasChangelog: true,
 				changelogEntries: [
 					{
@@ -671,7 +676,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/nonascii-test",
+				output: makeTempDir("nonascii-test"),
 				hasDocuments: true,
 				sections: [],
 				documents: builder.getDocumentInDirectory(
@@ -726,7 +731,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/docs-home-test",
+				output: makeTempDir("docs-home-test"),
 
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
@@ -737,7 +742,7 @@ describe("DoculaBuilder - Documents", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath: "test/fixtures/multi-page-site",
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp/docs-home-test",
+					output: makeTempDir("docs-home-test"),
 				}),
 				templates: {
 					home: "home.hbs",
@@ -770,7 +775,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/docs-home-error-test",
+				output: makeTempDir("docs-home-error-test"),
 
 				hasDocuments: true,
 				documents: [],
@@ -795,7 +800,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/docs-home-empty-test",
+				output: makeTempDir("docs-home-empty-test"),
 
 				hasDocuments: true,
 				documents: [],
@@ -821,7 +826,7 @@ describe("DoculaBuilder - Documents", () => {
 				siteDescription: "Beautiful Website for Your Projects",
 				sitePath: "test/fixtures/multi-page-site",
 				templatePath: "test/fixtures/template-example",
-				output: "test/temp/docs-home-precomputed-sidebar",
+				output: makeTempDir("docs-home-precomputed-sidebar"),
 
 				hasDocuments: true,
 				sections: [{ name: "getting-started", path: "getting-started" }],
@@ -832,7 +837,7 @@ describe("DoculaBuilder - Documents", () => {
 					siteDescription: "Beautiful Website for Your Projects",
 					sitePath: "test/fixtures/multi-page-site",
 					templatePath: "test/fixtures/template-example",
-					output: "test/temp/docs-home-precomputed-sidebar",
+					output: makeTempDir("docs-home-precomputed-sidebar"),
 				}),
 				sidebarItems: [],
 				templates: {
@@ -853,16 +858,12 @@ describe("DoculaBuilder - Documents", () => {
 
 	describe("Docula Builder - Content Assets", () => {
 		it("should copy non-markdown files from docs to output docs", async () => {
-			const tempSitePath = "test/temp/content-assets-docs-site";
-			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-page-site",
+				"content-assets-docs-site",
+			);
 			const options = new DoculaOptions();
-			options.output = "test/temp/content-assets-docs";
+			options.output = makeTempDir("content-assets-docs");
 			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -910,16 +911,12 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should copy non-markdown files from changelog to output changelog", async () => {
-			const tempSitePath = "test/temp/content-assets-changelog-site";
-			fs.cpSync("test/fixtures/mega-page-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/mega-page-site",
+				"content-assets-changelog-site",
+			);
 			const options = new DoculaOptions();
-			options.output = "test/temp/content-assets-changelog";
+			options.output = makeTempDir("content-assets-changelog");
 			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -958,7 +955,7 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should only copy files with allowed asset extensions", async () => {
-			const tempSitePath = "test/temp/content-assets-extensions-site";
+			const tempSitePath = makeTempDir("content-assets-extensions-site");
 			const docsPath = `${tempSitePath}/docs`;
 
 			await fs.promises.mkdir(docsPath, { recursive: true });
@@ -994,7 +991,7 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should respect custom allowedAssets from options", async () => {
-			const tempSitePath = "test/temp/content-assets-custom-ext-site";
+			const tempSitePath = makeTempDir("content-assets-custom-ext-site");
 			const docsPath = `${tempSitePath}/docs`;
 
 			await fs.promises.mkdir(docsPath, { recursive: true });
@@ -1031,16 +1028,12 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should copy sibling assets into non-index document output directories", async () => {
-			const tempSitePath = "test/temp/content-assets-sibling-site";
-			fs.cpSync("test/fixtures/multi-page-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/multi-page-site",
+				"content-assets-sibling-site",
+			);
 			const options = new DoculaOptions();
-			options.output = "test/temp/content-assets-sibling";
+			options.output = makeTempDir("content-assets-sibling");
 			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
@@ -1089,7 +1082,7 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should NOT copy unreferenced assets from docs", async () => {
-			const tempSitePath = "test/temp/content-assets-unreferenced-site";
+			const tempSitePath = makeTempDir("content-assets-unreferenced-site");
 			const docsPath = `${tempSitePath}/docs`;
 
 			await fs.promises.mkdir(docsPath, { recursive: true });
@@ -1125,16 +1118,12 @@ describe("DoculaBuilder - Documents", () => {
 		});
 
 		it("should handle docs directory with no non-markdown files", async () => {
-			const tempSitePath = "test/temp/content-assets-no-assets-site";
-			fs.cpSync("test/fixtures/single-page-site", tempSitePath, {
-				recursive: true,
-				filter: (src) => {
-					const base = src.split("/").pop() ?? "";
-					return !base.startsWith("dist") && base !== ".cache";
-				},
-			});
+			const tempSitePath = cloneFixture(
+				"test/fixtures/single-page-site",
+				"content-assets-no-assets-site",
+			);
 			const options = new DoculaOptions();
-			options.output = "test/temp/content-assets-no-assets";
+			options.output = makeTempDir("content-assets-no-assets");
 			options.sitePath = tempSitePath;
 			options.githubPath = "jaredwray/docula";
 			options.siteTitle = "docula";
