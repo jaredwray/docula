@@ -27,8 +27,8 @@ importers:
         specifier: ^2.0.20
         version: 2.0.20
       ecto:
-        specifier: ^4.8.5
-        version: 4.8.5
+        specifier: ^4.8.7
+        version: 4.8.7
       hashery:
         specifier: ^2.0.0
         version: 2.0.0
@@ -1272,8 +1272,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  ecto@4.8.5:
-    resolution: {integrity: sha512-Gdfh6fF0oFZH332e+V/sND2LFUkPFSTTYDK6qhPRABKKueNrZEB+Hbd4+Bbv3Rtj4HDpwavMKRyHBdg4OIDgXw==}
+  ecto@4.8.7:
+    resolution: {integrity: sha512-T3rANwJQsLIEXGRES/6FLPrbIGmVlLMj7aFoxyzPhVOT8yTPFnlWrJrx9x2XYU3DIq9no2ku/ij6v6vMN8aVaQ==}
 
   ejs@5.0.2:
     resolution: {integrity: sha512-IpbUaI/CAW86l3f+T8zN0iggSc0LmMZLcIW5eRVStLVNCoTXkE0YlncbbH50fp8Cl6zHIky0sW2uUbhBqGw0Jw==}
@@ -1671,8 +1671,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  liquidjs@10.25.7:
-    resolution: {integrity: sha512-rPCjJLiD4eDhQjvv964AeXFC+HbeYBbZrd7Z82Q6hqv1lX7G+5w4SJcKLn9CAAAwHI4aS3dTdo083UB79K3pDA==}
+  liquidjs@10.27.0:
+    resolution: {integrity: sha512-tw/OA59K7aIBlMKIrKlumr37fiZUheShVHXY8cVctWisgY1p9mc5hreOvlreoS0wTiwlWk14Ya7305c2a/Cg5w==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -3441,14 +3441,14 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  ecto@4.8.5:
+  ecto@4.8.7:
     dependencies:
       '@jaredwray/fumanchu': 4.7.0
       cacheable: 2.3.5
       ejs: 5.0.2
       ent: 2.2.2
       hookified: 2.2.0
-      liquidjs: 10.25.7
+      liquidjs: 10.27.0
       nunjucks: 3.2.4
       pug: 3.0.4
       writr: 6.1.2
@@ -3910,7 +3910,7 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  liquidjs@10.25.7:
+  liquidjs@10.27.0:
     dependencies:
       commander: 10.0.1
 
