@@ -24,6 +24,9 @@ vi.mock("@cacheable/net");
 describe("Github", () => {
 	afterEach(() => {
 		vi.resetAllMocks();
+		// Always clear the token so a throwing assertion in a token test cannot
+		// leak it into later tests (which branch on GITHUB_TOKEN).
+		delete process.env.GITHUB_TOKEN;
 	});
 	beforeEach(() => {
 		setupGithubMock();

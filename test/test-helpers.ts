@@ -90,10 +90,24 @@ export function cloneSite(fixturePath: string, prefix?: string): string {
 			}
 			continue;
 		}
-		const text = fs
-			.readFileSync(configPath, "utf8")
-			.replace(/^[ \t]*(?:sitePath|output)[ \t]*:[ \t]*[^\n]*\n/gm, "");
-		fs.writeFileSync(configPath, text);
+		const original = fs.readFileSync(configPath, "utf8");
+		// Strip simple single-line string-valued `sitePath:`/`output:` entries —
+		// the only form docula's fixtures use.
+		const stripped = original.replace(
+			/^[ \t]*(?:sitePath|output)[ \t]*:[ \t]*(?:"[^"]*"|'[^']*'|`[^`]*`)[ \t]*,?[ \t]*\r?\n/gm,
+			"",
+		);
+		fs.writeFileSync(configPath, stripped);
+		// Fail loud if a `sitePath`/`output` key remains in a form this helper
+		// can't strip (e.g. a multi-line or object value). That would silently
+		// redirect a build out of the clone — the exact flake we're preventing —
+		// so surface it immediately instead of using a heavyweight AST transform.
+		if (/^[ \t]*(?:sitePath|output)[ \t]*:/m.test(stripped)) {
+			throw new Error(
+				`cloneSite: ${entry} declares "sitePath"/"output" in a form cloneSite cannot neutralize. ` +
+					"Use a single-line string value in the fixture config, or extend cloneSite to handle it.",
+			);
+		}
 	}
 	return dir;
 }

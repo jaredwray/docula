@@ -1716,40 +1716,32 @@ describe("DoculaBuilder", () => {
 				"githubPath must be in 'owner/repo' format",
 			);
 		});
-		it("should validate siteDescription options", async () => {
+		it("should validate siteDescription options", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.quiet = true;
-			try {
-				options.siteDescription = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe(
-					"No site description options provided",
-				);
-			}
+			options.siteDescription = "";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"No site description options provided",
+			);
 		});
-		it("should validate site title options", async () => {
+		it("should validate site title options", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.quiet = true;
-			try {
-				options.siteTitle = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe("No site title options provided");
-			}
+			options.siteTitle = "";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"No site title options provided",
+			);
 		});
-		it("should validate site url options", async () => {
+		it("should validate site url options", () => {
 			const builder = new DoculaBuilder();
 			const options = new DoculaOptions();
 			options.quiet = true;
-			try {
-				options.siteUrl = "";
-				builder.validateOptions(options);
-			} catch (error) {
-				expect((error as Error).message).toBe("No site url options provided");
-			}
+			options.siteUrl = "";
+			expect(() => builder.validateOptions(options)).toThrow(
+				"No site url options provided",
+			);
 		});
 	});
 
@@ -1793,11 +1785,9 @@ describe("DoculaBuilder", () => {
 		});
 		it("should throw error when template path doesnt exist", async () => {
 			const builder = new DoculaBuilder();
-			try {
-				await builder.getTemplates("test/fixtures/template-example1/", false);
-			} catch (error) {
-				expect((error as Error).message).toContain("No template path found");
-			}
+			await expect(
+				builder.getTemplates("test/fixtures/template-example1/", false),
+			).rejects.toThrow("No template path found");
 		});
 	});
 
