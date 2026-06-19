@@ -73,6 +73,7 @@ export type DoculaData = {
 	googleTagManager?: string;
 	isGtag?: boolean;
 	enableLlmsTxt?: boolean;
+	enableSearch?: boolean;
 	hasFeed?: boolean;
 	lastModified?: string;
 	homeUrl?: string;

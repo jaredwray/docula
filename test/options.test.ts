@@ -39,6 +39,7 @@ describe("DoculaOptions", () => {
 			expect(options.enableReleaseChangelog).toEqual(true);
 			expect(options.changelogPerPage).toEqual(20);
 			expect(options.enableLlmsTxt).toEqual(true);
+			expect(options.enableSearch).toEqual(true);
 			expect(options.autoUpdateIgnores).toEqual(true);
 			expect(options.autoReadme).toEqual(true);
 			expect(options.quiet).toEqual(false);
@@ -190,6 +191,16 @@ describe("DoculaOptions", () => {
 		it("should not update enableLlmsTxt for non-boolean values", () => {
 			options.parseOptions({ enableLlmsTxt: "yes" });
 			expect(options.enableLlmsTxt).toEqual(true);
+		});
+
+		it("should parse enableSearch set to false", () => {
+			options.parseOptions({ enableSearch: false });
+			expect(options.enableSearch).toEqual(false);
+		});
+
+		it("should not update enableSearch for non-boolean values", () => {
+			options.parseOptions({ enableSearch: "yes" });
+			expect(options.enableSearch).toEqual(true);
 		});
 
 		it("should parse autoUpdateIgnores set to false", () => {

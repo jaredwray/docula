@@ -61,6 +61,7 @@ import {
 	mergeTemplateOverrides,
 } from "./builder-files.js";
 import { buildLlmsFiles as _buildLlmsFiles } from "./builder-llm.js";
+import { buildSearchIndex as _buildSearchIndex } from "./builder-search.js";
 import {
 	buildFeedPage as _buildFeedPage,
 	buildRobotsPage as _buildRobotsPage,
@@ -456,6 +457,13 @@ export class DoculaBuilder {
 		doculaData.hasChangelog =
 			allChangelogEntries.length > 0 && hasChangelogTemplate;
 
+		// Search is available when enabled and there is indexable content
+		// (documentation pages and/or changelog entries).
+		doculaData.enableSearch = Boolean(
+			this.options.enableSearch &&
+				(doculaData.hasDocuments || doculaData.hasChangelog),
+		);
+
 		// AI metadata enrichment for OG/meta tags
 		/* v8 ignore next 40 -- @preserve */
 		if (this._options.ai) {
@@ -770,6 +778,9 @@ export class DoculaBuilder {
 
 		await this.buildLlmsFiles(doculaData);
 
+		// Build the search index (search-index.json) consumed by the client UI
+		await this.buildSearchIndex(doculaData);
+
 		// Save build manifest for differential builds
 		ensureCacheInGitignore(this._options, this._console, this.options.sitePath);
 		const newManifest: BuildManifest = {
@@ -980,6 +991,10 @@ export class DoculaBuilder {
 
 	public async buildLlmsFiles(data: DoculaData): Promise<void> {
 		return _buildLlmsFiles(this._options, this._console, data);
+	}
+
+	public async buildSearchIndex(data: DoculaData): Promise<void> {
+		return _buildSearchIndex(this._console, data);
 	}
 
 	public resolveOpenGraphData(

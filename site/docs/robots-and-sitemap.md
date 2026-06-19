@@ -1,6 +1,6 @@
 ---
 title: Robots & Sitemap
-order: 18
+order: 19
 ---
 
 Docula automatically generates a `robots.txt`, `sitemap.xml`, and `feed.xml` in your output directory during every build. No configuration is required.
