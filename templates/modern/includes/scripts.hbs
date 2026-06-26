@@ -265,23 +265,34 @@
       });
     }
 
-    // Active header nav link highlighting
-    const navLinks = document.querySelectorAll('.header-bottom__item');
-    navLinks.forEach((link) => {
-      const href = link.getAttribute('href');
-      if (currentPath.startsWith(href)) {
-        link.classList.add('header-bottom__item--active');
-      }
-    });
-
-    // Active mobile nav link highlighting
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav__item');
-    mobileNavLinks.forEach((link) => {
-      const href = link.getAttribute('href');
-      if (currentPath.startsWith(href)) {
-        link.classList.add('mobile-nav__item--active');
-      }
-    });
+    // Active nav link highlighting (header + mobile). Highlight only the
+    // single most-specific link: the one whose path is the longest prefix of
+    // the current path. A plain startsWith() check lights up every link whose
+    // path merely prefixes the current one, so when the site is embedded under
+    // a base path (e.g. served at /developer with docs at that root) the
+    // Documentation link — whose path is a prefix of every page — would stay
+    // highlighted everywhere. Trailing slashes are normalized so matches stop
+    // at a path boundary. We read the anchor's resolved origin/pathname so
+    // absolute, relative, and same-origin hrefs all work, while cross-origin
+    // links and non-anchor items (e.g. the mobile logout button) are skipped.
+    const withTrailingSlash = (p) => (p.endsWith('/') ? p : p + '/');
+    const here = withTrailingSlash(currentPath);
+    const markActiveNav = (selector, activeClass) => {
+      let bestLink = null;
+      let bestLength = -1;
+      document.querySelectorAll(selector).forEach((link) => {
+        // Only same-origin anchors can match the current pathname.
+        if (!link.href || link.origin !== window.location.origin) return;
+        const base = withTrailingSlash(link.pathname);
+        if (here.startsWith(base) && base.length > bestLength) {
+          bestLink = link;
+          bestLength = base.length;
+        }
+      });
+      if (bestLink) bestLink.classList.add(activeClass);
+    };
+    markActiveNav('.header-bottom__item', 'header-bottom__item--active');
+    markActiveNav('.mobile-nav__item', 'mobile-nav__item--active');
 
     // TOC extraction: move the inline TOC into the right sidebar and hide the original
     const tocHeading = document.getElementById('table-of-contents');
