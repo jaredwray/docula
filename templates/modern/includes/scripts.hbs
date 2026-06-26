@@ -266,23 +266,24 @@
     }
 
     // Active nav link highlighting (header + mobile). Highlight only the
-    // single most-specific link: the one whose href is the longest prefix of
+    // single most-specific link: the one whose path is the longest prefix of
     // the current path. A plain startsWith() check lights up every link whose
-    // href merely prefixes the path, so when the site is embedded under a base
-    // path (e.g. served at /developer with docs at that root) the Documentation
-    // link — whose href is a prefix of every page — would stay highlighted
-    // everywhere. Trailing slashes are normalized so matches stop at a path
-    // boundary, and external/absolute links are skipped.
+    // path merely prefixes the current one, so when the site is embedded under
+    // a base path (e.g. served at /developer with docs at that root) the
+    // Documentation link — whose path is a prefix of every page — would stay
+    // highlighted everywhere. Trailing slashes are normalized so matches stop
+    // at a path boundary. We read the anchor's resolved origin/pathname so
+    // absolute, relative, and same-origin hrefs all work, while cross-origin
+    // links and non-anchor items (e.g. the mobile logout button) are skipped.
     const withTrailingSlash = (p) => (p.endsWith('/') ? p : p + '/');
     const here = withTrailingSlash(currentPath);
     const markActiveNav = (selector, activeClass) => {
       let bestLink = null;
       let bestLength = -1;
       document.querySelectorAll(selector).forEach((link) => {
-        const href = link.getAttribute('href');
-        // Only same-origin path links can match the current pathname.
-        if (!href || href.charAt(0) !== '/') return;
-        const base = withTrailingSlash(href);
+        // Only same-origin anchors can match the current pathname.
+        if (!link.href || link.origin !== window.location.origin) return;
+        const base = withTrailingSlash(link.pathname);
         if (here.startsWith(base) && base.length > bestLength) {
           bestLink = link;
           bestLength = base.length;
