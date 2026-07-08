@@ -83,12 +83,12 @@ export function isRemoteUrl(url: string): boolean {
 }
 
 /**
- * Encode a value for use in a Google Tag Manager URL. `encodeURIComponent`
- * leaves single quotes untouched, so escape them too — the params are injected
- * into a single-quoted JavaScript string literal in the GTM template, where a
- * raw quote would break the script.
+ * Encode a value for use in a URL query string. Unlike `encodeURIComponent`,
+ * this also escapes single quotes, so the result is safe to inject into a
+ * single-quoted JavaScript string literal (e.g., inline template scripts)
+ * where a raw quote would break the string.
  */
-function encodeGtmValue(value: string): string {
+function encodeQueryStringValue(value: string): string {
 	return encodeURIComponent(value).replace(/'/g, "%27");
 }
 
@@ -105,7 +105,7 @@ export function buildGtmEnvironmentParams(
 	if (!auth || !env) {
 		return undefined;
 	}
-	return `&gtm_auth=${encodeGtmValue(auth)}&gtm_preview=${encodeGtmValue(
-		env,
-	)}&gtm_cookies_win=x`;
+	return `&gtm_auth=${encodeQueryStringValue(
+		auth,
+	)}&gtm_preview=${encodeQueryStringValue(env)}&gtm_cookies_win=x`;
 }
