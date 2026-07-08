@@ -83,6 +83,16 @@ export function isRemoteUrl(url: string): boolean {
 }
 
 /**
+ * Encode a value for use in a Google Tag Manager URL. `encodeURIComponent`
+ * leaves single quotes untouched, so escape them too — the params are injected
+ * into a single-quoted JavaScript string literal in the GTM template, where a
+ * raw quote would break the script.
+ */
+function encodeGtmValue(value: string): string {
+	return encodeURIComponent(value).replace(/'/g, "%27");
+}
+
+/**
  * Build the extra query string appended to Google Tag Manager URLs when
  * targeting a GTM environment. A GTM environment is identified by both an
  * auth token and an environment name, so this returns `undefined` unless
@@ -95,7 +105,7 @@ export function buildGtmEnvironmentParams(
 	if (!auth || !env) {
 		return undefined;
 	}
-	return `&gtm_auth=${encodeURIComponent(auth)}&gtm_preview=${encodeURIComponent(
+	return `&gtm_auth=${encodeGtmValue(auth)}&gtm_preview=${encodeGtmValue(
 		env,
 	)}&gtm_cookies_win=x`;
 }

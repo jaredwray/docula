@@ -160,5 +160,11 @@ describe("builder-utils", () => {
 				"&gtm_auth=a%20b%2Fc&gtm_preview=env%203&gtm_cookies_win=x",
 			);
 		});
+
+		it("encodes single quotes so the JS string literal is not broken", () => {
+			expect(buildGtmEnvironmentParams("a'b", "env'3")).toBe(
+				"&gtm_auth=a%27b&gtm_preview=env%273&gtm_cookies_win=x",
+			);
+		});
 	});
 });
