@@ -72,6 +72,7 @@ export type DoculaData = {
 	}>;
 	googleTagManager?: string;
 	isGtag?: boolean;
+	googleTagManagerParams?: string;
 	enableLlmsTxt?: boolean;
 	enableSearch?: boolean;
 	hasFeed?: boolean;

@@ -81,3 +81,21 @@ export function summarizeMarkdown(markdown: string, maxLength = 240): string {
 export function isRemoteUrl(url: string): boolean {
 	return /^https?:\/\//i.test(url);
 }
+
+/**
+ * Build the extra query string appended to Google Tag Manager URLs when
+ * targeting a GTM environment. A GTM environment is identified by both an
+ * auth token and an environment name, so this returns `undefined` unless
+ * both are set.
+ */
+export function buildGtmEnvironmentParams(
+	auth?: string,
+	env?: string,
+): string | undefined {
+	if (!auth || !env) {
+		return undefined;
+	}
+	return `&gtm_auth=${encodeURIComponent(auth)}&gtm_preview=${encodeURIComponent(
+		env,
+	)}&gtm_cookies_win=x`;
+}

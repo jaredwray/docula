@@ -198,6 +198,16 @@ export class DoculaOptions {
 	 */
 	public googleTagManager?: string;
 	/**
+	 * Google Tag Manager environment auth token (gtm_auth). Only applies to
+	 * GTM container IDs; requires `googleTagManagerEnv` to also be set.
+	 */
+	public googleTagManagerAuth?: string;
+	/**
+	 * Google Tag Manager environment name (gtm_preview), e.g., "env-3". Only
+	 * applies to GTM container IDs; requires `googleTagManagerAuth` to also be set.
+	 */
+	public googleTagManagerEnv?: string;
+	/**
 	 * AI-powered metadata enrichment configuration. When set, uses AI to fill
 	 * missing OpenGraph and HTML meta tag fields during the build.
 	 * Requires provider name and API key. Omit to disable AI enrichment.
@@ -385,6 +395,22 @@ export class DoculaOptions {
 			/^G[A-Z]*-[A-Z0-9]+$/i.test(options.googleTagManager)
 		) {
 			this.googleTagManager = options.googleTagManager;
+		}
+
+		if (
+			options.googleTagManagerAuth !== undefined &&
+			typeof options.googleTagManagerAuth === "string" &&
+			options.googleTagManagerAuth.length > 0
+		) {
+			this.googleTagManagerAuth = options.googleTagManagerAuth;
+		}
+
+		if (
+			options.googleTagManagerEnv !== undefined &&
+			typeof options.googleTagManagerEnv === "string" &&
+			options.googleTagManagerEnv.length > 0
+		) {
+			this.googleTagManagerEnv = options.googleTagManagerEnv;
 		}
 
 		if (

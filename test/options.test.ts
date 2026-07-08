@@ -351,6 +351,42 @@ describe("DoculaOptions", () => {
 			expect(freshOptions.googleTagManager).toBeUndefined();
 		});
 
+		it("should have googleTagManagerAuth and googleTagManagerEnv undefined by default", () => {
+			const freshOptions = new DoculaOptions();
+			expect(freshOptions.googleTagManagerAuth).toBeUndefined();
+			expect(freshOptions.googleTagManagerEnv).toBeUndefined();
+		});
+
+		it("should parse googleTagManagerAuth and googleTagManagerEnv", () => {
+			options.parseOptions({
+				googleTagManager: "GTM-XXXXXX",
+				googleTagManagerAuth: "abc123",
+				googleTagManagerEnv: "env-3",
+			});
+			expect(options.googleTagManager).toEqual("GTM-XXXXXX");
+			expect(options.googleTagManagerAuth).toEqual("abc123");
+			expect(options.googleTagManagerEnv).toEqual("env-3");
+		});
+
+		it("should not set googleTagManagerAuth for non-string values", () => {
+			options.parseOptions({ googleTagManagerAuth: 123 });
+			expect(options.googleTagManagerAuth).toBeUndefined();
+		});
+
+		it("should not set googleTagManagerEnv for non-string values", () => {
+			options.parseOptions({ googleTagManagerEnv: 123 });
+			expect(options.googleTagManagerEnv).toBeUndefined();
+		});
+
+		it("should not set googleTagManagerAuth or googleTagManagerEnv for empty strings", () => {
+			options.parseOptions({
+				googleTagManagerAuth: "",
+				googleTagManagerEnv: "",
+			});
+			expect(options.googleTagManagerAuth).toBeUndefined();
+			expect(options.googleTagManagerEnv).toBeUndefined();
+		});
+
 		it("should parse cookieAuth with loginUrl", () => {
 			options.parseOptions({
 				cookieAuth: { loginUrl: "/login" },

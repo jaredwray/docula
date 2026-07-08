@@ -69,7 +69,11 @@ import {
 	resolveJsonLd as _resolveJsonLd,
 	resolveOpenGraphData as _resolveOpenGraphData,
 } from "./builder-seo.js";
-import { buildUrlPath, isRemoteUrl } from "./builder-utils.js";
+import {
+	buildGtmEnvironmentParams,
+	buildUrlPath,
+	isRemoteUrl,
+} from "./builder-utils.js";
 import { DoculaConsole } from "./console.js";
 import {
 	Github,
@@ -247,6 +251,10 @@ export class DoculaBuilder {
 			headerLinks: this.options.headerLinks,
 			googleTagManager: this.options.googleTagManager,
 			isGtag: this.options.googleTagManager?.startsWith("G-") ?? false,
+			googleTagManagerParams: buildGtmEnvironmentParams(
+				this.options.googleTagManagerAuth,
+				this.options.googleTagManagerEnv,
+			),
 			enableLlmsTxt: this.options.enableLlmsTxt,
 			homeUrl: this.options.homeUrl,
 			baseUrl: this.options.baseUrl,
