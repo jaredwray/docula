@@ -98,6 +98,8 @@ export function hashOptions(hash: Hashery, options: DoculaOptions): string {
 		changelogPath: options.changelogPath,
 		ai: options.ai,
 		googleTagManager: options.googleTagManager,
+		googleTagManagerAuth: options.googleTagManagerAuth,
+		googleTagManagerEnv: options.googleTagManagerEnv,
 	};
 	const optionsHash = hash.toHashSync(JSON.stringify(relevant));
 	const configHash = hashConfigFile(hash, options.sitePath);

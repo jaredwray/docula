@@ -2,6 +2,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	buildAbsoluteSiteUrl,
+	buildGtmEnvironmentParams,
 	buildUrlPath,
 	escapeXml,
 	isPathWithinBasePath,
@@ -131,6 +132,39 @@ describe("builder-utils", () => {
 		it("returns false for local paths", () => {
 			expect(isRemoteUrl("/api/spec.json")).toBe(false);
 			expect(isRemoteUrl("./spec.json")).toBe(false);
+		});
+	});
+
+	describe("buildGtmEnvironmentParams", () => {
+		it("returns undefined when neither auth nor env is set", () => {
+			expect(buildGtmEnvironmentParams()).toBeUndefined();
+			expect(buildGtmEnvironmentParams("", "")).toBeUndefined();
+		});
+
+		it("returns undefined when only auth is set", () => {
+			expect(buildGtmEnvironmentParams("abc123")).toBeUndefined();
+		});
+
+		it("returns undefined when only env is set", () => {
+			expect(buildGtmEnvironmentParams(undefined, "env-3")).toBeUndefined();
+		});
+
+		it("builds params when both auth and env are set", () => {
+			expect(buildGtmEnvironmentParams("abc123", "env-3")).toBe(
+				"&gtm_auth=abc123&gtm_preview=env-3&gtm_cookies_win=x",
+			);
+		});
+
+		it("url-encodes auth and env values", () => {
+			expect(buildGtmEnvironmentParams("a b/c", "env 3")).toBe(
+				"&gtm_auth=a%20b%2Fc&gtm_preview=env%203&gtm_cookies_win=x",
+			);
+		});
+
+		it("encodes single quotes so the JS string literal is not broken", () => {
+			expect(buildGtmEnvironmentParams("a'b", "env'3")).toBe(
+				"&gtm_auth=a%27b&gtm_preview=env%273&gtm_cookies_win=x",
+			);
 		});
 	});
 });

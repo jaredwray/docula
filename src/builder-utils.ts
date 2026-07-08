@@ -81,3 +81,31 @@ export function summarizeMarkdown(markdown: string, maxLength = 240): string {
 export function isRemoteUrl(url: string): boolean {
 	return /^https?:\/\//i.test(url);
 }
+
+/**
+ * Encode a value for use in a URL query string. Unlike `encodeURIComponent`,
+ * this also escapes single quotes, so the result is safe to inject into a
+ * single-quoted JavaScript string literal (e.g., inline template scripts)
+ * where a raw quote would break the string.
+ */
+function encodeQueryStringValue(value: string): string {
+	return encodeURIComponent(value).replace(/'/g, "%27");
+}
+
+/**
+ * Build the extra query string appended to Google Tag Manager URLs when
+ * targeting a GTM environment. A GTM environment is identified by both an
+ * auth token and an environment name, so this returns `undefined` unless
+ * both are set.
+ */
+export function buildGtmEnvironmentParams(
+	auth?: string,
+	env?: string,
+): string | undefined {
+	if (!auth || !env) {
+		return undefined;
+	}
+	return `&gtm_auth=${encodeQueryStringValue(
+		auth,
+	)}&gtm_preview=${encodeQueryStringValue(env)}&gtm_cookies_win=x`;
+}

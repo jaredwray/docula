@@ -2316,6 +2316,37 @@ describe("DoculaBuilder", () => {
 			}
 		});
 
+		it("should render GTM environment params when auth and env are configured", async () => {
+			const options = new DoculaOptions();
+			options.quiet = true;
+			options.template = "modern";
+			options.sitePath = cloneFixture("test/fixtures/multi-page-site");
+			options.output = makeTempDir("build-gtm-env");
+			options.googleTagManager = "GTM-ENV1234";
+			options.googleTagManagerAuth = "abc123";
+			options.googleTagManagerEnv = "env-3";
+			const builder = new DoculaBuilder(options);
+
+			try {
+				await builder.build();
+				const indexHtml = await fs.promises.readFile(
+					`${options.output}/index.html`,
+					"utf8",
+				);
+				expect(indexHtml).toContain(
+					"gtm.js?id='+i+dl+'&gtm_auth=abc123&gtm_preview=env-3&gtm_cookies_win=x'",
+				);
+				expect(indexHtml).toContain(
+					"ns.html?id=GTM-ENV1234&gtm_auth=abc123&gtm_preview=env-3&gtm_cookies_win=x",
+				);
+			} finally {
+				await fs.promises.rm(options.output, {
+					recursive: true,
+					force: true,
+				});
+			}
+		});
+
 		it("should render GA4 gtag.js scripts when G- prefix is used", async () => {
 			const options = new DoculaOptions();
 			options.quiet = true;
