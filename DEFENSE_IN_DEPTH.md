@@ -23,9 +23,9 @@ Profile: npm library · public
 - [x] Private vulnerability reporting enabled *(public repos only)* — verified 2026-08-16
 - [x] Dependabot alerts enabled — verified 2026-08-16
 - [x] Dependabot rule: auto-dismiss low + medium (manual) — verified 2026-08-16 (maintainer)
-- [ ] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual)
-- [ ] Recovery codes stored offline in a password manager (manual)
-- [ ] Dev/release VM network egress filtered by a firewall (e.g. PMG) (manual)
+- [x] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual) — verified 2026-08-16 (maintainer)
+- [x] Recovery codes stored offline in a password manager (manual) — verified 2026-08-16 (maintainer)
+- [x] Dev/release VM network egress filtered by a firewall (e.g. PMG) (manual) — verified 2026-08-16 (maintainer)
 
 ## 3. Dependencies (pnpm)
 
