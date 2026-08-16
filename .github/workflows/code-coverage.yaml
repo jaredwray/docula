@@ -8,10 +8,7 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  contents: read
 
 jobs:
   build:
