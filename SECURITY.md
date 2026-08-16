@@ -24,5 +24,5 @@ This repository follows the [defense-in-depth](https://github.com/jaredwray/agen
 hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_DEPTH.md). Measures currently in place:
 
 - Every action is pinned to a full commit SHA. CI workflows default to read-only `contents` permissions, and checkouts that do not push set `persist-credentials: false`. Socket Firewall wraps package installs; workflows are security-linted with zizmor on every PR.
-- Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. CI installs with a frozen lockfile. Socket reviews every dependency change; Aikido scans every build.
-- npm releases are staged via OIDC trusted publishing (`npm stage publish` with provenance). There are no npm tokens in Actions.
+- Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. CI installs with a frozen lockfile. Socket reviews every dependency change; Aikido scans every build, and the release workflow's stage-publish job requires a passing Aikido release gate.
+- npm releases are staged, never published directly: CI authenticates with **stage-only** OIDC trusted publishing (`npm stage publish` with provenance). Drydock reviews the staged artifact; a maintainer promotes with 2FA. The package requires 2FA and disallows tokens.
