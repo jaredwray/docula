@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Aikido CI client
         # zizmor: ignore[adhoc-packages] pinned Aikido CI client for the release gate
-        run: npm install --global @aikidosec/ci-api-client@1.0.17
+        run: sfw npm install --global @aikidosec/ci-api-client@1.0.17
 
       # Fails on new SAST/IaC/secrets findings. The API key comes from Aikido's
       # Continuous Integration settings — it grants no publish authority.
@@ -67,8 +67,11 @@ jobs:
     - name: Enable Corepack
       run: corepack enable
 
+    - name: Prepare pnpm
+      run: corepack prepare
+
     - name: Install Dependencies
-      run: pnpm install --frozen-lockfile
+      run: sfw pnpm install --frozen-lockfile
 
     - name: Build
       run: pnpm build
@@ -84,7 +87,7 @@ jobs:
 
     - name: Ensure npm CLI for staged publishing
       # zizmor: ignore[adhoc-packages] pin npm 11.19.0 so `npm stage publish` is available
-      run: npm install --global npm@11.19.0
+      run: sfw npm install --global npm@11.19.0
 
     - name: Stage publish
       run: npm stage publish packed/*.tgz --access public --provenance
