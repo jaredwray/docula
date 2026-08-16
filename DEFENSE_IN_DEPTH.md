@@ -11,21 +11,21 @@ Profile: npm library · public
 
 ## 2. Repository lockdown
 
-- [ ] `.github/CODEOWNERS` covers `/.github/`, `/.cursor/`, `/.devcontainer/`, `/scripts/` with owners the maintainer names (PR #473 pending)
-- [ ] Lockdown script run; `lockdown-repo.sh --check` passes clean
-- [ ] Pull requests required on the default branch (1 approving review of the latest push, including code owners on owned paths; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked
-- [ ] Merges blocked unless required status checks pass (`--required-checks "<repo's CI jobs>"`)
-- [ ] Tag ruleset "Tags only by admins" active
-- [ ] Workflow runs from all outside collaborators require approval
-- [ ] Default workflow token read-only; Actions cannot create or approve PRs
-- [ ] Actions allowlist: GitHub-owned + verified + explicit patterns only (`--allowed-actions`)
-- [ ] Secret scanning + push protection enabled *(plan-gated on private repos)*
-- [ ] Private vulnerability reporting enabled *(public repos only)*
-- [ ] Dependabot alerts enabled
-- [ ] Dependabot rule: auto-dismiss low + medium (manual)
-- [ ] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual)
-- [ ] Recovery codes stored offline in a password manager (manual)
-- [ ] Dev/release VM network egress filtered by a firewall (e.g. PMG) (manual)
+- [x] `.github/CODEOWNERS` covers `/.github/`, `/.cursor/`, `/.devcontainer/`, `/scripts/` with owners the maintainer names — PR #473
+- [x] Lockdown script run; `lockdown-repo.sh --check` passes clean — verified 2026-08-16 (maintainer apply)
+- [x] Pull requests required on the default branch (1 approving review of the latest push, including code owners on owned paths; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked — verified 2026-08-16 (ruleset "Pull requests required")
+- [x] Merges blocked unless required status checks pass (`--required-checks "build (22),build (24),build (26),zizmor"`) — verified 2026-08-16
+- [x] Tag ruleset "Tags only by admins" active — verified 2026-08-16
+- [x] Workflow runs from all outside collaborators require approval — verified 2026-08-16
+- [x] Default workflow token read-only; Actions cannot create or approve PRs — verified 2026-08-16
+- [x] Actions allowlist: GitHub-owned + verified + explicit patterns only (`--allowed-actions "codecov/*,cloudflare/*"`; `zizmorcore/*` and `SocketDev/*` always included) — verified 2026-08-16
+- [x] Secret scanning + push protection enabled *(plan-gated on private repos)* — verified 2026-08-16
+- [x] Private vulnerability reporting enabled *(public repos only)* — verified 2026-08-16
+- [x] Dependabot alerts enabled — verified 2026-08-16
+- [x] Dependabot rule: auto-dismiss low + medium (manual) — verified 2026-08-16 (maintainer)
+- [x] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual) — verified 2026-08-16 (maintainer)
+- [x] Recovery codes stored offline in a password manager (manual) — verified 2026-08-16 (maintainer)
+- [x] Dev/release VM network egress filtered by a firewall (e.g. PMG) (manual) — verified 2026-08-16 (maintainer)
 
 ## 3. Dependencies (pnpm)
 
