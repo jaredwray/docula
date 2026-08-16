@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { CacheableNet } from "@cacheable/net";
 import { Hashery } from "hashery";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Writr } from "writr";
 import {
 	DoculaBuilder,
 	type DoculaChangelogEntry,
@@ -242,6 +243,27 @@ describe("DoculaBuilder - Changelog", () => {
 			expect(entry.title).toBe("String Date Entry");
 			expect(entry.date).toBe("Q1 2025");
 			expect(entry.slug).toBe("2024-11-01-string-date");
+		});
+
+		it("should format Date objects from changelog front matter", () => {
+			const builder = new DoculaBuilder(
+				Object.assign(new DoculaOptions(), { quiet: true }),
+			);
+			const spy = vi
+				.spyOn(Writr.prototype, "frontMatter", "get")
+				.mockReturnValue({
+					title: "Date Object Entry",
+					date: new Date("2025-06-15T00:00:00.000Z"),
+				});
+			try {
+				const entry = builder.parseChangelogEntry(
+					"test/fixtures/changelog-site/changelog/2025-01-15-new-feature.md",
+				);
+				expect(entry.date).toBe("2025-06-15");
+				expect(entry.title).toBe("Date Object Entry");
+			} finally {
+				spy.mockRestore();
+			}
 		});
 
 		it("should parse SEO frontmatter fields from changelog entry", () => {
