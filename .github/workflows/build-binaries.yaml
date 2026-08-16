@@ -55,9 +55,11 @@ jobs:
 
       - name: Smoke Test Binary
         shell: bash
+        env:
+          BINARY_NAME: ${{ matrix.binary }}
         run: |
-          ./dist/${{ matrix.binary }} version
-          ./dist/${{ matrix.binary }} build -s ./test/fixtures/single-page-site -o ./smoke-dist
+          ./dist/${BINARY_NAME} version
+          ./dist/${BINARY_NAME} build -s ./test/fixtures/single-page-site -o ./smoke-dist
           test -f ./smoke-dist/index.html
 
       - name: Upload Binary Artifact
@@ -72,6 +74,9 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          BINARY_NAME: ${{ matrix.binary }}
+          ASSET_NAME: ${{ matrix.asset }}
         run: |
-          cp "dist/${{ matrix.binary }}" "dist/${{ matrix.asset }}"
-          gh release upload "${{ github.event.release.tag_name }}" "dist/${{ matrix.asset }}" --clobber
+          cp "dist/${BINARY_NAME}" "dist/${ASSET_NAME}"
+          gh release upload "${TAG_NAME}" "dist/${ASSET_NAME}" --clobber
