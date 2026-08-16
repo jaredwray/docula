@@ -27,8 +27,8 @@ importers:
         specifier: ^2.0.20
         version: 2.0.20
       ecto:
-        specifier: ^4.8.7
-        version: 4.8.7(supports-color@7.2.0)
+        specifier: ^5.0.0
+        version: 5.0.0(supports-color@7.2.0)
       hashery:
         specifier: ^3.0.1
         version: 3.0.1
@@ -201,9 +201,6 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
-
-  '@cacheable/memory@2.0.8':
-    resolution: {integrity: sha512-FvEb29x5wVwu/Kf93IWwsOOEuhHh6dYCJF3vcKLzXc0KXIW181AOzv6ceT4ZpBHDvAfG60eqb+ekmrnLHIy+jw==}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -1154,9 +1151,6 @@ packages:
     resolution: {integrity: sha512-tixWYgm5ZoOD+3g6UTea91eow5z6AAHaho3g0V9CNSNb45gM8SmflpAc+GRd1InC4AqN/07Unrgp56Y94N9hJQ==}
     engines: {node: '>=20.19.0'}
 
-  cacheable@2.3.5:
-    resolution: {integrity: sha512-EQfaKe09tl615iNvq/TBRWTFf1AKJNXYQSsMx0Z3EI0nA+pVsVPS8wJhnRlkbdacKPh1d0qVIhwTc2zsQNFEEg==}
-
   cacheable@2.5.0:
     resolution: {integrity: sha512-60cyAOytib/OzBw1JNSoSV/boK1AtHryDIjvVBk7XbN4ugfkM3+Sry7fEjNgPMGgOjuaZPAp8ruZ0Cxafwyq9g==}
 
@@ -1324,11 +1318,12 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  ecto@4.8.7:
-    resolution: {integrity: sha512-T3rANwJQsLIEXGRES/6FLPrbIGmVlLMj7aFoxyzPhVOT8yTPFnlWrJrx9x2XYU3DIq9no2ku/ij6v6vMN8aVaQ==}
+  ecto@5.0.0:
+    resolution: {integrity: sha512-uuoTfhPqp+ADz4vsBHrHq6zPq45G5ce7+0WOFrtwOwIUREX6AtsziVzCU4yJbVCA3oveKMlDrVt9j/JNSSiFVA==}
+    engines: {node: '>=22.18.0'}
 
-  ejs@5.0.2:
-    resolution: {integrity: sha512-IpbUaI/CAW86l3f+T8zN0iggSc0LmMZLcIW5eRVStLVNCoTXkE0YlncbbH50fp8Cl6zHIky0sW2uUbhBqGw0Jw==}
+  ejs@6.0.1:
+    resolution: {integrity: sha512-UaaM14yby8U3k02ihS1Bmj5Kz2d7CCQM1scxpgs4Mhkq8F1wR2gl3+Ts4h5Ne4Mnt7M9m4Dw7jsuMr3+xO4vZA==}
     engines: {node: '>=0.12.18'}
     hasBin: true
 
@@ -2691,13 +2686,6 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.7':
     optional: true
 
-  '@cacheable/memory@2.0.8':
-    dependencies:
-      '@cacheable/utils': 2.5.0
-      '@keyv/bigmap': 1.3.1(keyv@5.6.0)
-      hookified: 1.15.1
-      keyv: 5.6.0
-
   '@cacheable/memory@2.2.0':
     dependencies:
       '@cacheable/utils': 2.5.0
@@ -2876,7 +2864,7 @@ snapshots:
 
   '@jaredwray/fumanchu@4.7.0':
     dependencies:
-      '@cacheable/memory': 2.0.8
+      '@cacheable/memory': 2.2.0
       chrono-node: 2.9.0
       dayjs: 1.11.20
       ent: 2.2.2
@@ -3337,14 +3325,6 @@ snapshots:
 
   cac@7.0.0: {}
 
-  cacheable@2.3.5:
-    dependencies:
-      '@cacheable/memory': 2.0.8
-      '@cacheable/utils': 2.5.0
-      hookified: 1.15.1
-      keyv: 5.6.0
-      qified: 0.10.1
-
   cacheable@2.5.0:
     dependencies:
       '@cacheable/memory': 2.2.0
@@ -3482,13 +3462,12 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  ecto@4.8.7(supports-color@7.2.0):
+  ecto@5.0.0(supports-color@7.2.0):
     dependencies:
       '@jaredwray/fumanchu': 4.7.0
-      cacheable: 2.3.5
-      ejs: 5.0.2
-      ent: 2.2.2
-      hookified: 2.2.0
+      cacheable: 2.5.0
+      ejs: 6.0.1
+      hookified: 3.0.1
       liquidjs: 10.27.0
       nunjucks: 3.2.4
       pug: 3.0.4
@@ -3498,7 +3477,7 @@ snapshots:
       - chokidar
       - supports-color
 
-  ejs@5.0.2: {}
+  ejs@6.0.1: {}
 
   emoji-regex@10.4.0: {}
 
