@@ -11,7 +11,7 @@ Profile: npm library · public
 
 ## 2. Repository lockdown
 
-- [ ] `.github/CODEOWNERS` covers `/.github/`, `/.cursor/`, `/.devcontainer/`, `/scripts/` with owners the maintainer names (PR pending)
+- [ ] `.github/CODEOWNERS` covers `/.github/`, `/.cursor/`, `/.devcontainer/`, `/scripts/` with owners the maintainer names (PR #473 pending)
 - [ ] Lockdown script run; `lockdown-repo.sh --check` passes clean
 - [ ] Pull requests required on the default branch (1 approving review of the latest push, including code owners on owned paths; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked
 - [ ] Merges blocked unless required status checks pass (`--required-checks "<repo's CI jobs>"`)
