@@ -31,7 +31,7 @@ Profile: npm library · public
 - [x] 7-day cooldown: `minimumReleaseAge: 10080`, `minimumReleaseAgeStrict: true`, `minimumReleaseAgeIgnoreMissingTime: false` — verified 2026-08-16 (`pnpm-workspace.yaml`; first-party exclude: `writr`, `ecto`, `hashery`)
 - [x] Lifecycle scripts blocked: `strictDepBuilds: true`, `dangerouslyAllowAllBuilds: false`, `allowBuilds: {}` baseline — verified 2026-08-16 (default-deny; reviewed exceptions for `esbuild`, `sharp`, and `workerd`)
 - [x] `blockExoticSubdeps: true` — verified 2026-08-16
-- [ ] Lockfile committed; CI installs with `pnpm install --frozen-lockfile`
+- [ ] Lockfile committed; CI installs with `pnpm install --frozen-lockfile` (PR pending)
 - [x] Dependency-update tooling opens PRs only — never auto-merge — verified 2026-08-16 (no auto-merge config in-repo; upgrades via reviewed PRs)
 - [x] New direct dependencies get human review; prefer `~` ranges over `^` — verified 2026-08-16 (all changes via PR; existing runtime deps stay on `^`; new runtime deps prefer `~`)
 
