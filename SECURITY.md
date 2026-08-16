@@ -1,29 +1,27 @@
 # Security Policy
 
-<a href="https://app.aikido.dev/audit-report/external/lZAT2DfBsT11ZQfpYwClKi6s/request" target="_blank" rel="noopener noreferrer">
-    <img src="https://app.aikido.dev/assets/badges/full-light-theme.svg" alt="Aikido Security Audit Report" height="40" />
-</a>
+We take security seriously and work to keep this project up to date. If you discover a security vulnerability, please report it **privately** so we can investigate and ship a fix before the issue becomes public.
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-To report a security vulnerability, please send an email to me@jaredwray.com. Once the report has been validated, we will open a [Github Security Advisory](https://docs.github.com/en/code-security/repository-security-advisories/about-github-security-advisories-for-repositories), if necessary.
+Please use one of the following private channels — **do not open a public issue, pull request, or discussion** for security concerns:
 
-## Continuous Security Scanning
+1. **Preferred:** open a private report via GitHub's [Privately reporting a security vulnerability](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) flow on this repository's **Security** tab.
+2. **Email:** send the details to me@jaredwray.com. If the issue is urgent, include `[SECURITY]` in the subject line and we will respond as soon as possible.
 
-We take the security of Docula seriously and have multiple layers of automated scanning in place to detect vulnerabilities as early as possible:
+When reporting, please include as much of the following as you can:
 
-- **Aikido Security**: We use [Aikido](https://www.aikido.dev/) to continuously scan our codebase, dependencies, and infrastructure for vulnerabilities. You can review our public audit report by clicking the badge above.
-- **Pull Request Scans**: Every pull request opened against the `main` branch is automatically scanned for security issues before it can be merged. This ensures that no new code lands in `main` without first being reviewed for known vulnerabilities, insecure dependencies, and common security pitfalls.
-- **CodeQL Analysis**: We run [GitHub CodeQL](https://codeql.github.com/) static analysis on pushes to `main` and on every pull request targeting `main` to identify potential security issues in our source code.
+- A description of the vulnerability and its impact.
+- Steps to reproduce, or a proof-of-concept.
+- The affected version(s) and platform.
+- Any suggested remediation, if you have one.
 
-## npm Package Provenance
+We will acknowledge receipt, work with you on a coordinated disclosure timeline, and credit you in the advisory once a fix is published unless you ask to remain anonymous.
 
-Docula is published to [npmjs.org](https://www.npmjs.com/package/docula) with [npm package provenance](https://docs.npmjs.com/generating-provenance-statements) enabled via GitHub Actions. Provenance statements provide cryptographically verifiable links between published packages and the source code and build process that produced them.
+## How this repository is secured
 
-This means that when you install Docula from npm, you can verify:
+This repository follows the [defense-in-depth](https://github.com/jaredwray/agentic/blob/main/skills/security/defense-in-depth-nodejs/SKILL.md)
+hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_DEPTH.md). Measures currently in place:
 
-- The exact source repository and commit the package was built from.
-- The GitHub Actions workflow that built and published the package.
-- That the package has not been tampered with between build and publish.
-
-Our release workflow (`.github/workflows/release.yaml`) uses the `--provenance` flag when publishing, and the GitHub Actions runner is granted the `id-token: write` permission required to generate the signed provenance statement. You can verify the provenance of any published version directly on the [Docula npm page](https://www.npmjs.com/package/docula) or via `npm audit signatures`.
+- Every action is pinned to a full commit SHA.
+- Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. Socket reviews every dependency change; Aikido scans every build.
