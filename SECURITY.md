@@ -25,3 +25,4 @@ hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_D
 
 - Every action is pinned to a full commit SHA. CI workflows default to read-only `contents` permissions, and checkouts that do not push set `persist-credentials: false`. Socket Firewall wraps package installs; workflows are security-linted with zizmor on every PR.
 - Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. CI installs with a frozen lockfile. Socket reviews every dependency change; Aikido scans every build.
+- npm releases are staged via OIDC trusted publishing (`npm stage publish` with provenance). There are no npm tokens in Actions.
