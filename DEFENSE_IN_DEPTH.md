@@ -11,8 +11,9 @@ Profile: npm library · public
 
 ## 2. Repository lockdown
 
+- [ ] `.github/CODEOWNERS` covers `/.github/`, `/.cursor/`, `/.devcontainer/`, `/scripts/` with owners the maintainer names (PR #473 pending)
 - [ ] Lockdown script run; `lockdown-repo.sh --check` passes clean
-- [ ] Pull requests required on the default branch (1 approving review of the latest push; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked
+- [ ] Pull requests required on the default branch (1 approving review of the latest push, including code owners on owned paths; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked
 - [ ] Merges blocked unless required status checks pass (`--required-checks "<repo's CI jobs>"`)
 - [ ] Tag ruleset "Tags only by admins" active
 - [ ] Workflow runs from all outside collaborators require approval
@@ -21,6 +22,7 @@ Profile: npm library · public
 - [ ] Secret scanning + push protection enabled *(plan-gated on private repos)*
 - [ ] Private vulnerability reporting enabled *(public repos only)*
 - [ ] Dependabot alerts enabled
+- [ ] Dependabot rule: auto-dismiss low + medium (manual)
 - [ ] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual)
 - [ ] Recovery codes stored offline in a password manager (manual)
 - [ ] Dev/release VM network egress filtered by a firewall (e.g. PMG) (manual)
@@ -56,5 +58,5 @@ Profile: npm library · public
 ## 6. Security tooling
 
 - [x] Aikido runs on every build — verified 2026-08-16 (GitHub check "Aikido Security: check code" on PR #462)
-- [ ] Aikido release gate: the release workflow's stage-publish job `needs:` a passing `scan-release` (PR #471 pending)
+- [x] Aikido release gate: the release workflow's stage-publish job `needs:` a passing `scan-release` — PR #471
 - [x] Socket reviews every PR that changes dependencies — verified 2026-08-16 (GitHub checks "Socket Security: Pull Request Alerts" and "Project Report" on PR #462)
