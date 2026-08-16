@@ -37,7 +37,7 @@ Profile: npm library · public
 
 ## 4. GitHub Actions
 
-- [ ] `permissions: contents: read` (or `{}` + per-job grants) on every workflow
+- [ ] `permissions: contents: read` (or `{}` + per-job grants) on every workflow (PR pending)
 - [x] Every action pinned to a full commit SHA (`npx actions-up`) — verified 2026-08-16
 - [ ] Every job installs Socket Firewall (`SocketDev/action` SHA-pinned, `firewall-version` pinned)
 - [ ] `.github/workflows/check-workflows.yaml` lints workflows with zizmor on every PR

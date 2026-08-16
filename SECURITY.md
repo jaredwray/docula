@@ -23,5 +23,5 @@ We will acknowledge receipt, work with you on a coordinated disclosure timeline,
 This repository follows the [defense-in-depth](https://github.com/jaredwray/agentic/blob/main/skills/security/defense-in-depth-nodejs/SKILL.md)
 hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_DEPTH.md). Measures currently in place:
 
-- Every action is pinned to a full commit SHA.
+- Every action is pinned to a full commit SHA. CI workflows default to read-only `contents` permissions.
 - Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. CI installs with a frozen lockfile. Socket reviews every dependency change; Aikido scans every build.
