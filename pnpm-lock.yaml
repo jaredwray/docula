@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  undici@>=8.0.0 <8.9.0: 8.10.0
+  undici@>=7.0.0 <7.29.0: 7.29.0
+
 importers:
 
   .:
