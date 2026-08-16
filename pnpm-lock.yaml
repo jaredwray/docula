@@ -42,8 +42,8 @@ importers:
         specifier: ^6.1.7
         version: 6.1.7
       undici:
-        specifier: 8.7.0
-        version: 8.7.0
+        specifier: ^8.10.0
+        version: 8.10.0
       update-notifier:
         specifier: ^7.3.1
         version: 7.3.1
@@ -2403,16 +2403,12 @@ packages:
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
-  undici@7.25.0:
-    resolution: {integrity: sha512-xXnp4kTyor2Zq+J1FfPI6Eq3ew5h6Vl0F/8d9XU5zZQf1tX9s2Su1/3PiMmUANFULpmksxkClamIZcaUqryHsQ==}
-    engines: {node: '>=20.18.1'}
-
   undici@7.29.0:
     resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
     engines: {node: '>=20.18.1'}
 
-  undici@8.7.0:
-    resolution: {integrity: sha512-N7iQtfyLhIMOFgQubvmLV26svHpO0bqKnAiWotTQCVKCmWrcGbBotPuW1x+xwYZ2VHdSTVUfPQQnlEt1/LouTQ==}
+  undici@8.10.0:
+    resolution: {integrity: sha512-HvltHd7avK13QIw/oLe4qoOLyoVSoafqJ2jYOrtMRBkbYT31eiBQ8O0ehRKZiEZCMEyLFQNIADpgCWC5fALvYQ==}
     engines: {node: '>=22.19.0'}
 
   unicode-emoji-modifier-base@1.0.0:
@@ -2715,7 +2711,7 @@ snapshots:
       cacheable: 2.5.0
       hookified: 1.15.1
       http-cache-semantics: 4.2.0
-      undici: 7.25.0
+      undici: 7.29.0
 
   '@cacheable/utils@2.5.0':
     dependencies:
@@ -5020,11 +5016,9 @@ snapshots:
 
   undici-types@8.3.0: {}
 
-  undici@7.25.0: {}
-
   undici@7.29.0: {}
 
-  undici@8.7.0: {}
+  undici@8.10.0: {}
 
   unicode-emoji-modifier-base@1.0.0: {}
 
