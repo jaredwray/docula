@@ -6,8 +6,8 @@ Profile: npm library · public
 
 ## 1. Security docs
 
-- [ ] `SECURITY.md` present — contact info + "How this repository is secured" summary (PR #464 pending)
-- [ ] `DEFENSE_IN_DEPTH.md` present (this file) (PR #464 pending)
+- [x] `SECURITY.md` present — contact info + "How this repository is secured" summary — PR #464
+- [x] `DEFENSE_IN_DEPTH.md` present (this file) — PR #464
 
 ## 2. Repository lockdown
 
