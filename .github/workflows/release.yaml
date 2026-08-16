@@ -28,6 +28,7 @@ jobs:
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: 24
+        package-manager-cache: false
 
     - name: Enable Corepack
       run: corepack enable
@@ -41,5 +42,15 @@ jobs:
     - name: Testing
       run: pnpm test:ci
 
-    - name: Publish
-      run: pnpm publish --no-git-checks --provenance
+    - name: Pack
+      run: |
+        mkdir -p packed
+        pnpm pack --pack-destination packed
+        ls -la packed
+
+    - name: Ensure npm CLI for staged publishing
+      # zizmor: ignore[adhoc-packages] pin npm 11.19.0 so `npm stage publish` is available
+      run: npm install --global npm@11.19.0
+
+    - name: Stage publish
+      run: npm stage publish packed/*.tgz --access public --provenance

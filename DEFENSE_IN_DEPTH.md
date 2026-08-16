@@ -40,7 +40,7 @@ Profile: npm library · public
 - [x] `permissions: contents: read` (or `{}` + per-job grants) on every workflow — PR #466
 - [x] Every action pinned to a full commit SHA (`npx actions-up`) — verified 2026-08-16
 - [x] Every job installs Socket Firewall (`SocketDev/action` SHA-pinned, `firewall-version` pinned) — PR #468
-- [ ] `.github/workflows/check-workflows.yaml` lints workflows with zizmor on every PR (PR #469 pending)
+- [x] `.github/workflows/check-workflows.yaml` lints workflows with zizmor on every PR — PR #469
 - [x] `persist-credentials: false` on checkouts that don't push — PR #467
 - [x] No `pull_request_target` on workflows that run untrusted PR code — verified 2026-08-16
 - [x] No npm tokens (or other registry credentials) in Actions secrets — verified 2026-08-16 (no workflow references `NPM_TOKEN` / `NODE_AUTH_TOKEN`; publish uses OIDC provenance)
@@ -48,7 +48,7 @@ Profile: npm library · public
 ## 5. npm publishing — npm libraries only
 
 - [ ] OIDC trusted publishing configured **stage-only** on npmjs.com for the publish workflow — it can stage, never publish live (manual)
-- [ ] Staged publishing: CI runs `npm stage publish`; a maintainer promotes with 2FA (manual)
+- [ ] Staged publishing: CI runs `npm stage publish`; a maintainer promotes with 2FA (manual) (PR #470 pending)
 - [ ] Drydock connected — staged releases reviewed before promotion (manual)
 - [ ] No direct publish rights: package requires 2FA and disallows tokens (manual)
 - [x] `package.json` `repository.url` accurate so provenance maps to this repo — verified 2026-08-16
