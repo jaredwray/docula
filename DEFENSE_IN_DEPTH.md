@@ -13,7 +13,7 @@ Profile: npm library · public
 
 - [x] `.github/CODEOWNERS` covers `/.github/`, `/.cursor/`, `/.devcontainer/`, `/scripts/` with owners the maintainer names — PR #473
 - [x] Lockdown script run; `lockdown-repo.sh --check` passes clean — verified 2026-08-16 (maintainer apply)
-- [x] Pull requests required on the default branch (1 approving review of the latest push, including code owners on owned paths; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked — verified 2026-08-16 (ruleset "Pull requests required")
+- [x] Pull requests required on the default branch (0 required approving reviews, last-push approval off, code-owner review of owned paths; only the repository owner can merge, and they may merge without a review); force pushes and deletion blocked — verified 2026-08-16 (ruleset "Pull requests required")
 - [x] Merges blocked unless required status checks pass (`--required-checks "build (22),build (24),build (26),zizmor"`) — verified 2026-08-16
 - [x] Tag ruleset "Tags only by admins" active — verified 2026-08-16
 - [x] Workflow runs from all outside collaborators require approval — verified 2026-08-16
@@ -41,7 +41,7 @@ Profile: npm library · public
 
 - [x] `permissions: contents: read` (or `{}` + per-job grants) on every workflow — PR #466
 - [x] Every action pinned to a full commit SHA (`npx actions-up`) — verified 2026-08-16
-- [x] Every job installs Socket Firewall (`SocketDev/action` SHA-pinned, `firewall-version` pinned); package installs run through `sfw` — PR #468, PR #476 pending
+- [x] Every job installs Socket Firewall (`SocketDev/action` SHA-pinned, `firewall-version` pinned); package installs run through `sfw` — PR #468, PR #476
 - [x] `.github/workflows/check-workflows.yaml` lints workflows with zizmor on every PR — PR #469
 - [x] Artifact-publishing workflows disable `actions/setup-node` default caching (`package-manager-cache: false`) to prevent cache poisoning — PR #475
 - [x] `persist-credentials: false` on checkouts that don't push — PR #467
