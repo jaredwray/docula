@@ -62,11 +62,11 @@
     "docula": "./bin/docula.js"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.83",
-    "@ai-sdk/google": "^3.0.81",
-    "@ai-sdk/openai": "^3.0.70",
+    "@ai-sdk/anthropic": "^4.0.36",
+    "@ai-sdk/google": "^4.0.39",
+    "@ai-sdk/openai": "^4.0.36",
     "@cacheable/net": "^2.1.0",
-    "ai": "^6.0.202",
+    "ai": "^7.0.58",
     "colorette": "^2.0.20",
     "ecto": "^4.8.7",
     "hashery": "^3.0.1",
@@ -75,7 +75,7 @@
     "serve-handler": "^6.1.7",
     "undici": "8.7.0",
     "update-notifier": "^7.3.1",
-    "writr": "^6.1.2"
+    "writr": "^6.1.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.7",
