@@ -12,9 +12,12 @@ allowBuilds:
 
 # Force every undici copy onto a release that includes the SOCKS5
 # requestTls fix (8.5.0 / 7.28.0) and the later 8.9.0 / 7.29.0 advisories.
+# Force liquidjs onto 10.27.1 for CVE-2026-55575 and AIKIDO-2026-127306
+# (array filters that bypass memoryLimit, enabling DoS).
 overrides:
   "undici@>=8.0.0 <8.9.0": "8.10.0"
   "undici@>=7.0.0 <7.29.0": "7.29.0"
+  "liquidjs@<10.27.1": "10.27.1"
 
 minimumReleaseAgeExclude:
   - writr
