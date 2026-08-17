@@ -1375,6 +1375,18 @@ describe("DoculaBuilder - Changelog", () => {
 			options.enableReleaseChangelog = true;
 			options.quiet = true;
 			const builder = new DoculaBuilder(options);
+			builder.console.quiet = true;
+			// Inject releases so the hook always runs, independent of the GitHub
+			// HTTP mock module-graph. Stub console.error so the expected log does
+			// not leak to stderr (Vitest reports that as `✘ [error] ...`).
+			vi.spyOn(builder, "getGithubData").mockResolvedValue({
+				releases: githubMockReleases,
+				contributors: githubMockContributors,
+				// biome-ignore lint/suspicious/noExplicitAny: minimal GithubData stub
+			} as any);
+			const errorSpy = vi
+				.spyOn(builder.console, "error")
+				.mockImplementation(() => {});
 
 			builder.onReleaseChangelog = (_entries, _console) => {
 				throw new Error("Hook failed");
@@ -1383,10 +1395,14 @@ describe("DoculaBuilder - Changelog", () => {
 			try {
 				// Should not throw — error is caught and logged
 				await builder.build();
+				expect(errorSpy).toHaveBeenCalledWith(
+					expect.stringContaining("onReleaseChangelog error: Hook failed"),
+				);
 				expect(fs.existsSync(`${options.output}/changelog/index.html`)).toBe(
 					true,
 				);
 			} finally {
+				errorSpy.mockRestore();
 				await fs.promises.rm(options.output, {
 					recursive: true,
 					force: true,
