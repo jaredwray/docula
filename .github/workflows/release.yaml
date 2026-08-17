@@ -85,12 +85,8 @@ jobs:
         pnpm pack --pack-destination packed
         ls -la packed
 
-    - name: Ensure npm CLI for staged publishing
-      # zizmor: ignore[adhoc-packages] pin npm 11.19.0 so `npm stage publish` is available
-      run: sfw npm install --global npm@11.19.0
-
     - name: Stage publish
-      # Prefix with ./ so npm treats the tarball as a local file. A bare
-      # packed/*.tgz path is parsed as GitHub owner/repo shorthand (npm npa),
-      # which then fails with git ls-remote Permission denied (publickey).
-      run: npm stage publish ./packed/*.tgz --access public --provenance
+      # pnpm ≥ 11.3. Prefix with ./ so the tarball is a local path, not GitHub
+      # owner/repo shorthand. --no-git-checks: git-checks run even for a tarball
+      # and fail on a detached release-tag checkout and on the untracked pack output.
+      run: pnpm stage publish ./packed/*.tgz --access public --provenance --no-git-checks
