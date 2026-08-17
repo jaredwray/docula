@@ -74,7 +74,20 @@ This produces a platform-specific binary at `dist/docula` (or `dist/docula.exe` 
 
 ## Testing the Binary
 
-After building, test it locally:
+After building, run the binary harness. It checks `version`, `help`, a JSON-config site build, that TypeScript configs are rejected, `download variables`, and `init`:
+
+```bash
+pnpm test:binary
+```
+
+Or point it at a specific binary:
+
+```bash
+pnpm test:binary -- ./dist/docula
+DOCULA_BINARY=./dist/docula.exe pnpm test:binary
+```
+
+You can also exercise the binary directly:
 
 ```bash
 # Show help

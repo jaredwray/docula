@@ -11,6 +11,7 @@ Docula is a documentation/website generator built with TypeScript and Node.js (>
 - `pnpm install` - Install dependencies
 - `pnpm build` - Build the project
 - `pnpm test` - Run linter and tests with coverage
+- `pnpm test:binary` - Smoke-test a standalone binary (`dist/docula` or `DOCULA_BINARY`)
 
 **Use pnpm, not npm.**
 
