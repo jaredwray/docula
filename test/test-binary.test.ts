@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	type CommandResult,
 	combinedOutput,
+	createWorkDir,
 	defaultBinaryName,
 	main,
 	type RunCommand,
@@ -12,6 +13,7 @@ import {
 	runBinaryHarness,
 	SMOKE_SITE_TITLE,
 	stripAnsi,
+	toCliPath,
 	writeSmokeSite,
 	writeTypescriptOnlySite,
 } from "../scripts/test-binary.js";
@@ -55,6 +57,38 @@ function runnerFor(
 	};
 }
 
+function isTypescriptOnlyBuild(args: string[]): boolean {
+	return args.some((argument) => argument.includes("ts-only-site"));
+}
+
+function passingRunner(): RunCommand {
+	return runnerFor({
+		version: () => success("1.0.0\n"),
+		help: () => success("Usage:\n  build\n"),
+		build: (args) => {
+			if (isTypescriptOnlyBuild(args)) {
+				return failure("", "Only docula.config.json is supported");
+			}
+			const outputDir = args[args.indexOf("-o") + 1];
+			writeBuildOutput(outputDir);
+			return success();
+		},
+		download: (args) => {
+			const siteDir = args[args.indexOf("-s") + 1];
+			fs.writeFileSync(path.join(siteDir, "variables.css"), ":root {}\n");
+			return success();
+		},
+		init: (args) => {
+			const siteDir = args[args.indexOf("-s") + 1];
+			fs.mkdirSync(siteDir, { recursive: true });
+			fs.writeFileSync(path.join(siteDir, "docula.config.mjs"), "export {}\n");
+			fs.writeFileSync(path.join(siteDir, "logo.png"), "logo");
+			fs.writeFileSync(path.join(siteDir, "favicon.ico"), "ico");
+			return success();
+		},
+	});
+}
+
 describe("binary harness helpers", () => {
 	it("strips ANSI color codes", () => {
 		expect(stripAnsi("\u001B[32m2.2.0\u001B[0m")).toBe("2.2.0");
@@ -91,6 +125,18 @@ describe("binary harness helpers", () => {
 		expect(resolveBinaryPath(["--"], {}, "linux", "/repo")).toBe(
 			path.resolve("/repo", "dist/docula"),
 		);
+	});
+
+	it("converts absolute paths under cwd to relative CLI paths", () => {
+		expect(toCliPath("/repo/tmp/site", "/repo")).toBe(path.join("tmp", "site"));
+		expect(toCliPath("/repo", "/repo")).toBe(".");
+	});
+
+	it("creates a work directory under cwd/tmp", () => {
+		const dir = createWorkDir();
+		expect(dir.startsWith(path.join(process.cwd(), "tmp"))).toBe(true);
+		expect(fs.existsSync(dir)).toBe(true);
+		fs.rmSync(dir, { recursive: true, force: true });
 	});
 
 	it("writes the smoke and TypeScript-only sites", () => {
@@ -178,33 +224,9 @@ describe("runBinaryHarness", () => {
 
 		const result = await runBinaryHarness({
 			binaryPath,
-			expectedVersion: "9.9.9",
+			expectedVersion: "1.0.0",
 			platform: "linux",
-			runCommand: runnerFor({
-				version: () => success("9.9.9\n"),
-				help: () => success("Usage:\n  build\n"),
-				build: (args) => {
-					const outputDir = args[args.indexOf("-o") + 1];
-					writeBuildOutput(outputDir);
-					return success();
-				},
-				download: (args) => {
-					const siteDir = args[args.indexOf("-s") + 1];
-					fs.writeFileSync(path.join(siteDir, "variables.css"), ":root {}\n");
-					return success();
-				},
-				init: (args) => {
-					const siteDir = args[args.indexOf("-s") + 1];
-					fs.mkdirSync(siteDir, { recursive: true });
-					fs.writeFileSync(
-						path.join(siteDir, "docula.config.mjs"),
-						"export {}\n",
-					);
-					fs.writeFileSync(path.join(siteDir, "logo.png"), "logo");
-					fs.writeFileSync(path.join(siteDir, "favicon.ico"), "ico");
-					return success();
-				},
-			}),
+			runCommand: passingRunner(),
 			logger: { log: () => undefined, error: () => undefined },
 		});
 
@@ -376,7 +398,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("1.0.0\n"),
 				help: () => success("Usage:\n  build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return success();
 					}
 					const outputDir = args[args.indexOf("-o") + 1];
@@ -400,7 +422,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("1.0.0\n"),
 				help: () => success("Usage:\n  build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return failure("", "something else went wrong");
 					}
 					const outputDir = args[args.indexOf("-o") + 1];
@@ -424,7 +446,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("1.0.0\n"),
 				help: () => success("Usage:\n  build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return failure("", "Only docula.config.json is supported");
 					}
 					const outputDir = args[args.indexOf("-o") + 1];
@@ -449,7 +471,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("1.0.0\n"),
 				help: () => success("Usage:\n  build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return failure("", "Only docula.config.json is supported");
 					}
 					const outputDir = args[args.indexOf("-o") + 1];
@@ -474,7 +496,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("1.0.0\n"),
 				help: () => success("Usage:\n  build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return failure("", "Only docula.config.json is supported");
 					}
 					const outputDir = args[args.indexOf("-o") + 1];
@@ -504,7 +526,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("1.0.0\n"),
 				help: () => success("Usage:\n  build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return failure("", "Only docula.config.json is supported");
 					}
 					const outputDir = args[args.indexOf("-o") + 1];
@@ -535,7 +557,7 @@ describe("runBinaryHarness", () => {
 				version: () => success("\u001B[32m2.2.0\u001B[0m\n"),
 				help: () => success("Usage:\n    docula [command]\n    build\n"),
 				build: (args) => {
-					if (args.includes("ts-only-site")) {
+					if (isTypescriptOnlyBuild(args)) {
 						return failure(
 							"",
 							"Only docula.config.json is supported when running the standalone binary",

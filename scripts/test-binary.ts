@@ -1,6 +1,5 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -71,6 +70,25 @@ export function resolveBinaryPath(
 
 export function combinedOutput(result: CommandResult): string {
 	return `${result.stdout}\n${result.stderr}`;
+}
+
+/**
+ * Docula joins CLI paths with `path.join(cwd, value)`, which prefixes
+ * absolute paths (`/tmp/site` becomes `$cwd/tmp/site`). Always pass
+ * paths relative to the process cwd.
+ */
+export function toCliPath(absolutePath: string, cwd = process.cwd()): string {
+	const relative = path.relative(cwd, absolutePath);
+	if (relative === "") {
+		return ".";
+	}
+	return relative;
+}
+
+export function createWorkDir(cwd = process.cwd()): string {
+	const root = path.join(cwd, "tmp");
+	fs.mkdirSync(root, { recursive: true });
+	return fs.mkdtempSync(path.join(root, "docula-binary-harness-"));
 }
 
 export async function runBinaryCommand(
@@ -232,9 +250,9 @@ async function checkBuild(
 	const result = await runCommand(binaryPath, [
 		"build",
 		"-s",
-		siteDir,
+		toCliPath(siteDir),
 		"-o",
-		outputDir,
+		toCliPath(outputDir),
 	]);
 	if (result.exitCode !== 0) {
 		return {
@@ -289,9 +307,9 @@ async function checkTypescriptConfigRejected(
 	const result = await runCommand(binaryPath, [
 		"build",
 		"-s",
-		siteDir,
+		toCliPath(siteDir),
 		"-o",
-		outputDir,
+		toCliPath(outputDir),
 	]);
 	const output = stripAnsi(combinedOutput(result));
 	if (result.exitCode === 0) {
@@ -326,7 +344,7 @@ async function checkDownloadVariables(
 		"download",
 		"variables",
 		"-s",
-		siteDir,
+		toCliPath(siteDir),
 	]);
 	if (result.exitCode !== 0) {
 		return {
@@ -359,7 +377,7 @@ async function checkInit(
 		"init",
 		"--javascript",
 		"-s",
-		siteDir,
+		toCliPath(siteDir),
 	]);
 	if (result.exitCode !== 0) {
 		return {
@@ -398,9 +416,7 @@ export async function runBinaryHarness(
 	const runCommand = options.runCommand ?? runBinaryCommand;
 	const expectedVersion = options.expectedVersion ?? doculaPkg.version;
 	const platform = options.platform ?? process.platform;
-	const mkdtemp =
-		options.mkdtemp ??
-		((prefix) => fs.mkdtempSync(path.join(os.tmpdir(), prefix)));
+	const mkdtemp = options.mkdtemp ?? ((_prefix) => createWorkDir());
 	const rm =
 		options.rm ??
 		((dir) => {

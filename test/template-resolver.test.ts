@@ -53,7 +53,7 @@ describe("template-resolver", () => {
 				existsSpy.mockRestore();
 				isSeaSpy.mockRestore();
 				fs.rmSync(tmpDir, { recursive: true, force: true });
-				setEmbeddedTemplates(undefined as unknown as Record<string, string>);
+				setEmbeddedTemplates(undefined);
 			}
 		});
 	});
@@ -95,7 +95,7 @@ describe("template-resolver", () => {
 
 	describe("setEmbeddedTemplates", () => {
 		afterEach(() => {
-			setEmbeddedTemplates(undefined as unknown as Record<string, string>);
+			setEmbeddedTemplates(undefined);
 		});
 
 		it("should accept a templates record", () => {
@@ -117,6 +117,15 @@ describe("template-resolver", () => {
 		it("should return true when sea.isSea() reports true", () => {
 			vi.spyOn(sea, "isSea").mockReturnValue(true);
 			expect(isSEA()).toBe(true);
+		});
+
+		it("should return true when embedded templates are registered", () => {
+			setEmbeddedTemplates({ "modern/home.hbs": "dGVzdA==" });
+			try {
+				expect(isSEA()).toBe(true);
+			} finally {
+				setEmbeddedTemplates(undefined);
+			}
 		});
 	});
 
@@ -160,7 +169,7 @@ describe("template-resolver", () => {
 
 		afterEach(() => {
 			fs.rmSync(tmpDir, { recursive: true, force: true });
-			setEmbeddedTemplates(undefined as unknown as Record<string, string>);
+			setEmbeddedTemplates(undefined);
 		});
 
 		it("should throw when embedded templates are not registered", () => {
