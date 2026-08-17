@@ -26,6 +26,7 @@ hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_D
 - All changes land through pull requests — direct pushes to `main` are blocked, and merging requires passing status checks.
 - Tags (and therefore releases) can only be created by repository admins.
 - Workflow runs from outside collaborators always require maintainer approval, and only allowlisted GitHub Actions can run.
-- CI runs with read-only permissions; every action is pinned to a full commit SHA; Socket Firewall wraps package installs; workflows are security-linted with zizmor on every PR.
+- CI runs with read-only permissions; every action is pinned to a full commit SHA; Socket Firewall (`sfw`) wraps `pnpm install` / `npm install`; workflows are security-linted with zizmor on every PR.
+- Codespaces and Cursor Cloud Agents install through Aikido Safe Chain; package-manager shims must not be bypassed.
 - Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. Socket reviews every dependency change; Aikido scans every build, and the release workflow's stage-publish job requires a passing Aikido release gate.
 - npm releases are staged, never published directly: CI authenticates with **stage-only** OIDC trusted publishing (`npm stage publish` with provenance). Drydock reviews the staged artifact; a maintainer promotes with 2FA. The package requires 2FA and disallows tokens.
