@@ -25,7 +25,7 @@ Profile: npm library · public
 - [x] Dependabot rule: auto-dismiss low + medium (manual) — verified 2026-08-16 (maintainer)
 - [x] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual) — verified 2026-08-16 (maintainer)
 - [x] Recovery codes stored offline in a password manager (manual) — verified 2026-08-16 (maintainer)
-- [ ] Codespaces and Cursor Cloud Agents bootstrap Aikido Safe Chain via scripts/setup-cloud-environment.sh (--ci shims, frozen lockfile) (PR pending)
+- [ ] Codespaces and Cursor Cloud Agents bootstrap Aikido Safe Chain via scripts/setup-cloud-environment.sh (--ci shims, frozen lockfile) (PR #478 pending)
 
 ## 3. Dependencies (pnpm)
 
