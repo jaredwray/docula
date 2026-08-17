@@ -22,7 +22,8 @@ if [[ ! -f pnpm-lock.yaml ]]; then
 fi
 
 if [[ -f package.json ]] && grep -q '"packageManager"' package.json && command -v corepack >/dev/null; then
-  corepack enable
+  # javascript-node owns Node's bin dir as root; enable may need sudo (EACCES).
+  corepack enable || sudo corepack enable
 fi
 
 if ! command -v pnpm >/dev/null; then
