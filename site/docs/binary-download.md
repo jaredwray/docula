@@ -26,6 +26,8 @@ chmod +x docula-linux-x64
 ./docula-linux-x64 version
 ```
 
+In this repository, `pnpm test:binary` runs the same smoke checks the release workflow uses (`version`, `help`, a JSON-config build, TypeScript-config rejection, `download variables`, and `init`). Point it at a downloaded artifact with `DOCULA_BINARY` or a path argument.
+
 ## JSON Config Only
 
 The standalone binary loads configuration from **`docula.config.json`** only. TypeScript (`.ts`) and ESM JavaScript (`.mjs`) config files are not supported when running the binary; if one is present and no `docula.config.json` exists, the binary exits with an error explaining the limitation.

@@ -10,6 +10,7 @@
 		"includes": [
 			"src/**/*",
 			"test/**/*.ts",
+			"scripts/test-binary.ts",
 			"!src/init.ts",
 			"!src/embedded-templates.ts"
 		]

@@ -60,11 +60,8 @@ jobs:
       - name: Smoke Test Binary
         shell: bash
         env:
-          BINARY_NAME: ${{ matrix.binary }}
-        run: |
-          ./dist/${BINARY_NAME} version
-          ./dist/${BINARY_NAME} build -s ./test/fixtures/single-page-site -o ./smoke-dist
-          test -f ./smoke-dist/index.html
+          DOCULA_BINARY: ./dist/${{ matrix.binary }}
+        run: pnpm test:binary
 
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

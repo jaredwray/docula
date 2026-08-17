@@ -8,16 +8,23 @@ let embeddedTemplates: Record<string, string> | undefined;
 /**
  * Registers embedded template data for use in SEA builds.
  * Must be called before any template resolution occurs.
+ * Pass `undefined` to clear the registry (used by tests).
  */
-export function setEmbeddedTemplates(templates: Record<string, string>): void {
+export function setEmbeddedTemplates(
+	templates: Record<string, string> | undefined,
+): void {
 	embeddedTemplates = templates;
 }
 
 /**
- * Returns true when running as a single-executable application (SEA).
+ * Returns true when running as a standalone binary.
+ *
+ * Node's `sea.isSea()` is the official signal, but tsdown's `exe` wrapper
+ * does not always report SEA. `sea-entry` always registers embedded
+ * templates, so a populated registry is treated as the same mode.
  */
 export function isSEA(): boolean {
-	return sea.isSea();
+	return sea.isSea() || embeddedTemplates !== undefined;
 }
 
 /**
