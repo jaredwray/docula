@@ -35,7 +35,6 @@ Profile: npm library · public
 - [x] `blockExoticSubdeps: true` — verified 2026-08-16
 - [x] Lockfile committed; CI installs with `pnpm install --frozen-lockfile` — PR #465
 - [x] Dependency-update tooling opens PRs only — never auto-merge — verified 2026-08-16 (no auto-merge config in-repo; upgrades via reviewed PRs)
-- [x] New direct dependencies get human review; prefer `~` ranges over `^` — verified 2026-08-16 (all changes via PR; existing runtime deps stay on `^`; new runtime deps prefer `~`)
 
 ## 4. GitHub Actions
 
