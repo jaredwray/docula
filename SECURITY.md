@@ -24,9 +24,10 @@ This repository follows the [defense-in-depth](https://github.com/jaredwray/agen
 hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_DEPTH.md). Measures currently in place:
 
 - All changes land through pull requests — direct pushes to `main` are blocked, and merging requires passing status checks.
-- Tags (and therefore releases) can only be created by repository admins.
+- Tags can only be created by repository admins.
 - Workflow runs from outside collaborators always require maintainer approval, and only allowlisted GitHub Actions can run.
-- CI runs with read-only permissions; every action is pinned to a full commit SHA; Socket Firewall (`sfw`) wraps `pnpm install` / `npm install`; workflows are security-linted with zizmor on every PR.
+- CI runs with read-only permissions (only jobs whose purpose is mutating the repo get `contents: write`); generated output is an artifact, never committed back; every action is pinned to a full commit SHA; Socket Firewall (`sfw`) wraps `pnpm install` / `npm install`; workflows are security-linted with zizmor on every PR.
 - Codespaces and Cursor Cloud Agents install through Aikido Safe Chain; package-manager shims must not be bypassed.
-- Dependencies install through pnpm with a 7-day cooldown on new versions, and lifecycle scripts are blocked by default. Socket reviews every dependency change; Aikido scans every build, and the release workflow's stage-publish job requires a passing Aikido release gate.
-- npm releases are staged, never published directly: CI publishes via stage-only OIDC trusted publishing (`pnpm stage publish` with provenance), Drydock reviews the exact staged artifact, and a maintainer promotes it with 2FA. There are no npm tokens.
+- The Codespaces Dev Container image is pinned by digest (`name:<tag>@sha256:<digest>`), not a floating tag.
+- Dependencies install through pnpm with a 7-day cooldown on new versions and lifecycle scripts blocked by default. Socket reviews every dependency change; Aikido scans every build, and the release workflow's stage-publish job requires a passing Aikido release gate.
+- npm releases are staged, never published directly: CI publishes via stage-only OIDC trusted publishing, Drydock reviews the exact staged artifact, and a maintainer promotes it with 2FA. There are no npm publish tokens.
