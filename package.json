@@ -63,11 +63,11 @@
     "docula": "./bin/docula.js"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.36",
-    "@ai-sdk/google": "^4.0.39",
-    "@ai-sdk/openai": "^4.0.36",
+    "@ai-sdk/anthropic": "^4.0.53",
+    "@ai-sdk/google": "^4.0.69",
+    "@ai-sdk/openai": "^4.0.66",
     "@cacheable/net": "^2.1.0",
-    "ai": "^7.0.58",
+    "ai": "^7.0.99",
     "colorette": "^2.0.20",
     "ecto": "^5.0.0",
     "hashery": "^3.0.1",
