@@ -16,7 +16,6 @@ allowBuilds:
 # 10.27.0 (CVE-2026-55575 / AIKIDO-2026-127306: pop/sample filters
 # bypass memoryLimit accounting and allow a DoS).
 overrides:
-  "undici@>=8.0.0 <8.9.0": "8.10.0"
   "undici@>=7.0.0 <7.29.0": "7.29.0"
   "liquidjs@<10.27.1": "10.27.1"
 
