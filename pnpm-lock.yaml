@@ -30,8 +30,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(supports-color@7.2.0)
       hashery:
-        specifier: ^3.0.1
-        version: 3.0.1
+        specifier: ^3.0.2
+        version: 3.0.2
       ipaddr.js:
         specifier: ^2.5.0
         version: 2.5.0
@@ -1620,8 +1620,8 @@ packages:
     resolution: {integrity: sha512-iZyKG96/JwPz1N55vj2Ie2vXbhu440zfUfJvSwEqEbeLluk7NnapfGqa7LH0mOsnDxTF85Mx8/dyR6HfqcbmbQ==}
     engines: {node: '>=20'}
 
-  hashery@3.0.1:
-    resolution: {integrity: sha512-jfLVt3/SEkJzW/OCSK7Bxdl+FpXYDpEE84QOU4wzKRpO7rNoafNK718Z71GPQR/ozfQmKxXS++MhbrL/eKaTow==}
+  hashery@3.0.2:
+    resolution: {integrity: sha512-840jNJwXnqjLg43qvTwE/MFCq/+RkeSgYqunLgmUyycW09IWC/MGv7qsfampIUCYb6Mjk4cGmtw/AmlzFz/UTA==}
     engines: {node: '>=22.18'}
 
   hasown@2.0.2:
@@ -1685,6 +1685,10 @@ packages:
 
   hookified@3.0.1:
     resolution: {integrity: sha512-mtpUIV7U9reosQ16+OHWBd0Ca07fs1ryChQjBPuUMZnrRdLTCW+kEfkTcFudkaevp3gVe5H9FxDCBxYIdO+QQA==}
+    engines: {node: '>=22.18.0'}
+
+  hookified@3.0.3:
+    resolution: {integrity: sha512-ZcbRytYgERoKtosiaXolUIPIWMgUCrSiWQEzFZ0kc8etD/LPgpy4/KOrtssFdK7ZXlTTyb4cob2veqj7osv8yA==}
     engines: {node: '>=22.18.0'}
 
   html-dom-parser@8.0.0:
@@ -3801,9 +3805,9 @@ snapshots:
     dependencies:
       hookified: 1.15.1
 
-  hashery@3.0.1:
+  hashery@3.0.2:
     dependencies:
-      hookified: 3.0.1
+      hookified: 3.0.3
 
   hasown@2.0.2:
     dependencies:
@@ -3926,6 +3930,8 @@ snapshots:
   hookified@2.2.0: {}
 
   hookified@3.0.1: {}
+
+  hookified@3.0.3: {}
 
   html-dom-parser@8.0.0:
     dependencies:
@@ -5278,7 +5284,7 @@ snapshots:
     dependencies:
       ai: 7.0.99(zod@4.4.3)
       cacheable: 2.5.0
-      hashery: 3.0.1
+      hashery: 3.0.2
       hookified: 3.0.1
       html-react-parser: 6.1.5(react@19.2.8)
       js-yaml: 5.2.3
