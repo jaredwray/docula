@@ -10,12 +10,6 @@ allowBuilds:
   sharp: true
   workerd: true
 
-# Force liquidjs onto 10.27.1+ so ecto's ^10.27.0 range cannot resolve
-# 10.27.0 (CVE-2026-55575 / AIKIDO-2026-127306: pop/sample filters
-# bypass memoryLimit accounting and allow a DoS).
-overrides:
-  "liquidjs@<10.27.1": "10.27.1"
-
 minimumReleaseAgeExclude:
   - writr
   - ecto
