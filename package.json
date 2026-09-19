@@ -70,7 +70,7 @@
     "ai": "^7.0.99",
     "colorette": "^2.0.20",
     "ecto": "^5.0.0",
-    "hashery": "^3.0.1",
+    "hashery": "^3.0.2",
     "ipaddr.js": "^2.5.0",
     "jiti": "^2.7.0",
     "serve-handler": "^6.1.7",
