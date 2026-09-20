@@ -14,7 +14,6 @@ env:
  
 jobs:
   setup-build-deploy:
-    name: Deploy Website
     runs-on: ubuntu-latest
 
     steps:
