@@ -1,17 +1,104 @@
 name: build-binaries
 
+# Published releases are immutable (see SECURITY.md): assets cannot be added
+# once a release is published, and draft releases fire no workflow events. So
+# the binaries are attached while the release is still a draft:
+#   1. A version bump lands on `main` (or the workflow is run by hand there):
+#      the binaries are built, a draft release for `v<package.json version>`
+#      is created when none exists, and the binaries are attached to it.
+#   2. A maintainer edits the notes and publishes the draft. Publishing creates
+#      the tag and fires the `release` and `deploy-site` workflows as before.
+# A version tag push re-checks that its release carries every binary and fails
+# when a release was published without them. A run on any other branch only
+# uploads the binaries as workflow artifacts.
 on:
   workflow_dispatch:
-  release:
-    types: [released]
+  push:
+    branches: [main]
+    paths: [package.json]
+    tags: ["v*"]
 
 permissions:
   contents: read
 
+env:
+  # Asset names attached to every release — keep in sync with the build matrix.
+  RELEASE_ASSETS: docula-linux-x64 docula-macos-arm64 docula-windows-x64.exe
+
 jobs:
+  release-state:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.state.outputs.tag }}
+      attach: ${{ steps.state.outputs.attach }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Socket Firewall
+        uses: SocketDev/action@ba6de6cc0565af1f42295590380973573297e31f # v1.3.2
+        with:
+          mode: firewall-free
+          firewall-version: "1.15.2"
+
+      - name: Resolve Release
+        id: state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version="$(jq -r .version package.json)"
+          TAG="v${version}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "$TAG" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version} (expected ${TAG})."
+            exit 1
+          fi
+
+          if [ "$GITHUB_REF_TYPE" = branch ] && [ "$GITHUB_REF_NAME" != main ]; then
+            echo "::notice::Build-only run on ${GITHUB_REF_NAME}: binaries are uploaded as workflow artifacts, not attached to a release."
+            echo "attach=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # The read-only token lists published releases but not drafts, so a
+          # draft looks like no release here; either way the attach job looks
+          # again with its write token and creates the draft when needed.
+          release="$(gh release list --limit 100 --json tagName,isDraft | jq --arg tag "$TAG" '[.[] | select(.tagName == $tag)][0]')"
+          if [ "$release" = null ] || [ "$(jq -r .isDraft <<<"$release")" = true ]; then
+            echo "No published release for ${TAG}: the binaries will be attached to its draft."
+            echo "attach=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          attached="$(gh release view "$TAG" --json assets --jq '[.assets[].name]')"
+          missing=""
+          for asset in $RELEASE_ASSETS; do
+            if ! jq -e --arg name "$asset" 'index($name)' <<<"$attached" >/dev/null; then
+              missing="${missing} ${asset}"
+            fi
+          done
+
+          if [ -z "$missing" ]; then
+            echo "::notice::${TAG} is published with every binary attached; nothing to do."
+            echo "attach=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          message="${TAG} is published, so it is immutable, but it is missing:${missing}. Binaries can only be attached while a release is a draft: delete the release and its tag, then run this workflow on main to rebuild the draft."
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_TYPE" = branch ]; then
+            echo "::warning::${message}"
+            echo "attach=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::error::${message}"
+          exit 1
+
   build-binary:
-    permissions:
-      contents: write
+    needs: [release-state]
+    if: needs.release-state.outputs.attach == 'true' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -63,21 +150,93 @@ jobs:
           DOCULA_BINARY: ./dist/${{ matrix.binary }}
         run: pnpm test:binary
 
+      - name: Name Binary After Its Release Asset
+        shell: bash
+        env:
+          BINARY_NAME: ${{ matrix.binary }}
+          ASSET_NAME: ${{ matrix.asset }}
+        run: cp "dist/${BINARY_NAME}" "dist/${ASSET_NAME}"
+
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.asset }}
-          path: dist/${{ matrix.binary }}
+          path: dist/${{ matrix.asset }}
           if-no-files-found: error
 
-      - name: Upload to Release
-        if: github.event_name == 'release'
-        shell: bash
+  attach-binaries:
+    needs: [release-state, build-binary]
+    if: needs.release-state.outputs.attach == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # One attach at a time, so overlapping runs never race to create the draft.
+    concurrency:
+      group: build-binaries-attach
+      cancel-in-progress: false
+
+    steps:
+      - name: Install Socket Firewall
+        uses: SocketDev/action@ba6de6cc0565af1f42295590380973573297e31f # v1.3.2
+        with:
+          mode: firewall-free
+          firewall-version: "1.15.2"
+
+      - name: Download Binary Artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: docula-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Attach Binaries To Draft Release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.event.release.tag_name }}
-          BINARY_NAME: ${{ matrix.binary }}
-          ASSET_NAME: ${{ matrix.asset }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.release-state.outputs.tag }}
         run: |
-          cp "dist/${BINARY_NAME}" "dist/${ASSET_NAME}"
-          gh release upload "${TAG_NAME}" "dist/${ASSET_NAME}" --clobber
+          files=()
+          for asset in $RELEASE_ASSETS; do
+            if [ ! -f "release-assets/${asset}" ]; then
+              echo "::error::Built binary release-assets/${asset} is missing."
+              exit 1
+            fi
+            files+=("release-assets/${asset}")
+          done
+
+          # Point the release at the commit the binaries were built from, so
+          # publishing the draft tags exactly that commit. GitHub ignores the
+          # target once the tag exists.
+          target=()
+          if [ "$GITHUB_REF_TYPE" = branch ]; then
+            target=(--target "$GITHUB_SHA")
+          fi
+          prerelease=()
+          case "$TAG" in
+            *-*) prerelease=(--prerelease) ;;
+          esac
+
+          release="$(gh release list --limit 100 --json tagName,isDraft | jq --arg tag "$TAG" '[.[] | select(.tagName == $tag)][0]')"
+          if [ "$release" = null ]; then
+            echo "Creating draft release ${TAG}"
+            gh release create "$TAG" --draft --title "$TAG" --generate-notes "${target[@]}" "${prerelease[@]}"
+          elif [ "$(jq -r .isDraft <<<"$release")" = true ]; then
+            echo "Attaching to the existing draft release ${TAG}"
+            if [ "${#target[@]}" -gt 0 ]; then
+              gh release edit "$TAG" "${target[@]}"
+            fi
+          else
+            attached="$(gh release view "$TAG" --json assets --jq '[.assets[].name]')"
+            for asset in $RELEASE_ASSETS; do
+              if ! jq -e --arg name "$asset" 'index($name)' <<<"$attached" >/dev/null; then
+                echo "::error::${TAG} was published before its binaries were attached, and published releases are immutable. Delete the release and its tag, then run this workflow on main to rebuild the draft."
+                exit 1
+              fi
+            done
+            echo "::notice::${TAG} is published with every binary attached; nothing to do."
+            exit 0
+          fi
+
+          gh release upload "$TAG" "${files[@]}" --clobber
+          url="$(gh release view "$TAG" --json url --jq .url)"
+          echo "::notice::Binaries attached to draft release ${TAG}. Review the notes and publish it: ${url}"
