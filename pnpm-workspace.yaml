@@ -9,8 +9,3 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
-
-minimumReleaseAgeExclude:
-  - writr
-  - ecto
-  - hashery

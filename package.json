@@ -70,13 +70,13 @@
     "ai": "^7.0.99",
     "colorette": "^2.0.20",
     "ecto": "^5.1.0",
-    "hashery": "^3.0.2",
+    "hashery": "^3.0.1",
     "ipaddr.js": "^2.5.0",
     "jiti": "^2.7.0",
     "serve-handler": "^6.1.7",
     "undici": "^8.10.2",
     "update-notifier": "^7.3.1",
-    "writr": "^6.1.6"
+    "writr": "^6.1.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",
