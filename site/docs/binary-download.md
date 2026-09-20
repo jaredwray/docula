@@ -5,7 +5,7 @@ order: 22
 
 # Binary Download
 
-Docula publishes standalone binaries — a single executable file containing both Node.js and docula itself — for Linux, macOS (x64 and arm64), and Windows. Binaries are produced by the [`build-binaries` GitHub Actions workflow](https://github.com/jaredwray/docula/actions/workflows/build-binaries.yaml) and attached to each release.
+Docula publishes standalone binaries — a single executable file containing both Node.js and docula itself — for Linux, macOS (x64 and arm64), and Windows. Binaries are produced by the [`build-binaries` GitHub Actions workflow](https://github.com/jaredwray/docula/actions/workflows/build-binaries.yaml) and attached to each release before it is published.
 
 Use a binary when you want to run docula without installing Node.js or pnpm/npm — for example, on a minimal CI image or a machine where you can't add a global npm dependency.
 
