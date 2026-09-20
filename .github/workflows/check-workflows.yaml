@@ -1,4 +1,4 @@
-name: Check Workflows
+name: check-workflows
 
 on:
   push:

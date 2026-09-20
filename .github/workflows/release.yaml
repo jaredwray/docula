@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   aikido-gate:
-    name: Aikido release gate
     runs-on: ubuntu-latest
     permissions: {}
     steps:
