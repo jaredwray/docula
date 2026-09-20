@@ -28,7 +28,7 @@ Profile: npm library · public
 ## 4. GitHub Actions
 
 - [x] `permissions: contents: read` (or `{}` + per-job grants) on every workflow — PR #466
-- [x] No `contents: write` except jobs whose purpose is mutating the repo (GitHub Release, Changesets version PR); generated output is a workflow artifact, never committed back from CI — verified 2026-09-19 (`build-binaries` grants it only to the job that creates the draft release and attaches the binaries; the build jobs stay read-only and also upload the binaries as artifacts)
+- [x] No `contents: write` except jobs whose purpose is mutating the repo (GitHub Release, Changesets version PR); generated output is a workflow artifact, never committed back from CI — verified 2026-09-19, PR #505 (`build-binaries` grants it only to the job that creates the draft release and attaches the binaries; the build jobs stay read-only and also upload the binaries as artifacts)
 - [x] Every action pinned to a full commit SHA (`npx actions-up`) — PR #492
 - [x] Every job installs Socket Firewall (`SocketDev/action` SHA-pinned, `firewall-version` pinned); `pnpm install` / `npm install` run as `sfw pnpm install` / `sfw npm install` — PR #468, PR #476
 - [x] `.github/workflows/check-workflows.yaml` lints workflows with zizmor on every PR — PR #469
