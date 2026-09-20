@@ -7,6 +7,7 @@
 [![codecov](https://codecov.io/gh/jaredwray/docula/branch/main/graph/badge.svg?token=RS0GPY4V4M)](https://codecov.io/gh/jaredwray/docula)
 [![npm](https://img.shields.io/npm/dm/docula)](https://npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula)](https://npmjs.com/package/docula)
+[![Drydock review](https://img.shields.io/endpoint?url=https%3A%2F%2Fdrydock.org%2Fpublic%2Fbadge%2Fnpm%2Fdocula)](https://drydock.org/diff/docula)
 
 # Features
 * No configuration required. Just setup the folder structure with a logo, favicon, and css file.
