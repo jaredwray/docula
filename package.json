@@ -73,7 +73,6 @@
     "hashery": "^3.0.1",
     "ipaddr.js": "^2.5.0",
     "jiti": "^2.7.0",
-    "serve-handler": "^6.1.7",
     "undici": "^8.10.2",
     "update-notifier": "^7.3.1",
     "writr": "^6.1.5"
@@ -82,7 +81,6 @@
     "@biomejs/biome": "^2.5.13",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.5.1",
-    "@types/serve-handler": "^6.1.4",
     "@types/update-notifier": "^6.0.8",
     "@vitest/coverage-v8": "^5.0.0",
     "dotenv": "^17.4.2",

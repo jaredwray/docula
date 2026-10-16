@@ -1483,12 +1483,18 @@ describe("docula dev", () => {
 			const port =
 				typeof address === "object" && address !== null ? address.port : 0;
 
-			// Make ONE real request so the createServer request handler arrow
-			// function (and its response "finish" logging) is actually invoked.
+			// Make real requests so the preview handler and its "finish" logging run.
 			const response = await fetch(`http://127.0.0.1:${port}/`);
-			// Drain the body so the response stream emits "finish".
-			await response.text();
-			expect(response.status).toBeGreaterThanOrEqual(200);
+			const body = await response.text();
+			expect(response.status).toBe(200);
+			expect(response.headers.get("content-type")).toContain("text/html");
+			expect(body.length).toBeGreaterThan(0);
+
+			const missing = await fetch(
+				`http://127.0.0.1:${port}/definitely-missing`,
+			);
+			expect(missing.status).toBe(404);
+			await missing.text();
 		} finally {
 			if (docula.watcher) {
 				docula.watcher.close();
