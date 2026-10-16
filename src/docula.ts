@@ -3,7 +3,6 @@ import http from "node:http";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-import handler from "serve-handler";
 import updateNotifier from "update-notifier";
 import doculaPkg from "../package.json" with { type: "json" };
 import { DoculaBuilder } from "./builder.js";
@@ -15,6 +14,7 @@ import {
 	logopng,
 } from "./init.js";
 import { DoculaOptions } from "./options.js";
+import { createStaticHandler } from "./static-server.js";
 import { isSEA, resolveTemplatePath } from "./template-resolver.js";
 
 export default class Docula {
@@ -603,25 +603,22 @@ export default class Docula {
 			fs.mkdirSync(output, { recursive: true });
 		}
 
-		const config = {
-			public: output,
-		};
+		const handle = createStaticHandler({ root: path.resolve(output) });
 
 		this._server = http.createServer(async (request, response) => {
-			/* v8 ignore start -- @preserve */
 			const start = Date.now();
 			response.on("finish", () => {
 				const duration = Date.now() - start;
+				// Node's HTTP parser sets both fields before this callback runs.
 				this._console.serverLog(
-					request.method ?? "GET",
-					request.url ?? "/",
+					request.method as string,
+					request.url as string,
 					response.statusCode,
 					duration,
 				);
 			});
 
-			handler(request, response, config);
-			/* v8 ignore stop -- @preserve */
+			await handle(request, response);
 		});
 
 		this._server.listen(port, () => {
