@@ -6,10 +6,6 @@ strictDepBuilds: true
 dangerouslyAllowAllBuilds: false
 trustPolicy: no-downgrade # fail if a later version has weaker trust evidence
 
-# Patched transitive versions. Direct undici stays on 8.10.2, which is already patched.
-overrides:
-  "undici@>=7 <7.29.1": "7.29.1"
-
 allowBuilds:
   esbuild: true
   sharp: true
