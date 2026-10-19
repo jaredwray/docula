@@ -9,8 +9,10 @@ name: build-binaries
 #   2. A maintainer edits the notes and publishes the draft. Publishing creates
 #      the tag and fires the `release` and `deploy-site` workflows as before.
 # A version tag push re-checks that its release carries every binary and fails
-# when a release was published without them. A run on any other branch only
-# uploads the binaries as workflow artifacts.
+# when a release was published without them. Such a release cannot get its
+# binaries, and GitHub does not let you reuse its tag, even after you delete
+# the release. Release the next version through the draft instead. A run on any
+# other branch only uploads the binaries as workflow artifacts.
 on:
   workflow_dispatch:
   push:
@@ -87,7 +89,7 @@ jobs:
             exit 0
           fi
 
-          message="${TAG} is published, so it is immutable, but it is missing:${missing}. Binaries can only be attached while a release is a draft: delete the release and its tag, then run this workflow on main to rebuild the draft."
+          message="${TAG} is published, so it is immutable, but it is missing:${missing}. You cannot attach binaries to a published release, and you cannot reuse its tag. Do not delete the release. Bump the version. Let this workflow attach the binaries to the new draft, then publish that draft."
           if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_TYPE" = branch ]; then
             echo "::warning::${message}"
             echo "attach=false" >> "$GITHUB_OUTPUT"
@@ -229,7 +231,7 @@ jobs:
             attached="$(gh release view "$TAG" --json assets --jq '[.assets[].name]')"
             for asset in $RELEASE_ASSETS; do
               if ! jq -e --arg name "$asset" 'index($name)' <<<"$attached" >/dev/null; then
-                echo "::error::${TAG} was published before its binaries were attached, and published releases are immutable. Delete the release and its tag, then run this workflow on main to rebuild the draft."
+                echo "::error::${TAG} was published before this workflow attached its binaries. You cannot attach binaries to a published release, and you cannot reuse its tag. Do not delete the release. Bump the version. Let this workflow attach the binaries to the new draft, then publish that draft."
                 exit 1
               fi
             done

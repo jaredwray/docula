@@ -27,6 +27,16 @@ Docula is a documentation/website generator built with TypeScript and Node.js (>
 - `test/` - Test files (Vitest)
 - `template/` - Handlebars templates
 
+## Releases
+
+- Do not create or publish a GitHub release. When a version bump merges to `main`, the
+  `build-binaries` workflow creates the draft release and attaches the binaries. A maintainer
+  publishes that draft.
+- In a release pull request, tell the maintainer to publish the draft only after it shows all
+  three binaries.
+- Do not tell anyone to delete a published release or its tag. GitHub does not let you reuse the
+  tag of an immutable release.
+
 ## Safe Chain
 
 Aikido Safe Chain shims examine each package that a package manager installs in this environment.

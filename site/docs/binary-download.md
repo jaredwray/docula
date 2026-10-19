@@ -5,7 +5,7 @@ order: 22
 
 # Binary Download
 
-Docula publishes standalone binaries — a single executable file containing both Node.js and docula itself — for Linux, macOS (x64 and arm64), and Windows. Binaries are produced by the [`build-binaries` GitHub Actions workflow](https://github.com/jaredwray/docula/actions/workflows/build-binaries.yaml) and attached to each release before it is published.
+Docula publishes standalone binaries — a single executable file containing both Node.js and docula itself — for Linux x64, macOS arm64, and Windows x64. Binaries are produced by the [`build-binaries` GitHub Actions workflow](https://github.com/jaredwray/docula/actions/workflows/build-binaries.yaml) and attached to each release before it is published.
 
 Use a binary when you want to run docula without installing Node.js or pnpm/npm — for example, on a minimal CI image or a machine where you can't add a global npm dependency.
 
@@ -26,7 +26,7 @@ chmod +x docula-linux-x64
 ./docula-linux-x64 version
 ```
 
-In this repository, `pnpm test:binary` runs the same smoke checks the release workflow uses (`version`, `help`, a JSON-config build, TypeScript-config rejection, `download variables`, and `init`). Point it at a downloaded artifact with `DOCULA_BINARY` or a path argument.
+In this repository, `pnpm test:binary` runs the same smoke checks the `build-binaries` workflow uses (`version`, `help`, a JSON-config build, TypeScript-config rejection, `download variables`, and `init`). Point it at a downloaded artifact with `DOCULA_BINARY` or a path argument.
 
 ## JSON Config Only
 
