@@ -67,6 +67,8 @@ pnpm build:binary
 
 This produces a platform-specific binary at `dist/docula` (or `dist/docula.exe` on Windows).
 
+The binary reads only `docula.config.json`. CI does not build the binary, and GitHub releases do not include it.
+
 ## What the Build Does
 
 1. Embeds all built-in templates (modern, classic) into the bundle as base64
@@ -103,23 +105,6 @@ You can also exercise the binary directly:
 # Build a site
 ./dist/docula build -s ./my-site -o ./my-site/dist
 ```
-
-## Cross-Platform Binaries
-
-The CI workflow (`.github/workflows/build-binaries.yaml`) builds each platform natively on its own runner. Native builds avoid the cross-compile signing pitfall on Apple Silicon, where unsigned Mach-O binaries are killed on launch.
-
-| Platform | Runner | Artifact |
-|---|---|---|
-| Linux x64 | `ubuntu-latest` | `docula-linux-x64` |
-| macOS ARM64 | `macos-latest` | `docula-macos-arm64` |
-| Windows x64 | `windows-latest` | `docula-windows-x64.exe` |
-
-Binaries are uploaded as build artifacts on every run. Published GitHub Releases are immutable (assets cannot be added after publishing), so the workflow attaches the binaries while the release is still a draft:
-
-1. Merge the version bump to `main`. The workflow builds the binaries, creates a draft release `v<version>` for that commit if none exists (with auto-generated notes to replace), and attaches all three binaries to it.
-2. Once the run is green, edit the draft's notes and publish it from the Releases page. Publishing creates the tag and triggers the `release` (npm) and `deploy-site` workflows.
-
-Run the workflow by hand (Actions → build-binaries → Run workflow on `main`) to rebuild and re-attach the binaries for the current version; a run on any other branch only produces artifacts. Pushing a version tag re-checks that its release carries every binary. A release published without them cannot be fixed in place — delete the release and its tag, then run the workflow again.
 
 # Open Source Examples
 
