@@ -8,7 +8,6 @@ trustPolicy: no-downgrade # fail if a later version has weaker trust evidence
 
 # Patched transitive versions. Direct undici stays on 8.10.2, which is already patched.
 overrides:
-  "handlebars@<4.7.10": "4.7.10"
   "undici@>=7 <7.29.1": "7.29.1"
 
 allowBuilds:
