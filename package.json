@@ -73,7 +73,7 @@
     "hashery": "^3.0.1",
     "ipaddr.js": "^2.5.0",
     "jiti": "^2.7.0",
-    "undici": "^8.10.2",
+    "undici": "^8.12.2",
     "update-notifier": "^7.3.1",
     "writr": "^6.1.5"
   },
@@ -88,6 +88,7 @@
     "tsdown": "^0.23.0",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
+    "vite": "^7.3.7",
     "vitest": "^5.0.4"
   },
   "files": [
