@@ -1,4 +1,7 @@
 minimumReleaseAge: 10080 # 7 days, in minutes
+# @jaredwray/fumanchu@4.7.5 fixes CVE-2026-111758. It is newer than the cooldown.
+minimumReleaseAgeExclude:
+  - "@jaredwray/fumanchu@4.7.5"
 minimumReleaseAgeStrict: true
 minimumReleaseAgeIgnoreMissingTime: false
 blockExoticSubdeps: true
