@@ -18,7 +18,7 @@ Profile: npm library · public
 ## 3. Dependencies (pnpm)
 
 - [x] `packageManager: pnpm@11.3+` pinned in `package.json` — verified 2026-09-19 (`pnpm@11.20.0`)
-- [x] 7-day cooldown: `minimumReleaseAge: 10080`, `minimumReleaseAgeStrict: true`, `minimumReleaseAgeIgnoreMissingTime: false`; no first-party `minimumReleaseAgeExclude` — PR #500
+- [x] 7-day cooldown: `minimumReleaseAge: 10080`, `minimumReleaseAgeStrict: true`, `minimumReleaseAgeIgnoreMissingTime: false`; exact `minimumReleaseAgeExclude` for `@jaredwray/fumanchu@4.7.5` (Needs Jared's sign-off)
 - [x] `trustPolicy: no-downgrade`; no first-party `trustPolicyExclude` — PR #501
 - [x] Lifecycle scripts blocked: `strictDepBuilds: true`, `dangerouslyAllowAllBuilds: false`, `allowBuilds: {}` baseline — verified 2026-08-16 (reviewed exceptions for `esbuild`, `sharp`, and `workerd`)
 - [x] `blockExoticSubdeps: true` — verified 2026-08-16
