@@ -157,6 +157,25 @@ describe("template-resolver", () => {
 
 			expect(() => cleanupExtractedTemplates()).not.toThrow();
 		});
+
+		it("should not remove a path that replaced its directory", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("test").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			fs.rmSync(firstDir, { recursive: true, force: true });
+			const plantedDir = fs.mkdtempSync(path.join(os.tmpdir(), "planted-"));
+			fs.symlinkSync(plantedDir, firstDir);
+
+			try {
+				cleanupExtractedTemplates();
+
+				expect(fs.lstatSync(firstDir).isSymbolicLink()).toBe(true);
+			} finally {
+				fs.rmSync(firstDir, { force: true });
+				fs.rmSync(plantedDir, { recursive: true, force: true });
+			}
+		});
 	});
 
 	describe("getExtractedTemplatesDir", () => {
@@ -280,23 +299,47 @@ describe("template-resolver", () => {
 			}
 		});
 
-		it("should not use a directory with a different owner at the same path", () => {
+		// Windows reports no owner. There, only the file ID shows that the path
+		// is a different directory.
+		it("should not use a different directory at the same path", () => {
 			setEmbeddedTemplates({
 				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
 			});
 			const firstDir = getExtractedTemplatesDir();
-			fs.rmSync(firstDir, { recursive: true, force: true });
+			// The rename keeps the file ID of the first directory in use. Thus the
+			// file system cannot give the same file ID to the planted directory.
+			const movedDir = `${firstDir}-moved`;
+			fs.renameSync(firstDir, movedDir);
 			fs.mkdirSync(path.join(firstDir, "modern"), { recursive: true });
 			fs.writeFileSync(path.join(firstDir, "modern/home.ejs"), "planted");
+
+			try {
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(firstDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+			} finally {
+				fs.rmSync(firstDir, { recursive: true, force: true });
+				fs.rmSync(movedDir, { recursive: true, force: true });
+			}
+		});
+
+		// A file system can give the file ID of a removed directory to a new
+		// directory. The owner then shows that the directory is different.
+		it("should not use a directory with a different owner", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
 			// The test cannot create a directory that a different user owns. Thus
-			// `lstatSync` reports a different owner for the planted directory.
+			// `lstatSync` reports a different owner for the first directory.
 			const lstatSync = fs.lstatSync;
 			const lstatSpy = vi.spyOn(fs, "lstatSync").mockImplementation(((
 				target: fs.PathLike,
 			) => {
-				const stat = lstatSync(target);
+				const stat = lstatSync(target, { bigint: true });
 				if (target === firstDir) {
-					stat.uid += 1;
+					stat.uid += 1n;
 				}
 
 				return stat;

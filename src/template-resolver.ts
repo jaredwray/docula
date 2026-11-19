@@ -3,8 +3,15 @@ import os from "node:os";
 import path from "node:path";
 import sea from "node:sea";
 
+type ExtractedTemplates = {
+	dir: string;
+	dev: bigint;
+	ino: bigint;
+	uid: bigint;
+};
+
 let embeddedTemplates: Record<string, string> | undefined;
-let extractedTemplates: { dir: string; uid: number } | undefined;
+let extractedTemplates: ExtractedTemplates | undefined;
 let cleanupRegistered = false;
 
 /**
@@ -32,15 +39,23 @@ export function isSEA(): boolean {
 /**
  * Returns true if the path is still the directory that this process created.
  * A temp file cleanup can remove the directory while the process runs. A
- * different user can then create the same path. That path is not a directory
- * or it has a different owner.
+ * different user can then create the same path.
+ *
+ * The device ID and the file ID identify the directory on all platforms.
+ * Some file systems use a file ID again, thus the owner must also agree.
+ * Windows always reports 0 for the owner.
  */
-function isExtractedTemplatesDir(extracted: {
-	dir: string;
-	uid: number;
-}): boolean {
-	const stat = fs.lstatSync(extracted.dir, { throwIfNoEntry: false });
-	return stat?.isDirectory() === true && stat.uid === extracted.uid;
+function isExtractedTemplatesDir(extracted: ExtractedTemplates): boolean {
+	const stat = fs.lstatSync(extracted.dir, {
+		bigint: true,
+		throwIfNoEntry: false,
+	});
+	return (
+		stat?.isDirectory() === true &&
+		stat.dev === extracted.dev &&
+		stat.ino === extracted.ino &&
+		stat.uid === extracted.uid
+	);
 }
 
 /**
@@ -55,7 +70,9 @@ export function cleanupExtractedTemplates(): void {
 
 	extractedTemplates = undefined;
 	try {
-		fs.rmSync(extracted.dir, { recursive: true, force: true });
+		if (isExtractedTemplatesDir(extracted)) {
+			fs.rmSync(extracted.dir, { recursive: true, force: true });
+		}
 	} catch {
 		// Best effort cleanup
 	}
@@ -83,7 +100,7 @@ export function getExtractedTemplatesDir(): string {
 	// creates a new directory, and its name is not predictable. Thus Docula
 	// never uses a directory that a different user made as the template root.
 	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "docula-templates-"));
-	const { uid } = fs.lstatSync(tmpDir);
+	const { dev, ino, uid } = fs.lstatSync(tmpDir, { bigint: true });
 
 	for (const [relativePath, base64Content] of Object.entries(
 		embeddedTemplates,
@@ -93,7 +110,7 @@ export function getExtractedTemplatesDir(): string {
 		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
 	}
 
-	extractedTemplates = { dir: tmpDir, uid };
+	extractedTemplates = { dir: tmpDir, dev, ino, uid };
 
 	// Clean up on exit and common termination signals
 	if (!cleanupRegistered) {
