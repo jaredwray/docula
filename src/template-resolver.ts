@@ -4,6 +4,7 @@ import path from "node:path";
 import sea from "node:sea";
 
 let embeddedTemplates: Record<string, string> | undefined;
+let extractedTemplatesDir: string | undefined;
 
 /**
  * Registers embedded template data for use in SEA builds.
@@ -28,18 +29,17 @@ export function isSEA(): boolean {
 }
 
 /**
- * Returns the deterministic temp directory path for extracted templates.
- */
-export function getExtractedTemplatesPath(): string {
-	return path.join(os.tmpdir(), `docula-templates-${process.pid}`);
-}
-
-/**
- * Cleans up extracted template files from the temp directory.
+ * Removes the temp directory that this process extracted the templates to.
+ * This function does not remove a directory that this process did not create.
  */
 export function cleanupExtractedTemplates(): void {
+	const tmpDir = extractedTemplatesDir;
+	if (!tmpDir) {
+		return;
+	}
+
+	extractedTemplatesDir = undefined;
 	try {
-		const tmpDir = getExtractedTemplatesPath();
 		fs.rmSync(tmpDir, { recursive: true, force: true });
 	} catch {
 		// Best effort cleanup
@@ -48,15 +48,11 @@ export function cleanupExtractedTemplates(): void {
 
 /**
  * Extracts embedded templates to a temporary directory and returns the path.
- * Uses a deterministic path based on process.pid, so repeated calls
- * return the same directory without module-level state.
+ * The first call creates the directory. Each later call returns the same path.
  */
 export function getExtractedTemplatesDir(): string {
-	const tmpDir = getExtractedTemplatesPath();
-
-	// Already extracted in a previous call
-	if (fs.existsSync(tmpDir)) {
-		return tmpDir;
+	if (extractedTemplatesDir) {
+		return extractedTemplatesDir;
 	}
 
 	if (!embeddedTemplates) {
@@ -65,7 +61,10 @@ export function getExtractedTemplatesDir(): string {
 		);
 	}
 
-	fs.mkdirSync(tmpDir, { recursive: true });
+	// Other users can write to the system temp directory. `mkdtempSync` always
+	// creates a new directory, and its name is not predictable. Thus Docula
+	// never uses a directory that a different user made as the template root.
+	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "docula-templates-"));
 
 	for (const [relativePath, base64Content] of Object.entries(
 		embeddedTemplates,
@@ -74,6 +73,8 @@ export function getExtractedTemplatesDir(): string {
 		fs.mkdirSync(path.dirname(fullPath), { recursive: true });
 		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
 	}
+
+	extractedTemplatesDir = tmpDir;
 
 	// Clean up on exit and common termination signals
 	process.on("exit", cleanupExtractedTemplates);
