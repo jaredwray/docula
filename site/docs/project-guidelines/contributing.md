@@ -10,12 +10,28 @@ Please note we have a [Code of Conduct](CODE_OF_CONDUCT.md), please follow it in
 
 We release new versions of this project (maintenance/features) on a monthly cadence so please be aware that some items will not get released right away.
 
+## Workspace packages
+
+The repository uses a pnpm workspace. The `docula` package is in `packages/docula/`.
+The root commands `pnpm build` and `pnpm test` run the scripts in each workspace package.
+To build one package, run `pnpm --filter <package-name> build`.
+
+### Add a package
+
+1. Create a directory under `packages/`.
+2. Add a `package.json` with a unique package name.
+3. Add the `build` and `test` scripts that the package needs.
+4. Use `workspace:*` for dependencies on other packages in this repository.
+5. Run `pnpm install` from the repository root to update the shared lockfile.
+
+If the package uses a linter, define `lint` and `lint:ci`. The `lint:ci` script checks files without edits.
+
 # Pull Request Process
 You can contribute changes to this repo by opening a pull request:
 
 1) After forking this repository to your Git account, make the proposed changes on your forked branch.
 2) Run tests and linting locally.
-	- Ensure you have Node.js >= 20 and pnpm installed.
+	- Use a Node.js version that meets the requirement in `package.json`.
 	- Run `pnpm install`.
 	- Run `pnpm test` (runs Biome linting and Vitest with coverage — 100% code coverage is required).
 3) Commit your changes and push them to your forked repository.

@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -13,7 +14,11 @@ export default defineConfig({
 			provider: "v8",
 			all: true,
 			include: ["src/**/*.ts"],
-			reporter: ["text", "json", "lcov"],
+			reporter: [
+				"text",
+				"json",
+				["lcov", { projectRoot: path.resolve(import.meta.dirname, "../..") }],
+			],
 			exclude: [
 				// Entry shim executed only inside a Single Executable App.
 				"src/sea-entry.ts",

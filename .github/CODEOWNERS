@@ -5,3 +5,4 @@
 /.cursor/ @jaredwray
 /.devcontainer/ @jaredwray
 /scripts/ @jaredwray
+/packages/docula/scripts/ @jaredwray

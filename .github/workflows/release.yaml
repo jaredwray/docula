@@ -79,12 +79,14 @@ jobs:
       run: pnpm test:ci
 
     - name: Pack
+      working-directory: packages/docula
       run: |
         mkdir -p packed
         pnpm pack --pack-destination packed
         ls -la packed
 
     - name: Stage publish
+      working-directory: packages/docula
       # pnpm ≥ 11.3. Prefix with ./ so the tarball is a local path, not GitHub
       # owner/repo shorthand. --no-git-checks: git-checks run even for a tarball
       # and fail on a detached release-tag checkout and on the untracked pack output.

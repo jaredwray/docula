@@ -115,4 +115,4 @@ When `templatePath` is set it takes priority over the `template` option. Your cu
 - `docs.hbs` — Documentation page
 - `includes/` — Partials (header, footer, sidebar, etc.)
 
-Refer to the built-in templates in the `templates/` directory of the Docula repository for a complete example of the expected structure and available Handlebars variables.
+Refer to the built-in templates in the `packages/docula/templates/` directory of the Docula repository for a complete example of the expected structure and available Handlebars variables.

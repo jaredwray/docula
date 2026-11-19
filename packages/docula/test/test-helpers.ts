@@ -45,7 +45,7 @@ export function makeTempDir(prefix = "docula"): string {
  * The cloned copy always starts without a `.cache` directory so differential
  * build behaviour is deterministic.
  *
- * @param fixturePath - Path to the source fixture (relative to repo root).
+ * @param fixturePath - Path to the source fixture (relative to the package root).
  * @param prefix - Optional directory-name hint (defaults to the fixture name).
  * @returns Absolute path to the cloned fixture.
  */

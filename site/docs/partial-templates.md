@@ -50,7 +50,7 @@ You can override any file in the built-in template, including:
 - `css/` — Stylesheet files
 - `js/` — JavaScript files
 
-The available includes vary by template. Check the `templates/` directory in the [Docula repository](https://github.com/jaredwray/docula) for the complete list of files in each template.
+The available includes vary by template. Check the `packages/docula/templates/` directory in the [Docula repository](https://github.com/jaredwray/docula) for the complete list of files in each template.
 
 ## Example: Custom Footer
 

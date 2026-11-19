@@ -784,19 +784,23 @@ describe("docula execute", () => {
 		);
 		options.output = makeTempDir("docula-serve-reset");
 		options.quiet = true;
+		options.port = 0;
 		await fs.promises.mkdir(options.output, { recursive: true, force: true });
 		const docula = new Docula(options);
-		process.argv = ["node", "docula", "serve", "-p", "8182"];
+		process.argv = ["node", "docula", "serve", "-p", "0"];
 		docula.console.quiet = true;
 
+		const firstServer = await docula.serve(options);
 		try {
-			await docula.serve(options);
 			await docula.execute(process);
+			expect(firstServer.listening).toBe(false);
+			expect(docula.server?.listening).toBe(true);
 		} finally {
 			await fs.promises.rm(options.output, { recursive: true, force: true });
-			if (docula.server) {
-				docula.server.close();
+			if (firstServer.listening) {
+				firstServer.close();
 			}
+			docula.server?.close();
 		}
 	});
 	it("should serve the site on a specified port", async () => {
