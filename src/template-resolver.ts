@@ -4,7 +4,8 @@ import path from "node:path";
 import sea from "node:sea";
 
 let embeddedTemplates: Record<string, string> | undefined;
-let extractedTemplatesDir: string | undefined;
+let extractedTemplates: { dir: string; uid: number } | undefined;
+let cleanupRegistered = false;
 
 /**
  * Registers embedded template data for use in SEA builds.
@@ -29,18 +30,32 @@ export function isSEA(): boolean {
 }
 
 /**
+ * Returns true if the path is still the directory that this process created.
+ * A temp file cleanup can remove the directory while the process runs. A
+ * different user can then create the same path. That path is not a directory
+ * or it has a different owner.
+ */
+function isExtractedTemplatesDir(extracted: {
+	dir: string;
+	uid: number;
+}): boolean {
+	const stat = fs.lstatSync(extracted.dir, { throwIfNoEntry: false });
+	return stat?.isDirectory() === true && stat.uid === extracted.uid;
+}
+
+/**
  * Removes the temp directory that this process extracted the templates to.
  * This function does not remove a directory that this process did not create.
  */
 export function cleanupExtractedTemplates(): void {
-	const tmpDir = extractedTemplatesDir;
-	if (!tmpDir) {
+	const extracted = extractedTemplates;
+	if (!extracted) {
 		return;
 	}
 
-	extractedTemplatesDir = undefined;
+	extractedTemplates = undefined;
 	try {
-		fs.rmSync(tmpDir, { recursive: true, force: true });
+		fs.rmSync(extracted.dir, { recursive: true, force: true });
 	} catch {
 		// Best effort cleanup
 	}
@@ -49,11 +64,14 @@ export function cleanupExtractedTemplates(): void {
 /**
  * Extracts embedded templates to a temporary directory and returns the path.
  * The first call creates the directory. Each later call returns the same path.
+ * If the directory is gone, the function extracts the templates again.
  */
 export function getExtractedTemplatesDir(): string {
-	if (extractedTemplatesDir) {
-		return extractedTemplatesDir;
+	if (extractedTemplates && isExtractedTemplatesDir(extractedTemplates)) {
+		return extractedTemplates.dir;
 	}
+
+	extractedTemplates = undefined;
 
 	if (!embeddedTemplates) {
 		throw new Error(
@@ -65,6 +83,7 @@ export function getExtractedTemplatesDir(): string {
 	// creates a new directory, and its name is not predictable. Thus Docula
 	// never uses a directory that a different user made as the template root.
 	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "docula-templates-"));
+	const { uid } = fs.lstatSync(tmpDir);
 
 	for (const [relativePath, base64Content] of Object.entries(
 		embeddedTemplates,
@@ -74,20 +93,23 @@ export function getExtractedTemplatesDir(): string {
 		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
 	}
 
-	extractedTemplatesDir = tmpDir;
+	extractedTemplates = { dir: tmpDir, uid };
 
 	// Clean up on exit and common termination signals
-	process.on("exit", cleanupExtractedTemplates);
-	/* v8 ignore start -- @preserve */
-	process.on("SIGINT", () => {
-		cleanupExtractedTemplates();
-		process.exit(130);
-	});
-	process.on("SIGTERM", () => {
-		cleanupExtractedTemplates();
-		process.exit(143);
-	});
-	/* v8 ignore stop */
+	if (!cleanupRegistered) {
+		cleanupRegistered = true;
+		process.on("exit", cleanupExtractedTemplates);
+		/* v8 ignore start -- @preserve */
+		process.on("SIGINT", () => {
+			cleanupExtractedTemplates();
+			process.exit(130);
+		});
+		process.on("SIGTERM", () => {
+			cleanupExtractedTemplates();
+			process.exit(143);
+		});
+		/* v8 ignore stop */
+	}
 
 	return tmpDir;
 }

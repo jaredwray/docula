@@ -239,6 +239,80 @@ describe("template-resolver", () => {
 			}
 		});
 
+		// A temp file cleanup can remove the directory while a `dev` or `serve`
+		// process runs.
+		it("should extract the templates again when the directory is gone", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			const exitListeners = process.listenerCount("exit");
+			fs.rmSync(firstDir, { recursive: true, force: true });
+
+			const dir = getExtractedTemplatesDir();
+
+			expect(fs.readFileSync(path.join(dir, "modern/home.hbs"), "utf8")).toBe(
+				"<h1>Embedded</h1>",
+			);
+			// The process must not get a new set of cleanup handlers each time.
+			expect(process.listenerCount("exit")).toBe(exitListeners);
+		});
+
+		it("should not use a symbolic link that replaced its directory", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			fs.rmSync(firstDir, { recursive: true, force: true });
+			const plantedDir = fs.mkdtempSync(path.join(os.tmpdir(), "planted-"));
+			fs.mkdirSync(path.join(plantedDir, "modern"));
+			fs.writeFileSync(path.join(plantedDir, "modern/home.ejs"), "planted");
+			fs.symlinkSync(plantedDir, firstDir);
+
+			try {
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(firstDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+			} finally {
+				fs.rmSync(firstDir, { force: true });
+				fs.rmSync(plantedDir, { recursive: true, force: true });
+			}
+		});
+
+		it("should not use a directory with a different owner at the same path", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			fs.rmSync(firstDir, { recursive: true, force: true });
+			fs.mkdirSync(path.join(firstDir, "modern"), { recursive: true });
+			fs.writeFileSync(path.join(firstDir, "modern/home.ejs"), "planted");
+			// The test cannot create a directory that a different user owns. Thus
+			// `lstatSync` reports a different owner for the planted directory.
+			const lstatSync = fs.lstatSync;
+			const lstatSpy = vi.spyOn(fs, "lstatSync").mockImplementation(((
+				target: fs.PathLike,
+			) => {
+				const stat = lstatSync(target);
+				if (target === firstDir) {
+					stat.uid += 1;
+				}
+
+				return stat;
+			}) as typeof fs.lstatSync);
+
+			try {
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(firstDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+			} finally {
+				lstatSpy.mockRestore();
+				fs.rmSync(firstDir, { recursive: true, force: true });
+			}
+		});
+
 		it("should create nested directories for template files", () => {
 			const testTemplates = {
 				"modern/includes/partials/header.hbs":
