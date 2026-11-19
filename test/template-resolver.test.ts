@@ -1,12 +1,12 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import sea from "node:sea";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	cleanupExtractedTemplates,
 	getBuiltInTemplatesDir,
 	getExtractedTemplatesDir,
-	getExtractedTemplatesPath,
 	isSEA,
 	listBuiltInTemplates,
 	resolveTemplatePath,
@@ -36,23 +36,22 @@ describe("template-resolver", () => {
 		});
 
 		it("should return extracted templates dir when in SEA mode and templates dir is missing", () => {
-			const tmpDir = getExtractedTemplatesPath();
-			fs.rmSync(tmpDir, { recursive: true, force: true });
-
 			setEmbeddedTemplates({
 				"modern/home.hbs": Buffer.from("<h1>SEA</h1>").toString("base64"),
 			});
 			// Force the "templates dir missing" path without renaming the real
-			// directory; extraction (mkdir/writeFile) still happens for real.
+			// directory; extraction (mkdtemp/writeFile) still happens for real.
 			const existsSpy = vi.spyOn(fs, "existsSync").mockReturnValue(false);
 			const isSeaSpy = vi.spyOn(sea, "isSea").mockReturnValue(true);
 			try {
 				const dir = getBuiltInTemplatesDir();
-				expect(dir).toBe(tmpDir);
+				expect(fs.readFileSync(path.join(dir, "modern/home.hbs"), "utf8")).toBe(
+					"<h1>SEA</h1>",
+				);
 			} finally {
 				existsSpy.mockRestore();
 				isSeaSpy.mockRestore();
-				fs.rmSync(tmpDir, { recursive: true, force: true });
+				cleanupExtractedTemplates();
 				setEmbeddedTemplates(undefined);
 			}
 		});
@@ -129,46 +128,59 @@ describe("template-resolver", () => {
 		});
 	});
 
-	describe("getExtractedTemplatesPath", () => {
-		it("should return a deterministic path based on process.pid", () => {
-			const result = getExtractedTemplatesPath();
-			expect(result).toContain(`docula-templates-${process.pid}`);
-		});
-
-		it("should return the same path on repeated calls", () => {
-			expect(getExtractedTemplatesPath()).toBe(getExtractedTemplatesPath());
-		});
-	});
-
 	describe("cleanupExtractedTemplates", () => {
+		afterEach(() => {
+			cleanupExtractedTemplates();
+			setEmbeddedTemplates(undefined);
+		});
+
 		it("should remove the extracted templates directory", () => {
-			const tmpDir = getExtractedTemplatesPath();
-			fs.mkdirSync(tmpDir, { recursive: true });
-			fs.writeFileSync(path.join(tmpDir, "test.txt"), "hello");
-			expect(fs.existsSync(tmpDir)).toBe(true);
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("test").toString("base64"),
+			});
+			const tmpDir = getExtractedTemplatesDir();
+			expect(fs.existsSync(path.join(tmpDir, "modern/home.hbs"))).toBe(true);
 
 			cleanupExtractedTemplates();
 
 			expect(fs.existsSync(tmpDir)).toBe(false);
 		});
 
-		it("should not throw if the directory does not exist", () => {
-			const tmpDir = getExtractedTemplatesPath();
-			fs.rmSync(tmpDir, { recursive: true, force: true });
+		// The SIGINT and SIGTERM handlers clean up and then exit, and the exit
+		// handler cleans up again.
+		it("should not throw when it is called a second time", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("test").toString("base64"),
+			});
+			getExtractedTemplatesDir();
+			cleanupExtractedTemplates();
 
 			expect(() => cleanupExtractedTemplates()).not.toThrow();
+		});
+
+		it("should not remove a path that replaced its directory", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("test").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			fs.rmSync(firstDir, { recursive: true, force: true });
+			const plantedDir = fs.mkdtempSync(path.join(os.tmpdir(), "planted-"));
+			fs.symlinkSync(plantedDir, firstDir);
+
+			try {
+				cleanupExtractedTemplates();
+
+				expect(fs.lstatSync(firstDir).isSymbolicLink()).toBe(true);
+			} finally {
+				fs.rmSync(firstDir, { force: true });
+				fs.rmSync(plantedDir, { recursive: true, force: true });
+			}
 		});
 	});
 
 	describe("getExtractedTemplatesDir", () => {
-		const tmpDir = getExtractedTemplatesPath();
-
-		beforeEach(() => {
-			fs.rmSync(tmpDir, { recursive: true, force: true });
-		});
-
 		afterEach(() => {
-			fs.rmSync(tmpDir, { recursive: true, force: true });
+			cleanupExtractedTemplates();
 			setEmbeddedTemplates(undefined);
 		});
 
@@ -191,31 +203,157 @@ describe("template-resolver", () => {
 
 			const dir = getExtractedTemplatesDir();
 
-			expect(dir).toBe(tmpDir);
-			expect(fs.existsSync(path.join(tmpDir, "modern/home.hbs"))).toBe(true);
-			expect(fs.existsSync(path.join(tmpDir, "modern/docs.hbs"))).toBe(true);
-			expect(fs.existsSync(path.join(tmpDir, "classic/home.hbs"))).toBe(true);
+			expect(fs.existsSync(path.join(dir, "modern/home.hbs"))).toBe(true);
+			expect(fs.existsSync(path.join(dir, "modern/docs.hbs"))).toBe(true);
+			expect(fs.existsSync(path.join(dir, "classic/home.hbs"))).toBe(true);
 
 			const content = fs.readFileSync(
-				path.join(tmpDir, "modern/home.hbs"),
+				path.join(dir, "modern/home.hbs"),
 				"utf-8",
 			);
 			expect(content).toBe("<h1>Test Home</h1>");
 		});
 
-		it("should return the existing temp dir without re-extracting", () => {
+		it("should return the same directory on repeated calls", () => {
 			setEmbeddedTemplates({
 				"modern/home.hbs": Buffer.from("test").toString("base64"),
 			});
 
-			// Pre-create the temp dir (empty) to simulate prior extraction
-			fs.mkdirSync(tmpDir, { recursive: true });
+			const dir = getExtractedTemplatesDir();
+
+			expect(getExtractedTemplatesDir()).toBe(dir);
+		});
+
+		it("should not use or remove a directory that it did not create", () => {
+			// A different local user can create this path before Docula starts.
+			// Earlier versions used it as the template root when it existed.
+			const plantedDir = path.join(
+				os.tmpdir(),
+				`docula-templates-${process.pid}`,
+			);
+			const plantedFile = path.join(plantedDir, "modern/home.ejs");
+			fs.mkdirSync(path.dirname(plantedFile), { recursive: true });
+			fs.writeFileSync(plantedFile, "planted");
+
+			try {
+				setEmbeddedTemplates({
+					"modern/home.hbs":
+						Buffer.from("<h1>Embedded</h1>").toString("base64"),
+				});
+
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(plantedDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+				expect(fs.readFileSync(path.join(dir, "modern/home.hbs"), "utf8")).toBe(
+					"<h1>Embedded</h1>",
+				);
+
+				cleanupExtractedTemplates();
+
+				expect(fs.existsSync(dir)).toBe(false);
+				expect(fs.readFileSync(plantedFile, "utf8")).toBe("planted");
+			} finally {
+				fs.rmSync(plantedDir, { recursive: true, force: true });
+			}
+		});
+
+		// A temp file cleanup can remove the directory while a `dev` or `serve`
+		// process runs.
+		it("should extract the templates again when the directory is gone", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			const exitListeners = process.listenerCount("exit");
+			fs.rmSync(firstDir, { recursive: true, force: true });
 
 			const dir = getExtractedTemplatesDir();
 
-			expect(dir).toBe(tmpDir);
-			// The file should NOT exist since extraction was skipped
-			expect(fs.existsSync(path.join(tmpDir, "modern/home.hbs"))).toBe(false);
+			expect(fs.readFileSync(path.join(dir, "modern/home.hbs"), "utf8")).toBe(
+				"<h1>Embedded</h1>",
+			);
+			// The process must not get a new set of cleanup handlers each time.
+			expect(process.listenerCount("exit")).toBe(exitListeners);
+		});
+
+		it("should not use a symbolic link that replaced its directory", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			fs.rmSync(firstDir, { recursive: true, force: true });
+			const plantedDir = fs.mkdtempSync(path.join(os.tmpdir(), "planted-"));
+			fs.mkdirSync(path.join(plantedDir, "modern"));
+			fs.writeFileSync(path.join(plantedDir, "modern/home.ejs"), "planted");
+			fs.symlinkSync(plantedDir, firstDir);
+
+			try {
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(firstDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+			} finally {
+				fs.rmSync(firstDir, { force: true });
+				fs.rmSync(plantedDir, { recursive: true, force: true });
+			}
+		});
+
+		// Windows reports no owner. There, only the file ID shows that the path
+		// is a different directory.
+		it("should not use a different directory at the same path", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			// The rename keeps the file ID of the first directory in use. Thus the
+			// file system cannot give the same file ID to the planted directory.
+			const movedDir = `${firstDir}-moved`;
+			fs.renameSync(firstDir, movedDir);
+			fs.mkdirSync(path.join(firstDir, "modern"), { recursive: true });
+			fs.writeFileSync(path.join(firstDir, "modern/home.ejs"), "planted");
+
+			try {
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(firstDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+			} finally {
+				fs.rmSync(firstDir, { recursive: true, force: true });
+				fs.rmSync(movedDir, { recursive: true, force: true });
+			}
+		});
+
+		// A file system can give the file ID of a removed directory to a new
+		// directory. The owner then shows that the directory is different.
+		it("should not use a directory with a different owner", () => {
+			setEmbeddedTemplates({
+				"modern/home.hbs": Buffer.from("<h1>Embedded</h1>").toString("base64"),
+			});
+			const firstDir = getExtractedTemplatesDir();
+			// The test cannot create a directory that a different user owns. Thus
+			// `lstatSync` reports a different owner for the first directory.
+			const lstatSync = fs.lstatSync;
+			const lstatSpy = vi.spyOn(fs, "lstatSync").mockImplementation(((
+				target: fs.PathLike,
+			) => {
+				const stat = lstatSync(target, { bigint: true });
+				if (target === firstDir) {
+					stat.uid += 1n;
+				}
+
+				return stat;
+			}) as typeof fs.lstatSync);
+
+			try {
+				const dir = getExtractedTemplatesDir();
+
+				expect(dir).not.toBe(firstDir);
+				expect(fs.readdirSync(path.join(dir, "modern"))).toEqual(["home.hbs"]);
+			} finally {
+				lstatSpy.mockRestore();
+				fs.rmSync(firstDir, { recursive: true, force: true });
+			}
 		});
 
 		it("should create nested directories for template files", () => {
@@ -228,9 +366,8 @@ describe("template-resolver", () => {
 
 			const dir = getExtractedTemplatesDir();
 
-			expect(dir).toBe(tmpDir);
 			expect(
-				fs.existsSync(path.join(tmpDir, "modern/includes/partials/header.hbs")),
+				fs.existsSync(path.join(dir, "modern/includes/partials/header.hbs")),
 			).toBe(true);
 		});
 	});

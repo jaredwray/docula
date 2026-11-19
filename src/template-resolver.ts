@@ -3,7 +3,16 @@ import os from "node:os";
 import path from "node:path";
 import sea from "node:sea";
 
+type ExtractedTemplates = {
+	dir: string;
+	dev: bigint;
+	ino: bigint;
+	uid: bigint;
+};
+
 let embeddedTemplates: Record<string, string> | undefined;
+let extractedTemplates: ExtractedTemplates | undefined;
+let cleanupRegistered = false;
 
 /**
  * Registers embedded template data for use in SEA builds.
@@ -28,19 +37,42 @@ export function isSEA(): boolean {
 }
 
 /**
- * Returns the deterministic temp directory path for extracted templates.
+ * Returns true if the path is still the directory that this process created.
+ * A temp file cleanup can remove the directory while the process runs. A
+ * different user can then create the same path.
+ *
+ * The device ID and the file ID identify the directory on all platforms.
+ * Some file systems use a file ID again, thus the owner must also agree.
+ * Windows always reports 0 for the owner.
  */
-export function getExtractedTemplatesPath(): string {
-	return path.join(os.tmpdir(), `docula-templates-${process.pid}`);
+function isExtractedTemplatesDir(extracted: ExtractedTemplates): boolean {
+	const stat = fs.lstatSync(extracted.dir, {
+		bigint: true,
+		throwIfNoEntry: false,
+	});
+	return (
+		stat?.isDirectory() === true &&
+		stat.dev === extracted.dev &&
+		stat.ino === extracted.ino &&
+		stat.uid === extracted.uid
+	);
 }
 
 /**
- * Cleans up extracted template files from the temp directory.
+ * Removes the temp directory that this process extracted the templates to.
+ * This function does not remove a directory that this process did not create.
  */
 export function cleanupExtractedTemplates(): void {
+	const extracted = extractedTemplates;
+	if (!extracted) {
+		return;
+	}
+
+	extractedTemplates = undefined;
 	try {
-		const tmpDir = getExtractedTemplatesPath();
-		fs.rmSync(tmpDir, { recursive: true, force: true });
+		if (isExtractedTemplatesDir(extracted)) {
+			fs.rmSync(extracted.dir, { recursive: true, force: true });
+		}
 	} catch {
 		// Best effort cleanup
 	}
@@ -48,16 +80,15 @@ export function cleanupExtractedTemplates(): void {
 
 /**
  * Extracts embedded templates to a temporary directory and returns the path.
- * Uses a deterministic path based on process.pid, so repeated calls
- * return the same directory without module-level state.
+ * The first call creates the directory. Each later call returns the same path.
+ * If the directory is gone, the function extracts the templates again.
  */
 export function getExtractedTemplatesDir(): string {
-	const tmpDir = getExtractedTemplatesPath();
-
-	// Already extracted in a previous call
-	if (fs.existsSync(tmpDir)) {
-		return tmpDir;
+	if (extractedTemplates && isExtractedTemplatesDir(extractedTemplates)) {
+		return extractedTemplates.dir;
 	}
+
+	extractedTemplates = undefined;
 
 	if (!embeddedTemplates) {
 		throw new Error(
@@ -65,7 +96,11 @@ export function getExtractedTemplatesDir(): string {
 		);
 	}
 
-	fs.mkdirSync(tmpDir, { recursive: true });
+	// Other users can write to the system temp directory. `mkdtempSync` always
+	// creates a new directory, and its name is not predictable. Thus Docula
+	// never uses a directory that a different user made as the template root.
+	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "docula-templates-"));
+	const { dev, ino, uid } = fs.lstatSync(tmpDir, { bigint: true });
 
 	for (const [relativePath, base64Content] of Object.entries(
 		embeddedTemplates,
@@ -75,18 +110,23 @@ export function getExtractedTemplatesDir(): string {
 		fs.writeFileSync(fullPath, Buffer.from(base64Content, "base64"));
 	}
 
+	extractedTemplates = { dir: tmpDir, dev, ino, uid };
+
 	// Clean up on exit and common termination signals
-	process.on("exit", cleanupExtractedTemplates);
-	/* v8 ignore start -- @preserve */
-	process.on("SIGINT", () => {
-		cleanupExtractedTemplates();
-		process.exit(130);
-	});
-	process.on("SIGTERM", () => {
-		cleanupExtractedTemplates();
-		process.exit(143);
-	});
-	/* v8 ignore stop */
+	if (!cleanupRegistered) {
+		cleanupRegistered = true;
+		process.on("exit", cleanupExtractedTemplates);
+		/* v8 ignore start -- @preserve */
+		process.on("SIGINT", () => {
+			cleanupExtractedTemplates();
+			process.exit(130);
+		});
+		process.on("SIGTERM", () => {
+			cleanupExtractedTemplates();
+			process.exit(143);
+		});
+		/* v8 ignore stop */
+	}
 
 	return tmpDir;
 }
