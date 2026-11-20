@@ -34,7 +34,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 ```
 
 > [!NOTE]
-> When you override `scripts.hbs`, it **replaces** the built-in file entirely. If you still need the default scripts (theme toggle, syntax highlighting, etc.), copy the contents of the original `templates/modern/includes/scripts.hbs` from the [Docula repository](https://github.com/jaredwray/docula) and add your custom code alongside it.
+> When you override `scripts.hbs`, it **replaces** the built-in file entirely. If you still need the default scripts (theme toggle, syntax highlighting, etc.), copy the contents of the original `packages/docula/templates/modern/includes/scripts.hbs` from the [Docula repository](https://github.com/jaredwray/docula) and add your custom code alongside it.
 
 ## Scripts in the Head
 

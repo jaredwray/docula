@@ -36,17 +36,17 @@ jobs:
       run: corepack prepare
 
     - name: Install Dependencies
-      run: sfw pnpm install --frozen-lockfile
+      run: sfw pnpm --filter docula install --frozen-lockfile
 
     - name: Build
-      run: pnpm build
+      run: pnpm --filter docula build
 
     - name: Testing
-      run: pnpm test:ci
+      run: pnpm --filter docula test:ci
 
     - name: Code Coverage
       uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         token: ${{ secrets.CODECOV_KEY }}
-        files: ./coverage/lcov.info
+        files: ./packages/docula/coverage/lcov.info
 

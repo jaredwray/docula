@@ -1,100 +1,36 @@
 {
-  "name": "docula",
-  "version": "3.0.3",
-  "description": "Beautiful Website for Your Projects",
+  "name": "docula-workspace",
+  "private": true,
   "type": "module",
-  "main": "./dist/docula.js",
-  "module": "./dist/docula.js",
-  "types": "./dist/docula.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/docula.js"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jaredwray/docula.git"
-  },
-  "author": "Jared Wray <me@jaredwray.com>",
+  "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
-  "license": "MIT",
   "scripts": {
-    "clean": "rimraf ./dist ./coverage ./node_modules ./package-lock.json ./yarn.lock ./pnpm-lock.yaml ./site/dist",
-    "build": "pnpm generate-init-file && tsdown",
-    "build:binary": "pnpm generate-init-file && pnpm generate-embedded-templates && tsdown --config tsdown.config.binary.ts",
-    "generate-embedded-templates": "tsx scripts/generate-embedded-templates.ts",
-    "lint": "biome check --write --error-on-warnings",
-    "lint:ci": "biome check --error-on-warnings",
-    "test": "pnpm lint && vitest run --coverage",
-    "test:ci": "pnpm lint:ci && vitest run --coverage",
-    "test:binary": "tsx scripts/test-binary.ts",
-    "test:e2e": "pnpm build && playwright test",
-    "docula:help": "pnpm build && node bin/docula.js help",
-    "generate-init-file": "tsx scripts/generate-init-file.ts",
-    "website:build": "node bin/docula.js build -s ./site -o ./site/dist",
-    "website:dev": "pnpm build && node bin/docula.js dev -s ./site -p 3333",
-    "website:mapi": "pnpm build && node bin/docula.js dev -s ./test/fixtures/multi-api-site -p 3333",
-    "website:mega": "node bin/docula.js dev -s ./test/fixtures/mega-page-site",
-    "website:mega:custom": "node bin/docula.js serve -s ./test/fixtures/mega-custom-template --watch",
-    "website:singlepage": "node bin/docula.js dev -s ./test/fixtures/single-page-site --clean",
-    "website:nohome": "node bin/docula.js serve -s ./test/fixtures/mega-page-site-no-home-page --watch --clean",
-    "website:changelog": "node bin/docula.js serve -s ./test/fixtures/changelog-site --watch --clean",
-    "prepublishOnly": "pnpm build"
-  },
-  "keywords": [
-    "static-site-generator",
-    "static-site",
-    "open source",
-    "ssg",
-    "documentation",
-    "website",
-    "templates",
-    "generator",
-    "framework",
-    "docula",
-    "writer",
-    "html",
-    "markdown",
-    "handlebars"
-  ],
-  "bin": {
-    "docula": "./bin/docula.js"
-  },
-  "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.53",
-    "@ai-sdk/google": "^4.0.69",
-    "@ai-sdk/openai": "^4.0.66",
-    "@cacheable/net": "^2.1.0",
-    "ai": "^7.0.99",
-    "colorette": "^2.0.20",
-    "ecto": "^5.1.0",
-    "hashery": "^3.0.1",
-    "ipaddr.js": "^2.5.0",
-    "jiti": "^2.7.0",
-    "undici": "^8.12.2",
-    "update-notifier": "^7.3.1",
-    "writr": "^6.1.5"
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "lint:ci": "pnpm -r run lint:ci",
+    "test": "pnpm lint && pnpm -r run test",
+    "test:ci": "pnpm lint:ci && pnpm -r run test",
+    "clean": "pnpm -r run clean && rimraf dist coverage node_modules package-lock.json yarn.lock pnpm-lock.yaml site/dist",
+    "test:binary": "node packages/docula/scripts/test-binary.ts",
+    "build:binary": "pnpm --filter docula run build:binary",
+    "test:e2e": "pnpm -r run test:e2e",
+    "generate-init-file": "pnpm --filter docula run generate-init-file",
+    "generate-embedded-templates": "pnpm --filter docula run generate-embedded-templates",
+    "docula:help": "pnpm --filter docula run docula:help",
+    "website:build": "docula build -s ./site -o ./site/dist",
+    "website:dev": "pnpm build && docula dev -s ./site -p 3333",
+    "website:mapi": "pnpm --filter docula run website:mapi",
+    "website:mega": "pnpm --filter docula run website:mega",
+    "website:mega:custom": "pnpm --filter docula run website:mega:custom",
+    "website:singlepage": "pnpm --filter docula run website:singlepage",
+    "website:nohome": "pnpm --filter docula run website:nohome",
+    "website:changelog": "pnpm --filter docula run website:changelog"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.15",
-    "@playwright/test": "^1.64.0",
-    "@types/node": "^26.5.1",
-    "@types/update-notifier": "^6.0.8",
-    "@vitest/coverage-v8": "^5.0.4",
+    "docula": "workspace:*",
     "dotenv": "^17.4.2",
-    "rimraf": "^6.1.3",
-    "tsdown": "^0.23.0",
-    "tsx": "^4.23.13",
-    "typescript": "^7.0.2",
-    "vite": "^7.3.8",
-    "vitest": "^5.0.4"
-  },
-  "files": [
-    "dist",
-    "templates",
-    "bin"
-  ],
-  "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee"
+    "rimraf": "^6.1.3"
+  }
 }

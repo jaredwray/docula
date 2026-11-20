@@ -64,7 +64,7 @@ export function resolveBinaryPath(
 	const candidate =
 		fromArgv ??
 		env.DOCULA_BINARY ??
-		path.join("dist", defaultBinaryName(platform));
+		path.resolve(import.meta.dirname, "../dist", defaultBinaryName(platform));
 	return path.isAbsolute(candidate) ? candidate : path.resolve(cwd, candidate);
 }
 

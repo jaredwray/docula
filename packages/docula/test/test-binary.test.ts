@@ -114,16 +114,16 @@ describe("binary harness helpers", () => {
 			resolveBinaryPath([], { DOCULA_BINARY: "/abs/docula" }, "linux", "/repo"),
 		).toBe("/abs/docula");
 		expect(resolveBinaryPath([], {}, "linux", "/repo")).toBe(
-			path.resolve("/repo", "dist/docula"),
+			path.resolve(import.meta.dirname, "../dist/docula"),
 		);
 		expect(resolveBinaryPath([], {}, "win32", "/repo")).toBe(
-			path.resolve("/repo", "dist/docula.exe"),
+			path.resolve(import.meta.dirname, "../dist/docula.exe"),
 		);
 	});
 
 	it("ignores a bare -- argv token when resolving the binary", () => {
 		expect(resolveBinaryPath(["--"], {}, "linux", "/repo")).toBe(
-			path.resolve("/repo", "dist/docula"),
+			path.resolve(import.meta.dirname, "../dist/docula"),
 		);
 	});
 

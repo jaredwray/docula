@@ -1,3 +1,5 @@
+# Docula
+
 ![Docula](site/logo.svg)
 
 # Beautiful Website for Your Projects
@@ -8,6 +10,9 @@
 [![npm](https://img.shields.io/npm/dm/docula)](https://npmjs.com/package/docula)
 [![npm](https://img.shields.io/npm/v/docula)](https://npmjs.com/package/docula)
 [![Drydock review](https://img.shields.io/endpoint?url=https%3A%2F%2Fdrydock.org%2Fpublic%2Fbadge%2Fnpm%2Fdocula)](https://drydock.org/diff/docula)
+
+The pnpm workspace contains the [Docula package](https://github.com/jaredwray/docula/tree/main/packages/docula).
+See the [contributor guide](https://github.com/jaredwray/docula/blob/main/CONTRIBUTING.md#add-a-package) to add a package.
 
 # Features
 * No configuration required. Just setup the folder structure with a logo, favicon, and css file.
@@ -65,7 +70,7 @@ pnpm install
 pnpm build:binary
 ```
 
-This produces a platform-specific binary at `dist/docula` (or `dist/docula.exe` on Windows).
+This produces a platform-specific binary at `packages/docula/dist/docula` (or `packages/docula/dist/docula.exe` on Windows).
 
 The binary reads only `docula.config.json`. CI does not build the binary, and GitHub releases do not include it.
 
@@ -86,24 +91,24 @@ pnpm test:binary
 Or point it at a specific binary:
 
 ```bash
-pnpm test:binary -- ./dist/docula
-DOCULA_BINARY=./dist/docula.exe pnpm test:binary
+pnpm test:binary -- ./packages/docula/dist/docula
+DOCULA_BINARY=./packages/docula/dist/docula.exe pnpm test:binary
 ```
 
 You can also exercise the binary directly:
 
 ```bash
 # Show help
-./dist/docula help
+./packages/docula/dist/docula help
 
 # Show version
-./dist/docula version
+./packages/docula/dist/docula version
 
 # Initialize a new project
-./dist/docula init -s ./my-site
+./packages/docula/dist/docula init -s ./my-site
 
 # Build a site
-./dist/docula build -s ./my-site -o ./my-site/dist
+./packages/docula/dist/docula build -s ./my-site -o ./my-site/dist
 ```
 
 # Open Source Examples

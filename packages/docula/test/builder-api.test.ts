@@ -266,7 +266,7 @@ describe("DoculaBuilder - API", () => {
 
 		it("should build with openApiUrl configured", async () => {
 			const options = new DoculaOptions();
-			options.sitePath = cloneFixture("site");
+			options.sitePath = cloneFixture("../../site");
 			options.output = makeTempDir("build-api-test");
 			options.openApiUrl = "https://petstore.swagger.io/v2/swagger.json";
 			const builder = new DoculaBuilder(options, { quiet: true });
