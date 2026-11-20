@@ -29,6 +29,7 @@
     "lint": "biome check --write --error-on-warnings",
     "lint:ci": "biome check --error-on-warnings",
     "test": "vitest run --coverage",
+    "test:ci": "pnpm lint:ci && pnpm test",
     "test:binary": "tsx scripts/test-binary.ts",
     "test:e2e": "pnpm build && playwright test",
     "docula:help": "pnpm build && node bin/docula.js help",

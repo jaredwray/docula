@@ -8,10 +8,6 @@ on:
 permissions:
   contents: read
 
-env:
-  GITHUB_TOKEN: ${{ github.token }}
-  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
- 
 jobs:
   setup-build-deploy:
     runs-on: ubuntu-latest
@@ -38,12 +34,15 @@ jobs:
       run: corepack prepare
 
     - name: Install Dependencies
-      run: sfw pnpm install --frozen-lockfile
+      run: sfw pnpm --filter docula-workspace --filter docula install --frozen-lockfile
 
     - name: Build
-      run: pnpm build
+      run: pnpm --filter docula build
 
     - name: Build Website
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       run: pnpm website:build
 
     - name: Publish to Cloudflare Pages

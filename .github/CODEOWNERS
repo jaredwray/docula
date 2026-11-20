@@ -5,4 +5,8 @@
 /.cursor/ @jaredwray
 /.devcontainer/ @jaredwray
 /scripts/ @jaredwray
-/packages/docula/scripts/ @jaredwray
+/packages/ @jaredwray
+/package.json @jaredwray
+/pnpm-workspace.yaml @jaredwray
+/pnpm-lock.yaml @jaredwray
+/site/docula.config.ts @jaredwray
